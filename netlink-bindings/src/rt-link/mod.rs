@@ -1737,7 +1737,7 @@ impl<'a> Iterator for IterableLinkAttrs<'a> {
                     val
                 }),
                 7u16 => LinkAttrs::Stats({
-                    let res = PushRtnlLinkStats::new_from_slice(next);
+                    let res = Some(PushRtnlLinkStats::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -1817,7 +1817,7 @@ impl<'a> Iterator for IterableLinkAttrs<'a> {
                     val
                 }),
                 23u16 => LinkAttrs::Stats64({
-                    let res = PushRtnlLinkStats64::new_from_slice(next);
+                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -15177,7 +15177,7 @@ impl<'a> Iterator for IterableStatsAttrs<'a> {
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => StatsAttrs::Link64({
-                    let res = PushRtnlLinkStats64::new_from_slice(next);
+                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -20220,6 +20220,13 @@ impl PushRtgenmsg {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -20268,6 +20275,13 @@ impl PushIfinfomsg {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -20346,6 +20360,13 @@ impl PushIflaBridgeId {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -20401,6 +20422,13 @@ impl PushIflaCacheinfo {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -20471,6 +20499,13 @@ impl PushRtnlLinkStats {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -20681,6 +20716,13 @@ impl PushRtnlLinkStats64 {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -20899,6 +20941,13 @@ impl PushRtnlLinkIfmap {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -20981,6 +21030,13 @@ impl PushBrBooloptMulti {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -21036,6 +21092,13 @@ impl PushIfStatsMsg {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -21098,6 +21161,13 @@ impl PushIflaVlanFlags {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -21154,6 +21224,13 @@ impl PushIflaVlanQosMapping {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -21208,6 +21285,13 @@ impl PushIflaGenevePortRange {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -21261,6 +21345,13 @@ impl PushIflaVfMac {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -21317,6 +21408,13 @@ impl PushIflaVfVlan {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -21379,6 +21477,13 @@ impl PushIflaVfTxRate {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -21433,6 +21538,13 @@ impl PushIflaVfSpoofchk {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -21486,6 +21598,13 @@ impl PushIflaVfLinkState {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -21544,6 +21663,13 @@ impl PushIflaVfRate {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -21606,6 +21732,13 @@ impl PushIflaVfRssQueryEn {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -21659,6 +21792,13 @@ impl PushIflaVfTrust {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -21716,6 +21856,13 @@ impl PushIflaVfGuid {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -21771,6 +21918,13 @@ impl PushIflaVfVlanInfo {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -25184,7 +25338,7 @@ impl<'a> Iterator for IterableOpGetlinkDumpReply<'a> {
                     val
                 }),
                 7u16 => OpGetlinkDumpReply::Stats({
-                    let res = PushRtnlLinkStats::new_from_slice(next);
+                    let res = Some(PushRtnlLinkStats::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -25264,7 +25418,7 @@ impl<'a> Iterator for IterableOpGetlinkDumpReply<'a> {
                     val
                 }),
                 23u16 => OpGetlinkDumpReply::Stats64({
-                    let res = PushRtnlLinkStats64::new_from_slice(next);
+                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -28017,7 +28171,7 @@ impl<'a> Iterator for IterableOpGetlinkDoReply<'a> {
                     val
                 }),
                 7u16 => OpGetlinkDoReply::Stats({
-                    let res = PushRtnlLinkStats::new_from_slice(next);
+                    let res = Some(PushRtnlLinkStats::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -28097,7 +28251,7 @@ impl<'a> Iterator for IterableOpGetlinkDoReply<'a> {
                     val
                 }),
                 23u16 => OpGetlinkDoReply::Stats64({
-                    let res = PushRtnlLinkStats64::new_from_slice(next);
+                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -30533,7 +30687,7 @@ impl<'a> Iterator for IterableOpSetlinkDoRequest<'a> {
                     val
                 }),
                 7u16 => OpSetlinkDoRequest::Stats({
-                    let res = PushRtnlLinkStats::new_from_slice(next);
+                    let res = Some(PushRtnlLinkStats::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -30613,7 +30767,7 @@ impl<'a> Iterator for IterableOpSetlinkDoRequest<'a> {
                     val
                 }),
                 23u16 => OpSetlinkDoRequest::Stats64({
-                    let res = PushRtnlLinkStats64::new_from_slice(next);
+                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -31888,7 +32042,7 @@ impl<'a> Iterator for IterableOpGetstatsDumpReply<'a> {
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpGetstatsDumpReply::Link64({
-                    let res = PushRtnlLinkStats64::new_from_slice(next);
+                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -32399,7 +32553,7 @@ impl<'a> Iterator for IterableOpGetstatsDoReply<'a> {
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpGetstatsDoReply::Link64({
-                    let res = PushRtnlLinkStats64::new_from_slice(next);
+                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),

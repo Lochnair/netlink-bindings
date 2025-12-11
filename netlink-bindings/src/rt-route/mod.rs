@@ -2015,6 +2015,13 @@ impl PushRtmsg {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -2121,6 +2128,13 @@ impl PushRtaCacheinfo {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf

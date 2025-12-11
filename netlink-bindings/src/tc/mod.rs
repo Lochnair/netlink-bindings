@@ -32531,6 +32531,13 @@ impl PushTcmsg {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -32607,6 +32614,13 @@ impl PushTcStats {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -32718,6 +32732,13 @@ impl PushTcCbsQopt {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -32795,6 +32816,13 @@ impl PushTcEtfQopt {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -32856,6 +32884,13 @@ impl PushTcFifoQopt {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -32906,6 +32941,13 @@ impl PushTcHtbOpt {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -32998,6 +33040,13 @@ impl PushTcHtbGlob {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -33082,6 +33131,13 @@ impl PushTcGredQopt {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -33253,6 +33309,13 @@ impl PushTcGredSopt {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -33321,6 +33384,13 @@ impl PushTcHfscQopt {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -33367,6 +33437,13 @@ impl PushTcMqprioQopt {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -33443,6 +33520,13 @@ impl PushTcMultiqQopt {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -33502,6 +33586,13 @@ impl PushTcNetemQopt {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -33599,6 +33690,13 @@ impl PushTcNetemGimodel {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -33676,6 +33774,13 @@ impl PushTcNetemGemodel {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -33746,6 +33851,13 @@ impl PushTcNetemCorr {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -33813,6 +33925,13 @@ impl PushTcNetemReorder {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -33866,6 +33985,13 @@ impl PushTcNetemCorrupt {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -33922,6 +34048,13 @@ impl PushTcNetemRate {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -33992,6 +34125,13 @@ impl PushTcNetemSlot {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -34075,6 +34215,13 @@ impl PushTcPlugQopt {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -34128,6 +34275,13 @@ impl PushTcPrioQopt {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -34188,6 +34342,13 @@ impl PushTcRedQopt {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -34291,6 +34452,13 @@ impl PushTcSfbQopt {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -34397,6 +34565,13 @@ impl PushTcSfqQopt {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -34483,6 +34658,13 @@ impl PushTcSfqredStats {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -34579,6 +34761,13 @@ impl PushTcSfqQoptV1 {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -34722,6 +34911,13 @@ impl PushTcRatespec {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -34806,6 +35002,13 @@ impl PushTcTbfQopt {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -34882,6 +35085,13 @@ impl PushTcSizespec {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -34979,6 +35189,13 @@ impl PushGnetEstimator {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -35038,6 +35255,13 @@ impl PushTcChokeXstats {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -35125,6 +35349,13 @@ impl PushTcCodelXstats {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -35248,6 +35479,13 @@ impl PushTcFqCodelXstats {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -35376,6 +35614,13 @@ impl PushTcDualpi2Xstats {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -35527,6 +35772,13 @@ impl PushTcFqPieXstats {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -35649,6 +35901,13 @@ impl PushTcFqQdStats {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -35824,6 +36083,13 @@ impl PushTcHhfXstats {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -35901,6 +36167,13 @@ impl PushTcPieXstats {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -36025,6 +36298,13 @@ impl PushTcRedXstats {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -36102,6 +36382,13 @@ impl PushTcSfbXstats {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -36208,6 +36495,13 @@ impl PushTcSfqXstats {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -36256,6 +36550,13 @@ impl PushGnetStatsBasic {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -36310,6 +36611,13 @@ impl PushGnetStatsRateEst {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -36367,6 +36675,13 @@ impl PushGnetStatsRateEst64 {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -36422,6 +36737,13 @@ impl PushGnetStatsQueue {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -36500,6 +36822,13 @@ impl PushTcU32Key {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -36570,6 +36899,13 @@ impl PushTcU32Mark {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -36632,6 +36968,13 @@ impl PushTcU32Sel {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -36738,6 +37081,13 @@ impl PushTcU32Pcnt {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -36800,6 +37150,13 @@ impl PushTcfT {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -36870,6 +37227,13 @@ impl PushTcGact {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -36946,6 +37310,13 @@ impl PushTcGactP {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -37007,6 +37378,13 @@ impl PushTcfEmatchTreeHdr {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -37063,6 +37441,13 @@ impl PushTcBasicPcnt {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -37117,6 +37502,13 @@ impl PushTcMatchallPcnt {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -37165,6 +37557,13 @@ impl PushTcMpls {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -37249,6 +37648,13 @@ impl PushTcPolice {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
@@ -37362,6 +37768,13 @@ impl PushTcPeditSel {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -37460,6 +37873,13 @@ impl PushTcPeditKey {
         buf.clone_from_slice(other);
         Some(Self { buf })
     }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
+    }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
     }
@@ -37543,6 +37963,13 @@ impl PushTcVlan {
         let mut buf = [0u8; Self::len()];
         buf.clone_from_slice(other);
         Some(Self { buf })
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self { buf }
     }
     pub fn as_slice(&self) -> &[u8] {
         &self.buf
