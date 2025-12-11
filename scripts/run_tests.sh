@@ -1,13 +1,18 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -e
 
 features="conntrack,rt-link,rt-addr,wireguard,nftables,nl80211"
+examples="conntrack wireguard-setup nftables nftables-api nl80211 nl80211-raw"
+
+run() {
+  echo >&2
+  echo ">" "$@" >&2
+  command "$@"
+}
 
 cargo() {
-  echo
-  echo ">" "cargo $@ --features=$features"
-  command cargo "$@" --features="$features"
+  run cargo "$@" --features="$features"
 }
 
 matches() {
@@ -18,10 +23,33 @@ matches() {
   fi
 }
 
+run_vm() {
+  if ! type -P nix &>/dev/null; then
+    echo "Skipping vm tests: 'nix' command not found"
+    return
+  fi
+
+  if test -z "$vm_runner"; then
+    local out="$(
+      run nix build \
+        --print-out-paths --no-link \
+        -f ./scripts/vm_tests.nix \
+        --argstr bins "$examples" \
+        --argstr bin_dir "target/debug/examples" \
+        driver
+    )"
+    vm_runner="$out/bin/nixos-test-driver"
+  fi
+
+  # To debug inside the vm run `$vm_runner --interactive`, type
+  # `machine.start()`, wait until it boots, and ssh root@vsock/7502{0,1,2,...}
+  run "$vm_runner" # [--interactive]
+}
+
 cargo build -p netlink-bindings --all-features
 
 if ! ip link show wg0 >/dev/null; then
-  # Create "wg0" interface for readme doctests
+  # Create "wg0" interface for doctests in readme
   ip link add dev wg0 type wireguard
 fi
 
@@ -31,8 +59,10 @@ for runtime in "" --features={tokio,smol}; do
   cargo run --example=extack |
     matches 'Attribute failed policy validation: attribute "Ifname" in "OpNewlinkDoRequest": PolicyTypeAttrs \{ MaxLength: 15, Type: 11 \}'
 
-  examples="conntrack wireguard-setup nftables nftables-api nl80211 nl80211-raw"
   for example in $examples; do
     cargo run --example="$example" $runtime
   done
+
+  # Run the same examples in a VM with a bunch of different kernel versions
+  run_vm
 done
