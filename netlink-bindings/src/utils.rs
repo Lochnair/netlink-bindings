@@ -366,7 +366,7 @@ impl ErrorContext {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct MultiAttrIterable<I, T, V>
 where
     I: Iterator<Item = Result<T, ErrorContext>>,
@@ -397,7 +397,7 @@ where
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy, Default)]
 pub struct ArrayIterable<I, T>
 where
     I: Iterator<Item = Result<T, ErrorContext>>,
