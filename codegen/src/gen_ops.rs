@@ -41,7 +41,7 @@ pub fn gen_ops(spec: &Spec, ctx: &mut Context) -> TokenStream {
             attribute_set: Some(attrs.clone()),
             r#do: Some(Operation::default()),
             dump: Some(Operation::default()),
-            value: Some("0xfefe".into()),
+            value: Some(0xfefe),
             fixed_header: if spec.is_genetlink() {
                 None
             } else if let Some(fixed_header) = &spec.operations.fixed_header {
@@ -79,14 +79,6 @@ fn whitelist_op_attrs(attrs: &mut Vec<AttrProp>, allowed: &[String]) {
     }
 }
 
-pub fn parse_value(value: &str) -> u16 {
-    if let Some(value) = value.strip_prefix("0x") {
-        u16::from_str_radix(value, 16).unwrap()
-    } else {
-        value.parse().unwrap()
-    }
-}
-
 pub fn get_value(ops: &OperationSpec, op: &Request) -> u16 {
     let same_ptr = |l: &Request, r: &Request| l as *const _ == r as *const _;
     let is_request = |l: &Option<Operation>| l.as_ref().is_some_and(|o| same_ptr(&o.request, op));
@@ -118,7 +110,7 @@ pub fn get_value(ops: &OperationSpec, op: &Request) -> u16 {
         .or_else(|| check_do_op(!is_request))
         .unwrap_or_else(|| panic!("Operation {:?} doesn't specify a value", ops.name));
 
-    parse_value(value)
+    *value
 }
 
 pub fn gen_op(

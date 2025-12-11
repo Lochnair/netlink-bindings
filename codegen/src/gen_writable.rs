@@ -145,7 +145,7 @@ pub fn gen_writable_attrset(
     for next in &set.attributes {
         id += 1;
         if let Some(val) = &next.value {
-            id = val.parse().unwrap();
+            id = *val;
         }
 
         if visited.contains(&next.name) {

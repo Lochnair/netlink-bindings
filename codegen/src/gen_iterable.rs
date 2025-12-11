@@ -41,7 +41,7 @@ pub fn gen_iterable_attrs(
     for next in &set.attributes {
         id += 1;
         if let Some(val) = &next.value {
-            id = val.parse().unwrap();
+            id = *val;
         }
 
         let name_str = kebab_to_type(&next.name);

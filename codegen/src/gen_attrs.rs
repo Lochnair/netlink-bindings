@@ -1,7 +1,6 @@
-use std::collections::HashSet;
-
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
+use std::collections::HashSet;
 use syn::Ident;
 
 use crate::{

@@ -144,8 +144,7 @@ fn main() {
         std::process::exit(1);
     }
 
-    let spec = std::fs::read_to_string(spec).unwrap();
-    let spec = Spec::parse(&spec);
+    let spec = Spec::parse_with_override(&spec);
 
     let mut ctx = Context::default();
 

@@ -1,11 +1,11 @@
 // vim:textwidth=80
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_aux::field_attributes::deserialize_default_from_empty_object;
+use serde_yaml::Value;
+use std::path::Path;
 
-use crate::gen_ops;
-
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub enum ByteOrder {
@@ -13,7 +13,7 @@ pub enum ByteOrder {
     Big,
     #[serde(rename = "little-endian")]
     Little,
-    #[serde(skip)]
+    #[serde(rename = "native-endian")]
     Host,
 }
 
@@ -29,7 +29,7 @@ impl Default for ByteOrder {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(untagged)]
 #[serde(rename_all = "kebab-case")]
@@ -42,7 +42,7 @@ pub enum EnumEntry {
     },
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(tag = "type")]
 #[serde(rename_all = "kebab-case")]
@@ -91,7 +91,7 @@ pub enum DefType {
     },
 }
 
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(tag = "type")]
 #[serde(rename_all = "kebab-case")]
 pub enum AttrType {
@@ -176,7 +176,7 @@ impl Default for AttrType {
 }
 
 /// Same as [`AttrType`], but can be used inside [`AttrType::IndexedArray`]
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(tag = "sub-type")]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
@@ -196,20 +196,42 @@ pub enum IndexedArrayType {
     },
 }
 
-#[derive(Debug, Clone, Deserialize, Default, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+#[serde(untagged)]
+pub enum NumOrName {
+    Num(usize),
+    Name(String),
+}
+
+impl NumOrName {
+    pub fn get_value(&self) -> usize {
+        match self {
+            Self::Num(val) => *val,
+            _ => unreachable!("{:?}", self),
+        }
+    }
+}
+
+impl From<usize> for NumOrName {
+    fn from(value: usize) -> Self {
+        Self::Num(value)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Default, PartialEq)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 #[allow(unused)]
 pub struct AttrCheck {
-    pub min_len: Option<usize>,
-    pub max_len: Option<usize>,
-    pub exact_len: Option<String>,
-    pub min: Option<String>,
-    pub max: Option<String>,
-    pub flags_mask: Option<String>,
+    pub min_len: Option<NumOrName>,
+    pub max_len: Option<NumOrName>,
+    pub exact_len: Option<NumOrName>,
+    pub min: Option<NumOrName>,
+    pub max: Option<NumOrName>,
+    pub flags_mask: Option<NumOrName>,
 }
 
-#[derive(Debug, Clone, Deserialize, Default, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, Default, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct AttrProp {
     /// Identifies the attribute, unique within the set.
@@ -229,7 +251,7 @@ pub struct AttrProp {
     ///
     /// Note that the value of an attribute is defined only in its main set (not
     /// in subsets).
-    pub value: Option<String>,
+    pub value: Option<u16>,
     /// Boolean property signifying that the attribute may be present multiple
     /// times. Allowing an attribute to repeat is the recommended way of
     /// implementing arrays (no extra nesting).
@@ -268,7 +290,10 @@ impl AttrProp {
     pub fn is_ipv6(&self) -> bool {
         matches!(self.r#type, AttrType::Binary { r#struct: None, .. })
             && self.display_hint.as_ref().is_some_and(|h| h == "ipv6")
-            && self.checks.as_ref().is_some_and(|c| c.min_len == Some(16))
+            && self
+                .checks
+                .as_ref()
+                .is_some_and(|c| c.min_len.as_ref().is_some_and(|l| l.get_value() == 16))
     }
 
     pub fn is_ip(&self) -> bool {
@@ -288,7 +313,7 @@ impl AttrProp {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Definition {
     /// Name for the enum type with commands, if empty no name will be used.
@@ -316,7 +341,7 @@ pub struct Definition {
     pub header: Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct AttrSet {
     /// Prefix for the C enum name of the command. The name is formed by
@@ -334,18 +359,18 @@ pub struct AttrSet {
     pub subset_of: Option<String>,
 }
 
-#[derive(Debug, Clone, Default, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub struct Request {
     /// Numerical message ID, used in serialized Netlink messages. The same
     /// enumeration rules are applied as to attribute values.
-    pub value: Option<String>,
+    pub value: Option<u16>,
     #[serde(default)]
     pub attributes: Vec<String>,
 }
 
-#[derive(Debug, Clone, Deserialize, Default)]
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub struct Operation {
@@ -359,7 +384,7 @@ pub struct Operation {
     pub reply: Request,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub enum KernelValidationFlag {
@@ -368,7 +393,7 @@ pub enum KernelValidationFlag {
     DumpStrict,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub struct NotifyEvent {
@@ -377,7 +402,7 @@ pub struct NotifyEvent {
     pub attributes: Vec<String>,
 }
 
-#[derive(Debug, Clone, Deserialize, Default)]
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub struct OperationSpec {
@@ -391,7 +416,7 @@ pub struct OperationSpec {
 
     /// ID of this message if value for request and response differ, i.e.
     /// requests and responses have different message enums.
-    pub value: Option<String>,
+    pub value: Option<u16>,
     /// Name of the structure defining the optional fixed-length protocol
     /// header. This header is placed in a message after the netlink and
     /// genetlink headers and before any attributes.
@@ -436,7 +461,7 @@ pub struct OperationSpec {
     pub config_cond: Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub struct Operations {
@@ -467,7 +492,7 @@ pub struct Operations {
     pub all_attrs: bool,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub enum CommandFlag {
@@ -475,7 +500,7 @@ pub enum CommandFlag {
     UnsAdminPerm,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub struct MulticastGroup {
@@ -492,7 +517,7 @@ pub struct MulticastGroup {
     pub value: Option<u64>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub struct MulticastGroups {
@@ -500,7 +525,7 @@ pub struct MulticastGroups {
     pub list: Vec<MulticastGroup>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 /// Value to match for dynamic selection of sub-message format specifier.
@@ -512,7 +537,7 @@ pub struct SubMessageFormat {
     pub attribute_set: Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub struct SubMessage {
@@ -522,7 +547,7 @@ pub struct SubMessage {
     pub formats: Vec<SubMessageFormat>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct KernelFamily {
     // We don't use this
@@ -532,7 +557,7 @@ fn default_protocol() -> Option<String> {
     Some("genetlink".to_string())
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub struct Spec {
@@ -568,8 +593,59 @@ pub struct Spec {
     pub sub_messages: Option<Vec<SubMessage>>,
 }
 
+fn merge_yaml(dst: &mut Value, src: &Value) {
+    match (dst, src) {
+        (Value::Mapping(dst), Value::Mapping(src)) => {
+            for (key, src_val) in src {
+                match dst.get_mut(key) {
+                    Some(dst_val) => merge_yaml(dst_val, src_val),
+                    None => _ = dst.insert(key.clone(), src_val.clone()),
+                };
+            }
+        }
+        (Value::Sequence(dst), Value::Sequence(src)) => {
+            'next: for src_val in src {
+                if let Value::Mapping(map) = src_val {
+                    if let Some(name) = map.get("name") {
+                        for dst_val in dst.iter_mut() {
+                            if let Value::Mapping(dst_map) = dst_val {
+                                if dst_map.get("name") == Some(name) {
+                                    merge_yaml(dst_val, src_val);
+                                    continue 'next;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                dst.push(src_val.clone());
+            }
+        }
+        (dst, src) => *dst = src.clone(),
+    }
+}
+
 impl Spec {
-    pub fn parse(buf: &str) -> Self {
+    pub fn parse_with_override(path: &Path) -> Self {
+        println!("Parsing spec: {path:?}");
+        let spec = std::fs::read_to_string(path).unwrap();
+        let mut spec = Self::parse_to_value(&spec);
+
+        let over = path.with_extension("overrides.yaml");
+        if over.exists() {
+            println!("Parsing spec override: {over:?}");
+            let over = std::fs::read_to_string(&over).unwrap();
+            let over: Value = serde_yaml::from_str(&over).unwrap();
+            merge_yaml(&mut spec, &over);
+        }
+
+        let mut spec: Spec = serde_yaml::from_value(spec).unwrap();
+        spec.check();
+        spec.fixup();
+        spec
+    }
+
+    fn parse_to_value(buf: &str) -> serde_yaml::Value {
         // Replace metadata with empty lines
         let sep = "\n---\n";
         let buf: Vec<u8> = if let Some(rem) = buf.find(sep) {
@@ -583,10 +659,10 @@ impl Spec {
             buf.into()
         };
 
-        let mut spec: Spec = serde_yaml::from_slice(&buf).unwrap();
-        spec.check();
-        spec.fixup();
-        spec
+        // Verify spec now as parsing from Value later won't preserve the source lines
+        let _: Spec = serde_yaml::from_slice(&buf).unwrap();
+
+        serde_yaml::from_slice(&buf).unwrap()
     }
 
     /// Matches genetlink and genetlink-legacy specifications
@@ -759,9 +835,9 @@ impl Spec {
                     .or(ops.dump.as_ref().and_then(|op| op.request.value.as_ref()));
 
                 if let Some(value) = value {
-                    request_type = gen_ops::parse_value(value);
+                    request_type = *value;
                 } else {
-                    ops.value = Some(format!("{request_type}"));
+                    ops.value = Some(request_type);
                 }
                 request_type += 1;
             }
@@ -776,7 +852,7 @@ impl Spec {
                 continue;
             }
             let req = Request {
-                value: Some("0xfefe".into()),
+                value: Some(0xfefe),
                 ..Default::default()
             };
             let op = Operation {

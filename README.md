@@ -396,6 +396,9 @@ Feature flags:
 - `--features=netlink-bindings/deny-unknown-attrs` - treat unknown attributes
 as errors.
 
+Additional attributes can specified in .override.yaml file located alongside
+the main specification file.
+
 ## To-do
 
 - Testing (for each sensible netlink family and for parsing primitives).
