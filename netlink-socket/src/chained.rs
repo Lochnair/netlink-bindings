@@ -29,6 +29,16 @@ impl NetlinkSocket {
 
         Self::write_buf(sock, &[IoSlice::new(request.payload())]).await?;
 
+        let mut done = Bits::with_len(request.chain_len());
+        for i in 0..request.chain_len() {
+            let Some(has_ack) = request.supports_ack(i) else {
+                break;
+            };
+            if !has_ack {
+                done.set(i);
+            }
+        }
+
         Ok(NetlinkReplyChained {
             sock,
             buf: &mut self.buf,
@@ -37,7 +47,7 @@ impl NetlinkSocket {
                 buf_offset: 0,
                 buf_read: 0,
             },
-            done: Bits::with_len(request.chain_len()),
+            done,
         })
     }
 }

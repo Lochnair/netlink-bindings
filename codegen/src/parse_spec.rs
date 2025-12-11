@@ -412,6 +412,9 @@ pub struct OperationSpec {
     #[serde(default)]
     pub request_type_at_runtime: bool,
 
+    #[serde(default)]
+    pub no_ack: bool,
+
     /// Name of the command sharing the reply type with this notification.
     #[allow(unused)]
     pub notify: Option<String>,

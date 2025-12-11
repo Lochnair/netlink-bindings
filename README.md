@@ -385,6 +385,8 @@ ones that are narrowed down. Reduces generated code size.
 provided at runtime.
 - `operations.all-attrs: true` or `operations.[].all-attrs: true` - don't
 narrow down attributes in generated request types.
+- `operations.[].no_ack: true` - operation doesn't support ack on success. This
+option only affects chained requests.
 - `definitions.[].shrinkable: true` - C struct is padded with zeros or
 truncated when needed, e.g. the struct was expanded between the kernel
 versions. The default behavior is to return a decoding error.

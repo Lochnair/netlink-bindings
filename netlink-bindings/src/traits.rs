@@ -60,4 +60,14 @@ pub trait NetlinkChained {
         let _ = index;
         |_, _, _| Default::default()
     }
+
+    /// Packet supports ack on success with NLM_F_ACK (assumed true by default).
+    /// To date, this's only used to workaround a bug in nftables prior to linux 6.10.
+    ///
+    /// Caller sequentially peeks indexes 0..chain_len() until it encounters None.
+    #[doc(hidden)]
+    fn supports_ack(&self, index: usize) -> Option<bool> {
+        let _ = index;
+        None
+    }
 }

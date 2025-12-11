@@ -189,6 +189,7 @@ pub fn gen_op(
             name: request_name.clone(),
             header: request_header(),
             needs_value,
+            no_ack: ops.no_ack,
         });
         let request_header = request_header();
 

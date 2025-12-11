@@ -14,6 +14,7 @@ pub struct OpInfo {
     pub name: String,
     pub header: Option<OpHeader>,
     pub needs_value: bool,
+    pub no_ack: bool,
 }
 
 pub fn gen_request(tokens: &mut TokenStream, _ctx: &mut Context, spec: &Spec, requests: &[OpInfo]) {
@@ -22,7 +23,7 @@ pub fn gen_request(tokens: &mut TokenStream, _ctx: &mut Context, spec: &Spec, re
     }
 
     if spec.protocol.as_ref().is_some_and(|s| s == "netlink-raw") {
-        gen_request_chained(tokens);
+        gen_request_chained(tokens, requests);
     }
 
     let name = format_ident!("Request");
@@ -31,6 +32,7 @@ pub fn gen_request(tokens: &mut TokenStream, _ctx: &mut Context, spec: &Spec, re
         name,
         header,
         needs_value,
+        ..
     } in requests
     {
         let req = format_ident!("Request{}", kebab_to_type(name));
@@ -384,7 +386,30 @@ pub fn gen_request_wrapper(
     });
 }
 
-pub fn gen_request_chained(tokens: &mut TokenStream) {
+pub fn gen_request_chained(tokens: &mut TokenStream, requests: &[OpInfo]) {
+    let mut supports_ack = quote!();
+    if requests.iter().any(|r| r.no_ack) {
+        let no_ack_requests = requests
+            .iter()
+            .filter(|r| r.no_ack)
+            .map(|r| format_ident!("Request{}", kebab_to_type(&r.name)))
+            .fold(quote!(), |acc, r| {
+                quote! {
+                    #acc
+                    f if f == #r::lookup as *const LookupFn => false,
+                }
+            });
+
+        supports_ack = quote! {
+            fn supports_ack(&self, index: usize) -> Option<bool> {
+                Some(match self.inner.lookups.get(index)?.1 as *const LookupFn {
+                    #no_ack_requests
+                    _ => true,
+                })
+            }
+        };
+    }
+
     tokens.extend(quote! {
         #[derive(Debug)]
         pub struct ChainedFinal<'a> {
@@ -453,6 +478,8 @@ pub fn gen_request_chained(tokens: &mut TokenStream) {
             fn lookup(&self, index: usize) -> LookupFn {
                 self.inner.lookups[index].1
             }
+
+            #supports_ack
         }
 
         impl Chained<'static> {
