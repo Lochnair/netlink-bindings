@@ -68,7 +68,7 @@ fn main() {
             println!("{:#?}", attrs);
 
             println!("Ifname: {:?}", attrs.get_ifname().unwrap()); // &CStr
-            for peer in attrs.get_peers().unwrap() {
+            for peer in attrs.get_peers().unwrap_or_default() {
                 if let Ok(endpoint) = peer.get_endpoint() {
                     println!("Endpoint: {endpoint}"); // SockAddr
                 } else {
