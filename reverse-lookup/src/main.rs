@@ -149,7 +149,13 @@ fn read(args: &CliArgs, reader: impl Read) {
                 }
                 print!(" ");
                 print_request_flags(header.flags());
-                print!(" {:?}", proto);
+                print!(" ");
+                match proto {
+                    Protocol::Generic(family) => {
+                        print!("Generic({:?})", String::from_utf8_lossy(family))
+                    }
+                    _ => print!("{proto:?}"),
+                }
                 println!();
 
                 if args.dump {
