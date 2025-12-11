@@ -70,6 +70,11 @@ pub enum DefType {
         #[allow(unused)]
         header: Option<String>,
         members: Vec<AttrProp>,
+
+        /// Controls whether decoder should pad missing bytes with zeros or
+        /// truncate when needed.
+        #[serde(default)]
+        shrinkable: bool,
     },
     /// defines an integer enumeration, with values for each entry occupying a
     /// bit, starting from bit 0, (e.g. 1, 2, 4, 8)
@@ -782,10 +787,12 @@ impl Spec {
         }
     }
 
+    pub fn try_find_def(&self, name: &str) -> Option<&Definition> {
+        self.definitions.iter().find(|op| op.name == name)
+    }
+
     pub fn find_def(&self, name: &str) -> &Definition {
-        self.definitions
-            .iter()
-            .find(|op| op.name == name)
+        self.try_find_def(name)
             .unwrap_or_else(|| panic!("Definition {name:?} not found"))
     }
 

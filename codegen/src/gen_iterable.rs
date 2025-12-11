@@ -9,7 +9,9 @@ use crate::{
     gen_sub_message::{self},
     gen_utils::{kebab_to_rust, kebab_to_type, lifetime_needed_attrs, sanitize_ident},
     gen_writable::writable_type,
-    parse_spec::{AttrProp, AttrSet, AttrType, ByteOrder, IndexedArrayType, Spec},
+    parse_spec::{
+        AttrProp, AttrSet, AttrType, ByteOrder, DefType, Definition, IndexedArrayType, Spec,
+    },
     Context,
 };
 
@@ -89,11 +91,11 @@ pub fn gen_iterable_attrs(
             }
             AttrType::IndexedArray { sub_type } => {
                 gen_iterable_array(tokens, ctx, spec, sub_type);
-                let parse = gen_iterable_parse(next);
+                let parse = gen_iterable_parse(spec, next);
                 push(parse);
             }
             _ => {
-                let parse = gen_iterable_parse(next);
+                let parse = gen_iterable_parse(spec, next);
                 push(parse);
             }
         }
@@ -205,7 +207,7 @@ pub fn gen_iterable_attrs(
     });
 }
 
-pub fn gen_iterable_parse(attr: &AttrProp) -> TokenStream {
+pub fn gen_iterable_parse(spec: &Spec, attr: &AttrProp) -> TokenStream {
     let buf_name = format_ident!("next");
 
     let ord = match attr.byte_order {
@@ -240,11 +242,20 @@ pub fn gen_iterable_parse(attr: &AttrProp) -> TokenStream {
             return quote! { #parse(#buf_name) };
         }
         AttrType::Binary {
-            r#struct: Some(struct_type),
+            r#struct: Some(r#struct),
             ..
         } => {
-            let struct_type = writable_type(struct_type);
-            return quote! { #struct_type::new_from_slice(#buf_name) };
+            let struct_type = writable_type(r#struct);
+            return match &spec.try_find_def(r#struct) {
+                Some(Definition {
+                    def:
+                        DefType::Struct {
+                            shrinkable: true, ..
+                        },
+                    ..
+                }) => quote! { Some(#struct_type::new_from_zeroed(#buf_name)) },
+                _ => quote! { #struct_type::new_from_slice(#buf_name) },
+            };
         }
         AttrType::String => {
             return quote! { CStr::from_bytes_with_nul(#buf_name).ok() };
@@ -295,7 +306,7 @@ pub fn gen_iterable_array(
         IndexedArrayType::Plain { attr } => {
             (item, _) = gen_attr_type(attr);
             attrs_name = None;
-            let parse_attr = gen_iterable_parse(attr);
+            let parse_attr = gen_iterable_parse(spec, attr);
             parse = quote!({
                 let Some(res) = #parse_attr else { break };
                 return Some(Ok(res));

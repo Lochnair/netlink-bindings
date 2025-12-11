@@ -285,11 +285,12 @@ for attr in OpGetDeviceDumpReply::new(&buf) {
 - [Neli](https://github.com/jbaublitz/neli).
 
 Both don't use codegen to generate bindings, hence many Netlink families are
-not supported. Another difference is that they represent netlink messages as
-lists of rust enums, while this project works with the binary representation
-directly, with a separate interfaces for encoding and decoding: a builder
-pattern-like interface for encoding, and an iterator interface for decoding
-(internally).
+not supported.
+
+Another difference is that they represent netlink messages as lists of rust
+enums, while this project works with the binary representation directly, with a
+separate interfaces for encoding and decoding: a builder pattern-like interface
+for encoding, and an iterator interface for decoding (internally).
 
 ## Support status
 
@@ -384,6 +385,9 @@ ones that are narrowed down. Reduces generated code size.
 provided at runtime.
 - `operations.all-attrs: true` or `operations.[].all-attrs: true` - don't
 narrow down attributes in generated request types.
+- `definitions.[].shrinkable: true` - C struct is padded with zeros or
+truncated when needed, e.g. the struct was expanded between the kernel
+versions. The default behavior is to return a decoding error.
 
 Feature flags:
 
