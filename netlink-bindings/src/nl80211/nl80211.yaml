@@ -1794,10 +1794,6 @@ attribute-sets:
         type: flag
 
 operations:
-  # Options specific to netlink-bindings
-  fallback-attrs: nl80211-attrs
-  transparent: true
-
   enum-model: directional
   list:
     -

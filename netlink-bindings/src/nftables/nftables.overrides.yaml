@@ -1,0 +1,8 @@
+operations:
+  list:
+    -
+      name: batch-begin
+      no-ack: true
+    -
+      name: batch-end
+      no-ack: true
