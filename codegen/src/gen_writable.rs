@@ -516,6 +516,7 @@ pub fn gen_def_struct_uint_writable(
 
             let first = m.off;
             let last = m.off + len;
+            m.off += len;
 
             members.extend(quote! {
                 #docs
@@ -543,6 +544,7 @@ pub fn gen_def_struct_uint_writable(
 
             let first = m.off;
             let last = m.off + len;
+            m.off += len;
 
             members.extend(quote! {
                 #docs
@@ -572,6 +574,7 @@ pub fn gen_def_struct_uint_writable(
 
     let first = m.off;
     let last = m.off + len;
+    m.off += len;
 
     let ord = match attr.byte_order {
         ByteOrder::Host => "",
@@ -602,8 +605,6 @@ pub fn gen_def_struct_uint_writable(
     debug.extend(quote! {
         .field(#name, &self.#getter_name())
     });
-
-    m.off += len;
 }
 
 // Binary structures are aligned according to C conventions
