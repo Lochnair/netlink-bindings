@@ -166,21 +166,25 @@ pub fn gen_sub_attr(
         }
     };
 
-    // TODO: don't panic on length mismatch
     match (header_type, attrs_type) {
         (Some(h), None) => {
+            // Subsmessage parser is expected to truncate/zero-out fixed header
+            // on length missmatch for forward compatibility.
+            // https://github.com/linux-netdev/ynl-c/blob/8504875fb9f081cb1203e5a6ab7a701e0dca0697/generated/tc-user.c#L9655-L9661
             select.extend(quote! {
-                #value => Some(#type_name::#select_ident(#h::new_from_slice(#buf_name)?)),
+                #value => Some(#type_name::#select_ident(#h::new_from_zeroed(#buf_name))),
             });
             variants.extend(quote!(#select_ident(#h),));
         }
         (None, Some((iter, a))) => {
+            // https://github.com/linux-netdev/ynl-c/blob/8504875fb9f081cb1203e5a6ab7a701e0dca0697/generated/tc-user.c#L8848-L8851
             select.extend(quote! {
                 #value => Some(#type_name::#select_ident(#iter::with_loc(#buf_name, #loc_name))),
             });
             variants.extend(quote!(#select_ident(#a),));
         }
         (Some(h), Some((iter, a))) => {
+            // https://github.com/linux-netdev/ynl-c/blob/8504875fb9f081cb1203e5a6ab7a701e0dca0697/generated/tc-user.c#L6039-L6042
             select.extend(quote! {
                 #value => {
                     let (header, attrs) = #buf_name.split_at(#buf_name.len().min(#h::len()));
@@ -193,7 +197,9 @@ pub fn gen_sub_attr(
             variants.extend(quote!(#select_ident(#h, #a),));
         }
         (None, None) => {
-            variants.extend(quote!(#select_ident(),));
+            // https://github.com/linux-netdev/ynl-c/blob/8504875fb9f081cb1203e5a6ab7a701e0dca0697/generated/tc-user.c#L9585
+            select.extend(quote!(#value => Some(#type_name::#select_ident),));
+            variants.extend(quote!(#select_ident,));
         }
     };
 }
