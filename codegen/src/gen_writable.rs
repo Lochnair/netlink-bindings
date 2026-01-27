@@ -209,7 +209,7 @@ pub fn gen_writable_attrset(
                         impls.extend(quote! {
                             pub fn #func(mut self, fixed_header: &#h) -> Self {
                                 self = self.#push_selector(#sel_val);
-                                push_nested_header(self.as_rec_mut(), #id);
+                                self.header_offset = Some(push_nested_header(self.as_rec_mut(), #id));
                                 self.as_rec_mut().extend(fixed_header.as_slice());
                                 self
                             }
@@ -252,7 +252,7 @@ pub fn gen_writable_attrset(
                         impls.extend(quote! {
                             pub fn #func(mut self) -> Self {
                                 self = self.#push_selector(#sel_val);
-                                push_nested_header(self.as_rec_mut(), #id);
+                                self.header_offset = Some(push_nested_header(self.as_rec_mut(), #id));
                                 self
                             }
                         });
@@ -516,6 +516,7 @@ pub fn gen_def_struct_uint_writable(
 
             let first = m.off;
             let last = m.off + len;
+            m.off += len;
 
             members.extend(quote! {
                 #docs
@@ -543,6 +544,7 @@ pub fn gen_def_struct_uint_writable(
 
             let first = m.off;
             let last = m.off + len;
+            m.off += len;
 
             members.extend(quote! {
                 #docs
@@ -572,6 +574,7 @@ pub fn gen_def_struct_uint_writable(
 
     let first = m.off;
     let last = m.off + len;
+    m.off += len;
 
     let ord = match attr.byte_order {
         ByteOrder::Host => "",
@@ -602,8 +605,6 @@ pub fn gen_def_struct_uint_writable(
     debug.extend(quote! {
         .field(#name, &self.#getter_name())
     });
-
-    m.off += len;
 }
 
 // Binary structures are aligned according to C conventions
