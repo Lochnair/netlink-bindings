@@ -56,14 +56,17 @@ async fn wg_dump(sock: &mut NetlinkSocket) {
     // Additional socket for handling wireguard requests
     let mut sock_wg = NetlinkSocket::new();
 
-    // Large or frequent requests may be encoded with the same buffer
+    // Consecutive requests can reuse the same buffer using [`Request::new_with_buf`],
+    // you don't need to .clean() the buffer yourself
     let mut buf = Vec::new();
 
     let request_links = rt_link::Request::new().op_getlink_dump_request(&PushIfinfomsg::new());
     let mut iter = sock.request(&request_links).await.unwrap();
     while let Some(res) = iter.recv().await {
         let (_header, attrs) = res.unwrap();
+
         let link = attrs.get_ifname().unwrap();
+
         if Ok(c"wireguard") != attrs.get_linkinfo().unwrap_or_default().get_kind() {
             println!("Skipping {link:?}");
             continue;
@@ -112,9 +115,7 @@ async fn wg_set(
         .end_array();
 
     let mut iter = sock.request(&request).await.unwrap();
-    while let Some(res) = iter.recv().await {
-        unreachable!("{res:#?}");
-    }
+    iter.recv_ack().await.unwrap();
 }
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
@@ -131,9 +132,7 @@ async fn addr_add(sock: &mut NetlinkSocket, ifindex: u32, addr: IpAddr, addr_pre
     request.encode().push_local(addr);
 
     let mut iter = sock.request(&request).await.unwrap();
-    while let Some(res) = iter.recv().await {
-        unreachable!("{res:#?}");
-    }
+    iter.recv_ack().await.unwrap();
 }
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
@@ -150,38 +149,29 @@ async fn link_add(sock: &mut NetlinkSocket, ifname: &str) {
         .push_kind(c"wireguard");
 
     let mut iter = sock.request(&request).await.unwrap();
-    while let Some(res) = iter.recv().await {
-        unreachable!("{res:#?}");
-    }
+    iter.recv_ack().await.unwrap();
 }
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn link_get_ifindex(sock: &mut NetlinkSocket, ifname: &str) -> u32 {
-    let mut buf = Vec::new();
-    let mut request = rt_link::Request::new_with_buf(&mut buf)
-        .op_getlink_do_request(&rt_link::PushIfinfomsg::new());
+    let mut request = rt_link::Request::new().op_getlink_do_request(&rt_link::PushIfinfomsg::new());
 
     request.encode().push_ifname_bytes(ifname.as_bytes());
 
     let mut iter = sock.request(&request).await.unwrap();
-    if let Some(res) = iter.recv().await {
-        let (header, _attrs) = res.unwrap();
-        return header.ifi_index() as u32;
-    }
+    let (header, _attrs) = iter.recv_one().await.unwrap();
 
-    unreachable!()
+    header.ifi_index() as u32
 }
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn link_del(sock: &mut NetlinkSocket, ifname: &str) {
-    let mut request = rt_link::Request::new().op_dellink_do_request(&rt_link::PushIfinfomsg::new());
+    let mut request = rt_link::Request::new().op_dellink_do_request(&Default::default());
 
     request.encode().push_ifname_bytes(ifname.as_bytes());
 
     let mut iter = sock.request(&request).await.unwrap();
-    while let Some(res) = iter.recv().await {
-        unreachable!("{res:#?}");
-    }
+    iter.recv_ack().await.unwrap();
 }
 
 fn libc_addr_family(addr: &IpAddr) -> i32 {
