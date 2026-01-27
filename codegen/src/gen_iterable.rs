@@ -86,7 +86,11 @@ pub fn gen_iterable_attrs(
 
                 push(quote! {{
                     let Ok(selector) = self.#get_selector() else { break };
-                    #name::select_with_loc(selector, #buf_name, self.orig_loc)
+                    match #name::select_with_loc(selector, #buf_name, self.orig_loc) {
+                        Some(sub) => Some(sub),
+                        None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                        None => continue,
+                    }
                 }});
             }
             AttrType::IndexedArray { sub_type } => {
@@ -174,23 +178,23 @@ pub fn gen_iterable_attrs(
             type Item = Result<#item, ErrorContext>;
 
             fn next(&mut self) -> Option<Self::Item> {
-                if self.buf.len() == self.pos {
-                    return None;
-                }
-
                 let pos = self.pos;
-                let mut r#type = None;
+                let mut r#type;
 
-                while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+                loop {
+                    r#type = None;
+                    if self.buf.len() == self.pos {
+                        return None;
+                    }
+
+                    let Some((header, next)) = chop_header(self.buf, &mut self.pos) else { break; };
                     r#type = Some(header.r#type);
+
                     // TODO: check nested flag
                     let res = match header.r#type {
                         #variants
-                        n => if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                            break
-                        } else {
-                            continue
-                        },
+                        n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                        n => continue,
                     };
 
                     return Some(Ok(res));
