@@ -50,21 +50,20 @@ impl<'a> IterableDummy<'a> {
 impl<'a> Iterator for IterableDummy<'a> {
     type Item = Result<Dummy, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -261,12 +260,16 @@ impl<'a> IterableNlmsgerrAttrs<'a> {
 impl<'a> Iterator for IterableNlmsgerrAttrs<'a> {
     type Item = Result<NlmsgerrAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => NlmsgerrAttrs::Msg({
@@ -299,13 +302,8 @@ impl<'a> Iterator for IterableNlmsgerrAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -678,12 +676,16 @@ impl<'a> IterablePolicyTypeAttrs<'a> {
 impl<'a> Iterator for IterablePolicyTypeAttrs<'a> {
     type Item = Result<PolicyTypeAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => PolicyTypeAttrs::Type({
@@ -746,13 +748,8 @@ impl<'a> Iterator for IterablePolicyTypeAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }

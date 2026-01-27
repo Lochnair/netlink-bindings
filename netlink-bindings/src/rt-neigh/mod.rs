@@ -466,12 +466,16 @@ impl<'a> IterableNeighbourAttrs<'a> {
 impl<'a> Iterator for IterableNeighbourAttrs<'a> {
     type Item = Result<NeighbourAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 0u16 => NeighbourAttrs::Unspec({
@@ -564,13 +568,8 @@ impl<'a> Iterator for IterableNeighbourAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -953,12 +952,16 @@ impl<'a> IterableNdtAttrs<'a> {
 impl<'a> Iterator for IterableNdtAttrs<'a> {
     type Item = Result<NdtAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => NdtAttrs::Name({
@@ -1006,13 +1009,8 @@ impl<'a> Iterator for IterableNdtAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -1500,12 +1498,16 @@ impl<'a> IterableNdtpaAttrs<'a> {
 impl<'a> Iterator for IterableNdtpaAttrs<'a> {
     type Item = Result<NdtpaAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => NdtpaAttrs::Ifindex({
@@ -1603,13 +1605,8 @@ impl<'a> Iterator for IterableNdtpaAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -2942,12 +2939,16 @@ impl<'a> IterableOpNewneighDoRequest<'a> {
 impl<'a> Iterator for IterableOpNewneighDoRequest<'a> {
     type Item = Result<OpNewneighDoRequest<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpNewneighDoRequest::Dst({
@@ -3010,13 +3011,8 @@ impl<'a> Iterator for IterableOpNewneighDoRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -3245,21 +3241,20 @@ impl<'a> IterableOpNewneighDoReply<'a> {
 impl<'a> Iterator for IterableOpNewneighDoReply<'a> {
     type Item = Result<OpNewneighDoReply, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -3472,12 +3467,16 @@ impl<'a> IterableOpDelneighDoRequest<'a> {
 impl<'a> Iterator for IterableOpDelneighDoRequest<'a> {
     type Item = Result<OpDelneighDoRequest<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpDelneighDoRequest::Dst({
@@ -3490,13 +3489,8 @@ impl<'a> Iterator for IterableOpDelneighDoRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -3652,21 +3646,20 @@ impl<'a> IterableOpDelneighDoReply<'a> {
 impl<'a> Iterator for IterableOpDelneighDoReply<'a> {
     type Item = Result<OpDelneighDoReply, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -3879,12 +3872,16 @@ impl<'a> IterableOpGetneighDumpRequest<'a> {
 impl<'a> Iterator for IterableOpGetneighDumpRequest<'a> {
     type Item = Result<OpGetneighDumpRequest, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 8u16 => OpGetneighDumpRequest::Ifindex({
@@ -3897,13 +3894,8 @@ impl<'a> Iterator for IterableOpGetneighDumpRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -4316,12 +4308,16 @@ impl<'a> IterableOpGetneighDumpReply<'a> {
 impl<'a> Iterator for IterableOpGetneighDumpReply<'a> {
     type Item = Result<OpGetneighDumpReply<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpGetneighDumpReply::Dst({
@@ -4384,13 +4380,8 @@ impl<'a> Iterator for IterableOpGetneighDumpReply<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -4687,12 +4678,16 @@ impl<'a> IterableOpGetneighDoRequest<'a> {
 impl<'a> Iterator for IterableOpGetneighDoRequest<'a> {
     type Item = Result<OpGetneighDoRequest<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpGetneighDoRequest::Dst({
@@ -4700,13 +4695,8 @@ impl<'a> Iterator for IterableOpGetneighDoRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -5112,12 +5102,16 @@ impl<'a> IterableOpGetneighDoReply<'a> {
 impl<'a> Iterator for IterableOpGetneighDoReply<'a> {
     type Item = Result<OpGetneighDoReply<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpGetneighDoReply::Dst({
@@ -5180,13 +5174,8 @@ impl<'a> Iterator for IterableOpGetneighDoReply<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -5458,21 +5447,20 @@ impl<'a> IterableOpGetneightblDumpRequest<'a> {
 impl<'a> Iterator for IterableOpGetneightblDumpRequest<'a> {
     type Item = Result<OpGetneightblDumpRequest, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -5780,12 +5768,16 @@ impl<'a> IterableOpGetneightblDumpReply<'a> {
 impl<'a> Iterator for IterableOpGetneightblDumpReply<'a> {
     type Item = Result<OpGetneightblDumpReply<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpGetneightblDumpReply::Name({
@@ -5828,13 +5820,8 @@ impl<'a> Iterator for IterableOpGetneightblDumpReply<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -6218,12 +6205,16 @@ impl<'a> IterableOpSetneightblDoRequest<'a> {
 impl<'a> Iterator for IterableOpSetneightblDoRequest<'a> {
     type Item = Result<OpSetneightblDoRequest<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpSetneightblDoRequest::Name({
@@ -6256,13 +6247,8 @@ impl<'a> Iterator for IterableOpSetneightblDoRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -6447,21 +6433,20 @@ impl<'a> IterableOpSetneightblDoReply<'a> {
 impl<'a> Iterator for IterableOpSetneightblDoReply<'a> {
     type Item = Result<OpSetneightblDoReply, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }

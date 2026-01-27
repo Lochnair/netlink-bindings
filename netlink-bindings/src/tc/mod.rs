@@ -7,6 +7,8 @@
 #![allow(irrefutable_let_patterns)]
 #![allow(unreachable_code)]
 #![allow(unreachable_patterns)]
+#[cfg(test)]
+mod tests;
 use crate::builtin::{PushBuiltinBitfield32, PushBuiltinNfgenmsg, PushDummy, PushNlmsghdr};
 use crate::{
     consts,
@@ -393,7 +395,7 @@ pub enum OptionsMsg<'a> {
     Cbs(IterableCbsAttrs<'a>),
     Cgroup(IterableCgroupAttrs<'a>),
     Choke(IterableChokeAttrs<'a>),
-    Clsact(),
+    Clsact,
     Codel(IterableCodelAttrs<'a>),
     Drr(IterableDrrAttrs<'a>),
     Dualpi2(IterableDualpi2Attrs<'a>),
@@ -409,9 +411,9 @@ pub enum OptionsMsg<'a> {
     Hfsc(PushTcHfscQopt),
     Hhf(IterableHhfAttrs<'a>),
     Htb(IterableHtbAttrs<'a>),
-    Ingress(),
+    Ingress,
     Matchall(IterableMatchallAttrs<'a>),
-    Mq(),
+    Mq,
     Mqprio(PushTcMqprioQopt),
     Multiq(PushTcMultiqQopt),
     Netem(PushTcNetemQopt, IterableNetemAttrs<'a>),
@@ -435,11 +437,12 @@ impl<'a> OptionsMsg<'a> {
         match selector.to_bytes() {
             b"basic" => Some(OptionsMsg::Basic(IterableBasicAttrs::with_loc(buf, loc))),
             b"bpf" => Some(OptionsMsg::Bpf(IterableBpfAttrs::with_loc(buf, loc))),
-            b"bfifo" => Some(OptionsMsg::Bfifo(PushTcFifoQopt::new_from_slice(buf)?)),
+            b"bfifo" => Some(OptionsMsg::Bfifo(PushTcFifoQopt::new_from_zeroed(buf))),
             b"cake" => Some(OptionsMsg::Cake(IterableCakeAttrs::with_loc(buf, loc))),
             b"cbs" => Some(OptionsMsg::Cbs(IterableCbsAttrs::with_loc(buf, loc))),
             b"cgroup" => Some(OptionsMsg::Cgroup(IterableCgroupAttrs::with_loc(buf, loc))),
             b"choke" => Some(OptionsMsg::Choke(IterableChokeAttrs::with_loc(buf, loc))),
+            b"clsact" => Some(OptionsMsg::Clsact),
             b"codel" => Some(OptionsMsg::Codel(IterableCodelAttrs::with_loc(buf, loc))),
             b"drr" => Some(OptionsMsg::Drr(IterableDrrAttrs::with_loc(buf, loc))),
             b"dualpi2" => Some(OptionsMsg::Dualpi2(IterableDualpi2Attrs::with_loc(
@@ -456,14 +459,16 @@ impl<'a> OptionsMsg<'a> {
             b"fq_pie" => Some(OptionsMsg::FqPie(IterableFqPieAttrs::with_loc(buf, loc))),
             b"fw" => Some(OptionsMsg::Fw(IterableFwAttrs::with_loc(buf, loc))),
             b"gred" => Some(OptionsMsg::Gred(IterableGredAttrs::with_loc(buf, loc))),
-            b"hfsc" => Some(OptionsMsg::Hfsc(PushTcHfscQopt::new_from_slice(buf)?)),
+            b"hfsc" => Some(OptionsMsg::Hfsc(PushTcHfscQopt::new_from_zeroed(buf))),
             b"hhf" => Some(OptionsMsg::Hhf(IterableHhfAttrs::with_loc(buf, loc))),
             b"htb" => Some(OptionsMsg::Htb(IterableHtbAttrs::with_loc(buf, loc))),
+            b"ingress" => Some(OptionsMsg::Ingress),
             b"matchall" => Some(OptionsMsg::Matchall(IterableMatchallAttrs::with_loc(
                 buf, loc,
             ))),
-            b"mqprio" => Some(OptionsMsg::Mqprio(PushTcMqprioQopt::new_from_slice(buf)?)),
-            b"multiq" => Some(OptionsMsg::Multiq(PushTcMultiqQopt::new_from_slice(buf)?)),
+            b"mq" => Some(OptionsMsg::Mq),
+            b"mqprio" => Some(OptionsMsg::Mqprio(PushTcMqprioQopt::new_from_zeroed(buf))),
+            b"multiq" => Some(OptionsMsg::Multiq(PushTcMultiqQopt::new_from_zeroed(buf))),
             b"netem" => {
                 let (header, attrs) = buf.split_at(buf.len().min(PushTcNetemQopt::len()));
                 Some(OptionsMsg::Netem(
@@ -471,19 +476,19 @@ impl<'a> OptionsMsg<'a> {
                     IterableNetemAttrs::with_loc(attrs, loc),
                 ))
             }
-            b"pfifo" => Some(OptionsMsg::Pfifo(PushTcFifoQopt::new_from_slice(buf)?)),
-            b"pfifo_fast" => Some(OptionsMsg::PfifoFast(PushTcPrioQopt::new_from_slice(buf)?)),
-            b"pfifo_head_drop" => Some(OptionsMsg::PfifoHeadDrop(PushTcFifoQopt::new_from_slice(
+            b"pfifo" => Some(OptionsMsg::Pfifo(PushTcFifoQopt::new_from_zeroed(buf))),
+            b"pfifo_fast" => Some(OptionsMsg::PfifoFast(PushTcPrioQopt::new_from_zeroed(buf))),
+            b"pfifo_head_drop" => Some(OptionsMsg::PfifoHeadDrop(PushTcFifoQopt::new_from_zeroed(
                 buf,
-            )?)),
+            ))),
             b"pie" => Some(OptionsMsg::Pie(IterablePieAttrs::with_loc(buf, loc))),
-            b"plug" => Some(OptionsMsg::Plug(PushTcPlugQopt::new_from_slice(buf)?)),
-            b"prio" => Some(OptionsMsg::Prio(PushTcPrioQopt::new_from_slice(buf)?)),
+            b"plug" => Some(OptionsMsg::Plug(PushTcPlugQopt::new_from_zeroed(buf))),
+            b"prio" => Some(OptionsMsg::Prio(PushTcPrioQopt::new_from_zeroed(buf))),
             b"qfq" => Some(OptionsMsg::Qfq(IterableQfqAttrs::with_loc(buf, loc))),
             b"red" => Some(OptionsMsg::Red(IterableRedAttrs::with_loc(buf, loc))),
             b"route" => Some(OptionsMsg::Route(IterableRouteAttrs::with_loc(buf, loc))),
-            b"sfb" => Some(OptionsMsg::Sfb(PushTcSfbQopt::new_from_slice(buf)?)),
-            b"sfq" => Some(OptionsMsg::Sfq(PushTcSfqQoptV1::new_from_slice(buf)?)),
+            b"sfb" => Some(OptionsMsg::Sfb(PushTcSfbQopt::new_from_zeroed(buf))),
+            b"sfq" => Some(OptionsMsg::Sfq(PushTcSfqQoptV1::new_from_zeroed(buf))),
             b"taprio" => Some(OptionsMsg::Taprio(IterableTaprioAttrs::with_loc(buf, loc))),
             b"tbf" => Some(OptionsMsg::Tbf(IterableTbfAttrs::with_loc(buf, loc))),
             b"u32" => Some(OptionsMsg::U32(IterableU32Attrs::with_loc(buf, loc))),
@@ -512,27 +517,27 @@ impl<'a> TcaStatsAppMsg<'a> {
             b"cake" => Some(TcaStatsAppMsg::Cake(IterableCakeStatsAttrs::with_loc(
                 buf, loc,
             ))),
-            b"choke" => Some(TcaStatsAppMsg::Choke(PushTcChokeXstats::new_from_slice(
+            b"choke" => Some(TcaStatsAppMsg::Choke(PushTcChokeXstats::new_from_zeroed(
                 buf,
-            )?)),
-            b"codel" => Some(TcaStatsAppMsg::Codel(PushTcCodelXstats::new_from_slice(
+            ))),
+            b"codel" => Some(TcaStatsAppMsg::Codel(PushTcCodelXstats::new_from_zeroed(
                 buf,
-            )?)),
+            ))),
             b"dualpi2" => Some(TcaStatsAppMsg::Dualpi2(
-                PushTcDualpi2Xstats::new_from_slice(buf)?,
+                PushTcDualpi2Xstats::new_from_zeroed(buf),
             )),
-            b"fq" => Some(TcaStatsAppMsg::Fq(PushTcFqQdStats::new_from_slice(buf)?)),
+            b"fq" => Some(TcaStatsAppMsg::Fq(PushTcFqQdStats::new_from_zeroed(buf))),
             b"fq_codel" => Some(TcaStatsAppMsg::FqCodel(
-                PushTcFqCodelXstats::new_from_slice(buf)?,
+                PushTcFqCodelXstats::new_from_zeroed(buf),
             )),
-            b"fq_pie" => Some(TcaStatsAppMsg::FqPie(PushTcFqPieXstats::new_from_slice(
+            b"fq_pie" => Some(TcaStatsAppMsg::FqPie(PushTcFqPieXstats::new_from_zeroed(
                 buf,
-            )?)),
-            b"hhf" => Some(TcaStatsAppMsg::Hhf(PushTcHhfXstats::new_from_slice(buf)?)),
-            b"pie" => Some(TcaStatsAppMsg::Pie(PushTcPieXstats::new_from_slice(buf)?)),
-            b"red" => Some(TcaStatsAppMsg::Red(PushTcRedXstats::new_from_slice(buf)?)),
-            b"sfb" => Some(TcaStatsAppMsg::Sfb(PushTcSfbXstats::new_from_slice(buf)?)),
-            b"sfq" => Some(TcaStatsAppMsg::Sfq(PushTcSfqXstats::new_from_slice(buf)?)),
+            ))),
+            b"hhf" => Some(TcaStatsAppMsg::Hhf(PushTcHhfXstats::new_from_zeroed(buf))),
+            b"pie" => Some(TcaStatsAppMsg::Pie(PushTcPieXstats::new_from_zeroed(buf))),
+            b"red" => Some(TcaStatsAppMsg::Red(PushTcRedXstats::new_from_zeroed(buf))),
+            b"sfb" => Some(TcaStatsAppMsg::Sfb(PushTcSfbXstats::new_from_zeroed(buf))),
+            b"sfq" => Some(TcaStatsAppMsg::Sfq(PushTcSfqXstats::new_from_zeroed(buf))),
             _ => None,
         }
     }
@@ -585,12 +590,16 @@ impl<'a> IterableAttrs<'a> {
 impl<'a> Iterator for IterableAttrs<'a> {
     type Item = Result<Attrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => Attrs::Kind({
@@ -601,7 +610,11 @@ impl<'a> Iterator for IterableAttrs<'a> {
                 2u16 => Attrs::Options({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        OptionsMsg::select_with_loc(selector, next, self.orig_loc)
+                        match OptionsMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -614,7 +627,11 @@ impl<'a> Iterator for IterableAttrs<'a> {
                 4u16 => Attrs::Xstats({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc)
+                        match TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -675,13 +692,8 @@ impl<'a> Iterator for IterableAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -1140,12 +1152,16 @@ impl<'a> IterableActAttrs<'a> {
 impl<'a> Iterator for IterableActAttrs<'a> {
     type Item = Result<ActAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActAttrs::Kind({
@@ -1156,7 +1172,11 @@ impl<'a> Iterator for IterableActAttrs<'a> {
                 2u16 => ActAttrs::Options({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        ActOptionsMsg::select_with_loc(selector, next, self.orig_loc)
+                        match ActOptionsMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -1201,13 +1221,8 @@ impl<'a> Iterator for IterableActAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -1532,12 +1547,16 @@ impl<'a> IterableActBpfAttrs<'a> {
 impl<'a> Iterator for IterableActBpfAttrs<'a> {
     type Item = Result<ActBpfAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActBpfAttrs::Tm({
@@ -1585,13 +1604,8 @@ impl<'a> Iterator for IterableActBpfAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -1806,12 +1820,16 @@ impl<'a> IterableActConnmarkAttrs<'a> {
 impl<'a> Iterator for IterableActConnmarkAttrs<'a> {
     type Item = Result<ActConnmarkAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActConnmarkAttrs::Parms({
@@ -1829,13 +1847,8 @@ impl<'a> Iterator for IterableActConnmarkAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -2008,12 +2021,16 @@ impl<'a> IterableActCsumAttrs<'a> {
 impl<'a> Iterator for IterableActCsumAttrs<'a> {
     type Item = Result<ActCsumAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActCsumAttrs::Parms({
@@ -2031,13 +2048,8 @@ impl<'a> Iterator for IterableActCsumAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -2465,12 +2477,16 @@ impl<'a> IterableActCtAttrs<'a> {
 impl<'a> Iterator for IterableActCtAttrs<'a> {
     type Item = Result<ActCtAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActCtAttrs::Parms({
@@ -2563,13 +2579,8 @@ impl<'a> Iterator for IterableActCtAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -2966,12 +2977,16 @@ impl<'a> IterableActCtinfoAttrs<'a> {
 impl<'a> Iterator for IterableActCtinfoAttrs<'a> {
     type Item = Result<ActCtinfoAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActCtinfoAttrs::Pad({
@@ -3024,13 +3039,8 @@ impl<'a> Iterator for IterableActCtinfoAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -3371,12 +3381,16 @@ impl<'a> IterableActGateAttrs<'a> {
 impl<'a> Iterator for IterableActGateAttrs<'a> {
     type Item = Result<ActGateAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActGateAttrs::Tm({
@@ -3429,13 +3443,8 @@ impl<'a> Iterator for IterableActGateAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -3725,12 +3734,16 @@ impl<'a> IterableActIfeAttrs<'a> {
 impl<'a> Iterator for IterableActIfeAttrs<'a> {
     type Item = Result<ActIfeAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActIfeAttrs::Parms({
@@ -3768,13 +3781,8 @@ impl<'a> Iterator for IterableActIfeAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -3992,12 +4000,16 @@ impl<'a> IterableActMirredAttrs<'a> {
 impl<'a> Iterator for IterableActMirredAttrs<'a> {
     type Item = Result<ActMirredAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActMirredAttrs::Tm({
@@ -4020,13 +4032,8 @@ impl<'a> Iterator for IterableActMirredAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -4291,12 +4298,16 @@ impl<'a> IterableActMplsAttrs<'a> {
 impl<'a> Iterator for IterableActMplsAttrs<'a> {
     type Item = Result<ActMplsAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActMplsAttrs::Tm({
@@ -4339,13 +4350,8 @@ impl<'a> Iterator for IterableActMplsAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -4553,12 +4559,16 @@ impl<'a> IterableActNatAttrs<'a> {
 impl<'a> Iterator for IterableActNatAttrs<'a> {
     type Item = Result<ActNatAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActNatAttrs::Parms({
@@ -4576,13 +4586,8 @@ impl<'a> Iterator for IterableActNatAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -4806,12 +4811,16 @@ impl<'a> IterableActPeditAttrs<'a> {
 impl<'a> Iterator for IterableActPeditAttrs<'a> {
     type Item = Result<ActPeditAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActPeditAttrs::Tm({
@@ -4844,13 +4853,8 @@ impl<'a> Iterator for IterableActPeditAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -5061,12 +5065,16 @@ impl<'a> IterableActSimpleAttrs<'a> {
 impl<'a> Iterator for IterableActSimpleAttrs<'a> {
     type Item = Result<ActSimpleAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActSimpleAttrs::Tm({
@@ -5089,13 +5097,8 @@ impl<'a> Iterator for IterableActSimpleAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -5394,12 +5397,16 @@ impl<'a> IterableActSkbeditAttrs<'a> {
 impl<'a> Iterator for IterableActSkbeditAttrs<'a> {
     type Item = Result<ActSkbeditAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActSkbeditAttrs::Tm({
@@ -5452,13 +5459,8 @@ impl<'a> Iterator for IterableActSkbeditAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -5731,12 +5733,16 @@ impl<'a> IterableActSkbmodAttrs<'a> {
 impl<'a> Iterator for IterableActSkbmodAttrs<'a> {
     type Item = Result<ActSkbmodAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActSkbmodAttrs::Tm({
@@ -5769,13 +5775,8 @@ impl<'a> Iterator for IterableActSkbmodAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -6156,12 +6157,16 @@ impl<'a> IterableActTunnelKeyAttrs<'a> {
 impl<'a> Iterator for IterableActTunnelKeyAttrs<'a> {
     type Item = Result<ActTunnelKeyAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActTunnelKeyAttrs::Tm({
@@ -6230,13 +6235,8 @@ impl<'a> Iterator for IterableActTunnelKeyAttrs<'a> {
                     val
                 }),
                 14u16 => ActTunnelKeyAttrs::NoFrag(()),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -6571,12 +6571,16 @@ impl<'a> IterableActVlanAttrs<'a> {
 impl<'a> Iterator for IterableActVlanAttrs<'a> {
     type Item = Result<ActVlanAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActVlanAttrs::Tm({
@@ -6619,13 +6623,8 @@ impl<'a> Iterator for IterableActVlanAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -6926,12 +6925,16 @@ impl<'a> IterableBasicAttrs<'a> {
 impl<'a> Iterator for IterableBasicAttrs<'a> {
     type Item = Result<BasicAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => BasicAttrs::Classid({
@@ -6964,13 +6967,8 @@ impl<'a> Iterator for IterableBasicAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -7315,12 +7313,16 @@ impl<'a> IterableBpfAttrs<'a> {
 impl<'a> Iterator for IterableBpfAttrs<'a> {
     type Item = Result<BpfAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => BpfAttrs::Act({
@@ -7378,13 +7380,8 @@ impl<'a> Iterator for IterableBpfAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -7876,12 +7873,16 @@ impl<'a> IterableCakeAttrs<'a> {
 impl<'a> Iterator for IterableCakeAttrs<'a> {
     type Item = Result<CakeAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => CakeAttrs::Pad({
@@ -7974,13 +7975,8 @@ impl<'a> Iterator for IterableCakeAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -8524,12 +8520,16 @@ impl<'a> IterableCakeStatsAttrs<'a> {
 impl<'a> Iterator for IterableCakeStatsAttrs<'a> {
     type Item = Result<CakeStatsAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => CakeStatsAttrs::Pad({
@@ -8615,13 +8615,8 @@ impl<'a> Iterator for IterableCakeStatsAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -9274,12 +9269,16 @@ impl<'a> IterableCakeTinStatsAttrs<'a> {
 impl<'a> Iterator for IterableCakeTinStatsAttrs<'a> {
     type Item = Result<CakeTinStatsAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => CakeTinStatsAttrs::Pad({
@@ -9407,13 +9406,8 @@ impl<'a> Iterator for IterableCakeTinStatsAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -9706,12 +9700,16 @@ impl<'a> IterableCbsAttrs<'a> {
 impl<'a> Iterator for IterableCbsAttrs<'a> {
     type Item = Result<CbsAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => CbsAttrs::Parms({
@@ -9719,13 +9717,8 @@ impl<'a> Iterator for IterableCbsAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -9884,12 +9877,16 @@ impl<'a> IterableCgroupAttrs<'a> {
 impl<'a> Iterator for IterableCgroupAttrs<'a> {
     type Item = Result<CgroupAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => CgroupAttrs::Act({
@@ -9907,13 +9904,8 @@ impl<'a> Iterator for IterableCgroupAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -10094,12 +10086,16 @@ impl<'a> IterableChokeAttrs<'a> {
 impl<'a> Iterator for IterableChokeAttrs<'a> {
     type Item = Result<ChokeAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ChokeAttrs::Parms({
@@ -10117,13 +10113,8 @@ impl<'a> Iterator for IterableChokeAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -10330,12 +10321,16 @@ impl<'a> IterableCodelAttrs<'a> {
 impl<'a> Iterator for IterableCodelAttrs<'a> {
     type Item = Result<CodelAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => CodelAttrs::Target({
@@ -10363,13 +10358,8 @@ impl<'a> Iterator for IterableCodelAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -10522,12 +10512,16 @@ impl<'a> IterableDrrAttrs<'a> {
 impl<'a> Iterator for IterableDrrAttrs<'a> {
     type Item = Result<DrrAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => DrrAttrs::Quantum({
@@ -10535,13 +10529,8 @@ impl<'a> Iterator for IterableDrrAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -10934,12 +10923,16 @@ impl<'a> IterableDualpi2Attrs<'a> {
 impl<'a> Iterator for IterableDualpi2Attrs<'a> {
     type Item = Result<Dualpi2Attrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => Dualpi2Attrs::Limit({
@@ -11017,13 +11010,8 @@ impl<'a> Iterator for IterableDualpi2Attrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -11275,12 +11263,16 @@ impl<'a> IterableEmatchAttrs<'a> {
 impl<'a> Iterator for IterableEmatchAttrs<'a> {
     type Item = Result<EmatchAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => EmatchAttrs::TreeHdr({
@@ -11293,13 +11285,8 @@ impl<'a> Iterator for IterableEmatchAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -11618,12 +11605,16 @@ impl<'a> IterableFlowAttrs<'a> {
 impl<'a> Iterator for IterableFlowAttrs<'a> {
     type Item = Result<FlowAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => FlowAttrs::Keys({
@@ -11686,13 +11677,8 @@ impl<'a> Iterator for IterableFlowAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -13775,12 +13761,16 @@ impl<'a> IterableFlowerAttrs<'a> {
 impl<'a> Iterator for IterableFlowerAttrs<'a> {
     type Item = Result<FlowerAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => FlowerAttrs::Classid({
@@ -14338,13 +14328,8 @@ impl<'a> Iterator for IterableFlowerAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -15312,12 +15297,16 @@ impl<'a> IterableFlowerKeyEncOptsAttrs<'a> {
 impl<'a> Iterator for IterableFlowerKeyEncOptsAttrs<'a> {
     type Item = Result<FlowerKeyEncOptsAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => FlowerKeyEncOptsAttrs::Geneve({
@@ -15352,13 +15341,8 @@ impl<'a> Iterator for IterableFlowerKeyEncOptsAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -15539,12 +15523,16 @@ impl<'a> IterableFlowerKeyEncOptGeneveAttrs<'a> {
 impl<'a> Iterator for IterableFlowerKeyEncOptGeneveAttrs<'a> {
     type Item = Result<FlowerKeyEncOptGeneveAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => FlowerKeyEncOptGeneveAttrs::Class({
@@ -15562,13 +15550,8 @@ impl<'a> Iterator for IterableFlowerKeyEncOptGeneveAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -15707,12 +15690,16 @@ impl<'a> IterableFlowerKeyEncOptVxlanAttrs<'a> {
 impl<'a> Iterator for IterableFlowerKeyEncOptVxlanAttrs<'a> {
     type Item = Result<FlowerKeyEncOptVxlanAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => FlowerKeyEncOptVxlanAttrs::Gbp({
@@ -15720,13 +15707,8 @@ impl<'a> Iterator for IterableFlowerKeyEncOptVxlanAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -15902,12 +15884,16 @@ impl<'a> IterableFlowerKeyEncOptErspanAttrs<'a> {
 impl<'a> Iterator for IterableFlowerKeyEncOptErspanAttrs<'a> {
     type Item = Result<FlowerKeyEncOptErspanAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => FlowerKeyEncOptErspanAttrs::Ver({
@@ -15930,13 +15916,8 @@ impl<'a> Iterator for IterableFlowerKeyEncOptErspanAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -16099,12 +16080,16 @@ impl<'a> IterableFlowerKeyEncOptGtpAttrs<'a> {
 impl<'a> Iterator for IterableFlowerKeyEncOptGtpAttrs<'a> {
     type Item = Result<FlowerKeyEncOptGtpAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => FlowerKeyEncOptGtpAttrs::PduType({
@@ -16117,13 +16102,8 @@ impl<'a> Iterator for IterableFlowerKeyEncOptGtpAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -16323,12 +16303,16 @@ impl<'a> IterableFlowerKeyMplsOptAttrs<'a> {
 impl<'a> Iterator for IterableFlowerKeyMplsOptAttrs<'a> {
     type Item = Result<FlowerKeyMplsOptAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => FlowerKeyMplsOptAttrs::LseDepth({
@@ -16356,13 +16340,8 @@ impl<'a> Iterator for IterableFlowerKeyMplsOptAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -16532,12 +16511,16 @@ impl<'a> IterableFlowerKeyCfmAttrs<'a> {
 impl<'a> Iterator for IterableFlowerKeyCfmAttrs<'a> {
     type Item = Result<FlowerKeyCfmAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => FlowerKeyCfmAttrs::MdLevel({
@@ -16550,13 +16533,8 @@ impl<'a> Iterator for IterableFlowerKeyCfmAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -16756,12 +16734,16 @@ impl<'a> IterableFwAttrs<'a> {
 impl<'a> Iterator for IterableFwAttrs<'a> {
     type Item = Result<FwAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => FwAttrs::Classid({
@@ -16789,13 +16771,8 @@ impl<'a> Iterator for IterableFwAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -17038,12 +17015,16 @@ impl<'a> IterableGredAttrs<'a> {
 impl<'a> Iterator for IterableGredAttrs<'a> {
     type Item = Result<GredAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => GredAttrs::Parms({
@@ -17076,13 +17057,8 @@ impl<'a> Iterator for IterableGredAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -17241,12 +17217,16 @@ impl<'a> IterableTcaGredVqListAttrs<'a> {
 impl<'a> Iterator for IterableTcaGredVqListAttrs<'a> {
     type Item = Result<TcaGredVqListAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => TcaGredVqListAttrs::Entry({
@@ -17254,13 +17234,8 @@ impl<'a> Iterator for IterableTcaGredVqListAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -17573,12 +17548,16 @@ impl<'a> IterableTcaGredVqEntryAttrs<'a> {
 impl<'a> Iterator for IterableTcaGredVqEntryAttrs<'a> {
     type Item = Result<TcaGredVqEntryAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => TcaGredVqEntryAttrs::Pad({
@@ -17641,13 +17620,8 @@ impl<'a> Iterator for IterableTcaGredVqEntryAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -17883,12 +17857,16 @@ impl<'a> IterableHfscAttrs<'a> {
 impl<'a> Iterator for IterableHfscAttrs<'a> {
     type Item = Result<HfscAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => HfscAttrs::Rsc({
@@ -17906,13 +17884,8 @@ impl<'a> Iterator for IterableHfscAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -18153,12 +18126,16 @@ impl<'a> IterableHhfAttrs<'a> {
 impl<'a> Iterator for IterableHhfAttrs<'a> {
     type Item = Result<HhfAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => HhfAttrs::BacklogLimit({
@@ -18196,13 +18173,8 @@ impl<'a> Iterator for IterableHhfAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -18505,12 +18477,16 @@ impl<'a> IterableHtbAttrs<'a> {
 impl<'a> Iterator for IterableHtbAttrs<'a> {
     type Item = Result<HtbAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => HtbAttrs::Parms({
@@ -18554,13 +18530,8 @@ impl<'a> Iterator for IterableHtbAttrs<'a> {
                     val
                 }),
                 9u16 => HtbAttrs::Offload(()),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -18809,12 +18780,16 @@ impl<'a> IterableMatchallAttrs<'a> {
 impl<'a> Iterator for IterableMatchallAttrs<'a> {
     type Item = Result<MatchallAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => MatchallAttrs::Classid({
@@ -18842,13 +18817,8 @@ impl<'a> Iterator for IterableMatchallAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -19009,12 +18979,16 @@ impl<'a> IterableEtfAttrs<'a> {
 impl<'a> Iterator for IterableEtfAttrs<'a> {
     type Item = Result<EtfAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => EtfAttrs::Parms({
@@ -19022,13 +18996,8 @@ impl<'a> Iterator for IterableEtfAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -19230,12 +19199,16 @@ impl<'a> IterableEtsAttrs<'a> {
 impl<'a> Iterator for IterableEtsAttrs<'a> {
     type Item = Result<EtsAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => EtsAttrs::Nbands({
@@ -19268,13 +19241,8 @@ impl<'a> Iterator for IterableEtsAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -19737,12 +19705,16 @@ impl<'a> IterableFqAttrs<'a> {
 impl<'a> Iterator for IterableFqAttrs<'a> {
     type Item = Result<FqAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => FqAttrs::Plimit({
@@ -19830,13 +19802,8 @@ impl<'a> Iterator for IterableFqAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -20240,12 +20207,16 @@ impl<'a> IterableFqCodelAttrs<'a> {
 impl<'a> Iterator for IterableFqCodelAttrs<'a> {
     type Item = Result<FqCodelAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => FqCodelAttrs::Target({
@@ -20303,13 +20274,8 @@ impl<'a> Iterator for IterableFqCodelAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -20691,12 +20657,16 @@ impl<'a> IterableFqPieAttrs<'a> {
 impl<'a> Iterator for IterableFqPieAttrs<'a> {
     type Item = Result<FqPieAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => FqPieAttrs::Limit({
@@ -20759,13 +20729,8 @@ impl<'a> Iterator for IterableFqPieAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -21188,12 +21153,16 @@ impl<'a> IterableNetemAttrs<'a> {
 impl<'a> Iterator for IterableNetemAttrs<'a> {
     type Item = Result<NetemAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => NetemAttrs::Corr({
@@ -21266,13 +21235,8 @@ impl<'a> Iterator for IterableNetemAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -21510,12 +21474,16 @@ impl<'a> IterableNetemLossAttrs<'a> {
 impl<'a> Iterator for IterableNetemLossAttrs<'a> {
     type Item = Result<NetemLossAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => NetemLossAttrs::Gi({
@@ -21528,13 +21496,8 @@ impl<'a> Iterator for IterableNetemLossAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -21785,12 +21748,16 @@ impl<'a> IterablePieAttrs<'a> {
 impl<'a> Iterator for IterablePieAttrs<'a> {
     type Item = Result<PieAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => PieAttrs::Target({
@@ -21833,13 +21800,8 @@ impl<'a> Iterator for IterablePieAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -22183,12 +22145,16 @@ impl<'a> IterablePoliceAttrs<'a> {
 impl<'a> Iterator for IterablePoliceAttrs<'a> {
     type Item = Result<PoliceAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => PoliceAttrs::Tbf({
@@ -22246,13 +22212,8 @@ impl<'a> Iterator for IterablePoliceAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -22464,12 +22425,16 @@ impl<'a> IterableQfqAttrs<'a> {
 impl<'a> Iterator for IterableQfqAttrs<'a> {
     type Item = Result<QfqAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => QfqAttrs::Weight({
@@ -22482,13 +22447,8 @@ impl<'a> Iterator for IterableQfqAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -22705,12 +22665,16 @@ impl<'a> IterableRedAttrs<'a> {
 impl<'a> Iterator for IterableRedAttrs<'a> {
     type Item = Result<RedAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => RedAttrs::Parms({
@@ -22743,13 +22707,8 @@ impl<'a> Iterator for IterableRedAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -22994,12 +22953,16 @@ impl<'a> IterableRouteAttrs<'a> {
 impl<'a> Iterator for IterableRouteAttrs<'a> {
     type Item = Result<RouteAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => RouteAttrs::Classid({
@@ -23032,13 +22995,8 @@ impl<'a> Iterator for IterableRouteAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -23393,12 +23351,16 @@ impl<'a> IterableTaprioAttrs<'a> {
 impl<'a> Iterator for IterableTaprioAttrs<'a> {
     type Item = Result<TaprioAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => TaprioAttrs::Priomap({
@@ -23461,13 +23423,8 @@ impl<'a> Iterator for IterableTaprioAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -23670,12 +23627,16 @@ impl<'a> IterableTaprioSchedEntryList<'a> {
 impl<'a> Iterator for IterableTaprioSchedEntryList<'a> {
     type Item = Result<TaprioSchedEntryList<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => TaprioSchedEntryList::Entry({
@@ -23683,13 +23644,8 @@ impl<'a> Iterator for IterableTaprioSchedEntryList<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -23866,12 +23822,16 @@ impl<'a> IterableTaprioSchedEntry<'a> {
 impl<'a> Iterator for IterableTaprioSchedEntry<'a> {
     type Item = Result<TaprioSchedEntry, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => TaprioSchedEntry::Index({
@@ -23894,13 +23854,8 @@ impl<'a> Iterator for IterableTaprioSchedEntry<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -24080,12 +24035,16 @@ impl<'a> IterableTaprioTcEntryAttrs<'a> {
 impl<'a> Iterator for IterableTaprioTcEntryAttrs<'a> {
     type Item = Result<TaprioTcEntryAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => TaprioTcEntryAttrs::Index({
@@ -24103,13 +24062,8 @@ impl<'a> Iterator for IterableTaprioTcEntryAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -24367,12 +24321,16 @@ impl<'a> IterableTbfAttrs<'a> {
 impl<'a> Iterator for IterableTbfAttrs<'a> {
     type Item = Result<TbfAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => TbfAttrs::Parms({
@@ -24415,13 +24373,8 @@ impl<'a> Iterator for IterableTbfAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -24680,12 +24633,16 @@ impl<'a> IterableActSampleAttrs<'a> {
 impl<'a> Iterator for IterableActSampleAttrs<'a> {
     type Item = Result<ActSampleAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActSampleAttrs::Tm({
@@ -24718,13 +24675,8 @@ impl<'a> Iterator for IterableActSampleAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -24935,12 +24887,16 @@ impl<'a> IterableActGactAttrs<'a> {
 impl<'a> Iterator for IterableActGactAttrs<'a> {
     type Item = Result<ActGactAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => ActGactAttrs::Tm({
@@ -24963,13 +24919,8 @@ impl<'a> Iterator for IterableActGactAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -25132,12 +25083,16 @@ impl<'a> IterableTcaStabAttrs<'a> {
 impl<'a> Iterator for IterableTcaStabAttrs<'a> {
     type Item = Result<TcaStabAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => TcaStabAttrs::Base({
@@ -25150,13 +25105,8 @@ impl<'a> Iterator for IterableTcaStabAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -25407,12 +25357,16 @@ impl<'a> IterableTcaStatsAttrs<'a> {
 impl<'a> Iterator for IterableTcaStatsAttrs<'a> {
     type Item = Result<TcaStatsAttrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => TcaStatsAttrs::Basic({
@@ -25450,13 +25404,8 @@ impl<'a> Iterator for IterableTcaStatsAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -25817,12 +25766,16 @@ impl<'a> IterableU32Attrs<'a> {
 impl<'a> Iterator for IterableU32Attrs<'a> {
     type Item = Result<U32Attrs<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => U32Attrs::Classid({
@@ -25885,13 +25838,8 @@ impl<'a> Iterator for IterableU32Attrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -26117,7 +26065,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_bfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"bfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26181,7 +26129,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_clsact(mut self) -> Self {
         self = self.push_kind(c"clsact");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -26356,7 +26304,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_hfsc(mut self, fixed_header: &PushTcHfscQopt) -> Self {
         self = self.push_kind(c"hfsc");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26392,7 +26340,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_ingress(mut self) -> Self {
         self = self.push_kind(c"ingress");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -26413,14 +26361,14 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mq(mut self) -> Self {
         self = self.push_kind(c"mq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mqprio(mut self, fixed_header: &PushTcMqprioQopt) -> Self {
         self = self.push_kind(c"mqprio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26428,7 +26376,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_multiq(mut self, fixed_header: &PushTcMultiqQopt) -> Self {
         self = self.push_kind(c"multiq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26454,7 +26402,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26462,7 +26410,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_fast(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"pfifo_fast");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26470,7 +26418,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_head_drop(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo_head_drop");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26492,7 +26440,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_plug(mut self, fixed_header: &PushTcPlugQopt) -> Self {
         self = self.push_kind(c"plug");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26500,7 +26448,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_prio(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"prio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26550,7 +26498,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfb(mut self, fixed_header: &PushTcSfbQopt) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26558,7 +26506,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfq(mut self, fixed_header: &PushTcSfqQoptV1) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26627,7 +26575,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_choke(mut self, fixed_header: &PushTcChokeXstats) -> Self {
         self = self.push_kind(c"choke");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26635,7 +26583,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_codel(mut self, fixed_header: &PushTcCodelXstats) -> Self {
         self = self.push_kind(c"codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26643,7 +26591,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_dualpi2(mut self, fixed_header: &PushTcDualpi2Xstats) -> Self {
         self = self.push_kind(c"dualpi2");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26651,7 +26599,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq(mut self, fixed_header: &PushTcFqQdStats) -> Self {
         self = self.push_kind(c"fq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26659,7 +26607,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_codel(mut self, fixed_header: &PushTcFqCodelXstats) -> Self {
         self = self.push_kind(c"fq_codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26667,7 +26615,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_pie(mut self, fixed_header: &PushTcFqPieXstats) -> Self {
         self = self.push_kind(c"fq_pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26675,7 +26623,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_hhf(mut self, fixed_header: &PushTcHhfXstats) -> Self {
         self = self.push_kind(c"hhf");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26683,7 +26631,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_pie(mut self, fixed_header: &PushTcPieXstats) -> Self {
         self = self.push_kind(c"pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26691,7 +26639,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_red(mut self, fixed_header: &PushTcRedXstats) -> Self {
         self = self.push_kind(c"red");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26699,7 +26647,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfb(mut self, fixed_header: &PushTcSfbXstats) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -26707,7 +26655,7 @@ impl<Prev: Rec> PushAttrs<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfq(mut self, fixed_header: &PushTcSfqXstats) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -32918,13 +32866,13 @@ impl std::fmt::Debug for PushTcFifoQopt {
 }
 #[derive(Clone)]
 pub struct PushTcHtbOpt {
-    pub(crate) buf: [u8; 20usize],
+    pub(crate) buf: [u8; 44usize],
 }
 #[doc = "Create zero-initialized struct"]
 impl Default for PushTcHtbOpt {
     fn default() -> Self {
         Self {
-            buf: [0u8; 20usize],
+            buf: [0u8; 44usize],
         }
     }
 }
@@ -32956,7 +32904,7 @@ impl PushTcHtbOpt {
         &mut self.buf
     }
     pub const fn len() -> usize {
-        20usize
+        44usize
     }
     pub fn rate(&self) -> PushTcRatespec {
         PushTcRatespec::new_from_slice(&self.buf[0usize..12usize]).unwrap()
@@ -32965,40 +32913,40 @@ impl PushTcHtbOpt {
         self.buf[0usize..12usize].copy_from_slice(&value.as_slice())
     }
     pub fn ceil(&self) -> PushTcRatespec {
-        PushTcRatespec::new_from_slice(&self.buf[0usize..12usize]).unwrap()
+        PushTcRatespec::new_from_slice(&self.buf[12usize..24usize]).unwrap()
     }
     pub fn set_ceil(&mut self, value: PushTcRatespec) {
-        self.buf[0usize..12usize].copy_from_slice(&value.as_slice())
+        self.buf[12usize..24usize].copy_from_slice(&value.as_slice())
     }
     pub fn buffer(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
+        parse_u32(&self.buf[24usize..28usize]).unwrap()
     }
     pub fn set_buffer(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[24usize..28usize].copy_from_slice(&value.to_ne_bytes())
     }
     pub fn cbuffer(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
+        parse_u32(&self.buf[28usize..32usize]).unwrap()
     }
     pub fn set_cbuffer(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[28usize..32usize].copy_from_slice(&value.to_ne_bytes())
     }
     pub fn quantum(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
+        parse_u32(&self.buf[32usize..36usize]).unwrap()
     }
     pub fn set_quantum(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[32usize..36usize].copy_from_slice(&value.to_ne_bytes())
     }
     pub fn level(&self) -> u32 {
-        parse_u32(&self.buf[12usize..16usize]).unwrap()
+        parse_u32(&self.buf[36usize..40usize]).unwrap()
     }
     pub fn set_level(&mut self, value: u32) {
-        self.buf[12usize..16usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[36usize..40usize].copy_from_slice(&value.to_ne_bytes())
     }
     pub fn prio(&self) -> u32 {
-        parse_u32(&self.buf[16usize..20usize]).unwrap()
+        parse_u32(&self.buf[40usize..44usize]).unwrap()
     }
     pub fn set_prio(&mut self, value: u32) {
-        self.buf[16usize..20usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[40usize..44usize].copy_from_slice(&value.to_ne_bytes())
     }
 }
 impl std::fmt::Debug for PushTcHtbOpt {
@@ -33416,12 +33364,14 @@ impl std::fmt::Debug for PushTcHfscQopt {
 }
 #[derive(Clone)]
 pub struct PushTcMqprioQopt {
-    pub(crate) buf: [u8; 2usize],
+    pub(crate) buf: [u8; 82usize],
 }
 #[doc = "Create zero-initialized struct"]
 impl Default for PushTcMqprioQopt {
     fn default() -> Self {
-        Self { buf: [0u8; 2usize] }
+        Self {
+            buf: [0u8; 82usize],
+        }
     }
 }
 impl PushTcMqprioQopt {
@@ -33452,7 +33402,7 @@ impl PushTcMqprioQopt {
         &mut self.buf
     }
     pub const fn len() -> usize {
-        2usize
+        82usize
     }
     pub fn num_tc(&self) -> u8 {
         parse_u8(&self.buf[0usize..1usize]).unwrap()
@@ -33467,22 +33417,22 @@ impl PushTcMqprioQopt {
         self.buf[1usize..17usize].copy_from_slice(&value)
     }
     pub fn hw(&self) -> u8 {
-        parse_u8(&self.buf[1usize..2usize]).unwrap()
+        parse_u8(&self.buf[17usize..18usize]).unwrap()
     }
     pub fn set_hw(&mut self, value: u8) {
-        self.buf[1usize..2usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[17usize..18usize].copy_from_slice(&value.to_ne_bytes())
     }
     pub fn count(&self) -> [u8; 32usize] {
-        self.buf[2usize..34usize].try_into().unwrap()
+        self.buf[18usize..50usize].try_into().unwrap()
     }
     pub fn set_count(&mut self, value: [u8; 32usize]) {
-        self.buf[2usize..34usize].copy_from_slice(&value)
+        self.buf[18usize..50usize].copy_from_slice(&value)
     }
     pub fn offset(&self) -> [u8; 32usize] {
-        self.buf[2usize..34usize].try_into().unwrap()
+        self.buf[50usize..82usize].try_into().unwrap()
     }
     pub fn set_offset(&mut self, value: [u8; 32usize]) {
-        self.buf[2usize..34usize].copy_from_slice(&value)
+        self.buf[50usize..82usize].copy_from_slice(&value)
     }
 }
 impl std::fmt::Debug for PushTcMqprioQopt {
@@ -34254,12 +34204,14 @@ impl std::fmt::Debug for PushTcPlugQopt {
 }
 #[derive(Clone)]
 pub struct PushTcPrioQopt {
-    pub(crate) buf: [u8; 4usize],
+    pub(crate) buf: [u8; 20usize],
 }
 #[doc = "Create zero-initialized struct"]
 impl Default for PushTcPrioQopt {
     fn default() -> Self {
-        Self { buf: [0u8; 4usize] }
+        Self {
+            buf: [0u8; 20usize],
+        }
     }
 }
 impl PushTcPrioQopt {
@@ -34290,7 +34242,7 @@ impl PushTcPrioQopt {
         &mut self.buf
     }
     pub const fn len() -> usize {
-        4usize
+        20usize
     }
     #[doc = "Number of bands"]
     pub fn bands(&self) -> u32 {
@@ -34738,13 +34690,13 @@ impl std::fmt::Debug for PushTcSfqredStats {
 }
 #[derive(Clone)]
 pub struct PushTcSfqQoptV1 {
-    pub(crate) buf: [u8; 28usize],
+    pub(crate) buf: [u8; 72usize],
 }
 #[doc = "Create zero-initialized struct"]
 impl Default for PushTcSfqQoptV1 {
     fn default() -> Self {
         Self {
-            buf: [0u8; 28usize],
+            buf: [0u8; 72usize],
         }
     }
 }
@@ -34776,7 +34728,7 @@ impl PushTcSfqQoptV1 {
         &mut self.buf
     }
     pub const fn len() -> usize {
-        28usize
+        72usize
     }
     pub fn v0(&self) -> PushTcSfqQopt {
         PushTcSfqQopt::new_from_slice(&self.buf[0usize..20usize]).unwrap()
@@ -34786,85 +34738,85 @@ impl PushTcSfqQoptV1 {
     }
     #[doc = "Maximum number of packets per flow"]
     pub fn depth(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
+        parse_u32(&self.buf[20usize..24usize]).unwrap()
     }
     #[doc = "Maximum number of packets per flow"]
     pub fn set_depth(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[20usize..24usize].copy_from_slice(&value.to_ne_bytes())
     }
     pub fn headdrop(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
+        parse_u32(&self.buf[24usize..28usize]).unwrap()
     }
     pub fn set_headdrop(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[24usize..28usize].copy_from_slice(&value.to_ne_bytes())
     }
     #[doc = "HARD maximal flow queue length in bytes"]
     pub fn limit(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
+        parse_u32(&self.buf[28usize..32usize]).unwrap()
     }
     #[doc = "HARD maximal flow queue length in bytes"]
     pub fn set_limit(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[28usize..32usize].copy_from_slice(&value.to_ne_bytes())
     }
     #[doc = "Min average length threshold in bytes"]
     pub fn qth_min(&self) -> u32 {
-        parse_u32(&self.buf[12usize..16usize]).unwrap()
+        parse_u32(&self.buf[32usize..36usize]).unwrap()
     }
     #[doc = "Min average length threshold in bytes"]
     pub fn set_qth_min(&mut self, value: u32) {
-        self.buf[12usize..16usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[32usize..36usize].copy_from_slice(&value.to_ne_bytes())
     }
     #[doc = "Max average length threshold in bytes"]
     pub fn qth_max(&self) -> u32 {
-        parse_u32(&self.buf[16usize..20usize]).unwrap()
+        parse_u32(&self.buf[36usize..40usize]).unwrap()
     }
     #[doc = "Max average length threshold in bytes"]
     pub fn set_qth_max(&mut self, value: u32) {
-        self.buf[16usize..20usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[36usize..40usize].copy_from_slice(&value.to_ne_bytes())
     }
     #[doc = "log(W)"]
     pub fn Wlog(&self) -> u8 {
-        parse_u8(&self.buf[20usize..21usize]).unwrap()
+        parse_u8(&self.buf[40usize..41usize]).unwrap()
     }
     #[doc = "log(W)"]
     pub fn set_Wlog(&mut self, value: u8) {
-        self.buf[20usize..21usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[40usize..41usize].copy_from_slice(&value.to_ne_bytes())
     }
     #[doc = "log(P_max / (qth-max - qth-min))"]
     pub fn Plog(&self) -> u8 {
-        parse_u8(&self.buf[21usize..22usize]).unwrap()
+        parse_u8(&self.buf[41usize..42usize]).unwrap()
     }
     #[doc = "log(P_max / (qth-max - qth-min))"]
     pub fn set_Plog(&mut self, value: u8) {
-        self.buf[21usize..22usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[41usize..42usize].copy_from_slice(&value.to_ne_bytes())
     }
     #[doc = "Cell size for idle damping"]
     pub fn Scell_log(&self) -> u8 {
-        parse_u8(&self.buf[22usize..23usize]).unwrap()
+        parse_u8(&self.buf[42usize..43usize]).unwrap()
     }
     #[doc = "Cell size for idle damping"]
     pub fn set_Scell_log(&mut self, value: u8) {
-        self.buf[22usize..23usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[42usize..43usize].copy_from_slice(&value.to_ne_bytes())
     }
     pub fn flags(&self) -> u8 {
-        parse_u8(&self.buf[23usize..24usize]).unwrap()
+        parse_u8(&self.buf[43usize..44usize]).unwrap()
     }
     pub fn set_flags(&mut self, value: u8) {
-        self.buf[23usize..24usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[43usize..44usize].copy_from_slice(&value.to_ne_bytes())
     }
     #[doc = "probability, high resolution"]
     pub fn max_P(&self) -> u32 {
-        parse_u32(&self.buf[24usize..28usize]).unwrap()
+        parse_u32(&self.buf[44usize..48usize]).unwrap()
     }
     #[doc = "probability, high resolution"]
     pub fn set_max_P(&mut self, value: u32) {
-        self.buf[24usize..28usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[44usize..48usize].copy_from_slice(&value.to_ne_bytes())
     }
     pub fn stats(&self) -> PushTcSfqredStats {
-        PushTcSfqredStats::new_from_slice(&self.buf[28usize..52usize]).unwrap()
+        PushTcSfqredStats::new_from_slice(&self.buf[48usize..72usize]).unwrap()
     }
     pub fn set_stats(&mut self, value: PushTcSfqredStats) {
-        self.buf[28usize..52usize].copy_from_slice(&value.as_slice())
+        self.buf[48usize..72usize].copy_from_slice(&value.as_slice())
     }
 }
 impl std::fmt::Debug for PushTcSfqQoptV1 {
@@ -34978,13 +34930,13 @@ impl std::fmt::Debug for PushTcRatespec {
 }
 #[derive(Clone)]
 pub struct PushTcTbfQopt {
-    pub(crate) buf: [u8; 12usize],
+    pub(crate) buf: [u8; 36usize],
 }
 #[doc = "Create zero-initialized struct"]
 impl Default for PushTcTbfQopt {
     fn default() -> Self {
         Self {
-            buf: [0u8; 12usize],
+            buf: [0u8; 36usize],
         }
     }
 }
@@ -35016,7 +34968,7 @@ impl PushTcTbfQopt {
         &mut self.buf
     }
     pub const fn len() -> usize {
-        12usize
+        36usize
     }
     pub fn rate(&self) -> PushTcRatespec {
         PushTcRatespec::new_from_slice(&self.buf[0usize..12usize]).unwrap()
@@ -35025,28 +34977,28 @@ impl PushTcTbfQopt {
         self.buf[0usize..12usize].copy_from_slice(&value.as_slice())
     }
     pub fn peakrate(&self) -> PushTcRatespec {
-        PushTcRatespec::new_from_slice(&self.buf[0usize..12usize]).unwrap()
+        PushTcRatespec::new_from_slice(&self.buf[12usize..24usize]).unwrap()
     }
     pub fn set_peakrate(&mut self, value: PushTcRatespec) {
-        self.buf[0usize..12usize].copy_from_slice(&value.as_slice())
+        self.buf[12usize..24usize].copy_from_slice(&value.as_slice())
     }
     pub fn limit(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
+        parse_u32(&self.buf[24usize..28usize]).unwrap()
     }
     pub fn set_limit(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[24usize..28usize].copy_from_slice(&value.to_ne_bytes())
     }
     pub fn buffer(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
+        parse_u32(&self.buf[28usize..32usize]).unwrap()
     }
     pub fn set_buffer(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[28usize..32usize].copy_from_slice(&value.to_ne_bytes())
     }
     pub fn mtu(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
+        parse_u32(&self.buf[32usize..36usize]).unwrap()
     }
     pub fn set_mtu(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[32usize..36usize].copy_from_slice(&value.to_ne_bytes())
     }
 }
 impl std::fmt::Debug for PushTcTbfQopt {
@@ -35878,13 +35830,13 @@ impl std::fmt::Debug for PushTcFqPieXstats {
 }
 #[derive(Clone)]
 pub struct PushTcFqQdStats {
-    pub(crate) buf: [u8; 120usize],
+    pub(crate) buf: [u8; 152usize],
 }
 #[doc = "Create zero-initialized struct"]
 impl Default for PushTcFqQdStats {
     fn default() -> Self {
         Self {
-            buf: [0u8; 120usize],
+            buf: [0u8; 152usize],
         }
     }
 }
@@ -35916,7 +35868,7 @@ impl PushTcFqQdStats {
         &mut self.buf
     }
     pub const fn len() -> usize {
-        120usize
+        152usize
     }
     pub fn gc_flows(&self) -> u64 {
         parse_u64(&self.buf[0usize..8usize]).unwrap()
@@ -36027,10 +35979,10 @@ impl PushTcFqQdStats {
         self.buf[112usize..136usize].copy_from_slice(&value)
     }
     pub fn band_pkt_count(&self) -> [u8; 12usize] {
-        self.buf[112usize..124usize].try_into().unwrap()
+        self.buf[136usize..148usize].try_into().unwrap()
     }
     pub fn set_band_pkt_count(&mut self, value: [u8; 12usize]) {
-        self.buf[112usize..124usize].copy_from_slice(&value)
+        self.buf[136usize..148usize].copy_from_slice(&value)
     }
 }
 impl std::fmt::Debug for PushTcFqQdStats {
@@ -36945,13 +36897,13 @@ impl std::fmt::Debug for PushTcU32Mark {
 }
 #[derive(Clone)]
 pub struct PushTcU32Sel {
-    pub(crate) buf: [u8; 16usize],
+    pub(crate) buf: [u8; 32usize],
 }
 #[doc = "Create zero-initialized struct"]
 impl Default for PushTcU32Sel {
     fn default() -> Self {
         Self {
-            buf: [0u8; 16usize],
+            buf: [0u8; 32usize],
         }
     }
 }
@@ -36983,7 +36935,7 @@ impl PushTcU32Sel {
         &mut self.buf
     }
     pub const fn len() -> usize {
-        16usize
+        32usize
     }
     pub fn flags(&self) -> u8 {
         parse_u8(&self.buf[0usize..1usize]).unwrap()
@@ -37625,13 +37577,13 @@ impl std::fmt::Debug for PushTcMpls {
 }
 #[derive(Clone)]
 pub struct PushTcPolice {
-    pub(crate) buf: [u8; 32usize],
+    pub(crate) buf: [u8; 56usize],
 }
 #[doc = "Create zero-initialized struct"]
 impl Default for PushTcPolice {
     fn default() -> Self {
         Self {
-            buf: [0u8; 32usize],
+            buf: [0u8; 56usize],
         }
     }
 }
@@ -37663,7 +37615,7 @@ impl PushTcPolice {
         &mut self.buf
     }
     pub const fn len() -> usize {
-        32usize
+        56usize
     }
     pub fn index(&self) -> u32 {
         parse_u32(&self.buf[0usize..4usize]).unwrap()
@@ -37702,28 +37654,28 @@ impl PushTcPolice {
         self.buf[20usize..32usize].copy_from_slice(&value.as_slice())
     }
     pub fn peakrate(&self) -> PushTcRatespec {
-        PushTcRatespec::new_from_slice(&self.buf[20usize..32usize]).unwrap()
+        PushTcRatespec::new_from_slice(&self.buf[32usize..44usize]).unwrap()
     }
     pub fn set_peakrate(&mut self, value: PushTcRatespec) {
-        self.buf[20usize..32usize].copy_from_slice(&value.as_slice())
+        self.buf[32usize..44usize].copy_from_slice(&value.as_slice())
     }
     pub fn refcnt(&self) -> i32 {
-        parse_i32(&self.buf[20usize..24usize]).unwrap()
+        parse_i32(&self.buf[44usize..48usize]).unwrap()
     }
     pub fn set_refcnt(&mut self, value: i32) {
-        self.buf[20usize..24usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[44usize..48usize].copy_from_slice(&value.to_ne_bytes())
     }
     pub fn bindcnt(&self) -> i32 {
-        parse_i32(&self.buf[24usize..28usize]).unwrap()
+        parse_i32(&self.buf[48usize..52usize]).unwrap()
     }
     pub fn set_bindcnt(&mut self, value: i32) {
-        self.buf[24usize..28usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[48usize..52usize].copy_from_slice(&value.to_ne_bytes())
     }
     pub fn capab(&self) -> u32 {
-        parse_u32(&self.buf[28usize..32usize]).unwrap()
+        parse_u32(&self.buf[52usize..56usize]).unwrap()
     }
     pub fn set_capab(&mut self, value: u32) {
-        self.buf[28usize..32usize].copy_from_slice(&value.to_ne_bytes())
+        self.buf[52usize..56usize].copy_from_slice(&value.to_ne_bytes())
     }
 }
 impl std::fmt::Debug for PushTcPolice {
@@ -37744,13 +37696,13 @@ impl std::fmt::Debug for PushTcPolice {
 }
 #[derive(Clone)]
 pub struct PushTcPeditSel {
-    pub(crate) buf: [u8; 24usize],
+    pub(crate) buf: [u8; 48usize],
 }
 #[doc = "Create zero-initialized struct"]
 impl Default for PushTcPeditSel {
     fn default() -> Self {
         Self {
-            buf: [0u8; 24usize],
+            buf: [0u8; 48usize],
         }
     }
 }
@@ -37782,7 +37734,7 @@ impl PushTcPeditSel {
         &mut self.buf
     }
     pub const fn len() -> usize {
-        24usize
+        48usize
     }
     pub fn index(&self) -> u32 {
         parse_u32(&self.buf[0usize..4usize]).unwrap()
@@ -38107,7 +38059,7 @@ impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_bfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"bfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -38171,7 +38123,7 @@ impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_clsact(mut self) -> Self {
         self = self.push_kind(c"clsact");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -38346,7 +38298,7 @@ impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_hfsc(mut self, fixed_header: &PushTcHfscQopt) -> Self {
         self = self.push_kind(c"hfsc");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -38382,7 +38334,7 @@ impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_ingress(mut self) -> Self {
         self = self.push_kind(c"ingress");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -38403,14 +38355,14 @@ impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mq(mut self) -> Self {
         self = self.push_kind(c"mq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mqprio(mut self, fixed_header: &PushTcMqprioQopt) -> Self {
         self = self.push_kind(c"mqprio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -38418,7 +38370,7 @@ impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_multiq(mut self, fixed_header: &PushTcMultiqQopt) -> Self {
         self = self.push_kind(c"multiq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -38444,7 +38396,7 @@ impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -38452,7 +38404,7 @@ impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_fast(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"pfifo_fast");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -38460,7 +38412,7 @@ impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_head_drop(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo_head_drop");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -38482,7 +38434,7 @@ impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_plug(mut self, fixed_header: &PushTcPlugQopt) -> Self {
         self = self.push_kind(c"plug");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -38490,7 +38442,7 @@ impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_prio(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"prio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -38540,7 +38492,7 @@ impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfb(mut self, fixed_header: &PushTcSfbQopt) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -38548,7 +38500,7 @@ impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfq(mut self, fixed_header: &PushTcSfqQoptV1) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -38759,12 +38711,16 @@ impl<'a> IterableOpNewqdiscDoRequest<'a> {
 impl<'a> Iterator for IterableOpNewqdiscDoRequest<'a> {
     type Item = Result<OpNewqdiscDoRequest<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpNewqdiscDoRequest::Kind({
@@ -38775,7 +38731,11 @@ impl<'a> Iterator for IterableOpNewqdiscDoRequest<'a> {
                 2u16 => OpNewqdiscDoRequest::Options({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        OptionsMsg::select_with_loc(selector, next, self.orig_loc)
+                        match OptionsMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -38800,13 +38760,8 @@ impl<'a> Iterator for IterableOpNewqdiscDoRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -38990,21 +38945,20 @@ impl<'a> IterableOpNewqdiscDoReply<'a> {
 impl<'a> Iterator for IterableOpNewqdiscDoReply<'a> {
     type Item = Result<OpNewqdiscDoReply, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -39173,7 +39127,7 @@ impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_bfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"bfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -39237,7 +39191,7 @@ impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_clsact(mut self) -> Self {
         self = self.push_kind(c"clsact");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -39412,7 +39366,7 @@ impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_hfsc(mut self, fixed_header: &PushTcHfscQopt) -> Self {
         self = self.push_kind(c"hfsc");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -39448,7 +39402,7 @@ impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_ingress(mut self) -> Self {
         self = self.push_kind(c"ingress");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -39469,14 +39423,14 @@ impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mq(mut self) -> Self {
         self = self.push_kind(c"mq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mqprio(mut self, fixed_header: &PushTcMqprioQopt) -> Self {
         self = self.push_kind(c"mqprio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -39484,7 +39438,7 @@ impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_multiq(mut self, fixed_header: &PushTcMultiqQopt) -> Self {
         self = self.push_kind(c"multiq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -39510,7 +39464,7 @@ impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -39518,7 +39472,7 @@ impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_fast(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"pfifo_fast");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -39526,7 +39480,7 @@ impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_head_drop(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo_head_drop");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -39548,7 +39502,7 @@ impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_plug(mut self, fixed_header: &PushTcPlugQopt) -> Self {
         self = self.push_kind(c"plug");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -39556,7 +39510,7 @@ impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_prio(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"prio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -39606,7 +39560,7 @@ impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfb(mut self, fixed_header: &PushTcSfbQopt) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -39614,7 +39568,7 @@ impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfq(mut self, fixed_header: &PushTcSfqQoptV1) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -39825,12 +39779,16 @@ impl<'a> IterableOpDelqdiscDoRequest<'a> {
 impl<'a> Iterator for IterableOpDelqdiscDoRequest<'a> {
     type Item = Result<OpDelqdiscDoRequest<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpDelqdiscDoRequest::Kind({
@@ -39841,7 +39799,11 @@ impl<'a> Iterator for IterableOpDelqdiscDoRequest<'a> {
                 2u16 => OpDelqdiscDoRequest::Options({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        OptionsMsg::select_with_loc(selector, next, self.orig_loc)
+                        match OptionsMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -39866,13 +39828,8 @@ impl<'a> Iterator for IterableOpDelqdiscDoRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -40056,21 +40013,20 @@ impl<'a> IterableOpDelqdiscDoReply<'a> {
 impl<'a> Iterator for IterableOpDelqdiscDoReply<'a> {
     type Item = Result<OpDelqdiscDoReply, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -40261,22 +40217,21 @@ impl<'a> IterableOpGetqdiscDumpRequest<'a> {
 impl<'a> Iterator for IterableOpGetqdiscDumpRequest<'a> {
     type Item = Result<OpGetqdiscDumpRequest, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 10u16 => OpGetqdiscDumpRequest::DumpInvisible(()),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -40425,7 +40380,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_bfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"bfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40489,7 +40444,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_clsact(mut self) -> Self {
         self = self.push_kind(c"clsact");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -40664,7 +40619,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_hfsc(mut self, fixed_header: &PushTcHfscQopt) -> Self {
         self = self.push_kind(c"hfsc");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40700,7 +40655,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_ingress(mut self) -> Self {
         self = self.push_kind(c"ingress");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -40721,14 +40676,14 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mq(mut self) -> Self {
         self = self.push_kind(c"mq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mqprio(mut self, fixed_header: &PushTcMqprioQopt) -> Self {
         self = self.push_kind(c"mqprio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40736,7 +40691,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_multiq(mut self, fixed_header: &PushTcMultiqQopt) -> Self {
         self = self.push_kind(c"multiq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40762,7 +40717,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40770,7 +40725,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_fast(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"pfifo_fast");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40778,7 +40733,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_head_drop(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo_head_drop");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40800,7 +40755,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_plug(mut self, fixed_header: &PushTcPlugQopt) -> Self {
         self = self.push_kind(c"plug");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40808,7 +40763,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_prio(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"prio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40858,7 +40813,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfb(mut self, fixed_header: &PushTcSfbQopt) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40866,7 +40821,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfq(mut self, fixed_header: &PushTcSfqQoptV1) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40935,7 +40890,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_choke(mut self, fixed_header: &PushTcChokeXstats) -> Self {
         self = self.push_kind(c"choke");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40943,7 +40898,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_codel(mut self, fixed_header: &PushTcCodelXstats) -> Self {
         self = self.push_kind(c"codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40951,7 +40906,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_dualpi2(mut self, fixed_header: &PushTcDualpi2Xstats) -> Self {
         self = self.push_kind(c"dualpi2");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40959,7 +40914,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq(mut self, fixed_header: &PushTcFqQdStats) -> Self {
         self = self.push_kind(c"fq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40967,7 +40922,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_codel(mut self, fixed_header: &PushTcFqCodelXstats) -> Self {
         self = self.push_kind(c"fq_codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40975,7 +40930,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_pie(mut self, fixed_header: &PushTcFqPieXstats) -> Self {
         self = self.push_kind(c"fq_pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40983,7 +40938,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_hhf(mut self, fixed_header: &PushTcHhfXstats) -> Self {
         self = self.push_kind(c"hhf");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40991,7 +40946,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_pie(mut self, fixed_header: &PushTcPieXstats) -> Self {
         self = self.push_kind(c"pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -40999,7 +40954,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_red(mut self, fixed_header: &PushTcRedXstats) -> Self {
         self = self.push_kind(c"red");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -41007,7 +40962,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfb(mut self, fixed_header: &PushTcSfbXstats) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -41015,7 +40970,7 @@ impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfq(mut self, fixed_header: &PushTcSfqXstats) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -41283,12 +41238,16 @@ impl<'a> IterableOpGetqdiscDumpReply<'a> {
 impl<'a> Iterator for IterableOpGetqdiscDumpReply<'a> {
     type Item = Result<OpGetqdiscDumpReply<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpGetqdiscDumpReply::Kind({
@@ -41299,7 +41258,11 @@ impl<'a> Iterator for IterableOpGetqdiscDumpReply<'a> {
                 2u16 => OpGetqdiscDumpReply::Options({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        OptionsMsg::select_with_loc(selector, next, self.orig_loc)
+                        match OptionsMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -41312,7 +41275,11 @@ impl<'a> Iterator for IterableOpGetqdiscDumpReply<'a> {
                 4u16 => OpGetqdiscDumpReply::Xstats({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc)
+                        match TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -41352,13 +41319,8 @@ impl<'a> Iterator for IterableOpGetqdiscDumpReply<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -41645,22 +41607,21 @@ impl<'a> IterableOpGetqdiscDoRequest<'a> {
 impl<'a> Iterator for IterableOpGetqdiscDoRequest<'a> {
     type Item = Result<OpGetqdiscDoRequest, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 10u16 => OpGetqdiscDoRequest::DumpInvisible(()),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -41809,7 +41770,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_bfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"bfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -41873,7 +41834,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_clsact(mut self) -> Self {
         self = self.push_kind(c"clsact");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -42048,7 +42009,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_hfsc(mut self, fixed_header: &PushTcHfscQopt) -> Self {
         self = self.push_kind(c"hfsc");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42084,7 +42045,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_ingress(mut self) -> Self {
         self = self.push_kind(c"ingress");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -42105,14 +42066,14 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mq(mut self) -> Self {
         self = self.push_kind(c"mq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mqprio(mut self, fixed_header: &PushTcMqprioQopt) -> Self {
         self = self.push_kind(c"mqprio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42120,7 +42081,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_multiq(mut self, fixed_header: &PushTcMultiqQopt) -> Self {
         self = self.push_kind(c"multiq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42146,7 +42107,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42154,7 +42115,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_fast(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"pfifo_fast");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42162,7 +42123,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_head_drop(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo_head_drop");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42184,7 +42145,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_plug(mut self, fixed_header: &PushTcPlugQopt) -> Self {
         self = self.push_kind(c"plug");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42192,7 +42153,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_prio(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"prio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42242,7 +42203,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfb(mut self, fixed_header: &PushTcSfbQopt) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42250,7 +42211,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfq(mut self, fixed_header: &PushTcSfqQoptV1) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42319,7 +42280,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_choke(mut self, fixed_header: &PushTcChokeXstats) -> Self {
         self = self.push_kind(c"choke");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42327,7 +42288,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_codel(mut self, fixed_header: &PushTcCodelXstats) -> Self {
         self = self.push_kind(c"codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42335,7 +42296,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_dualpi2(mut self, fixed_header: &PushTcDualpi2Xstats) -> Self {
         self = self.push_kind(c"dualpi2");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42343,7 +42304,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq(mut self, fixed_header: &PushTcFqQdStats) -> Self {
         self = self.push_kind(c"fq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42351,7 +42312,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_codel(mut self, fixed_header: &PushTcFqCodelXstats) -> Self {
         self = self.push_kind(c"fq_codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42359,7 +42320,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_pie(mut self, fixed_header: &PushTcFqPieXstats) -> Self {
         self = self.push_kind(c"fq_pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42367,7 +42328,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_hhf(mut self, fixed_header: &PushTcHhfXstats) -> Self {
         self = self.push_kind(c"hhf");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42375,7 +42336,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_pie(mut self, fixed_header: &PushTcPieXstats) -> Self {
         self = self.push_kind(c"pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42383,7 +42344,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_red(mut self, fixed_header: &PushTcRedXstats) -> Self {
         self = self.push_kind(c"red");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42391,7 +42352,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfb(mut self, fixed_header: &PushTcSfbXstats) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42399,7 +42360,7 @@ impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfq(mut self, fixed_header: &PushTcSfqXstats) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -42667,12 +42628,16 @@ impl<'a> IterableOpGetqdiscDoReply<'a> {
 impl<'a> Iterator for IterableOpGetqdiscDoReply<'a> {
     type Item = Result<OpGetqdiscDoReply<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpGetqdiscDoReply::Kind({
@@ -42683,7 +42648,11 @@ impl<'a> Iterator for IterableOpGetqdiscDoReply<'a> {
                 2u16 => OpGetqdiscDoReply::Options({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        OptionsMsg::select_with_loc(selector, next, self.orig_loc)
+                        match OptionsMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -42696,7 +42665,11 @@ impl<'a> Iterator for IterableOpGetqdiscDoReply<'a> {
                 4u16 => OpGetqdiscDoReply::Xstats({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc)
+                        match TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -42736,13 +42709,8 @@ impl<'a> Iterator for IterableOpGetqdiscDoReply<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -43005,7 +42973,7 @@ impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_bfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"bfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -43069,7 +43037,7 @@ impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_clsact(mut self) -> Self {
         self = self.push_kind(c"clsact");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -43244,7 +43212,7 @@ impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_hfsc(mut self, fixed_header: &PushTcHfscQopt) -> Self {
         self = self.push_kind(c"hfsc");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -43280,7 +43248,7 @@ impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_ingress(mut self) -> Self {
         self = self.push_kind(c"ingress");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -43301,14 +43269,14 @@ impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mq(mut self) -> Self {
         self = self.push_kind(c"mq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mqprio(mut self, fixed_header: &PushTcMqprioQopt) -> Self {
         self = self.push_kind(c"mqprio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -43316,7 +43284,7 @@ impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_multiq(mut self, fixed_header: &PushTcMultiqQopt) -> Self {
         self = self.push_kind(c"multiq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -43342,7 +43310,7 @@ impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -43350,7 +43318,7 @@ impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_fast(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"pfifo_fast");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -43358,7 +43326,7 @@ impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_head_drop(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo_head_drop");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -43380,7 +43348,7 @@ impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_plug(mut self, fixed_header: &PushTcPlugQopt) -> Self {
         self = self.push_kind(c"plug");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -43388,7 +43356,7 @@ impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_prio(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"prio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -43438,7 +43406,7 @@ impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfb(mut self, fixed_header: &PushTcSfbQopt) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -43446,7 +43414,7 @@ impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfq(mut self, fixed_header: &PushTcSfqQoptV1) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -43657,12 +43625,16 @@ impl<'a> IterableOpNewtclassDoRequest<'a> {
 impl<'a> Iterator for IterableOpNewtclassDoRequest<'a> {
     type Item = Result<OpNewtclassDoRequest<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpNewtclassDoRequest::Kind({
@@ -43673,7 +43645,11 @@ impl<'a> Iterator for IterableOpNewtclassDoRequest<'a> {
                 2u16 => OpNewtclassDoRequest::Options({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        OptionsMsg::select_with_loc(selector, next, self.orig_loc)
+                        match OptionsMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -43698,13 +43674,8 @@ impl<'a> Iterator for IterableOpNewtclassDoRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -43888,21 +43859,20 @@ impl<'a> IterableOpNewtclassDoReply<'a> {
 impl<'a> Iterator for IterableOpNewtclassDoReply<'a> {
     type Item = Result<OpNewtclassDoReply, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -44071,21 +44041,20 @@ impl<'a> IterableOpDeltclassDoRequest<'a> {
 impl<'a> Iterator for IterableOpDeltclassDoRequest<'a> {
     type Item = Result<OpDeltclassDoRequest, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -44211,21 +44180,20 @@ impl<'a> IterableOpDeltclassDoReply<'a> {
 impl<'a> Iterator for IterableOpDeltclassDoReply<'a> {
     type Item = Result<OpDeltclassDoReply, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -44394,21 +44362,20 @@ impl<'a> IterableOpGettclassDoRequest<'a> {
 impl<'a> Iterator for IterableOpGettclassDoRequest<'a> {
     type Item = Result<OpGettclassDoRequest, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -44534,7 +44501,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_bfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"bfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -44598,7 +44565,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_clsact(mut self) -> Self {
         self = self.push_kind(c"clsact");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -44773,7 +44740,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_hfsc(mut self, fixed_header: &PushTcHfscQopt) -> Self {
         self = self.push_kind(c"hfsc");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -44809,7 +44776,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_ingress(mut self) -> Self {
         self = self.push_kind(c"ingress");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -44830,14 +44797,14 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mq(mut self) -> Self {
         self = self.push_kind(c"mq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mqprio(mut self, fixed_header: &PushTcMqprioQopt) -> Self {
         self = self.push_kind(c"mqprio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -44845,7 +44812,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_multiq(mut self, fixed_header: &PushTcMultiqQopt) -> Self {
         self = self.push_kind(c"multiq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -44871,7 +44838,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -44879,7 +44846,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_fast(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"pfifo_fast");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -44887,7 +44854,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_head_drop(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo_head_drop");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -44909,7 +44876,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_plug(mut self, fixed_header: &PushTcPlugQopt) -> Self {
         self = self.push_kind(c"plug");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -44917,7 +44884,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_prio(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"prio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -44967,7 +44934,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfb(mut self, fixed_header: &PushTcSfbQopt) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -44975,7 +44942,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfq(mut self, fixed_header: &PushTcSfqQoptV1) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -45044,7 +45011,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_choke(mut self, fixed_header: &PushTcChokeXstats) -> Self {
         self = self.push_kind(c"choke");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -45052,7 +45019,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_codel(mut self, fixed_header: &PushTcCodelXstats) -> Self {
         self = self.push_kind(c"codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -45060,7 +45027,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_dualpi2(mut self, fixed_header: &PushTcDualpi2Xstats) -> Self {
         self = self.push_kind(c"dualpi2");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -45068,7 +45035,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq(mut self, fixed_header: &PushTcFqQdStats) -> Self {
         self = self.push_kind(c"fq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -45076,7 +45043,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_codel(mut self, fixed_header: &PushTcFqCodelXstats) -> Self {
         self = self.push_kind(c"fq_codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -45084,7 +45051,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_pie(mut self, fixed_header: &PushTcFqPieXstats) -> Self {
         self = self.push_kind(c"fq_pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -45092,7 +45059,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_hhf(mut self, fixed_header: &PushTcHhfXstats) -> Self {
         self = self.push_kind(c"hhf");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -45100,7 +45067,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_pie(mut self, fixed_header: &PushTcPieXstats) -> Self {
         self = self.push_kind(c"pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -45108,7 +45075,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_red(mut self, fixed_header: &PushTcRedXstats) -> Self {
         self = self.push_kind(c"red");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -45116,7 +45083,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfb(mut self, fixed_header: &PushTcSfbXstats) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -45124,7 +45091,7 @@ impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfq(mut self, fixed_header: &PushTcSfqXstats) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -45392,12 +45359,16 @@ impl<'a> IterableOpGettclassDoReply<'a> {
 impl<'a> Iterator for IterableOpGettclassDoReply<'a> {
     type Item = Result<OpGettclassDoReply<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpGettclassDoReply::Kind({
@@ -45408,7 +45379,11 @@ impl<'a> Iterator for IterableOpGettclassDoReply<'a> {
                 2u16 => OpGettclassDoReply::Options({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        OptionsMsg::select_with_loc(selector, next, self.orig_loc)
+                        match OptionsMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -45421,7 +45396,11 @@ impl<'a> Iterator for IterableOpGettclassDoReply<'a> {
                 4u16 => OpGettclassDoReply::Xstats({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc)
+                        match TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -45461,13 +45440,8 @@ impl<'a> Iterator for IterableOpGettclassDoReply<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -45730,7 +45704,7 @@ impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_bfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"bfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -45794,7 +45768,7 @@ impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_clsact(mut self) -> Self {
         self = self.push_kind(c"clsact");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -45969,7 +45943,7 @@ impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_hfsc(mut self, fixed_header: &PushTcHfscQopt) -> Self {
         self = self.push_kind(c"hfsc");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -46005,7 +45979,7 @@ impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_ingress(mut self) -> Self {
         self = self.push_kind(c"ingress");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -46026,14 +46000,14 @@ impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mq(mut self) -> Self {
         self = self.push_kind(c"mq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mqprio(mut self, fixed_header: &PushTcMqprioQopt) -> Self {
         self = self.push_kind(c"mqprio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -46041,7 +46015,7 @@ impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_multiq(mut self, fixed_header: &PushTcMultiqQopt) -> Self {
         self = self.push_kind(c"multiq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -46067,7 +46041,7 @@ impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -46075,7 +46049,7 @@ impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_fast(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"pfifo_fast");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -46083,7 +46057,7 @@ impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_head_drop(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo_head_drop");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -46105,7 +46079,7 @@ impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_plug(mut self, fixed_header: &PushTcPlugQopt) -> Self {
         self = self.push_kind(c"plug");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -46113,7 +46087,7 @@ impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_prio(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"prio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -46163,7 +46137,7 @@ impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfb(mut self, fixed_header: &PushTcSfbQopt) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -46171,7 +46145,7 @@ impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfq(mut self, fixed_header: &PushTcSfqQoptV1) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -46382,12 +46356,16 @@ impl<'a> IterableOpNewtfilterDoRequest<'a> {
 impl<'a> Iterator for IterableOpNewtfilterDoRequest<'a> {
     type Item = Result<OpNewtfilterDoRequest<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpNewtfilterDoRequest::Kind({
@@ -46398,7 +46376,11 @@ impl<'a> Iterator for IterableOpNewtfilterDoRequest<'a> {
                 2u16 => OpNewtfilterDoRequest::Options({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        OptionsMsg::select_with_loc(selector, next, self.orig_loc)
+                        match OptionsMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -46423,13 +46405,8 @@ impl<'a> Iterator for IterableOpNewtfilterDoRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -46613,21 +46590,20 @@ impl<'a> IterableOpNewtfilterDoReply<'a> {
 impl<'a> Iterator for IterableOpNewtfilterDoReply<'a> {
     type Item = Result<OpNewtfilterDoReply, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -46850,12 +46826,16 @@ impl<'a> IterableOpDeltfilterDoRequest<'a> {
 impl<'a> Iterator for IterableOpDeltfilterDoRequest<'a> {
     type Item = Result<OpDeltfilterDoRequest<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpDeltfilterDoRequest::Kind({
@@ -46868,13 +46848,8 @@ impl<'a> Iterator for IterableOpDeltfilterDoRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -47030,21 +47005,20 @@ impl<'a> IterableOpDeltfilterDoReply<'a> {
 impl<'a> Iterator for IterableOpDeltfilterDoReply<'a> {
     type Item = Result<OpDeltfilterDoReply, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -47257,12 +47231,16 @@ impl<'a> IterableOpGettfilterDumpRequest<'a> {
 impl<'a> Iterator for IterableOpGettfilterDumpRequest<'a> {
     type Item = Result<OpGettfilterDumpRequest, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 11u16 => OpGettfilterDumpRequest::Chain({
@@ -47275,13 +47253,8 @@ impl<'a> Iterator for IterableOpGettfilterDumpRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -47437,7 +47410,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_bfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"bfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47501,7 +47474,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_clsact(mut self) -> Self {
         self = self.push_kind(c"clsact");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -47676,7 +47649,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_hfsc(mut self, fixed_header: &PushTcHfscQopt) -> Self {
         self = self.push_kind(c"hfsc");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47712,7 +47685,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_ingress(mut self) -> Self {
         self = self.push_kind(c"ingress");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -47733,14 +47706,14 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mq(mut self) -> Self {
         self = self.push_kind(c"mq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mqprio(mut self, fixed_header: &PushTcMqprioQopt) -> Self {
         self = self.push_kind(c"mqprio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47748,7 +47721,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_multiq(mut self, fixed_header: &PushTcMultiqQopt) -> Self {
         self = self.push_kind(c"multiq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47774,7 +47747,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47782,7 +47755,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_fast(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"pfifo_fast");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47790,7 +47763,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_head_drop(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo_head_drop");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47812,7 +47785,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_plug(mut self, fixed_header: &PushTcPlugQopt) -> Self {
         self = self.push_kind(c"plug");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47820,7 +47793,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_prio(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"prio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47870,7 +47843,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfb(mut self, fixed_header: &PushTcSfbQopt) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47878,7 +47851,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfq(mut self, fixed_header: &PushTcSfqQoptV1) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47947,7 +47920,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_choke(mut self, fixed_header: &PushTcChokeXstats) -> Self {
         self = self.push_kind(c"choke");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47955,7 +47928,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_codel(mut self, fixed_header: &PushTcCodelXstats) -> Self {
         self = self.push_kind(c"codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47963,7 +47936,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_dualpi2(mut self, fixed_header: &PushTcDualpi2Xstats) -> Self {
         self = self.push_kind(c"dualpi2");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47971,7 +47944,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq(mut self, fixed_header: &PushTcFqQdStats) -> Self {
         self = self.push_kind(c"fq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47979,7 +47952,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_codel(mut self, fixed_header: &PushTcFqCodelXstats) -> Self {
         self = self.push_kind(c"fq_codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47987,7 +47960,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_pie(mut self, fixed_header: &PushTcFqPieXstats) -> Self {
         self = self.push_kind(c"fq_pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -47995,7 +47968,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_hhf(mut self, fixed_header: &PushTcHhfXstats) -> Self {
         self = self.push_kind(c"hhf");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -48003,7 +47976,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_pie(mut self, fixed_header: &PushTcPieXstats) -> Self {
         self = self.push_kind(c"pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -48011,7 +47984,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_red(mut self, fixed_header: &PushTcRedXstats) -> Self {
         self = self.push_kind(c"red");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -48019,7 +47992,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfb(mut self, fixed_header: &PushTcSfbXstats) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -48027,7 +48000,7 @@ impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfq(mut self, fixed_header: &PushTcSfqXstats) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -48295,12 +48268,16 @@ impl<'a> IterableOpGettfilterDumpReply<'a> {
 impl<'a> Iterator for IterableOpGettfilterDumpReply<'a> {
     type Item = Result<OpGettfilterDumpReply<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpGettfilterDumpReply::Kind({
@@ -48311,7 +48288,11 @@ impl<'a> Iterator for IterableOpGettfilterDumpReply<'a> {
                 2u16 => OpGettfilterDumpReply::Options({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        OptionsMsg::select_with_loc(selector, next, self.orig_loc)
+                        match OptionsMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -48324,7 +48305,11 @@ impl<'a> Iterator for IterableOpGettfilterDumpReply<'a> {
                 4u16 => OpGettfilterDumpReply::Xstats({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc)
+                        match TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -48364,13 +48349,8 @@ impl<'a> Iterator for IterableOpGettfilterDumpReply<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -48689,12 +48669,16 @@ impl<'a> IterableOpGettfilterDoRequest<'a> {
 impl<'a> Iterator for IterableOpGettfilterDoRequest<'a> {
     type Item = Result<OpGettfilterDoRequest<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpGettfilterDoRequest::Kind({
@@ -48707,13 +48691,8 @@ impl<'a> Iterator for IterableOpGettfilterDoRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -48869,7 +48848,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_bfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"bfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -48933,7 +48912,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_clsact(mut self) -> Self {
         self = self.push_kind(c"clsact");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -49108,7 +49087,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_hfsc(mut self, fixed_header: &PushTcHfscQopt) -> Self {
         self = self.push_kind(c"hfsc");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49144,7 +49123,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_ingress(mut self) -> Self {
         self = self.push_kind(c"ingress");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -49165,14 +49144,14 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mq(mut self) -> Self {
         self = self.push_kind(c"mq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mqprio(mut self, fixed_header: &PushTcMqprioQopt) -> Self {
         self = self.push_kind(c"mqprio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49180,7 +49159,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_multiq(mut self, fixed_header: &PushTcMultiqQopt) -> Self {
         self = self.push_kind(c"multiq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49206,7 +49185,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49214,7 +49193,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_fast(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"pfifo_fast");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49222,7 +49201,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_head_drop(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo_head_drop");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49244,7 +49223,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_plug(mut self, fixed_header: &PushTcPlugQopt) -> Self {
         self = self.push_kind(c"plug");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49252,7 +49231,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_prio(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"prio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49302,7 +49281,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfb(mut self, fixed_header: &PushTcSfbQopt) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49310,7 +49289,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfq(mut self, fixed_header: &PushTcSfqQoptV1) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49379,7 +49358,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_choke(mut self, fixed_header: &PushTcChokeXstats) -> Self {
         self = self.push_kind(c"choke");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49387,7 +49366,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_codel(mut self, fixed_header: &PushTcCodelXstats) -> Self {
         self = self.push_kind(c"codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49395,7 +49374,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_dualpi2(mut self, fixed_header: &PushTcDualpi2Xstats) -> Self {
         self = self.push_kind(c"dualpi2");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49403,7 +49382,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq(mut self, fixed_header: &PushTcFqQdStats) -> Self {
         self = self.push_kind(c"fq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49411,7 +49390,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_codel(mut self, fixed_header: &PushTcFqCodelXstats) -> Self {
         self = self.push_kind(c"fq_codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49419,7 +49398,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_pie(mut self, fixed_header: &PushTcFqPieXstats) -> Self {
         self = self.push_kind(c"fq_pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49427,7 +49406,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_hhf(mut self, fixed_header: &PushTcHhfXstats) -> Self {
         self = self.push_kind(c"hhf");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49435,7 +49414,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_pie(mut self, fixed_header: &PushTcPieXstats) -> Self {
         self = self.push_kind(c"pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49443,7 +49422,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_red(mut self, fixed_header: &PushTcRedXstats) -> Self {
         self = self.push_kind(c"red");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49451,7 +49430,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfb(mut self, fixed_header: &PushTcSfbXstats) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49459,7 +49438,7 @@ impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfq(mut self, fixed_header: &PushTcSfqXstats) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -49727,12 +49706,16 @@ impl<'a> IterableOpGettfilterDoReply<'a> {
 impl<'a> Iterator for IterableOpGettfilterDoReply<'a> {
     type Item = Result<OpGettfilterDoReply<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpGettfilterDoReply::Kind({
@@ -49743,7 +49726,11 @@ impl<'a> Iterator for IterableOpGettfilterDoReply<'a> {
                 2u16 => OpGettfilterDoReply::Options({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        OptionsMsg::select_with_loc(selector, next, self.orig_loc)
+                        match OptionsMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -49756,7 +49743,11 @@ impl<'a> Iterator for IterableOpGettfilterDoReply<'a> {
                 4u16 => OpGettfilterDoReply::Xstats({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc)
+                        match TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -49796,13 +49787,8 @@ impl<'a> Iterator for IterableOpGettfilterDoReply<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -50065,7 +50051,7 @@ impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_bfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"bfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -50129,7 +50115,7 @@ impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_clsact(mut self) -> Self {
         self = self.push_kind(c"clsact");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -50304,7 +50290,7 @@ impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_hfsc(mut self, fixed_header: &PushTcHfscQopt) -> Self {
         self = self.push_kind(c"hfsc");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -50340,7 +50326,7 @@ impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_ingress(mut self) -> Self {
         self = self.push_kind(c"ingress");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -50361,14 +50347,14 @@ impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mq(mut self) -> Self {
         self = self.push_kind(c"mq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mqprio(mut self, fixed_header: &PushTcMqprioQopt) -> Self {
         self = self.push_kind(c"mqprio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -50376,7 +50362,7 @@ impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_multiq(mut self, fixed_header: &PushTcMultiqQopt) -> Self {
         self = self.push_kind(c"multiq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -50402,7 +50388,7 @@ impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -50410,7 +50396,7 @@ impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_fast(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"pfifo_fast");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -50418,7 +50404,7 @@ impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_head_drop(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo_head_drop");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -50440,7 +50426,7 @@ impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_plug(mut self, fixed_header: &PushTcPlugQopt) -> Self {
         self = self.push_kind(c"plug");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -50448,7 +50434,7 @@ impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_prio(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"prio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -50498,7 +50484,7 @@ impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfb(mut self, fixed_header: &PushTcSfbQopt) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -50506,7 +50492,7 @@ impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfq(mut self, fixed_header: &PushTcSfqQoptV1) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -50717,12 +50703,16 @@ impl<'a> IterableOpNewchainDoRequest<'a> {
 impl<'a> Iterator for IterableOpNewchainDoRequest<'a> {
     type Item = Result<OpNewchainDoRequest<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpNewchainDoRequest::Kind({
@@ -50733,7 +50723,11 @@ impl<'a> Iterator for IterableOpNewchainDoRequest<'a> {
                 2u16 => OpNewchainDoRequest::Options({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        OptionsMsg::select_with_loc(selector, next, self.orig_loc)
+                        match OptionsMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -50758,13 +50752,8 @@ impl<'a> Iterator for IterableOpNewchainDoRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -50948,21 +50937,20 @@ impl<'a> IterableOpNewchainDoReply<'a> {
 impl<'a> Iterator for IterableOpNewchainDoReply<'a> {
     type Item = Result<OpNewchainDoReply, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -51154,12 +51142,16 @@ impl<'a> IterableOpDelchainDoRequest<'a> {
 impl<'a> Iterator for IterableOpDelchainDoRequest<'a> {
     type Item = Result<OpDelchainDoRequest, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 11u16 => OpDelchainDoRequest::Chain({
@@ -51167,13 +51159,8 @@ impl<'a> Iterator for IterableOpDelchainDoRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -51322,21 +51309,20 @@ impl<'a> IterableOpDelchainDoReply<'a> {
 impl<'a> Iterator for IterableOpDelchainDoReply<'a> {
     type Item = Result<OpDelchainDoReply, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -51528,12 +51514,16 @@ impl<'a> IterableOpGetchainDoRequest<'a> {
 impl<'a> Iterator for IterableOpGetchainDoRequest<'a> {
     type Item = Result<OpGetchainDoRequest, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 11u16 => OpGetchainDoRequest::Chain({
@@ -51541,13 +51531,8 @@ impl<'a> Iterator for IterableOpGetchainDoRequest<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }
@@ -51696,7 +51681,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_bfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"bfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -51760,7 +51745,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_clsact(mut self) -> Self {
         self = self.push_kind(c"clsact");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -51935,7 +51920,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_hfsc(mut self, fixed_header: &PushTcHfscQopt) -> Self {
         self = self.push_kind(c"hfsc");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -51971,7 +51956,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_ingress(mut self) -> Self {
         self = self.push_kind(c"ingress");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
@@ -51992,14 +51977,14 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mq(mut self) -> Self {
         self = self.push_kind(c"mq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self
     }
     #[doc = "Selector attribute is inserted automatically."]
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_mqprio(mut self, fixed_header: &PushTcMqprioQopt) -> Self {
         self = self.push_kind(c"mqprio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52007,7 +51992,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_multiq(mut self, fixed_header: &PushTcMultiqQopt) -> Self {
         self = self.push_kind(c"multiq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52033,7 +52018,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52041,7 +52026,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_fast(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"pfifo_fast");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52049,7 +52034,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_pfifo_head_drop(mut self, fixed_header: &PushTcFifoQopt) -> Self {
         self = self.push_kind(c"pfifo_head_drop");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52071,7 +52056,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_plug(mut self, fixed_header: &PushTcPlugQopt) -> Self {
         self = self.push_kind(c"plug");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52079,7 +52064,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_prio(mut self, fixed_header: &PushTcPrioQopt) -> Self {
         self = self.push_kind(c"prio");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52129,7 +52114,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfb(mut self, fixed_header: &PushTcSfbQopt) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52137,7 +52122,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_options_sfq(mut self, fixed_header: &PushTcSfqQoptV1) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 2u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 2u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52206,7 +52191,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_choke(mut self, fixed_header: &PushTcChokeXstats) -> Self {
         self = self.push_kind(c"choke");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52214,7 +52199,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_codel(mut self, fixed_header: &PushTcCodelXstats) -> Self {
         self = self.push_kind(c"codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52222,7 +52207,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_dualpi2(mut self, fixed_header: &PushTcDualpi2Xstats) -> Self {
         self = self.push_kind(c"dualpi2");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52230,7 +52215,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq(mut self, fixed_header: &PushTcFqQdStats) -> Self {
         self = self.push_kind(c"fq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52238,7 +52223,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_codel(mut self, fixed_header: &PushTcFqCodelXstats) -> Self {
         self = self.push_kind(c"fq_codel");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52246,7 +52231,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_fq_pie(mut self, fixed_header: &PushTcFqPieXstats) -> Self {
         self = self.push_kind(c"fq_pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52254,7 +52239,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_hhf(mut self, fixed_header: &PushTcHhfXstats) -> Self {
         self = self.push_kind(c"hhf");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52262,7 +52247,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_pie(mut self, fixed_header: &PushTcPieXstats) -> Self {
         self = self.push_kind(c"pie");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52270,7 +52255,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_red(mut self, fixed_header: &PushTcRedXstats) -> Self {
         self = self.push_kind(c"red");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52278,7 +52263,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfb(mut self, fixed_header: &PushTcSfbXstats) -> Self {
         self = self.push_kind(c"sfb");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52286,7 +52271,7 @@ impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
     #[doc = "At most one sub-message attribute is expected per attribute set."]
     pub fn nested_xstats_sfq(mut self, fixed_header: &PushTcSfqXstats) -> Self {
         self = self.push_kind(c"sfq");
-        push_nested_header(self.as_rec_mut(), 4u16);
+        self.header_offset = Some(push_nested_header(self.as_rec_mut(), 4u16));
         self.as_rec_mut().extend(fixed_header.as_slice());
         self
     }
@@ -52554,12 +52539,16 @@ impl<'a> IterableOpGetchainDoReply<'a> {
 impl<'a> Iterator for IterableOpGetchainDoReply<'a> {
     type Item = Result<OpGetchainDoReply<'a>, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == self.pos {
-            return None;
-        }
         let pos = self.pos;
-        let mut r#type = None;
-        while let Some((header, next)) = chop_header(self.buf, &mut self.pos) {
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => OpGetchainDoReply::Kind({
@@ -52570,7 +52559,11 @@ impl<'a> Iterator for IterableOpGetchainDoReply<'a> {
                 2u16 => OpGetchainDoReply::Options({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        OptionsMsg::select_with_loc(selector, next, self.orig_loc)
+                        match OptionsMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -52583,7 +52576,11 @@ impl<'a> Iterator for IterableOpGetchainDoReply<'a> {
                 4u16 => OpGetchainDoReply::Xstats({
                     let res = {
                         let Ok(selector) = self.get_kind() else { break };
-                        TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc)
+                        match TcaStatsAppMsg::select_with_loc(selector, next, self.orig_loc) {
+                            Some(sub) => Some(sub),
+                            None if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                            None => continue,
+                        }
                     };
                     let Some(val) = res else { break };
                     val
@@ -52623,13 +52620,8 @@ impl<'a> Iterator for IterableOpGetchainDoReply<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
-                n => {
-                    if cfg!(any(test, feature = "deny-unknown-attrs")) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
             };
             return Some(Ok(res));
         }

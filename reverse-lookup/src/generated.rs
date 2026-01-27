@@ -954,50 +954,6 @@ impl Debug for ReverseLookup<'_> {
                         return consider(fmt, "conntrack");
                     }
                     #[cfg(feature = "nftables")]
-                    if let (2816u16, None, true) = pat {
-                        return Debug::fmt(
-                            &netlink_bindings::nftables::OpGetcompatDumpRequest::new(buf),
-                            fmt,
-                        );
-                    }
-                    #[cfg(not(feature = "nftables"))]
-                    if let (2816u16, None, true) = pat {
-                        return consider(fmt, "nftables");
-                    }
-                    #[cfg(feature = "nftables")]
-                    if let (2816u16, Some(2816u16), true) = pat {
-                        return Debug::fmt(
-                            &netlink_bindings::nftables::OpGetcompatDumpReply::new(buf),
-                            fmt,
-                        );
-                    }
-                    #[cfg(not(feature = "nftables"))]
-                    if let (2816u16, Some(2816u16), true) = pat {
-                        return consider(fmt, "nftables");
-                    }
-                    #[cfg(feature = "nftables")]
-                    if let (2816u16, None, false) = pat {
-                        return Debug::fmt(
-                            &netlink_bindings::nftables::OpGetcompatDoRequest::new(buf),
-                            fmt,
-                        );
-                    }
-                    #[cfg(not(feature = "nftables"))]
-                    if let (2816u16, None, false) = pat {
-                        return consider(fmt, "nftables");
-                    }
-                    #[cfg(feature = "nftables")]
-                    if let (2816u16, Some(2816u16), false) = pat {
-                        return Debug::fmt(
-                            &netlink_bindings::nftables::OpGetcompatDoReply::new(buf),
-                            fmt,
-                        );
-                    }
-                    #[cfg(not(feature = "nftables"))]
-                    if let (2816u16, Some(2816u16), false) = pat {
-                        return consider(fmt, "nftables");
-                    }
-                    #[cfg(feature = "nftables")]
                     if let (16u16, None, false) = pat {
                         return Debug::fmt(
                             &netlink_bindings::nftables::OpBatchBeginDoRequest::new(buf),
@@ -1941,6 +1897,50 @@ impl Debug for ReverseLookup<'_> {
                     }
                     #[cfg(not(feature = "nftables"))]
                     if let (2592u16, Some(2592u16), false) = pat {
+                        return consider(fmt, "nftables");
+                    }
+                    #[cfg(feature = "nftables")]
+                    if let (2816u16, None, true) = pat {
+                        return Debug::fmt(
+                            &netlink_bindings::nftables::OpGetcompatDumpRequest::new(buf),
+                            fmt,
+                        );
+                    }
+                    #[cfg(not(feature = "nftables"))]
+                    if let (2816u16, None, true) = pat {
+                        return consider(fmt, "nftables");
+                    }
+                    #[cfg(feature = "nftables")]
+                    if let (2816u16, Some(2816u16), true) = pat {
+                        return Debug::fmt(
+                            &netlink_bindings::nftables::OpGetcompatDumpReply::new(buf),
+                            fmt,
+                        );
+                    }
+                    #[cfg(not(feature = "nftables"))]
+                    if let (2816u16, Some(2816u16), true) = pat {
+                        return consider(fmt, "nftables");
+                    }
+                    #[cfg(feature = "nftables")]
+                    if let (2816u16, None, false) = pat {
+                        return Debug::fmt(
+                            &netlink_bindings::nftables::OpGetcompatDoRequest::new(buf),
+                            fmt,
+                        );
+                    }
+                    #[cfg(not(feature = "nftables"))]
+                    if let (2816u16, None, false) = pat {
+                        return consider(fmt, "nftables");
+                    }
+                    #[cfg(feature = "nftables")]
+                    if let (2816u16, Some(2816u16), false) = pat {
+                        return Debug::fmt(
+                            &netlink_bindings::nftables::OpGetcompatDoReply::new(buf),
+                            fmt,
+                        );
+                    }
+                    #[cfg(not(feature = "nftables"))]
+                    if let (2816u16, Some(2816u16), false) = pat {
                         return consider(fmt, "nftables");
                     }
                     write!(
