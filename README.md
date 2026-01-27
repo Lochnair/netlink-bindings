@@ -177,6 +177,8 @@ wrapper for creating nftables rules.
 - [nl80211](./netlink-socket/examples/nl80211.rs) - Basic interactions with nl80211.
 - [nl80211-raw](./netlink-socket/examples/nl80211-raw.rs) - Same as nl80211,
 but manually encoding/decoding netlink messages.
+- [tc-prio](./netlink-socket/examples/tc-prio.rs) - Add, show, and delete
+traffic control queueing discipline.
 
 ## Attribute encoding
 
@@ -307,13 +309,13 @@ for encoding, and an iterator interface for decoding (internally).
 | [nl80211](./netlink-socket/examples/nl80211.rs) | ✅ | |
 | [rt-addr](./netlink-socket/examples/wireguard-setup.rs) | ✅ | |
 | [rt-link](./netlink-socket/examples/wireguard-setup.rs) | ✅ | |
+| [tc](./netlink-socket/examples/tc-prio.rs) | ✅ | |
 | [wireguard](./netlink-socket/examples/wireguard-setup.rs) | ✅ | |
 | devlink | ✔️ | |
 | netdev | ✔️ | |
 | rt-neigh | ✔️ | |
 | rt-route | ✔️ | |
 | rt-rule | ✔️ | |
-| tc | ✔️ | |
 | ethtool | ? | |
 | dpll | ? | |
 | fou | ? | |
