@@ -368,6 +368,7 @@ pub struct Request {
     pub value: Option<u16>,
     #[serde(default)]
     pub attributes: Vec<String>,
+    pub fixed_header: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
@@ -430,6 +431,12 @@ pub struct OperationSpec {
     pub r#dump: Option<Operation>,
     pub doc: Option<String>,
 
+    #[serde(default)]
+    pub rust_filter: Option<String>,
+    #[serde(default)]
+    pub rust_filter_request: Option<String>,
+    #[serde(default)]
+    pub rust_filter_reply: Option<String>,
     /// Make operation reuse common encoding/decoding types
     #[serde(default)]
     pub transparent: bool,

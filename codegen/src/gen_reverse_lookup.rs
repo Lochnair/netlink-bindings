@@ -1,5 +1,5 @@
 use proc_macro2::{Literal, TokenStream};
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, TokenStreamExt};
 use std::{collections::BTreeMap, path::Path, rc::Rc};
 
 use crate::{
@@ -71,6 +71,7 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
 
                 let reply_name = gen_ops::reply_kebab_name(&ops.name, op_name);
                 list.1.push((
+                    ops.clone(),
                     spec.name.clone(),
                     request_value,
                     reply_value,
@@ -110,7 +111,11 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
     let mut netlink_raw = TokenStream::new();
     for (protonum, (spec, ops)) in &raw {
         let mut variants = TokenStream::new();
-        for (proto, request_value, reply_value, request, reply, is_dump, is_transparent) in ops {
+        for (
+            i,
+            (ops, proto, request_value, reply_value, request, reply, is_dump, is_transparent),
+        ) in ops.iter().enumerate()
+        {
             let prefix = format_ident!("{}", kebab_to_rust(proto));
             let mut request = format_ident!("{}", kebab_to_type(request));
             let mut reply = format_ident!("{}", kebab_to_type(reply));
@@ -122,7 +127,7 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
                 decoder = quote!(decode_reply);
             }
 
-            variants.extend(quote! {
+            let mut tokens = quote! {
                 #[cfg(feature = #proto)]
                 if let (#request_value, None, #is_dump) = pat {
                     return Debug::fmt(&#b::#prefix::#request::#decoder(buf), fmt);
@@ -140,7 +145,56 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
                 if let (#reply_value, Some(#request_value), #is_dump) = pat {
                     return consider(fmt, #proto);
                 }
-            })
+            };
+
+            let pass = ops.rust_filter_request.is_none() && ops.rust_filter_reply.is_none();
+            let mut pass = quote!(let mut pass = #pass;);
+
+            if let Some(filter_request) = &ops.rust_filter_request {
+                let filter: TokenStream = syn::parse_str(filter_request).unwrap();
+                pass = quote! {
+                    #pass
+                    let filter: fn(&[u8]) -> bool = #filter;
+                    if last_filter_val.is_none_or(|l| l == #i) && filter(buf) {
+                        last_filter.set(Some(#i));
+                        pass = true;
+                    }
+                };
+
+                if ops.rust_filter_reply.is_none() {
+                    pass = quote! {
+                        #pass
+                        if last_filter_val.is_some_and(|l| l == #i) {
+                            last_filter.set(Some(#i));
+                            pass = true;
+                        }
+                    };
+                }
+            }
+
+            if let Some(filter_reply) = &ops.rust_filter_reply {
+                let filter: TokenStream = syn::parse_str(filter_reply).unwrap();
+                pass = quote! {
+                    #pass
+                    let filter: fn(&[u8]) -> bool = #filter;
+                    if last_filter_val.is_some_and(|l| l == #i && filter(buf)) {
+                        last_filter.set(Some(#i));
+                        pass = true;
+                    }
+                }
+            }
+
+            if let Some(filter) = &ops.rust_filter {
+                let filter: TokenStream = syn::parse_str(filter).unwrap();
+                tokens = quote! {
+                    #pass
+                    let filter: fn(&[u8]) -> bool = #filter;
+                    if filter(buf) && pass {
+                        #tokens
+                    }
+                }
+            }
+            variants.extend(tokens);
         }
 
         let fallback = if let Some((attrs, fallback)) = gen_fallback(spec.as_ref()) {
@@ -167,7 +221,7 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
     let mut generic = TokenStream::new();
     for (proto, (spec, ops)) in &genl {
         let mut variants = TokenStream::new();
-        for (_, request_value, reply_value, request, reply, is_dump, is_transparent) in ops {
+        for (_, _, request_value, reply_value, request, reply, is_dump, is_transparent) in ops {
             let prefix = format_ident!("{}", kebab_to_rust(proto));
             let request_value = *request_value as u8;
             let reply_value = *reply_value as u8;
@@ -230,6 +284,7 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
         #![allow(unreachable_patterns)]
 
         use std::fmt::Debug;
+        use std::cell::Cell;
         use netlink_bindings::{
             builtin::PushBuiltinNfgenmsg,
             traits::{NetlinkRequest, Protocol},
@@ -241,6 +296,7 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
             pub value: u16,
             pub request_value: Option<u16>,
             pub is_dump: bool,
+            pub last_filter: &'a Cell<Option<usize>>,
             pub buf: &'a [u8],
         }
 
@@ -250,7 +306,8 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
 
         impl Debug for ReverseLookup<'_> {
             fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                let Self { proto, value, request_value, is_dump, buf } = self.clone();
+                let Self { proto, value, request_value, is_dump, buf, last_filter } = self.clone();
+                let last_filter_val = last_filter.take();
                 match proto {
                     Protocol::Raw { protonum, .. } => {
                         #netlink_raw

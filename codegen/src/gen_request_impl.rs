@@ -293,9 +293,8 @@ pub fn gen_request_wrapper(
     }
 
     let (reply_type, map_decoder, new);
-    if let Some(fixed_header) = request_header {
-        let header = writable_type(&fixed_header.name);
-        if fixed_header.construct_header.is_some() {
+    if let Some(request_header) = request_header {
+        if request_header.construct_header.is_some() {
             reply_type = quote!(#decoder_iter<'buf>);
             map_decoder = quote!();
             new = quote! {
@@ -305,10 +304,12 @@ pub fn gen_request_wrapper(
                 }
             };
         } else {
-            reply_type = quote!((#header, #decoder_iter<'buf>));
+            let request_header = writable_type(&request_header.name);
+            let reply_header = writable_type(&reply_header.as_ref().unwrap().name);
+            reply_type = quote!((#reply_header, #decoder_iter<'buf>));
             map_decoder = quote!(.1);
             new = quote! {
-                pub fn new(mut request: Request<'r> #new_args, header: &#header) -> Self {
+                pub fn new(mut request: Request<'r> #new_args, header: &#request_header) -> Self {
                     #header_encoder::write_header(&mut request.buf_mut(), header);
                     Self { request: #request #store_request_type }
                 }

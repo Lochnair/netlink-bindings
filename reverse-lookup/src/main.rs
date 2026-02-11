@@ -59,6 +59,7 @@ fn read(args: &CliArgs, reader: impl Read) {
     let mut is_dump = false;
     let mut last_request_value = None;
     let mut last_request_genl_family: Option<&'static str> = None;
+    let last_filter = Default::default();
 
     let mut lines = BufReader::new(reader)
         .lines()
@@ -230,6 +231,7 @@ fn read(args: &CliArgs, reader: impl Read) {
                         last_request_value
                     },
                     is_dump,
+                    last_filter: &last_filter,
                     buf,
                 };
 
