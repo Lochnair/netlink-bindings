@@ -209,6 +209,11 @@ pub fn push_header(buf: &mut Vec<u8>, r#type: u16, len: u16) -> usize {
 }
 
 /// Returns header offset
+pub fn write_header(buf: &mut Vec<u8>, r#type: u16) -> usize {
+    push_header_type(buf, r#type, 0, false)
+}
+
+/// Returns header offset
 /// The kernel doesn't really check byteorder bit nor set it correctly
 fn push_header_type(buf: &mut Vec<u8>, mut r#type: u16, len: u16, is_nested: bool) -> usize {
     align(buf);
@@ -271,10 +276,14 @@ pub fn chop_header<'a>(buf: &'a [u8], pos: &mut usize) -> Option<(Header, &'a [u
 
 pub trait Rec {
     fn as_rec_mut(&mut self) -> &mut Vec<u8>;
+    fn as_rec(&self) -> &Vec<u8>;
 }
 
 impl Rec for &mut Vec<u8> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self
+    }
+    fn as_rec(&self) -> &Vec<u8> {
         self
     }
 }
@@ -482,5 +491,70 @@ impl RequestBuf<'_> {
 impl Rec for RequestBuf<'_> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.buf_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.buf()
+    }
+}
+
+pub struct PushWriter<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+
+impl<Prev: Rec> std::ops::Deref for PushWriter<Prev> {
+    type Target = Vec<u8>;
+    fn deref(&self) -> &Self::Target {
+        self.as_rec()
+    }
+}
+
+impl<Prev: Rec> std::ops::DerefMut for PushWriter<Prev> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.as_rec_mut()
+    }
+}
+
+impl<Prev: Rec> std::io::Write for PushWriter<Prev> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        self.as_rec_mut().write(buf)
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.as_rec_mut().flush()
+    }
+}
+
+impl<Prev: Rec> Rec for PushWriter<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+
+impl<Prev: Rec> PushWriter<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+}
+
+impl<Prev: Rec> Drop for PushWriter<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
     }
 }

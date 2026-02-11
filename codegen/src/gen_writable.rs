@@ -75,6 +75,9 @@ pub fn gen_writable_attrset(
             fn as_rec_mut(&mut self) -> &mut Vec<u8> {
                 self.prev.as_mut().unwrap().as_rec_mut()
             }
+            fn as_rec(&self) -> &Vec<u8> {
+                self.prev.as_ref().unwrap().as_rec()
+            }
         }
     });
 
@@ -313,6 +316,19 @@ pub fn gen_writable_attrset(
                 self
             }
         });
+
+        if spec.experimental.attr_binary_write
+            && matches!(&next.r#type, AttrType::Binary { .. } | AttrType::String)
+        {
+            let write_func = format_ident!("write_{}", kebab_to_rust(&next.name));
+            doc_attr(next, |doc| impls.extend(quote!(#[doc = #doc])));
+            impls.extend(quote! {
+                pub fn #write_func(mut self) -> PushWriter<Self> {
+                    let header_offset = write_header(self.as_rec_mut(), #id);
+                    PushWriter { prev: Some(self), header_offset: Some(header_offset) }
+                }
+            });
+        }
 
         if let AttrType::String = &next.r#type {
             // Convince method to use allow &[u8] instead of &CStr
@@ -750,6 +766,9 @@ pub fn gen_writable_index_array(
         impl<Prev: Rec> Rec for #array_type<Prev> {
             fn as_rec_mut(&mut self) -> &mut Vec<u8> {
                 self.prev.as_mut().unwrap().as_rec_mut()
+            }
+            fn as_rec(&self) -> &Vec<u8> {
+                self.prev.as_ref().unwrap().as_rec()
             }
         }
         impl<Prev: Rec> #array_type<Prev> {

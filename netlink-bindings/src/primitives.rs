@@ -1,3 +1,4 @@
+use std::io::Write;
 pub use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
 
 macro_rules! gen_parse {
@@ -102,15 +103,15 @@ pub fn parse_sockaddr(buf: &[u8]) -> Option<SocketAddr> {
     }
 }
 
-pub fn encode_ipv4(buf: &mut Vec<u8>, val: Ipv4Addr) {
-    buf.extend(&val.to_bits().to_be_bytes())
+pub fn encode_ipv4<W: Write>(buf: &mut W, val: Ipv4Addr) {
+    buf.write_all(&val.to_bits().to_be_bytes()).unwrap()
 }
 
-pub fn encode_ipv6(buf: &mut Vec<u8>, val: Ipv6Addr) {
-    buf.extend(&val.to_bits().to_be_bytes())
+pub fn encode_ipv6<W: Write>(buf: &mut W, val: Ipv6Addr) {
+    buf.write_all(&val.to_bits().to_be_bytes()).unwrap()
 }
 
-pub fn encode_ip(buf: &mut Vec<u8>, val: IpAddr) {
+pub fn encode_ip<W: Write>(buf: &mut W, val: IpAddr) {
     match val {
         IpAddr::V4(addr) => encode_ipv4(buf, addr),
         IpAddr::V6(addr) => encode_ipv6(buf, addr),

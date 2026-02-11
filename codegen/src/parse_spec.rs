@@ -615,6 +615,19 @@ pub struct Spec {
     pub sub_messages: Option<Vec<SubMessage>>,
 }
 
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+#[serde(rename_all = "kebab-case")]
+pub struct Experimental {
+    pub struct_type: Option<String>,
+    #[serde(default)]
+    pub struct_prefix: Option<bool>,
+    #[serde(default)]
+    pub struct_explicit_padding: bool,
+    #[serde(default)]
+    pub attr_binary_write: bool,
+}
+
 fn merge_yaml(dst: &mut Value, src: &Value) {
     match (dst, src) {
         (Value::Mapping(dst), Value::Mapping(src)) => {
