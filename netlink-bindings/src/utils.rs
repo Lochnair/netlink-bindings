@@ -558,3 +558,62 @@ impl<Prev: Rec> Drop for PushWriter<Prev> {
         }
     }
 }
+
+pub fn get_bits(buf: &[u8], byte_off: usize, bit_off: usize, bits: usize) -> u32 {
+    assert!(bit_off < 8);
+    assert!(bits <= 32);
+
+    let max_bytes = (bit_off + bits).div_ceil(8);
+    let first = byte_off;
+    let last = byte_off + max_bytes;
+
+    let mut reg_buf = [0u8; 8];
+    reg_buf[..max_bytes].copy_from_slice(&buf[first..last]);
+    let reg = u64::from_le_bytes(reg_buf) << (64 - bit_off - bits) >> (64 - bits);
+    reg.to_le() as u32
+}
+
+pub fn set_bits(buf: &mut [u8], byte_off: usize, bit_off: usize, bits: usize, val: u32) {
+    assert!(bit_off < 8);
+    assert!(bits <= 32);
+
+    let max_bytes = (bit_off + bits).div_ceil(8);
+    let first = byte_off;
+    let last = byte_off + max_bytes;
+
+    let mask = !(((1 << bits) - 1) << bit_off);
+    let reg = (val as u64) << bit_off;
+    let mut reg_buf = [0u8; 8];
+    reg_buf[..max_bytes].copy_from_slice(&buf[first..last]);
+    let reg = (u64::from_le_bytes(reg_buf) & mask) | reg;
+    let reg_buf = reg.to_le_bytes();
+    buf[first..last].copy_from_slice(&reg_buf[..max_bytes])
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_bits_basic() {
+        let buf = &[0b1010_0110u8, 0b0000_1100];
+
+        assert_eq!(get_bits(buf, 0, 0, 4), 0b0110);
+        assert_eq!(get_bits(buf, 0, 4, 4), 0b1010);
+        assert_eq!(get_bits(buf, 0, 4, 8), 0b1100_1010);
+    }
+
+    #[test]
+    fn test_set_bits_basic() {
+        let buf = &mut [0u8; 2];
+
+        set_bits(buf, 0, 0, 4, 0b0110);
+        assert_eq!(buf[0], 0b0110);
+
+        set_bits(buf, 0, 4, 4, 0b1111);
+        assert_eq!(buf[0], 0b1111_0110);
+
+        set_bits(buf, 0, 4, 8, 0b1100_1010);
+        assert_eq!(buf, &[0b1010_0110, 0b0000_1100]);
+    }
+}
