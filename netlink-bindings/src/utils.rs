@@ -55,6 +55,18 @@ impl<T: AsRef<[u8]>> Debug for FormatBinStr<T> {
     }
 }
 
+pub struct FormatIter<I: Iterator<Item = T> + Clone, T: Debug>(pub I);
+
+impl<I: Iterator<Item = T> + Clone, T: Debug> Debug for FormatIter<I, T> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut f = fmt.debug_list();
+        for item in self.0.clone() {
+            f.entry(&item);
+        }
+        f.finish()
+    }
+}
+
 pub struct FormatHex<T: AsRef<[u8]>>(pub T);
 
 impl<T: AsRef<[u8]>> Debug for FormatHex<T> {
