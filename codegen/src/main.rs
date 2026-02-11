@@ -13,6 +13,7 @@ use std::{
 
 mod dump;
 mod gen_attrs;
+mod gen_cstruct;
 mod gen_debug_impl;
 mod gen_defs;
 mod gen_iterable;
@@ -20,6 +21,7 @@ mod gen_lookup;
 mod gen_ops;
 mod gen_request_impl;
 mod gen_reverse_lookup;
+mod gen_struct;
 mod gen_sub_message;
 mod gen_utils;
 mod gen_writable;

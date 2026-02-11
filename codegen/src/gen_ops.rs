@@ -123,7 +123,10 @@ pub fn gen_op(
     let is_transparent = spec.operations.transparent || ops.transparent;
     let needs_value = ops.request_type_at_runtime;
 
-    let fixed_header = |op: &Request| match (&ops.fixed_header, spec.protocol.as_deref()) {
+    let fixed_header = |op: &Request| match (
+        op.fixed_header.as_ref().or(ops.fixed_header.as_ref()),
+        spec.protocol.as_deref(),
+    ) {
         (Some(h), _) => Some(OpHeader {
             name: h.clone(),
             construct_header: None,
@@ -143,6 +146,9 @@ pub fn gen_op(
                     quote! {
                         #header.set_cmd(#value);
                         #header.set_version(#version);
+
+                        // #header.cmd = #value;
+                        // #header.version = #version;
                     }
                 }) as Box<dyn Fn(&Ident, Option<&TokenStream>) -> TokenStream>
             };

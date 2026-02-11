@@ -8,6 +8,7 @@ use crate::{
     gen_defs::GenImplStruct,
     gen_iterable::{array_iterable_name, gen_iterable_attrs, iterable_name},
     gen_ops::OpHeader,
+    gen_struct::struct_type,
     gen_sub_message::sub_message_name,
     gen_utils::{doc_attr, kebab_to_rust, kebab_to_type, sanitize_ident},
     parse_spec::{AttrProp, AttrSet, AttrType, IndexedArrayType, Spec},
@@ -42,6 +43,8 @@ pub fn gen_attrset(
 
     let mut m = GenImplStruct {
         off: 0,
+        bit_off: 0,
+        last_bit_type: None,
         alignment: 0,
         lifetime_needed: false,
         type_name: type_name.clone(),
@@ -86,7 +89,7 @@ pub fn gen_attr(
     _tokens: &mut TokenStream,
     variants: &mut TokenStream,
     shorthands: &mut TokenStream,
-    _spec: &Spec,
+    spec: &Spec,
     m: &mut GenImplStruct,
     attr: &AttrProp,
 ) {
@@ -98,7 +101,7 @@ pub fn gen_attr(
 
     let variant_name = sanitize_ident(&kebab_to_type(&attr.name));
 
-    let (rust_type, lifetime_needed) = gen_attr_type(attr);
+    let (rust_type, lifetime_needed) = gen_attr_type(spec, attr);
 
     m.lifetime_needed |= lifetime_needed;
 
@@ -153,7 +156,7 @@ pub fn gen_attr(
         AttrType::IndexedArray { sub_type } => {
             let item_type = match sub_type {
                 IndexedArrayType::Plain { attr } => {
-                    let (rust_type, _) = gen_attr_type(attr);
+                    let (rust_type, _) = gen_attr_type(spec, attr);
                     rust_type
                 }
                 IndexedArrayType::Nest { nested_attributes } => {
@@ -198,7 +201,7 @@ pub fn gen_attr(
     }
 }
 
-pub fn gen_attr_type_name(attr: &AttrProp) -> String {
+pub fn gen_attr_type_name(spec: &Spec, attr: &AttrProp) -> String {
     match &attr.r#type {
         AttrType::Unused => unreachable!(),
         AttrType::Flag => "()",
@@ -215,9 +218,9 @@ pub fn gen_attr_type_name(attr: &AttrProp) -> String {
         AttrType::Binary { .. } if attr.is_ip() => "IpAddr",
         AttrType::Binary { .. } if attr.is_sockaddr() => "SocketAddr",
         AttrType::Binary {
-            r#struct: Some(struct_type),
+            r#struct: Some(r#struct),
             ..
-        } => return format!("Push{}", kebab_to_type(struct_type)),
+        } => return struct_type(spec, r#struct).to_string(),
         AttrType::String => "CStr",
         AttrType::Pad { .. } | AttrType::Binary { .. } => "Binary",
         AttrType::Nest { nested_attributes } => nested_attributes,
@@ -227,7 +230,7 @@ pub fn gen_attr_type_name(attr: &AttrProp) -> String {
     .to_string()
 }
 
-pub fn gen_attr_type(attr: &AttrProp) -> (TokenStream, bool) {
+pub fn gen_attr_type(spec: &Spec, attr: &AttrProp) -> (TokenStream, bool) {
     let mut lifetime_needed = false;
     let rust_type = match &attr.r#type {
         AttrType::Unused => unreachable!(),
@@ -245,9 +248,9 @@ pub fn gen_attr_type(attr: &AttrProp) -> (TokenStream, bool) {
         AttrType::Binary { .. } if attr.is_ip() => quote!(std::net::IpAddr),
         AttrType::Binary { .. } if attr.is_sockaddr() => quote!(std::net::SocketAddr),
         AttrType::Binary {
-            r#struct: Some(struct_type),
+            r#struct: Some(r#struct),
             ..
-        } => format_ident!("Push{}", kebab_to_type(struct_type)).into_token_stream(),
+        } => struct_type(spec, r#struct).into_token_stream(),
         AttrType::String => {
             lifetime_needed = true;
             quote!(&'a CStr)
@@ -261,7 +264,7 @@ pub fn gen_attr_type(attr: &AttrProp) -> (TokenStream, bool) {
 
             let arr = match sub_type {
                 IndexedArrayType::Plain { attr } => {
-                    let rust_type = gen_attr_type_name(attr);
+                    let rust_type = gen_attr_type_name(spec, attr);
                     array_iterable_name(&rust_type)
                 }
                 IndexedArrayType::Nest { nested_attributes } => {

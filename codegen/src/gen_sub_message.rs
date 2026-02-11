@@ -4,8 +4,8 @@ use syn::Ident;
 
 use crate::{
     gen_iterable::iterable_name,
+    gen_struct::struct_type,
     gen_utils::{kebab_to_rust, kebab_to_type},
-    gen_writable::writable_type,
     parse_spec::{AttrProp, AttrSet, Spec, SubMessage, SubMessageFormat},
     Context, WARNING,
 };
@@ -152,7 +152,7 @@ pub fn gen_sub_attr(
     let mut header_type = None;
     if let Some(fixed_header) = &sub_attr.fixed_header {
         spec.find_def(fixed_header);
-        header_type = Some(writable_type(fixed_header).into_token_stream());
+        header_type = Some(struct_type(spec, fixed_header).into_token_stream());
     }
 
     let value: TokenStream = match selector_type {

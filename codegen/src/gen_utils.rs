@@ -115,3 +115,7 @@ pub fn lifetime_needed_attrs(attrs: &AttrSet) -> bool {
     }
     false
 }
+
+pub const fn align_up(len: usize, alignment: usize) -> usize {
+    ((len) + alignment - 1) & !(alignment - 1)
+}

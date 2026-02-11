@@ -2,7 +2,9 @@ use std::io::Write;
 
 use crate::{
     gen_attrs::shorthand_name,
-    gen_ops, gen_sub_message,
+    gen_ops,
+    gen_struct::struct_type,
+    gen_sub_message,
     gen_utils::{doc_attr, kebab_to_rust, kebab_to_type},
     gen_writable::writable_type,
     parse_spec::{AttrProp, AttrSet, AttrType, IndexedArrayType, Operation, Request, Spec},
@@ -78,7 +80,7 @@ impl Nest {
     }
 }
 
-pub fn dump_string_type(attr: &AttrProp) -> String {
+pub fn dump_string_type(spec: &Spec, attr: &AttrProp) -> String {
     match &attr.r#type {
         AttrType::Flag => "()".into(),
         AttrType::U8 => "u8".into(),
@@ -94,15 +96,13 @@ pub fn dump_string_type(attr: &AttrProp) -> String {
         AttrType::Binary { .. } if attr.is_ip() => "IpAddr".into(),
         AttrType::Binary { .. } if attr.is_sockaddr() => "SocketAddr".into(),
         AttrType::Binary {
-            r#struct: Some(struct_type),
+            r#struct: Some(r#struct),
             ..
-        } => {
-            format!("{}", writable_type(struct_type))
-        }
+        } => format!("{}", struct_type(spec, r#struct)),
         AttrType::String => "&CStr".into(),
         AttrType::Pad { .. } | AttrType::Binary { .. } => "&[u8]".into(),
         AttrType::IndexedArray { sub_type } => match sub_type {
-            IndexedArrayType::Plain { attr } => dump_string_type(attr),
+            IndexedArrayType::Plain { attr } => dump_string_type(spec, attr),
             IndexedArrayType::Nest { nested_attributes } => {
                 format!("{}", writable_type(nested_attributes))
             }
@@ -132,7 +132,7 @@ pub fn dump_writable_attr(out: &mut Vec<u8>, n: &mut Nest, spec: &Spec, attr: &A
             writeln!(out, ".array_{}()", kebab_to_rust(&attr.name)).unwrap();
             match sub_type {
                 IndexedArrayType::Plain { attr } => {
-                    let rust_type = dump_string_type(attr);
+                    let rust_type = dump_string_type(spec, attr);
                     n.indent(out);
                     writeln!(out, ".entry(val) // {rust_type}",).unwrap();
                 }
@@ -176,7 +176,7 @@ pub fn dump_writable_attr(out: &mut Vec<u8>, n: &mut Nest, spec: &Spec, attr: &A
                 let mut comm = String::new();
                 if let Some(fixed_header) = &sub_attr.fixed_header {
                     args = "fixed_header".to_string();
-                    comm = format!(" // {}", writable_type(fixed_header));
+                    comm = format!(" // {}", struct_type(spec, fixed_header));
                 }
 
                 if sub_attr.attribute_set.is_some() {
@@ -196,7 +196,7 @@ pub fn dump_writable_attr(out: &mut Vec<u8>, n: &mut Nest, spec: &Spec, attr: &A
             }
         }
         _ => {
-            let rust_type = dump_string_type(attr);
+            let rust_type = dump_string_type(spec, attr);
 
             n.indent(out);
             writeln!(
@@ -256,7 +256,7 @@ fn dump_shorthand_attr(
     }
 
     let name = shorthand_name(&attr.name);
-    let rust_type = dump_string_type(attr);
+    let rust_type = dump_string_type(spec, attr);
 
     if let AttrType::Nest { .. } = &attr.r#type {
         n.indent_advance(out);
@@ -438,7 +438,7 @@ fn dump_readable_attr(out: &mut Vec<u8>, n: &mut Nest, spec: &Spec, attr: &AttrP
             n.end(out);
         }
         _ => {
-            let rust_type = dump_string_type(attr);
+            let rust_type = dump_string_type(spec, attr);
 
             n.indent(out);
             writeln!(out, "{name}(val) => {{}}, // {rust_type}",).unwrap();

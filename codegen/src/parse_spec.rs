@@ -21,6 +21,9 @@ impl ByteOrder {
     pub fn host() -> Self {
         Self::Host
     }
+    pub fn is_host(&self) -> bool {
+        matches!(self, Self::Host)
+    }
 }
 
 impl Default for ByteOrder {
@@ -148,6 +151,14 @@ pub enum AttrType {
         sub_type: IndexedArrayType,
     },
 
+    // Experimental
+    #[serde(rename = "cbitfield")]
+    #[serde(rename_all = "kebab-case")]
+    CBitField {
+        bits: usize,
+        sub_type: CBitFieldType,
+    },
+
     // And some weird ones
     /// Translated to a corresponding binary struct type in [`Spec::fixup()`]
     Bitfield32,
@@ -173,6 +184,15 @@ impl Default for AttrType {
     fn default() -> Self {
         Self::Undefined
     }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "kebab-case")]
+pub enum CBitFieldType {
+    U8,
+    U16,
+    #[serde(alias = "uint")]
+    U32,
 }
 
 /// Same as [`AttrType`], but can be used inside [`AttrType::IndexedArray`]
@@ -606,6 +626,9 @@ pub struct Spec {
     /// not an enum value.
     #[allow(unused)]
     pub max_by_define: Option<bool>,
+
+    #[serde(default)]
+    pub experimental: Experimental,
 
     pub definitions: Vec<Definition>,
     pub attribute_sets: Vec<AttrSet>,

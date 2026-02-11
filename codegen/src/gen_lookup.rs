@@ -5,15 +5,15 @@ use crate::{
     gen_defs::GenImplStruct,
     gen_iterable::iterable_name,
     gen_ops::OpHeader,
+    gen_struct::struct_type,
     gen_utils::{kebab_to_type, sanitize_ident},
-    gen_writable::writable_type,
     parse_spec::{AttrSet, AttrType, IndexedArrayType, Spec},
     Context,
 };
 
 pub fn gen_lookup(
     tokens: &mut TokenStream,
-    _spec: &Spec,
+    spec: &Spec,
     _ctx: &mut Context,
     m: &GenImplStruct,
     set: &AttrSet,
@@ -74,7 +74,7 @@ pub fn gen_lookup(
     }
 
     let correct_for_header_len = if let Some(fixed_header) = fixed_header {
-        let name = writable_type(&fixed_header.name);
+        let name = struct_type(spec, &fixed_header.name);
         quote!(+ #name::len())
     } else {
         quote!()

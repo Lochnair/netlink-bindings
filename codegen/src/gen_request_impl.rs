@@ -4,6 +4,7 @@ use quote::{format_ident, quote, ToTokens};
 use crate::{
     gen_iterable::{gen_decoder_new_impl, iterable_name, DecoderNewImpl},
     gen_ops::OpHeader,
+    gen_struct::struct_type,
     gen_utils::{kebab_to_rust, kebab_to_type},
     gen_writable::writable_type,
     parse_spec::{AttrSet, Spec},
@@ -52,7 +53,7 @@ pub fn gen_request(tokens: &mut TokenStream, _ctx: &mut Context, spec: &Spec, re
         }
 
         if let Some(header) = header.as_ref().filter(|h| h.construct_header.is_none()) {
-            let header = writable_type(&header.name);
+            let header = struct_type(spec, &header.name);
             op_args = quote!(#op_args, header: &#header);
             new_args = quote!(#new_args, header);
         };
@@ -257,7 +258,7 @@ pub fn gen_request_wrapper(
         encoder_new = quote!(new);
         if let Some(fixed_header) = request_header {
             let request_type_ident = format_ident!("request_type").to_token_stream();
-            let header = writable_type(&fixed_header.name);
+            let header = struct_type(spec, &fixed_header.name);
             let header_var = format_ident!("header");
             if let Some(fill) = &fixed_header.construct_header {
                 let fill = fill(&header_var, needs_value.then_some(&request_type_ident));
@@ -282,7 +283,7 @@ pub fn gen_request_wrapper(
             return_type: reply_return_typen,
             body: reply_body,
             ..
-        } = gen_decoder_new_impl(reply_attrs, reply_header);
+        } = gen_decoder_new_impl(spec, reply_attrs, reply_header);
 
         let request_attrs = spec.find_attr(transparent_request_attrs);
         let DecoderNewImpl {
@@ -333,8 +334,8 @@ pub fn gen_request_wrapper(
                 }
             };
         } else {
-            let request_header = writable_type(&request_header.name);
-            let reply_header = writable_type(&reply_header.as_ref().unwrap().name);
+            let request_header = struct_type(spec, &request_header.name);
+            let reply_header = struct_type(spec, &reply_header.as_ref().unwrap().name);
             reply_type = quote!((#reply_header, #decoder_iter<'buf>));
             request_type = quote!((#request_header, #encoder_iter<'buf>));
             map_decoder = quote!(.1);
@@ -615,6 +616,14 @@ pub fn gen_request_chained(tokens: &mut TokenStream, requests: &[OpInfo]) {
                 header.set_type(request_type);
                 header.set_flags(flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16);
                 header.set_seq(seq);
+
+                // let mut header = PushNlmsghdr {
+                //     len: (buf.len() - header_offset) as u32,
+                //     r#type: request_type,
+                //     flags: flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16,
+                //     seq,
+                //     pid: 0,
+                // };
 
                 buf[header_offset..(header_offset+16)].clone_from_slice(header.as_slice());
             }

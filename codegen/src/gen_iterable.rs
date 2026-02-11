@@ -6,9 +6,9 @@ use crate::{
     gen_attrs::{gen_attr_type, gen_attr_type_name},
     gen_defs::GenImplStruct,
     gen_ops::OpHeader,
+    gen_struct::struct_type,
     gen_sub_message::{self},
     gen_utils::{kebab_to_rust, kebab_to_type, lifetime_needed_attrs, sanitize_ident},
-    gen_writable::writable_type,
     parse_spec::{
         AttrProp, AttrSet, AttrType, ByteOrder, DefType, Definition, IndexedArrayType, Spec,
     },
@@ -136,7 +136,7 @@ pub fn gen_iterable_attrs(
         lifetime = quote!(<'a>)
     };
 
-    let new_impl = gen_decoder_new_impl(set, fixed_header).full;
+    let new_impl = gen_decoder_new_impl(spec, set, fixed_header).full;
 
     let mut impl_lifetime = quote!();
     if lifetime_needed_attrs(set) {
@@ -249,7 +249,7 @@ pub fn gen_iterable_parse(spec: &Spec, attr: &AttrProp) -> TokenStream {
             r#struct: Some(r#struct),
             ..
         } => {
-            let struct_type = writable_type(r#struct);
+            let struct_type = struct_type(spec, r#struct);
             return match &spec.try_find_def(r#struct) {
                 Some(Definition {
                     def:
@@ -270,7 +270,7 @@ pub fn gen_iterable_parse(spec: &Spec, attr: &AttrProp) -> TokenStream {
         AttrType::IndexedArray { sub_type, .. } => {
             let arr = match sub_type {
                 IndexedArrayType::Plain { attr } => {
-                    let name_str = gen_attr_type_name(attr);
+                    let name_str = gen_attr_type_name(spec, attr);
                     array_iterable_name(&name_str)
                 }
                 IndexedArrayType::Nest { nested_attributes } => {
@@ -308,14 +308,14 @@ pub fn gen_iterable_array(
 
     match sub_type {
         IndexedArrayType::Plain { attr } => {
-            (item, _) = gen_attr_type(attr);
+            (item, _) = gen_attr_type(spec, attr);
             attrs_name = None;
             let parse_attr = gen_iterable_parse(spec, attr);
             parse = quote!({
                 let Some(res) = #parse_attr else { break };
                 return Some(Ok(res));
             });
-            name_str = gen_attr_type_name(attr);
+            name_str = gen_attr_type_name(spec, attr);
             arr = array_iterable_name(&name_str);
         }
         IndexedArrayType::Nest { nested_attributes } => {
@@ -407,12 +407,16 @@ pub struct DecoderNewImpl {
     pub full: TokenStream,
 }
 
-pub fn gen_decoder_new_impl(set: &AttrSet, fixed_header: Option<&OpHeader>) -> DecoderNewImpl {
+pub fn gen_decoder_new_impl(
+    spec: &Spec,
+    set: &AttrSet,
+    fixed_header: Option<&OpHeader>,
+) -> DecoderNewImpl {
     let return_type;
     let body;
     let iter = iterable_name(&set.name);
     if let Some(fixed_header) = fixed_header {
-        let header = writable_type(&fixed_header.name);
+        let header = struct_type(spec, &fixed_header.name);
         // TODO: verify fixed header length and contents
         if fixed_header.construct_header.is_some() {
             return_type = quote!(#iter<'a>);

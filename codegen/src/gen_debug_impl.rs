@@ -5,8 +5,8 @@ use crate::{
     gen_attrs::gen_attr_type_name,
     gen_defs::GenImplStruct,
     gen_iterable::{array_iterable_name, iterable_name},
+    gen_struct::struct_type,
     gen_utils::{kebab_to_type, lifetime_needed_attrs, sanitize_ident},
-    gen_writable::writable_type,
     parse_spec::{AttrSet, AttrType, DefType, IndexedArrayType, Spec},
     Context,
 };
@@ -14,14 +14,14 @@ use crate::{
 pub fn gen_introspect_array(
     tokens: &mut TokenStream,
     ctx: &mut Context,
-    _spec: &Spec,
+    spec: &Spec,
     sub_type: &IndexedArrayType,
 ) {
     let fmt_name = format_ident!("fmt");
 
     let arr = match sub_type {
         IndexedArrayType::Plain { attr } => {
-            let name_str = gen_attr_type_name(attr);
+            let name_str = gen_attr_type_name(spec, attr);
             array_iterable_name(&name_str)
         }
         IndexedArrayType::Nest { nested_attributes } => array_iterable_name(nested_attributes),
@@ -104,7 +104,7 @@ pub fn gen_introspect_attrs(
                 if next.display_hint.as_ref().is_some_and(|h| h.ends_with("[]")) =>
             {
                 let c_type = next.display_hint.as_ref().unwrap().strip_suffix("[]").unwrap();
-                let rust_type = writable_type(c_type);
+                let rust_type = struct_type(spec, c_type);
                 variants.extend(quote! {
                     #type_name::#name(#val_name) => {
                         let iter = #val_name.chunks(#rust_type::len()).map(|b| #rust_type::new_from_zeroed(b));

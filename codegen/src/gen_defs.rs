@@ -4,11 +4,14 @@ use syn::Ident;
 
 use crate::{
     gen_utils::{kebab_to_type, kebab_to_upper, sanitize_ident},
-    parse_spec::{DefType, Definition, EnumEntry, Spec},
+    parse_spec::{CBitFieldType, DefType, Definition, EnumEntry, Spec},
 };
 
+#[derive(Debug)]
 pub struct GenImplStruct {
     pub off: usize,
+    pub bit_off: usize,
+    pub last_bit_type: Option<(CBitFieldType, usize, Ident)>,
     pub alignment: usize,
     pub lifetime_needed: bool,
     pub type_name: Ident,

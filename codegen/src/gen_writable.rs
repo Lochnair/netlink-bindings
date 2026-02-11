@@ -5,8 +5,9 @@ use quote::{format_ident, quote, ToTokens};
 use syn::Ident;
 
 use crate::{
-    gen_defs::GenImplStruct,
+    gen_cstruct::gen_cstruct,
     gen_ops::OpHeader,
+    gen_struct::{gen_struct, gen_struct_len, struct_type},
     gen_sub_message::{self, SelectorType},
     gen_utils::{doc_attr, kebab_to_rust, kebab_to_type},
     parse_spec::{AttrProp, AttrSet, AttrType, ByteOrder, DefType, IndexedArrayType, Spec},
@@ -17,14 +18,14 @@ pub fn writable_type(name: &str) -> Ident {
     format_ident!("Push{}", kebab_to_type(name))
 }
 
-pub fn writable_array_type(attr: &IndexedArrayType) -> Ident {
+pub fn writable_array_type(spec: &Spec, attr: &IndexedArrayType) -> Ident {
     let rust_type = match attr {
         IndexedArrayType::Plain { attr } => match &attr.r#type {
             AttrType::U32 => "U32".into(),
             AttrType::Binary {
                 r#struct: Some(r#struct),
                 ..
-            } => writable_type(r#struct).to_string(),
+            } => struct_type(spec, r#struct).to_string(),
             AttrType::Binary { .. } => "Binary".into(),
             other => unreachable!("{other:?}"),
         },
@@ -45,7 +46,12 @@ pub fn gen_writable(spec: &Spec, ctx: &mut Context) -> TokenStream {
         let DefType::Struct { members, .. } = &def.def else {
             continue;
         };
-        gen_writable_struct(&mut tokens, spec, &def.name, members);
+
+        match spec.experimental.struct_type.as_ref().map(|s| s.as_str()) {
+            None | Some("buf") => gen_struct(&mut tokens, spec, &def.name, members),
+            Some("cstruct") => gen_cstruct(&mut tokens, spec, &def.name, members),
+            t => panic!("Unknown rfc struct type: {t:?}"),
+        }
     }
 
     tokens
@@ -91,7 +97,7 @@ pub fn gen_writable_attrset(
     }
 
     let new_impl = if let Some(fixed_header) = fixed_header {
-        let header = writable_type(&fixed_header.name);
+        let header = struct_type(spec, &fixed_header.name);
         let header_var = format_ident!("header");
         if let Some(fill) = &fixed_header.construct_header {
             let fill = fill(&header_var, request_type_ident.as_ref());
@@ -191,7 +197,7 @@ pub fn gen_writable_attrset(
                 let mut header_type = None;
                 if let Some(fixed_header) = &sub_attr.fixed_header {
                     spec.find_def(fixed_header);
-                    header_type = Some(writable_type(fixed_header).into_token_stream());
+                    header_type = Some(struct_type(spec, fixed_header).into_token_stream());
                 }
 
                 let mut attrs_type = None;
@@ -300,7 +306,19 @@ pub fn gen_writable_attrset(
         let func = format_ident!("push_{}", kebab_to_rust(&next.name));
         let value_name = format_ident!("value");
 
-        let (rust_type, inner, plain, len) = gen_writable_type(next);
+        let WritableType {
+            rust_type,
+            encode_expr: inner,
+            encode_block: plain,
+            size_expr: len,
+            // align,
+            ..
+        } = gen_writable_type(spec, next);
+
+        let do_align = quote!();
+        // TODO: is it realy needed? looks like kernel is always read u64 as unaligned anyways,
+        // but what about structs?
+        // let do_align = crate::gen_cstruct::gen_push_align(spec, set, next, align);
 
         let inner = if !inner.is_empty() && !matches!(next.r#type, AttrType::Flag) {
             quote!(self.as_rec_mut().extend(#inner);)
@@ -310,6 +328,7 @@ pub fn gen_writable_attrset(
 
         impls.extend(quote! {
             pub fn #func(mut self, #value_name: #rust_type) -> Self {
+                #do_align
                 push_header(self.as_rec_mut(), #id, #len as u16);
                 #inner
                 #plain
@@ -324,6 +343,7 @@ pub fn gen_writable_attrset(
             doc_attr(next, |doc| impls.extend(quote!(#[doc = #doc])));
             impls.extend(quote! {
                 pub fn #write_func(mut self) -> PushWriter<Self> {
+                    #do_align
                     let header_offset = write_header(self.as_rec_mut(), #id);
                     PushWriter { prev: Some(self), header_offset: Some(header_offset) }
                 }
@@ -361,8 +381,16 @@ pub fn gen_writable_attrset(
     });
 }
 
-/// (rust_type, encode (immediate encoding), plain (statement before encode), len)
-pub fn gen_writable_type(next: &AttrProp) -> (TokenStream, TokenStream, TokenStream, TokenStream) {
+pub struct WritableType {
+    pub rust_type: TokenStream,
+    pub encode_expr: TokenStream,
+    pub encode_block: TokenStream,
+    pub size_expr: TokenStream,
+    #[allow(unused)]
+    pub align: usize,
+}
+
+pub fn gen_writable_type(spec: &Spec, next: &AttrProp) -> WritableType {
     let value_name = format_ident!("value");
     let ord = match next.byte_order {
         ByteOrder::Host => "ne",
@@ -372,65 +400,78 @@ pub fn gen_writable_type(next: &AttrProp) -> (TokenStream, TokenStream, TokenStr
     let encode = format_ident!("to_{ord}_bytes");
 
     match &next.r#type {
-        AttrType::Flag => (quote!(()), quote!(()), quote!(), quote!(0)),
-        AttrType::U32 if next.is_ipv4() => (
-            quote!(std::net::Ipv4Addr),
-            quote! { &#value_name.to_bits().#encode() },
-            quote!(),
-            quote!(4),
-        ),
-        AttrType::Binary { .. } if next.is_ipv6() => (
-            quote!(std::net::Ipv6Addr),
-            quote! { &#value_name.to_bits().#encode() },
-            quote!(),
-            quote!(16),
-        ),
-        AttrType::Binary { .. } if next.is_ip() => (
-            quote!(std::net::IpAddr),
-            quote!(),
-            quote! { encode_ip(self.as_rec_mut(), #value_name); },
-            quote! {{
+        AttrType::Flag => WritableType {
+            rust_type: quote!(()),
+            encode_expr: quote!(()),
+            encode_block: quote!(),
+            size_expr: quote!(0),
+            align: 0,
+        },
+        AttrType::U32 if next.is_ipv4() => WritableType {
+            rust_type: quote!(std::net::Ipv4Addr),
+            encode_expr: quote! { &#value_name.to_bits().#encode() },
+            encode_block: quote!(),
+            size_expr: quote!(4),
+            align: 4,
+        },
+        AttrType::Binary { .. } if next.is_ipv6() => WritableType {
+            rust_type: quote!(std::net::Ipv6Addr),
+            encode_expr: quote! { &#value_name.to_bits().#encode() },
+            encode_block: quote!(),
+            size_expr: quote!(16),
+            align: 4,
+        },
+        AttrType::Binary { .. } if next.is_ip() => WritableType {
+            rust_type: quote!(std::net::IpAddr),
+            encode_expr: quote!(),
+            encode_block: quote! { encode_ip(self.as_rec_mut(), #value_name); },
+            size_expr: quote! {{
                 match &#value_name {
                     IpAddr::V4(_) => 4,
                     IpAddr::V6(_) => 16,
                 }
             }},
-        ),
-        AttrType::Binary { .. } if next.is_sockaddr() => (
-            quote!(std::net::SocketAddr),
-            quote!(),
-            quote! { encode_sockaddr(self.as_rec_mut(), #value_name); },
-            quote! {{
+            align: 4,
+        },
+        AttrType::Binary { .. } if next.is_sockaddr() => WritableType {
+            rust_type: quote!(std::net::SocketAddr),
+            encode_expr: quote!(),
+            encode_block: quote! { encode_sockaddr(self.as_rec_mut(), #value_name); },
+            size_expr: quote! {{
                 match &#value_name {
                     SocketAddr::V4(_) => 16,
                     SocketAddr::V6(_) => 28,
                 }
             }},
-        ),
+            align: 4,
+        },
         AttrType::Binary {
-            r#struct: Some(struct_type),
+            r#struct: Some(r#struct),
             ..
         } => {
-            let struct_type = writable_type(struct_type);
-            (
-                quote!(#struct_type),
-                quote!(#value_name.as_slice()),
-                quote!(),
-                quote!(#value_name.as_slice().len()),
-            )
+            let rust_type = struct_type(spec, r#struct);
+            WritableType {
+                rust_type: quote!(#rust_type),
+                encode_expr: quote!(#value_name.as_slice()),
+                encode_block: quote!(),
+                size_expr: quote!(#value_name.as_slice().len()),
+                align: gen_struct_len(spec, r#struct).1,
+            }
         }
-        AttrType::String => (
-            quote!(&CStr),
-            quote!(#value_name.to_bytes_with_nul()),
-            quote!(),
-            quote!(#value_name.to_bytes_with_nul().len()),
-        ),
-        AttrType::Pad { .. } | AttrType::Binary { .. } => (
-            quote!(&[u8]),
-            quote!(#value_name),
-            quote!(),
-            quote!(#value_name.len()),
-        ),
+        AttrType::String => WritableType {
+            rust_type: quote!(&CStr),
+            encode_expr: quote!(#value_name.to_bytes_with_nul()),
+            encode_block: quote!(),
+            size_expr: quote!(#value_name.to_bytes_with_nul().len()),
+            align: 1,
+        },
+        AttrType::Pad { .. } | AttrType::Binary { .. } => WritableType {
+            rust_type: quote!(&[u8]),
+            encode_expr: quote!(#value_name),
+            encode_block: quote!(),
+            size_expr: quote!(#value_name.len()),
+            align: 1,
+        },
         r#type => {
             let (rust_type, len) = match r#type {
                 AttrType::U8 => (quote!(u8), 1),
@@ -443,282 +484,35 @@ pub fn gen_writable_type(next: &AttrProp) -> (TokenStream, TokenStream, TokenStr
                 AttrType::S64 => (quote!(i64), 8),
                 r#type => unreachable!("{:?}", r#type),
             };
-            (
+            WritableType {
                 rust_type,
-                quote!(#value_name.#encode()),
-                quote!(),
-                Literal::u16_unsuffixed(len).into_token_stream(),
-            )
+                encode_expr: quote!(#value_name.#encode()),
+                encode_block: quote!(),
+                size_expr: Literal::u16_unsuffixed(len as u16).into_token_stream(),
+                align: len,
+            }
         }
     }
-}
-
-pub fn gen_def_struct_len(spec: &Spec, r#struct: &str) -> (usize, usize) {
-    let DefType::Struct { members, .. } = &spec.find_def(r#struct).def else {
-        unreachable!("{:?}", r#struct);
-    };
-
-    let mut len = 0;
-    let mut alignment = 1;
-    for member in members {
-        let (member_len, member_alignment) = match &member.r#type {
-            AttrType::U8 => (1, 1),
-            AttrType::U16 => (2, 2),
-            AttrType::U32 => (4, 4),
-            AttrType::U64 => (8, 8),
-            AttrType::S8 => (1, 1),
-            AttrType::S16 => (2, 2),
-            AttrType::S32 => (4, 4),
-            AttrType::S64 => (8, 8),
-            AttrType::Pad { len: Some(len) } => (*len, 1),
-            AttrType::Binary {
-                r#struct: Some(r#struct),
-                ..
-            } => gen_def_struct_len(spec, r#struct),
-            r#type => unreachable!("{:?}", r#type),
-        };
-        len += member_len;
-        alignment = alignment.max(member_alignment);
-    }
-
-    (align_up(len, alignment), alignment)
-}
-
-pub const fn align_up(len: usize, alignment: usize) -> usize {
-    ((len) + alignment - 1) & !(alignment - 1)
-}
-
-pub fn gen_def_struct_uint_writable(
-    spec: &Spec,
-    members: &mut TokenStream,
-    debug: &mut TokenStream,
-    m: &mut GenImplStruct,
-    attr: &AttrProp,
-) {
-    let value_name = format_ident!("value");
-    let getter_prefix = match attr.name.as_str() {
-        "type" | "len" => "get_",
-        _ => "",
-    };
-    let getter_name = format_ident!("{getter_prefix}{}", kebab_to_rust(&attr.name));
-    let setter_name = format_ident!("set_{}", kebab_to_rust(&attr.name));
-
-    let mut docs = TokenStream::new();
-    doc_attr(attr, |doc| docs.extend(quote!(#[doc = #doc])));
-
-    let (rust_type, len) = match &attr.r#type {
-        AttrType::U8 => ("u8", 1),
-        AttrType::U16 => ("u16", 2),
-        AttrType::U32 => ("u32", 4),
-        AttrType::U64 => ("u64", 8),
-        AttrType::S8 => ("i8", 1),
-        AttrType::S16 => ("i16", 2),
-        AttrType::S32 => ("i32", 4),
-        AttrType::S64 => ("i64", 8),
-        AttrType::Pad { len: Some(len) } => {
-            m.off += len;
-            return;
-        }
-        AttrType::Binary {
-            r#struct: Some(r#struct),
-            ..
-        } => {
-            let rust_type = writable_type(r#struct);
-
-            let (len, alignment) = gen_def_struct_len(spec, r#struct);
-
-            m.off = align_up(m.off, alignment);
-            m.alignment = m.alignment.max(alignment);
-
-            let first = m.off;
-            let last = m.off + len;
-            m.off += len;
-
-            members.extend(quote! {
-                #docs
-                pub fn #getter_name(&self) -> #rust_type {
-                    #rust_type::new_from_slice(&self.buf[#first..#last]).unwrap()
-                }
-                #docs
-                pub fn #setter_name(&mut self, #value_name: #rust_type) {
-                    self.buf[#first..#last].copy_from_slice(&#value_name.as_slice())
-                }
-            });
-
-            let name = kebab_to_rust(&attr.name);
-            debug.extend(quote! {
-                .field(#name, &self.#getter_name())
-            });
-
-            return;
-        }
-        AttrType::Binary {
-            r#struct: None,
-            len: Some(len),
-        } => {
-            let rust_type = quote!([u8; #len]);
-
-            let first = m.off;
-            let last = m.off + len;
-            m.off += len;
-
-            members.extend(quote! {
-                #docs
-                pub fn #getter_name(&self) -> #rust_type {
-                    self.buf[#first..#last].try_into().unwrap()
-                }
-                #docs
-                pub fn #setter_name(&mut self, #value_name: #rust_type) {
-                    self.buf[#first..#last].copy_from_slice(&#value_name)
-                }
-            });
-
-            let name = kebab_to_rust(&attr.name);
-            debug.extend(quote! {
-                .field(#name, &self.#getter_name())
-            });
-
-            return;
-        }
-        other => todo!("{:?}", other),
-    };
-
-    let rust_type = format_ident!("{}", rust_type);
-
-    m.alignment = m.alignment.max(len);
-    m.off = align_up(m.off, len);
-
-    let first = m.off;
-    let last = m.off + len;
-    m.off += len;
-
-    let ord = match attr.byte_order {
-        ByteOrder::Host => "",
-        ByteOrder::Little => "_le",
-        ByteOrder::Big => "_be",
-    };
-    let parse = format_ident!("parse{ord}_{rust_type}");
-
-    let encode_ord = match attr.byte_order {
-        ByteOrder::Host => "ne",
-        ByteOrder::Little => "le",
-        ByteOrder::Big => "be",
-    };
-    let encode = format_ident!("to_{encode_ord}_bytes");
-
-    members.extend(quote! {
-        #docs
-        pub fn #getter_name(&self) -> #rust_type {
-            #parse(&self.buf[#first..#last]).unwrap()
-        }
-        #docs
-        pub fn #setter_name(&mut self, #value_name: #rust_type) {
-            self.buf[#first..#last].copy_from_slice(&#value_name.#encode())
-        }
-    });
-
-    let name = kebab_to_rust(&attr.name);
-    debug.extend(quote! {
-        .field(#name, &self.#getter_name())
-    });
-}
-
-// Binary structures are aligned according to C conventions
-// Link: https://www.gnu.org/software/c-intro-and-ref/manual/html_node/Structure-Layout.html
-pub fn gen_writable_struct(
-    tokens: &mut TokenStream,
-    spec: &Spec,
-    name: &str,
-    members: &[AttrProp],
-) {
-    let type_name = format_ident!("Push{}", kebab_to_type(name));
-    let name_str = kebab_to_type(name);
-
-    let mut m = GenImplStruct {
-        off: 0,
-        alignment: 0,
-        lifetime_needed: false,
-        type_name: type_name.clone(),
-    };
-
-    let mut inner = TokenStream::new();
-    let mut debug = TokenStream::new();
-    for attr in members {
-        gen_def_struct_uint_writable(spec, &mut inner, &mut debug, &mut m, attr);
-    }
-
-    let fmt_name = format_ident!("fmt");
-
-    let len = align_up(m.off, m.alignment);
-    tokens.extend(quote! {
-        #[derive(Clone)]
-        pub struct #type_name {
-            pub(crate) buf: [u8; #len],
-        }
-
-        #[doc = "Create zero-initialized struct"]
-        impl Default for #type_name {
-            fn default() -> Self {
-                Self { buf: [0u8; #len] }
-            }
-        }
-
-        impl #type_name {
-            #[doc = "Create zero-initialized struct"]
-            pub fn new() -> Self {
-                Default::default()
-            }
-            #[doc = "Copy from contents from other slice"]
-            pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-                if other.len() != Self::len() {
-                    return None;
-                }
-                let mut buf = [0u8; Self::len()];
-                buf.clone_from_slice(other);
-                Some(Self { buf })
-            }
-            #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-            pub fn new_from_zeroed(other: &[u8]) -> Self {
-                let mut buf = [0u8; Self::len()];
-                let len = buf.len().min(other.len());
-                buf[..len].clone_from_slice(&other[..len]);
-                Self { buf }
-            }
-            pub fn as_slice(&self) -> &[u8] {
-                &self.buf
-            }
-            pub fn as_mut_slice(&mut self) -> &mut [u8] {
-                &mut self.buf
-            }
-            pub const fn len() -> usize {
-                #len
-            }
-            #inner
-        }
-
-        impl std::fmt::Debug for #type_name {
-            fn fmt(&self, #fmt_name: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                #fmt_name
-                    .debug_struct(#name_str)
-                    #debug
-                    .finish()
-            }
-        }
-    });
 }
 
 pub fn gen_writable_index_array(
     tokens: &mut TokenStream,
     ctx: &mut Context,
-    _spec: &Spec,
+    spec: &Spec,
     sub_type: &IndexedArrayType,
 ) -> Ident {
     let mut impls = TokenStream::new();
-    let array_type = writable_array_type(sub_type);
+    let array_type = writable_array_type(spec, sub_type);
 
     match sub_type {
         IndexedArrayType::Plain { attr } => {
-            let (rust_type, inner, plain, len) = gen_writable_type(attr);
+            let WritableType {
+                rust_type,
+                encode_expr: inner,
+                encode_block: plain,
+                size_expr: len,
+                ..
+            } = gen_writable_type(spec, attr);
 
             let inner = if !inner.is_empty() && !matches!(attr.r#type, AttrType::Flag) {
                 quote!(self.as_rec_mut().extend(#inner);)
