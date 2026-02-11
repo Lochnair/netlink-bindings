@@ -36,7 +36,7 @@ fn main() {
 
     if args.strace.is_empty() {
         println!("No input strace specified");
-        println!("Run: strace -o ./output_file --decode-fd=socket -e %network --{{write,read}}=$(seq -s, 0 100) -- <command...>");
+        println!("Run: strace -o ./output_file --decode-fd=socket -e execve,%network --{{write,read}}=$(seq -s, 0 100) -- <command...>");
         let buf = std::fs::read_link("/proc/self/exe").unwrap_or_else(|_| "<this_command>".into());
         let cwd = std::env::current_dir().unwrap_or_else(|_| "".into());
         let self_loc = buf.strip_prefix(cwd).unwrap_or(&buf);
