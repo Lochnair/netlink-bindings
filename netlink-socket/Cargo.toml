@@ -40,6 +40,10 @@ required-features = [ "netlink-bindings/nl80211", "netlink-bindings/rt-link" ]
 name = "tc-prio"
 required-features = [ "netlink-bindings/tc", "netlink-bindings/rt-link" ]
 
+[[example]]
+name = "tcp-rtt"
+required-features = [ "netlink-bindings/inet-diag" ]
+
 [features]
 async = []
 tokio = [ "async", "dep:tokio"]

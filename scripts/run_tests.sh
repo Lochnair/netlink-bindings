@@ -2,8 +2,8 @@
 
 set -e
 
-features="conntrack,rt-link,rt-addr,wireguard,nftables,nl80211,tc"
-examples="conntrack wireguard-setup nftables nftables-api nl80211 nl80211-raw tc-prio"
+features="conntrack,rt-link,rt-addr,wireguard,nftables,nl80211,tc,inet-diag"
+examples="conntrack wireguard-setup nftables nftables-api nl80211 nl80211-raw tc-prio tcp-rtt"
 
 run() {
   echo >&2
