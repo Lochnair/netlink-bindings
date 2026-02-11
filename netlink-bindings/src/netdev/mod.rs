@@ -3795,6 +3795,9 @@ impl<Prev: Rec> Rec for PushDev<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushDev<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -3863,6 +3866,9 @@ impl<Prev: Rec> Rec for PushIoUringProviderInfo<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushIoUringProviderInfo<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -3895,6 +3901,9 @@ pub struct PushPagePool<Prev: Rec> {
 impl<Prev: Rec> Rec for PushPagePool<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushPagePool<Prev> {
@@ -3979,6 +3988,9 @@ impl<Prev: Rec> Rec for PushPagePoolInfo<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushPagePoolInfo<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -4023,6 +4035,9 @@ pub struct PushPagePoolStats<Prev: Rec> {
 impl<Prev: Rec> Rec for PushPagePoolStats<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushPagePoolStats<Prev> {
@@ -4120,6 +4135,9 @@ impl<Prev: Rec> Rec for PushNapi<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushNapi<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -4201,6 +4219,9 @@ impl<Prev: Rec> Rec for PushXskInfo<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushXskInfo<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -4233,6 +4254,9 @@ pub struct PushQueue<Prev: Rec> {
 impl<Prev: Rec> Rec for PushQueue<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushQueue<Prev> {
@@ -4312,6 +4336,9 @@ pub struct PushQstats<Prev: Rec> {
 impl<Prev: Rec> Rec for PushQstats<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushQstats<Prev> {
@@ -4532,6 +4559,9 @@ impl<Prev: Rec> Rec for PushQueueId<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushQueueId<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -4576,6 +4606,9 @@ pub struct PushDmabuf<Prev: Rec> {
 impl<Prev: Rec> Rec for PushDmabuf<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushDmabuf<Prev> {
@@ -4636,6 +4669,9 @@ pub struct PushOpDevGetDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpDevGetDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpDevGetDumpRequest<Prev> {
@@ -4775,6 +4811,9 @@ pub struct PushOpDevGetDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpDevGetDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpDevGetDumpReply<Prev> {
@@ -5129,9 +5168,11 @@ impl<'r> RequestOpDevGetDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpDevGetDumpRequest<RequestBuf<'r>> {
         PushOpDevGetDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpDevGetDumpRequest<'buf> {
+        OpDevGetDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpDevGetDumpRequest<'_> {
-    type ReplyType<'buf> = IterableOpDevGetDumpReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -5141,6 +5182,7 @@ impl NetlinkRequest for RequestOpDevGetDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpDevGetDumpReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpDevGetDumpReply::new(buf)
     }
@@ -5160,6 +5202,9 @@ pub struct PushOpDevGetDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpDevGetDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpDevGetDoRequest<Prev> {
@@ -5353,6 +5398,9 @@ pub struct PushOpDevGetDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpDevGetDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpDevGetDoReply<Prev> {
@@ -5705,9 +5753,11 @@ impl<'r> RequestOpDevGetDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpDevGetDoRequest<RequestBuf<'r>> {
         PushOpDevGetDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpDevGetDoRequest<'buf> {
+        OpDevGetDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpDevGetDoRequest<'_> {
-    type ReplyType<'buf> = IterableOpDevGetDoReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -5717,6 +5767,7 @@ impl NetlinkRequest for RequestOpDevGetDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpDevGetDoReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpDevGetDoReply::new(buf)
     }
@@ -5736,6 +5787,9 @@ pub struct PushOpPagePoolGetDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpPagePoolGetDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpPagePoolGetDumpRequest<Prev> {
@@ -5875,6 +5929,9 @@ pub struct PushOpPagePoolGetDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpPagePoolGetDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpPagePoolGetDumpReply<Prev> {
@@ -6332,9 +6389,11 @@ impl<'r> RequestOpPagePoolGetDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpPagePoolGetDumpRequest<RequestBuf<'r>> {
         PushOpPagePoolGetDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpPagePoolGetDumpRequest<'buf> {
+        OpPagePoolGetDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpPagePoolGetDumpRequest<'_> {
-    type ReplyType<'buf> = IterableOpPagePoolGetDumpReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -6344,6 +6403,7 @@ impl NetlinkRequest for RequestOpPagePoolGetDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpPagePoolGetDumpReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpPagePoolGetDumpReply::new(buf)
     }
@@ -6363,6 +6423,9 @@ pub struct PushOpPagePoolGetDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpPagePoolGetDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpPagePoolGetDoRequest<Prev> {
@@ -6556,6 +6619,9 @@ pub struct PushOpPagePoolGetDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpPagePoolGetDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpPagePoolGetDoReply<Prev> {
@@ -7011,9 +7077,11 @@ impl<'r> RequestOpPagePoolGetDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpPagePoolGetDoRequest<RequestBuf<'r>> {
         PushOpPagePoolGetDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpPagePoolGetDoRequest<'buf> {
+        OpPagePoolGetDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpPagePoolGetDoRequest<'_> {
-    type ReplyType<'buf> = IterableOpPagePoolGetDoReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -7023,6 +7091,7 @@ impl NetlinkRequest for RequestOpPagePoolGetDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpPagePoolGetDoReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpPagePoolGetDoReply::new(buf)
     }
@@ -7042,6 +7111,9 @@ pub struct PushOpPagePoolStatsGetDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpPagePoolStatsGetDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpPagePoolStatsGetDumpRequest<Prev> {
@@ -7181,6 +7253,9 @@ pub struct PushOpPagePoolStatsGetDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpPagePoolStatsGetDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpPagePoolStatsGetDumpReply<Prev> {
@@ -7757,9 +7832,11 @@ impl<'r> RequestOpPagePoolStatsGetDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpPagePoolStatsGetDumpRequest<RequestBuf<'r>> {
         PushOpPagePoolStatsGetDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpPagePoolStatsGetDumpRequest<'buf> {
+        OpPagePoolStatsGetDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpPagePoolStatsGetDumpRequest<'_> {
-    type ReplyType<'buf> = IterableOpPagePoolStatsGetDumpReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -7769,6 +7846,7 @@ impl NetlinkRequest for RequestOpPagePoolStatsGetDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpPagePoolStatsGetDumpReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpPagePoolStatsGetDumpReply::new(buf)
     }
@@ -7788,6 +7866,9 @@ pub struct PushOpPagePoolStatsGetDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpPagePoolStatsGetDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpPagePoolStatsGetDoRequest<Prev> {
@@ -7984,6 +8065,9 @@ pub struct PushOpPagePoolStatsGetDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpPagePoolStatsGetDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpPagePoolStatsGetDoReply<Prev> {
@@ -8558,9 +8642,11 @@ impl<'r> RequestOpPagePoolStatsGetDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpPagePoolStatsGetDoRequest<RequestBuf<'r>> {
         PushOpPagePoolStatsGetDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpPagePoolStatsGetDoRequest<'buf> {
+        OpPagePoolStatsGetDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpPagePoolStatsGetDoRequest<'_> {
-    type ReplyType<'buf> = IterableOpPagePoolStatsGetDoReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -8570,6 +8656,7 @@ impl NetlinkRequest for RequestOpPagePoolStatsGetDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpPagePoolStatsGetDoReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpPagePoolStatsGetDoReply::new(buf)
     }
@@ -8589,6 +8676,9 @@ pub struct PushOpQueueGetDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpQueueGetDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpQueueGetDumpRequest<Prev> {
@@ -8782,6 +8872,9 @@ pub struct PushOpQueueGetDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpQueueGetDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpQueueGetDumpReply<Prev> {
@@ -9207,9 +9300,11 @@ impl<'r> RequestOpQueueGetDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpQueueGetDumpRequest<RequestBuf<'r>> {
         PushOpQueueGetDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpQueueGetDumpRequest<'buf> {
+        OpQueueGetDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpQueueGetDumpRequest<'_> {
-    type ReplyType<'buf> = IterableOpQueueGetDumpReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -9219,6 +9314,7 @@ impl NetlinkRequest for RequestOpQueueGetDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpQueueGetDumpReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpQueueGetDumpReply::new(buf)
     }
@@ -9238,6 +9334,9 @@ pub struct PushOpQueueGetDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpQueueGetDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpQueueGetDoRequest<Prev> {
@@ -9505,6 +9604,9 @@ pub struct PushOpQueueGetDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpQueueGetDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpQueueGetDoReply<Prev> {
@@ -9928,9 +10030,11 @@ impl<'r> RequestOpQueueGetDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpQueueGetDoRequest<RequestBuf<'r>> {
         PushOpQueueGetDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpQueueGetDoRequest<'buf> {
+        OpQueueGetDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpQueueGetDoRequest<'_> {
-    type ReplyType<'buf> = IterableOpQueueGetDoReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -9940,6 +10044,7 @@ impl NetlinkRequest for RequestOpQueueGetDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpQueueGetDoReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpQueueGetDoReply::new(buf)
     }
@@ -9959,6 +10064,9 @@ pub struct PushOpNapiGetDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpNapiGetDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpNapiGetDumpRequest<Prev> {
@@ -10152,6 +10260,9 @@ pub struct PushOpNapiGetDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpNapiGetDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpNapiGetDumpReply<Prev> {
@@ -10609,9 +10720,11 @@ impl<'r> RequestOpNapiGetDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpNapiGetDumpRequest<RequestBuf<'r>> {
         PushOpNapiGetDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpNapiGetDumpRequest<'buf> {
+        OpNapiGetDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpNapiGetDumpRequest<'_> {
-    type ReplyType<'buf> = IterableOpNapiGetDumpReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -10621,6 +10734,7 @@ impl NetlinkRequest for RequestOpNapiGetDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpNapiGetDumpReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpNapiGetDumpReply::new(buf)
     }
@@ -10640,6 +10754,9 @@ pub struct PushOpNapiGetDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpNapiGetDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpNapiGetDoRequest<Prev> {
@@ -10833,6 +10950,9 @@ pub struct PushOpNapiGetDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpNapiGetDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpNapiGetDoReply<Prev> {
@@ -11288,9 +11408,11 @@ impl<'r> RequestOpNapiGetDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpNapiGetDoRequest<RequestBuf<'r>> {
         PushOpNapiGetDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpNapiGetDoRequest<'buf> {
+        OpNapiGetDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpNapiGetDoRequest<'_> {
-    type ReplyType<'buf> = IterableOpNapiGetDoReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -11300,6 +11422,7 @@ impl NetlinkRequest for RequestOpNapiGetDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpNapiGetDoReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpNapiGetDoReply::new(buf)
     }
@@ -11319,6 +11442,9 @@ pub struct PushOpQstatsGetDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpQstatsGetDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpQstatsGetDumpRequest<Prev> {
@@ -11550,6 +11676,9 @@ pub struct PushOpQstatsGetDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpQstatsGetDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpQstatsGetDumpReply<Prev> {
@@ -12808,9 +12937,11 @@ impl<'r> RequestOpQstatsGetDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpQstatsGetDumpRequest<RequestBuf<'r>> {
         PushOpQstatsGetDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpQstatsGetDumpRequest<'buf> {
+        OpQstatsGetDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpQstatsGetDumpRequest<'_> {
-    type ReplyType<'buf> = IterableOpQstatsGetDumpReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -12820,6 +12951,7 @@ impl NetlinkRequest for RequestOpQstatsGetDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpQstatsGetDumpReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpQstatsGetDumpReply::new(buf)
     }
@@ -12839,6 +12971,9 @@ pub struct PushOpBindRxDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpBindRxDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpBindRxDoRequest<Prev> {
@@ -13104,6 +13239,9 @@ impl<Prev: Rec> Rec for PushOpBindRxDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpBindRxDoReply<Prev> {
     pub fn new(mut prev: Prev) -> Self {
@@ -13303,9 +13441,11 @@ impl<'r> RequestOpBindRxDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpBindRxDoRequest<RequestBuf<'r>> {
         PushOpBindRxDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpBindRxDoRequest<'buf> {
+        OpBindRxDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpBindRxDoRequest<'_> {
-    type ReplyType<'buf> = IterableOpBindRxDoReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -13315,6 +13455,7 @@ impl NetlinkRequest for RequestOpBindRxDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpBindRxDoReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpBindRxDoReply::new(buf)
     }
@@ -13334,6 +13475,9 @@ pub struct PushOpNapiSetDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpNapiSetDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpNapiSetDoRequest<Prev> {
@@ -13675,6 +13819,9 @@ impl<Prev: Rec> Rec for PushOpNapiSetDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpNapiSetDoReply<Prev> {
     pub fn new(mut prev: Prev) -> Self {
@@ -13820,9 +13967,11 @@ impl<'r> RequestOpNapiSetDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpNapiSetDoRequest<RequestBuf<'r>> {
         PushOpNapiSetDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpNapiSetDoRequest<'buf> {
+        OpNapiSetDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpNapiSetDoRequest<'_> {
-    type ReplyType<'buf> = IterableOpNapiSetDoReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -13832,6 +13981,7 @@ impl NetlinkRequest for RequestOpNapiSetDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpNapiSetDoReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpNapiSetDoReply::new(buf)
     }
@@ -13851,6 +14001,9 @@ pub struct PushOpBindTxDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpBindTxDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpBindTxDoRequest<Prev> {
@@ -14081,6 +14234,9 @@ impl<Prev: Rec> Rec for PushOpBindTxDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpBindTxDoReply<Prev> {
     pub fn new(mut prev: Prev) -> Self {
@@ -14280,9 +14436,11 @@ impl<'r> RequestOpBindTxDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpBindTxDoRequest<RequestBuf<'r>> {
         PushOpBindTxDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpBindTxDoRequest<'buf> {
+        OpBindTxDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpBindTxDoRequest<'_> {
-    type ReplyType<'buf> = IterableOpBindTxDoReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("netdev".as_bytes())
     }
@@ -14292,6 +14450,7 @@ impl NetlinkRequest for RequestOpBindTxDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpBindTxDoReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpBindTxDoReply::new(buf)
     }

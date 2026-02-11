@@ -16195,6 +16195,9 @@ impl<Prev: Rec> Rec for PushNl80211Attrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 pub struct PushArrayU32<Prev: Rec> {
     pub(crate) prev: Option<Prev>,
@@ -16204,6 +16207,9 @@ pub struct PushArrayU32<Prev: Rec> {
 impl<Prev: Rec> Rec for PushArrayU32<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushArrayU32<Prev> {
@@ -16246,6 +16252,9 @@ pub struct PushArrayIfCombinationAttributes<Prev: Rec> {
 impl<Prev: Rec> Rec for PushArrayIfCombinationAttributes<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushArrayIfCombinationAttributes<Prev> {
@@ -17974,6 +17983,9 @@ impl<Prev: Rec> Rec for PushFrameTypeAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushFrameTypeAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -18011,6 +18023,9 @@ pub struct PushWiphyBands<Prev: Rec> {
 impl<Prev: Rec> Rec for PushWiphyBands<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushWiphyBands<Prev> {
@@ -18090,6 +18105,9 @@ impl<Prev: Rec> Rec for PushBandAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 pub struct PushArrayFrequencyAttrs<Prev: Rec> {
     pub(crate) prev: Option<Prev>,
@@ -18099,6 +18117,9 @@ pub struct PushArrayFrequencyAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushArrayFrequencyAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushArrayFrequencyAttrs<Prev> {
@@ -18144,6 +18165,9 @@ impl<Prev: Rec> Rec for PushArrayBitrateAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushArrayBitrateAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -18187,6 +18211,9 @@ pub struct PushArrayIftypeDataAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushArrayIftypeDataAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushArrayIftypeDataAttrs<Prev> {
@@ -18329,6 +18356,9 @@ impl<Prev: Rec> Rec for PushBitrateAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushBitrateAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -18371,6 +18401,9 @@ impl<Prev: Rec> Rec for PushFrequencyAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 pub struct PushArrayWmmAttrs<Prev: Rec> {
     pub(crate) prev: Option<Prev>,
@@ -18380,6 +18413,9 @@ pub struct PushArrayWmmAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushArrayWmmAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushArrayWmmAttrs<Prev> {
@@ -18612,6 +18648,9 @@ impl<Prev: Rec> Rec for PushIfCombinationAttributes<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 pub struct PushArrayIfaceLimitAttributes<Prev: Rec> {
     pub(crate) prev: Option<Prev>,
@@ -18621,6 +18660,9 @@ pub struct PushArrayIfaceLimitAttributes<Prev: Rec> {
 impl<Prev: Rec> Rec for PushArrayIfaceLimitAttributes<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushArrayIfaceLimitAttributes<Prev> {
@@ -18726,6 +18768,9 @@ impl<Prev: Rec> Rec for PushIfaceLimitAttributes<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushIfaceLimitAttributes<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -18770,6 +18815,9 @@ pub struct PushIftypeDataAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushIftypeDataAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushIftypeDataAttrs<Prev> {
@@ -18858,6 +18906,9 @@ pub struct PushIftypeAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushIftypeAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushIftypeAttrs<Prev> {
@@ -18983,6 +19034,9 @@ impl<Prev: Rec> Rec for PushSarAttributes<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 pub struct PushArraySarSpecs<Prev: Rec> {
     pub(crate) prev: Option<Prev>,
@@ -18992,6 +19046,9 @@ pub struct PushArraySarSpecs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushArraySarSpecs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushArraySarSpecs<Prev> {
@@ -19073,6 +19130,9 @@ impl<Prev: Rec> Rec for PushSarSpecs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushSarSpecs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -19125,6 +19185,9 @@ pub struct PushSupportedIftypes<Prev: Rec> {
 impl<Prev: Rec> Rec for PushSupportedIftypes<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushSupportedIftypes<Prev> {
@@ -19206,6 +19269,9 @@ pub struct PushTxqStatsAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushTxqStatsAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushTxqStatsAttrs<Prev> {
@@ -19295,6 +19361,9 @@ impl<Prev: Rec> Rec for PushWmmAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushWmmAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -19347,6 +19416,9 @@ pub struct PushWowlanTriggersAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushWowlanTriggersAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushWowlanTriggersAttrs<Prev> {
@@ -19537,13 +19609,16 @@ impl<'r> RequestOpGetWiphyDumpRequest<'r> {
         header.set_version(1u8);
         prev.as_rec_mut().extend(header.as_slice());
     }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
     fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
         let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
         IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
     }
 }
 impl NetlinkRequest for RequestOpGetWiphyDumpRequest<'_> {
-    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19553,6 +19628,7 @@ impl NetlinkRequest for RequestOpGetWiphyDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         Self::decode(buf)
     }
@@ -19585,13 +19661,16 @@ impl<'r> RequestOpGetWiphyDoRequest<'r> {
         header.set_version(1u8);
         prev.as_rec_mut().extend(header.as_slice());
     }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
     fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
         let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
         IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
     }
 }
 impl NetlinkRequest for RequestOpGetWiphyDoRequest<'_> {
-    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19601,6 +19680,7 @@ impl NetlinkRequest for RequestOpGetWiphyDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         Self::decode(buf)
     }
@@ -19635,13 +19715,16 @@ impl<'r> RequestOpGetInterfaceDumpRequest<'r> {
         header.set_version(1u8);
         prev.as_rec_mut().extend(header.as_slice());
     }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
     fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
         let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
         IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
     }
 }
 impl NetlinkRequest for RequestOpGetInterfaceDumpRequest<'_> {
-    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19651,6 +19734,7 @@ impl NetlinkRequest for RequestOpGetInterfaceDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         Self::decode(buf)
     }
@@ -19683,13 +19767,16 @@ impl<'r> RequestOpGetInterfaceDoRequest<'r> {
         header.set_version(1u8);
         prev.as_rec_mut().extend(header.as_slice());
     }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
     fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
         let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
         IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
     }
 }
 impl NetlinkRequest for RequestOpGetInterfaceDoRequest<'_> {
-    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19699,6 +19786,7 @@ impl NetlinkRequest for RequestOpGetInterfaceDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         Self::decode(buf)
     }
@@ -19731,13 +19819,16 @@ impl<'r> RequestOpGetProtocolFeaturesDoRequest<'r> {
         header.set_version(1u8);
         prev.as_rec_mut().extend(header.as_slice());
     }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
     fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
         let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
         IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
     }
 }
 impl NetlinkRequest for RequestOpGetProtocolFeaturesDoRequest<'_> {
-    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19747,6 +19838,7 @@ impl NetlinkRequest for RequestOpGetProtocolFeaturesDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         Self::decode(buf)
     }
@@ -19781,13 +19873,16 @@ impl<'r> RequestOpDumpRequest<'r> {
         header.set_version(1u8);
         prev.as_rec_mut().extend(header.as_slice());
     }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
     fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
         let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
         IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
     }
 }
 impl NetlinkRequest for RequestOpDumpRequest<'_> {
-    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19797,6 +19892,7 @@ impl NetlinkRequest for RequestOpDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         Self::decode(buf)
     }
@@ -19829,13 +19925,16 @@ impl<'r> RequestOpDoRequest<'r> {
         header.set_version(1u8);
         prev.as_rec_mut().extend(header.as_slice());
     }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
     fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
         let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
         IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
     }
 }
 impl NetlinkRequest for RequestOpDoRequest<'_> {
-    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19845,6 +19944,7 @@ impl NetlinkRequest for RequestOpDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         Self::decode(buf)
     }

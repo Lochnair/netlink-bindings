@@ -1677,6 +1677,9 @@ impl<Prev: Rec> Rec for PushRouteAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushRouteAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -1866,6 +1869,9 @@ pub struct PushMetrics<Prev: Rec> {
 impl<Prev: Rec> Rec for PushMetrics<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushMetrics<Prev> {
@@ -2096,7 +2102,10 @@ impl std::fmt::Debug for PushRtmsg {
             .field("rtm_table", &self.rtm_table())
             .field("rtm_protocol", &self.rtm_protocol())
             .field("rtm_scope", &self.rtm_scope())
-            .field("rtm_type", &self.rtm_type())
+            .field(
+                "rtm_type",
+                &FormatEnum(self.rtm_type().into(), RtmType::from_value),
+            )
             .field("rtm_flags", &self.rtm_flags())
             .finish()
     }
@@ -2193,6 +2202,9 @@ pub struct PushOpGetrouteDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetrouteDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetrouteDumpRequest<Prev> {
@@ -2332,6 +2344,9 @@ pub struct PushOpGetrouteDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetrouteDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetrouteDumpReply<Prev> {
@@ -3425,9 +3440,13 @@ impl<'r> RequestOpGetrouteDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetrouteDumpRequest<RequestBuf<'r>> {
         PushOpGetrouteDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushRtmsg, IterableOpGetrouteDumpRequest<'buf>) {
+        OpGetrouteDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetrouteDumpRequest<'_> {
-    type ReplyType<'buf> = (PushRtmsg, IterableOpGetrouteDumpReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -3440,6 +3459,7 @@ impl NetlinkRequest for RequestOpGetrouteDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushRtmsg, IterableOpGetrouteDumpReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetrouteDumpReply::new(buf)
     }
@@ -3461,6 +3481,9 @@ pub struct PushOpGetrouteDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetrouteDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetrouteDoRequest<Prev> {
@@ -3948,6 +3971,9 @@ pub struct PushOpGetrouteDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetrouteDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetrouteDoReply<Prev> {
@@ -5039,9 +5065,11 @@ impl<'r> RequestOpGetrouteDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetrouteDoRequest<RequestBuf<'r>> {
         PushOpGetrouteDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushRtmsg, IterableOpGetrouteDoRequest<'buf>) {
+        OpGetrouteDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetrouteDoRequest<'_> {
-    type ReplyType<'buf> = (PushRtmsg, IterableOpGetrouteDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -5054,6 +5082,7 @@ impl NetlinkRequest for RequestOpGetrouteDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushRtmsg, IterableOpGetrouteDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetrouteDoReply::new(buf)
     }
@@ -5075,6 +5104,9 @@ pub struct PushOpNewrouteDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpNewrouteDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpNewrouteDoRequest<Prev> {
@@ -6160,6 +6192,9 @@ impl<Prev: Rec> Rec for PushOpNewrouteDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpNewrouteDoReply<Prev> {
     pub fn new(mut prev: Prev, header: &PushRtmsg) -> Self {
@@ -6305,9 +6340,11 @@ impl<'r> RequestOpNewrouteDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpNewrouteDoRequest<RequestBuf<'r>> {
         PushOpNewrouteDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushRtmsg, IterableOpNewrouteDoRequest<'buf>) {
+        OpNewrouteDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpNewrouteDoRequest<'_> {
-    type ReplyType<'buf> = (PushRtmsg, IterableOpNewrouteDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -6320,6 +6357,7 @@ impl NetlinkRequest for RequestOpNewrouteDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushRtmsg, IterableOpNewrouteDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpNewrouteDoReply::new(buf)
     }
@@ -6341,6 +6379,9 @@ pub struct PushOpDelrouteDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpDelrouteDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpDelrouteDoRequest<Prev> {
@@ -7426,6 +7467,9 @@ impl<Prev: Rec> Rec for PushOpDelrouteDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpDelrouteDoReply<Prev> {
     pub fn new(mut prev: Prev, header: &PushRtmsg) -> Self {
@@ -7571,9 +7615,11 @@ impl<'r> RequestOpDelrouteDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpDelrouteDoRequest<RequestBuf<'r>> {
         PushOpDelrouteDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushRtmsg, IterableOpDelrouteDoRequest<'buf>) {
+        OpDelrouteDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpDelrouteDoRequest<'_> {
-    type ReplyType<'buf> = (PushRtmsg, IterableOpDelrouteDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -7586,6 +7632,7 @@ impl NetlinkRequest for RequestOpDelrouteDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushRtmsg, IterableOpDelrouteDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpDelrouteDoReply::new(buf)
     }

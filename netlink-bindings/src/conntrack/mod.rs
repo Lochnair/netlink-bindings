@@ -4765,6 +4765,9 @@ impl<Prev: Rec> Rec for PushCounterAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushCounterAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -4822,6 +4825,9 @@ pub struct PushTupleProtoAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushTupleProtoAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushTupleProtoAttrs<Prev> {
@@ -4906,6 +4912,9 @@ impl<Prev: Rec> Rec for PushTupleIpAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushTupleIpAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -4963,6 +4972,9 @@ impl<Prev: Rec> Rec for PushTupleAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushTupleAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -5017,6 +5029,9 @@ pub struct PushProtoinfoTcpAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushProtoinfoTcpAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushProtoinfoTcpAttrs<Prev> {
@@ -5079,6 +5094,9 @@ impl<Prev: Rec> Rec for PushProtoinfoDccpAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushProtoinfoDccpAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -5133,6 +5151,9 @@ impl<Prev: Rec> Rec for PushProtoinfoSctpAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushProtoinfoSctpAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -5181,6 +5202,9 @@ pub struct PushProtoinfoAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushProtoinfoAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushProtoinfoAttrs<Prev> {
@@ -5239,6 +5263,9 @@ impl<Prev: Rec> Rec for PushHelpAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushHelpAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -5289,6 +5316,9 @@ impl<Prev: Rec> Rec for PushNatProtoAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushNatProtoAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -5331,6 +5361,9 @@ pub struct PushNatAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushNatAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushNatAttrs<Prev> {
@@ -5392,6 +5425,9 @@ impl<Prev: Rec> Rec for PushSeqadjAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushSeqadjAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -5439,6 +5475,9 @@ pub struct PushSecctxAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushSecctxAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushSecctxAttrs<Prev> {
@@ -5488,6 +5527,9 @@ impl<Prev: Rec> Rec for PushSynproxyAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushSynproxyAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -5535,6 +5577,9 @@ pub struct PushConntrackAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushConntrackAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushConntrackAttrs<Prev> {
@@ -5737,6 +5782,9 @@ pub struct PushConntrackStatsAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushConntrackStatsAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushConntrackStatsAttrs<Prev> {
@@ -5972,8 +6020,14 @@ impl PushNfCtTcpFlagsMask {
 impl std::fmt::Debug for PushNfCtTcpFlagsMask {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_struct("NfCtTcpFlagsMask")
-            .field("flags", &self.flags())
-            .field("mask", &self.mask())
+            .field(
+                "flags",
+                &FormatFlags(self.flags().into(), NfCtTcpFlags::from_value),
+            )
+            .field(
+                "mask",
+                &FormatFlags(self.mask().into(), NfCtTcpFlags::from_value),
+            )
             .finish()
     }
 }
@@ -5985,6 +6039,9 @@ pub struct PushOpGetDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetDumpRequest<Prev> {
@@ -6285,6 +6342,9 @@ pub struct PushOpGetDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetDumpReply<Prev> {
@@ -7152,9 +7212,11 @@ impl<'r> RequestOpGetDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetDumpRequest<RequestBuf<'r>> {
         PushOpGetDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushNfgenmsg, IterableOpGetDumpRequest<'buf>) {
+        OpGetDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetDumpRequest<'_> {
-    type ReplyType<'buf> = (PushNfgenmsg, IterableOpGetDumpReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 12u16,
@@ -7167,6 +7229,7 @@ impl NetlinkRequest for RequestOpGetDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushNfgenmsg, IterableOpGetDumpReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetDumpReply::new(buf)
     }
@@ -7188,6 +7251,9 @@ pub struct PushOpGetDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetDoRequest<Prev> {
@@ -7458,6 +7524,9 @@ pub struct PushOpGetDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetDoReply<Prev> {
@@ -8323,9 +8392,11 @@ impl<'r> RequestOpGetDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetDoRequest<RequestBuf<'r>> {
         PushOpGetDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushNfgenmsg, IterableOpGetDoRequest<'buf>) {
+        OpGetDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetDoRequest<'_> {
-    type ReplyType<'buf> = (PushNfgenmsg, IterableOpGetDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 12u16,
@@ -8338,6 +8409,7 @@ impl NetlinkRequest for RequestOpGetDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushNfgenmsg, IterableOpGetDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetDoReply::new(buf)
     }
@@ -8357,6 +8429,9 @@ pub struct PushOpGetStatsDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetStatsDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetStatsDumpRequest<Prev> {
@@ -8496,6 +8571,9 @@ pub struct PushOpGetStatsDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetStatsDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetStatsDumpReply<Prev> {
@@ -8995,9 +9073,13 @@ impl<'r> RequestOpGetStatsDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetStatsDumpRequest<RequestBuf<'r>> {
         PushOpGetStatsDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushNfgenmsg, IterableOpGetStatsDumpRequest<'buf>) {
+        OpGetStatsDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetStatsDumpRequest<'_> {
-    type ReplyType<'buf> = (PushNfgenmsg, IterableOpGetStatsDumpReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 12u16,
@@ -9010,6 +9092,7 @@ impl NetlinkRequest for RequestOpGetStatsDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushNfgenmsg, IterableOpGetStatsDumpReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetStatsDumpReply::new(buf)
     }

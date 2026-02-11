@@ -905,6 +905,9 @@ impl<Prev: Rec> Rec for PushDummy<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushDummy<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -937,6 +940,9 @@ pub struct PushNlmsgerrAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushNlmsgerrAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushNlmsgerrAttrs<Prev> {
@@ -1019,6 +1025,9 @@ pub struct PushPolicyTypeAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushPolicyTypeAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushPolicyTypeAttrs<Prev> {

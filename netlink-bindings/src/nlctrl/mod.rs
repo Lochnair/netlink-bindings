@@ -1593,6 +1593,9 @@ impl<Prev: Rec> Rec for PushCtrlAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 pub struct PushArrayOpAttrs<Prev: Rec> {
     pub(crate) prev: Option<Prev>,
@@ -1602,6 +1605,9 @@ pub struct PushArrayOpAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushArrayOpAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushArrayOpAttrs<Prev> {
@@ -1646,6 +1652,9 @@ pub struct PushArrayMcastGroupAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushArrayMcastGroupAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushArrayMcastGroupAttrs<Prev> {
@@ -1784,6 +1793,9 @@ impl<Prev: Rec> Rec for PushMcastGroupAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushMcastGroupAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -1837,6 +1849,9 @@ impl<Prev: Rec> Rec for PushOpAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -1880,6 +1895,9 @@ pub struct PushPolicyAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushPolicyAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushPolicyAttrs<Prev> {
@@ -1975,6 +1993,9 @@ impl<Prev: Rec> Rec for PushOpPolicyAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpPolicyAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -2018,6 +2039,9 @@ pub struct PushOpGetfamilyDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetfamilyDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetfamilyDumpRequest<Prev> {
@@ -2157,6 +2181,9 @@ pub struct PushOpGetfamilyDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetfamilyDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetfamilyDumpReply<Prev> {
@@ -2588,9 +2615,11 @@ impl<'r> RequestOpGetfamilyDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetfamilyDumpRequest<RequestBuf<'r>> {
         PushOpGetfamilyDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpGetfamilyDumpRequest<'buf> {
+        OpGetfamilyDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetfamilyDumpRequest<'_> {
-    type ReplyType<'buf> = IterableOpGetfamilyDumpReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0x10,
@@ -2603,6 +2632,7 @@ impl NetlinkRequest for RequestOpGetfamilyDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpGetfamilyDumpReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetfamilyDumpReply::new(buf)
     }
@@ -2622,6 +2652,9 @@ pub struct PushOpGetfamilyDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetfamilyDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetfamilyDoRequest<Prev> {
@@ -2822,6 +2855,9 @@ pub struct PushOpGetfamilyDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetfamilyDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetfamilyDoReply<Prev> {
@@ -3251,9 +3287,11 @@ impl<'r> RequestOpGetfamilyDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetfamilyDoRequest<RequestBuf<'r>> {
         PushOpGetfamilyDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpGetfamilyDoRequest<'buf> {
+        OpGetfamilyDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetfamilyDoRequest<'_> {
-    type ReplyType<'buf> = IterableOpGetfamilyDoReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0x10,
@@ -3266,6 +3304,7 @@ impl NetlinkRequest for RequestOpGetfamilyDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpGetfamilyDoReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetfamilyDoReply::new(buf)
     }
@@ -3285,6 +3324,9 @@ pub struct PushOpGetpolicyDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetpolicyDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetpolicyDumpRequest<Prev> {
@@ -3551,6 +3593,9 @@ pub struct PushOpGetpolicyDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetpolicyDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetpolicyDumpReply<Prev> {
@@ -3821,9 +3866,11 @@ impl<'r> RequestOpGetpolicyDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetpolicyDumpRequest<RequestBuf<'r>> {
         PushOpGetpolicyDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpGetpolicyDumpRequest<'buf> {
+        OpGetpolicyDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetpolicyDumpRequest<'_> {
-    type ReplyType<'buf> = IterableOpGetpolicyDumpReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0x10,
@@ -3836,6 +3883,7 @@ impl NetlinkRequest for RequestOpGetpolicyDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpGetpolicyDumpReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetpolicyDumpReply::new(buf)
     }

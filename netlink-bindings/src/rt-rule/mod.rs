@@ -1036,6 +1036,9 @@ impl<Prev: Rec> Rec for PushFibRuleAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushFibRuleAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -1380,7 +1383,10 @@ impl std::fmt::Debug for PushFibRuleHdr {
             .field("src_len", &self.src_len())
             .field("tos", &self.tos())
             .field("table", &self.table())
-            .field("action", &self.action())
+            .field(
+                "action",
+                &FormatEnum(self.action().into(), FrAct::from_value),
+            )
             .field("flags", &self.flags())
             .finish()
     }
@@ -1515,6 +1521,9 @@ pub struct PushOpNewruleDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpNewruleDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpNewruleDoRequest<Prev> {
@@ -2452,6 +2461,9 @@ impl<Prev: Rec> Rec for PushOpNewruleDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpNewruleDoReply<Prev> {
     pub fn new(mut prev: Prev, header: &PushFibRuleHdr) -> Self {
@@ -2597,9 +2609,13 @@ impl<'r> RequestOpNewruleDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpNewruleDoRequest<RequestBuf<'r>> {
         PushOpNewruleDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushFibRuleHdr, IterableOpNewruleDoRequest<'buf>) {
+        OpNewruleDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpNewruleDoRequest<'_> {
-    type ReplyType<'buf> = (PushFibRuleHdr, IterableOpNewruleDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -2612,6 +2628,7 @@ impl NetlinkRequest for RequestOpNewruleDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushFibRuleHdr, IterableOpNewruleDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpNewruleDoReply::new(buf)
     }
@@ -2633,6 +2650,9 @@ pub struct PushOpDelruleDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpDelruleDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpDelruleDoRequest<Prev> {
@@ -3570,6 +3590,9 @@ impl<Prev: Rec> Rec for PushOpDelruleDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpDelruleDoReply<Prev> {
     pub fn new(mut prev: Prev, header: &PushFibRuleHdr) -> Self {
@@ -3715,9 +3738,13 @@ impl<'r> RequestOpDelruleDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpDelruleDoRequest<RequestBuf<'r>> {
         PushOpDelruleDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushFibRuleHdr, IterableOpDelruleDoRequest<'buf>) {
+        OpDelruleDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpDelruleDoRequest<'_> {
-    type ReplyType<'buf> = (PushFibRuleHdr, IterableOpDelruleDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -3730,6 +3757,7 @@ impl NetlinkRequest for RequestOpDelruleDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushFibRuleHdr, IterableOpDelruleDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpDelruleDoReply::new(buf)
     }
@@ -3751,6 +3779,9 @@ pub struct PushOpGetruleDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetruleDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetruleDumpRequest<Prev> {
@@ -3890,6 +3921,9 @@ pub struct PushOpGetruleDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetruleDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetruleDumpReply<Prev> {
@@ -4835,9 +4869,13 @@ impl<'r> RequestOpGetruleDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetruleDumpRequest<RequestBuf<'r>> {
         PushOpGetruleDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushFibRuleHdr, IterableOpGetruleDumpRequest<'buf>) {
+        OpGetruleDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetruleDumpRequest<'_> {
-    type ReplyType<'buf> = (PushFibRuleHdr, IterableOpGetruleDumpReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -4850,6 +4888,7 @@ impl NetlinkRequest for RequestOpGetruleDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushFibRuleHdr, IterableOpGetruleDumpReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetruleDumpReply::new(buf)
     }

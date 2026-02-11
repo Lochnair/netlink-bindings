@@ -1194,6 +1194,9 @@ impl<Prev: Rec> Rec for PushWgdevice<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 pub struct PushArrayWgpeer<Prev: Rec> {
     pub(crate) prev: Option<Prev>,
@@ -1203,6 +1206,9 @@ pub struct PushArrayWgpeer<Prev: Rec> {
 impl<Prev: Rec> Rec for PushArrayWgpeer<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushArrayWgpeer<Prev> {
@@ -1328,6 +1334,9 @@ impl<Prev: Rec> Rec for PushWgpeer<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 pub struct PushArrayWgallowedip<Prev: Rec> {
     pub(crate) prev: Option<Prev>,
@@ -1337,6 +1346,9 @@ pub struct PushArrayWgallowedip<Prev: Rec> {
 impl<Prev: Rec> Rec for PushArrayWgallowedip<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushArrayWgallowedip<Prev> {
@@ -1468,6 +1480,9 @@ impl<Prev: Rec> Rec for PushWgallowedip<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushWgallowedip<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -1595,6 +1610,9 @@ pub struct PushOpGetDeviceDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetDeviceDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetDeviceDumpRequest<Prev> {
@@ -2051,6 +2069,9 @@ pub struct PushOpGetDeviceDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetDeviceDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetDeviceDumpReply<Prev> {
@@ -2516,9 +2537,11 @@ impl<'r> RequestOpGetDeviceDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetDeviceDumpRequest<RequestBuf<'r>> {
         PushOpGetDeviceDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpGetDeviceDumpRequest<'buf> {
+        OpGetDeviceDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetDeviceDumpRequest<'_> {
-    type ReplyType<'buf> = IterableOpGetDeviceDumpReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("wireguard".as_bytes())
     }
@@ -2528,6 +2551,7 @@ impl NetlinkRequest for RequestOpGetDeviceDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpGetDeviceDumpReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetDeviceDumpReply::new(buf)
     }
@@ -2547,6 +2571,9 @@ pub struct PushOpSetDeviceDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpSetDeviceDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpSetDeviceDoRequest<Prev> {
@@ -3004,6 +3031,9 @@ impl<Prev: Rec> Rec for PushOpSetDeviceDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpSetDeviceDoReply<Prev> {
     pub fn new(mut prev: Prev) -> Self {
@@ -3149,9 +3179,11 @@ impl<'r> RequestOpSetDeviceDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpSetDeviceDoRequest<RequestBuf<'r>> {
         PushOpSetDeviceDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpSetDeviceDoRequest<'buf> {
+        OpSetDeviceDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpSetDeviceDoRequest<'_> {
-    type ReplyType<'buf> = IterableOpSetDeviceDoReply<'buf>;
     fn protocol(&self) -> Protocol {
         Protocol::Generic("wireguard".as_bytes())
     }
@@ -3161,6 +3193,7 @@ impl NetlinkRequest for RequestOpSetDeviceDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = IterableOpSetDeviceDoReply<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpSetDeviceDoReply::new(buf)
     }

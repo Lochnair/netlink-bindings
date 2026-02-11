@@ -26003,6 +26003,9 @@ impl<Prev: Rec> Rec for PushAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -26750,6 +26753,9 @@ impl<Prev: Rec> Rec for PushActAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushActAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -27106,6 +27112,9 @@ impl<Prev: Rec> Rec for PushActBpfAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushActBpfAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -27194,6 +27203,9 @@ impl<Prev: Rec> Rec for PushActConnmarkAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushActConnmarkAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -27242,6 +27254,9 @@ impl<Prev: Rec> Rec for PushActCsumAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushActCsumAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -27289,6 +27304,9 @@ pub struct PushActCtAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushActCtAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushActCtAttrs<Prev> {
@@ -27423,6 +27441,9 @@ impl<Prev: Rec> Rec for PushActCtinfoAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushActCtinfoAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -27505,6 +27526,9 @@ pub struct PushActGateAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushActGateAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushActGateAttrs<Prev> {
@@ -27589,6 +27613,9 @@ impl<Prev: Rec> Rec for PushActIfeAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushActIfeAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -27657,6 +27684,9 @@ impl<Prev: Rec> Rec for PushActMirredAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushActMirredAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -27709,6 +27739,9 @@ pub struct PushActMplsAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushActMplsAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushActMplsAttrs<Prev> {
@@ -27783,6 +27816,9 @@ impl<Prev: Rec> Rec for PushActNatAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushActNatAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -27830,6 +27866,9 @@ pub struct PushActPeditAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushActPeditAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushActPeditAttrs<Prev> {
@@ -27894,6 +27933,9 @@ impl<Prev: Rec> Rec for PushActSimpleAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushActSimpleAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -27946,6 +27988,9 @@ pub struct PushActSkbeditAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushActSkbeditAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushActSkbeditAttrs<Prev> {
@@ -28030,6 +28075,9 @@ impl<Prev: Rec> Rec for PushActSkbmodAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushActSkbmodAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -28092,6 +28140,9 @@ pub struct PushActTunnelKeyAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushActTunnelKeyAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushActTunnelKeyAttrs<Prev> {
@@ -28195,6 +28246,9 @@ impl<Prev: Rec> Rec for PushActVlanAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushActVlanAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -28268,6 +28322,9 @@ impl<Prev: Rec> Rec for PushBasicAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 pub struct PushArrayActAttrs<Prev: Rec> {
     pub(crate) prev: Option<Prev>,
@@ -28277,6 +28334,9 @@ pub struct PushArrayActAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushArrayActAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushArrayActAttrs<Prev> {
@@ -28382,6 +28442,9 @@ impl<Prev: Rec> Rec for PushBpfAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushBpfAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -28484,6 +28547,9 @@ pub struct PushCakeAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushCakeAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushCakeAttrs<Prev> {
@@ -28608,6 +28674,9 @@ impl<Prev: Rec> Rec for PushCakeStatsAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 pub struct PushArrayCakeTinStatsAttrs<Prev: Rec> {
     pub(crate) prev: Option<Prev>,
@@ -28617,6 +28686,9 @@ pub struct PushArrayCakeTinStatsAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushArrayCakeTinStatsAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushArrayCakeTinStatsAttrs<Prev> {
@@ -28767,6 +28839,9 @@ pub struct PushCakeTinStatsAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushCakeTinStatsAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushCakeTinStatsAttrs<Prev> {
@@ -28926,6 +29001,9 @@ impl<Prev: Rec> Rec for PushCbsAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushCbsAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -28963,6 +29041,9 @@ pub struct PushCgroupAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushCgroupAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushCgroupAttrs<Prev> {
@@ -29017,6 +29098,9 @@ impl<Prev: Rec> Rec for PushChokeAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushChokeAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -29064,6 +29148,9 @@ pub struct PushCodelAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushCodelAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushCodelAttrs<Prev> {
@@ -29123,6 +29210,9 @@ impl<Prev: Rec> Rec for PushDrrAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushDrrAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -29160,6 +29250,9 @@ pub struct PushDualpi2Attrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushDualpi2Attrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushDualpi2Attrs<Prev> {
@@ -29284,6 +29377,9 @@ impl<Prev: Rec> Rec for PushEmatchAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushEmatchAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -29326,6 +29422,9 @@ pub struct PushFlowAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushFlowAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushFlowAttrs<Prev> {
@@ -29421,6 +29520,9 @@ pub struct PushFlowerAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushFlowerAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushFlowerAttrs<Prev> {
@@ -30036,6 +30138,9 @@ impl<Prev: Rec> Rec for PushFlowerKeyEncOptsAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushFlowerKeyEncOptsAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -30097,6 +30202,9 @@ impl<Prev: Rec> Rec for PushFlowerKeyEncOptGeneveAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushFlowerKeyEncOptGeneveAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -30145,6 +30253,9 @@ impl<Prev: Rec> Rec for PushFlowerKeyEncOptVxlanAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushFlowerKeyEncOptVxlanAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -30182,6 +30293,9 @@ pub struct PushFlowerKeyEncOptErspanAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushFlowerKeyEncOptErspanAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushFlowerKeyEncOptErspanAttrs<Prev> {
@@ -30236,6 +30350,9 @@ impl<Prev: Rec> Rec for PushFlowerKeyEncOptGtpAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushFlowerKeyEncOptGtpAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -30278,6 +30395,9 @@ pub struct PushFlowerKeyMplsOptAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushFlowerKeyMplsOptAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushFlowerKeyMplsOptAttrs<Prev> {
@@ -30337,6 +30457,9 @@ impl<Prev: Rec> Rec for PushFlowerKeyCfmAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushFlowerKeyCfmAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -30379,6 +30502,9 @@ pub struct PushFwAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushFwAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushFwAttrs<Prev> {
@@ -30453,6 +30579,9 @@ impl<Prev: Rec> Rec for PushGredAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushGredAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -30518,6 +30647,9 @@ impl<Prev: Rec> Rec for PushTcaGredVqListAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushTcaGredVqListAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -30558,6 +30690,9 @@ pub struct PushTcaGredVqEntryAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushTcaGredVqEntryAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushTcaGredVqEntryAttrs<Prev> {
@@ -30652,6 +30787,9 @@ impl<Prev: Rec> Rec for PushHfscAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushHfscAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -30699,6 +30837,9 @@ pub struct PushHhfAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushHhfAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushHhfAttrs<Prev> {
@@ -30767,6 +30908,9 @@ pub struct PushHtbAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushHtbAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushHtbAttrs<Prev> {
@@ -30845,6 +30989,9 @@ impl<Prev: Rec> Rec for PushMatchallAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushMatchallAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -30906,6 +31053,9 @@ impl<Prev: Rec> Rec for PushEtfAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushEtfAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -30943,6 +31093,9 @@ pub struct PushEtsAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushEtsAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushEtsAttrs<Prev> {
@@ -31012,6 +31165,9 @@ pub struct PushFqAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushFqAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushFqAttrs<Prev> {
@@ -31146,6 +31302,9 @@ impl<Prev: Rec> Rec for PushFqCodelAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushFqCodelAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -31233,6 +31392,9 @@ pub struct PushFqPieAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushFqPieAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushFqPieAttrs<Prev> {
@@ -31326,6 +31488,9 @@ pub struct PushNetemAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushNetemAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushNetemAttrs<Prev> {
@@ -31432,6 +31597,9 @@ impl<Prev: Rec> Rec for PushNetemLossAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushNetemLossAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -31476,6 +31644,9 @@ pub struct PushPieAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushPieAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushPieAttrs<Prev> {
@@ -31549,6 +31720,9 @@ pub struct PushPoliceAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushPoliceAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushPoliceAttrs<Prev> {
@@ -31638,6 +31812,9 @@ impl<Prev: Rec> Rec for PushQfqAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushQfqAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -31680,6 +31857,9 @@ pub struct PushRedAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushRedAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushRedAttrs<Prev> {
@@ -31743,6 +31923,9 @@ pub struct PushRouteAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushRouteAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushRouteAttrs<Prev> {
@@ -31811,6 +31994,9 @@ pub struct PushTaprioAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushTaprioAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushTaprioAttrs<Prev> {
@@ -31911,6 +32097,9 @@ impl<Prev: Rec> Rec for PushTaprioSchedEntryList<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushTaprioSchedEntryList<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -31951,6 +32140,9 @@ pub struct PushTaprioSchedEntry<Prev: Rec> {
 impl<Prev: Rec> Rec for PushTaprioSchedEntry<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushTaprioSchedEntry<Prev> {
@@ -32005,6 +32197,9 @@ impl<Prev: Rec> Rec for PushTaprioTcEntryAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushTaprioTcEntryAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -32052,6 +32247,9 @@ pub struct PushTbfAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushTbfAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushTbfAttrs<Prev> {
@@ -32126,6 +32324,9 @@ impl<Prev: Rec> Rec for PushActSampleAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushActSampleAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -32189,6 +32390,9 @@ impl<Prev: Rec> Rec for PushActGactAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushActGactAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -32242,6 +32446,9 @@ impl<Prev: Rec> Rec for PushTcaStabAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushTcaStabAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -32284,6 +32491,9 @@ pub struct PushTcaStatsAttrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushTcaStatsAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushTcaStatsAttrs<Prev> {
@@ -32352,6 +32562,9 @@ pub struct PushU32Attrs<Prev: Rec> {
 impl<Prev: Rec> Rec for PushU32Attrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushU32Attrs<Prev> {
@@ -37990,6 +38203,9 @@ impl<Prev: Rec> Rec for PushOpNewqdiscDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpNewqdiscDoRequest<Prev> {
     pub fn new(mut prev: Prev, header: &PushTcmsg) -> Self {
@@ -38876,6 +39092,9 @@ impl<Prev: Rec> Rec for PushOpNewqdiscDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpNewqdiscDoReply<Prev> {
     pub fn new(mut prev: Prev, header: &PushTcmsg) -> Self {
@@ -39021,9 +39240,11 @@ impl<'r> RequestOpNewqdiscDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpNewqdiscDoRequest<RequestBuf<'r>> {
         PushOpNewqdiscDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushTcmsg, IterableOpNewqdiscDoRequest<'buf>) {
+        OpNewqdiscDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpNewqdiscDoRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpNewqdiscDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -39036,6 +39257,7 @@ impl NetlinkRequest for RequestOpNewqdiscDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpNewqdiscDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpNewqdiscDoReply::new(buf)
     }
@@ -39057,6 +39279,9 @@ pub struct PushOpDelqdiscDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpDelqdiscDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpDelqdiscDoRequest<Prev> {
@@ -39944,6 +40169,9 @@ impl<Prev: Rec> Rec for PushOpDelqdiscDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpDelqdiscDoReply<Prev> {
     pub fn new(mut prev: Prev, header: &PushTcmsg) -> Self {
@@ -40089,9 +40317,11 @@ impl<'r> RequestOpDelqdiscDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpDelqdiscDoRequest<RequestBuf<'r>> {
         PushOpDelqdiscDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushTcmsg, IterableOpDelqdiscDoRequest<'buf>) {
+        OpDelqdiscDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpDelqdiscDoRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpDelqdiscDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -40104,6 +40334,7 @@ impl NetlinkRequest for RequestOpDelqdiscDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpDelqdiscDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpDelqdiscDoReply::new(buf)
     }
@@ -40125,6 +40356,9 @@ pub struct PushOpGetqdiscDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetqdiscDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetqdiscDumpRequest<Prev> {
@@ -40310,6 +40544,9 @@ pub struct PushOpGetqdiscDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetqdiscDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetqdiscDumpReply<Prev> {
@@ -41479,9 +41716,13 @@ impl<'r> RequestOpGetqdiscDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetqdiscDumpRequest<RequestBuf<'r>> {
         PushOpGetqdiscDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushTcmsg, IterableOpGetqdiscDumpRequest<'buf>) {
+        OpGetqdiscDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetqdiscDumpRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpGetqdiscDumpReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -41494,6 +41735,7 @@ impl NetlinkRequest for RequestOpGetqdiscDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpGetqdiscDumpReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetqdiscDumpReply::new(buf)
     }
@@ -41515,6 +41757,9 @@ pub struct PushOpGetqdiscDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetqdiscDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetqdiscDoRequest<Prev> {
@@ -41700,6 +41945,9 @@ pub struct PushOpGetqdiscDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetqdiscDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetqdiscDoReply<Prev> {
@@ -42867,9 +43115,11 @@ impl<'r> RequestOpGetqdiscDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetqdiscDoRequest<RequestBuf<'r>> {
         PushOpGetqdiscDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushTcmsg, IterableOpGetqdiscDoRequest<'buf>) {
+        OpGetqdiscDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetqdiscDoRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpGetqdiscDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -42882,6 +43132,7 @@ impl NetlinkRequest for RequestOpGetqdiscDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpGetqdiscDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetqdiscDoReply::new(buf)
     }
@@ -42903,6 +43154,9 @@ pub struct PushOpNewtclassDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpNewtclassDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpNewtclassDoRequest<Prev> {
@@ -43790,6 +44044,9 @@ impl<Prev: Rec> Rec for PushOpNewtclassDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpNewtclassDoReply<Prev> {
     pub fn new(mut prev: Prev, header: &PushTcmsg) -> Self {
@@ -43935,9 +44192,13 @@ impl<'r> RequestOpNewtclassDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpNewtclassDoRequest<RequestBuf<'r>> {
         PushOpNewtclassDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushTcmsg, IterableOpNewtclassDoRequest<'buf>) {
+        OpNewtclassDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpNewtclassDoRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpNewtclassDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -43950,6 +44211,7 @@ impl NetlinkRequest for RequestOpNewtclassDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpNewtclassDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpNewtclassDoReply::new(buf)
     }
@@ -43971,6 +44233,9 @@ pub struct PushOpDeltclassDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpDeltclassDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpDeltclassDoRequest<Prev> {
@@ -44110,6 +44375,9 @@ pub struct PushOpDeltclassDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpDeltclassDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpDeltclassDoReply<Prev> {
@@ -44256,9 +44524,13 @@ impl<'r> RequestOpDeltclassDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpDeltclassDoRequest<RequestBuf<'r>> {
         PushOpDeltclassDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushTcmsg, IterableOpDeltclassDoRequest<'buf>) {
+        OpDeltclassDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpDeltclassDoRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpDeltclassDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -44271,6 +44543,7 @@ impl NetlinkRequest for RequestOpDeltclassDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpDeltclassDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpDeltclassDoReply::new(buf)
     }
@@ -44292,6 +44565,9 @@ pub struct PushOpGettclassDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGettclassDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGettclassDoRequest<Prev> {
@@ -44431,6 +44707,9 @@ pub struct PushOpGettclassDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGettclassDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGettclassDoReply<Prev> {
@@ -45598,9 +45877,13 @@ impl<'r> RequestOpGettclassDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpGettclassDoRequest<RequestBuf<'r>> {
         PushOpGettclassDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushTcmsg, IterableOpGettclassDoRequest<'buf>) {
+        OpGettclassDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGettclassDoRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpGettclassDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -45613,6 +45896,7 @@ impl NetlinkRequest for RequestOpGettclassDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpGettclassDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGettclassDoReply::new(buf)
     }
@@ -45634,6 +45918,9 @@ pub struct PushOpNewtfilterDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpNewtfilterDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpNewtfilterDoRequest<Prev> {
@@ -46521,6 +46808,9 @@ impl<Prev: Rec> Rec for PushOpNewtfilterDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpNewtfilterDoReply<Prev> {
     pub fn new(mut prev: Prev, header: &PushTcmsg) -> Self {
@@ -46666,9 +46956,13 @@ impl<'r> RequestOpNewtfilterDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpNewtfilterDoRequest<RequestBuf<'r>> {
         PushOpNewtfilterDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushTcmsg, IterableOpNewtfilterDoRequest<'buf>) {
+        OpNewtfilterDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpNewtfilterDoRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpNewtfilterDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -46681,6 +46975,7 @@ impl NetlinkRequest for RequestOpNewtfilterDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpNewtfilterDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpNewtfilterDoReply::new(buf)
     }
@@ -46702,6 +46997,9 @@ pub struct PushOpDeltfilterDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpDeltfilterDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpDeltfilterDoRequest<Prev> {
@@ -46936,6 +47234,9 @@ impl<Prev: Rec> Rec for PushOpDeltfilterDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpDeltfilterDoReply<Prev> {
     pub fn new(mut prev: Prev, header: &PushTcmsg) -> Self {
@@ -47081,9 +47382,13 @@ impl<'r> RequestOpDeltfilterDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpDeltfilterDoRequest<RequestBuf<'r>> {
         PushOpDeltfilterDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushTcmsg, IterableOpDeltfilterDoRequest<'buf>) {
+        OpDeltfilterDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpDeltfilterDoRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpDeltfilterDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -47096,6 +47401,7 @@ impl NetlinkRequest for RequestOpDeltfilterDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpDeltfilterDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpDeltfilterDoReply::new(buf)
     }
@@ -47117,6 +47423,9 @@ pub struct PushOpGettfilterDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGettfilterDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGettfilterDumpRequest<Prev> {
@@ -47340,6 +47649,9 @@ pub struct PushOpGettfilterDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGettfilterDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGettfilterDumpReply<Prev> {
@@ -48509,9 +48821,13 @@ impl<'r> RequestOpGettfilterDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpGettfilterDumpRequest<RequestBuf<'r>> {
         PushOpGettfilterDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushTcmsg, IterableOpGettfilterDumpRequest<'buf>) {
+        OpGettfilterDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGettfilterDumpRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpGettfilterDumpReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -48524,6 +48840,7 @@ impl NetlinkRequest for RequestOpGettfilterDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpGettfilterDumpReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGettfilterDumpReply::new(buf)
     }
@@ -48545,6 +48862,9 @@ pub struct PushOpGettfilterDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGettfilterDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGettfilterDoRequest<Prev> {
@@ -48778,6 +49098,9 @@ pub struct PushOpGettfilterDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGettfilterDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGettfilterDoReply<Prev> {
@@ -49945,9 +50268,13 @@ impl<'r> RequestOpGettfilterDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpGettfilterDoRequest<RequestBuf<'r>> {
         PushOpGettfilterDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushTcmsg, IterableOpGettfilterDoRequest<'buf>) {
+        OpGettfilterDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGettfilterDoRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpGettfilterDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -49960,6 +50287,7 @@ impl NetlinkRequest for RequestOpGettfilterDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpGettfilterDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGettfilterDoReply::new(buf)
     }
@@ -49981,6 +50309,9 @@ pub struct PushOpNewchainDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpNewchainDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpNewchainDoRequest<Prev> {
@@ -50868,6 +51199,9 @@ impl<Prev: Rec> Rec for PushOpNewchainDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpNewchainDoReply<Prev> {
     pub fn new(mut prev: Prev, header: &PushTcmsg) -> Self {
@@ -51013,9 +51347,11 @@ impl<'r> RequestOpNewchainDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpNewchainDoRequest<RequestBuf<'r>> {
         PushOpNewchainDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushTcmsg, IterableOpNewchainDoRequest<'buf>) {
+        OpNewchainDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpNewchainDoRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpNewchainDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -51028,6 +51364,7 @@ impl NetlinkRequest for RequestOpNewchainDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpNewchainDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpNewchainDoReply::new(buf)
     }
@@ -51049,6 +51386,9 @@ pub struct PushOpDelchainDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpDelchainDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpDelchainDoRequest<Prev> {
@@ -51240,6 +51580,9 @@ impl<Prev: Rec> Rec for PushOpDelchainDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpDelchainDoReply<Prev> {
     pub fn new(mut prev: Prev, header: &PushTcmsg) -> Self {
@@ -51385,9 +51728,11 @@ impl<'r> RequestOpDelchainDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpDelchainDoRequest<RequestBuf<'r>> {
         PushOpDelchainDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushTcmsg, IterableOpDelchainDoRequest<'buf>) {
+        OpDelchainDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpDelchainDoRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpDelchainDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -51400,6 +51745,7 @@ impl NetlinkRequest for RequestOpDelchainDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpDelchainDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpDelchainDoReply::new(buf)
     }
@@ -51421,6 +51767,9 @@ pub struct PushOpGetchainDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetchainDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetchainDoRequest<Prev> {
@@ -51611,6 +51960,9 @@ pub struct PushOpGetchainDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetchainDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetchainDoReply<Prev> {
@@ -52778,9 +53130,11 @@ impl<'r> RequestOpGetchainDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetchainDoRequest<RequestBuf<'r>> {
         PushOpGetchainDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushTcmsg, IterableOpGetchainDoRequest<'buf>) {
+        OpGetchainDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetchainDoRequest<'_> {
-    type ReplyType<'buf> = (PushTcmsg, IterableOpGetchainDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -52793,6 +53147,7 @@ impl NetlinkRequest for RequestOpGetchainDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushTcmsg, IterableOpGetchainDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetchainDoReply::new(buf)
     }

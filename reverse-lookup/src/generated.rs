@@ -10,6 +10,7 @@ use netlink_bindings::{
     builtin::PushBuiltinNfgenmsg,
     traits::{NetlinkRequest, Protocol},
 };
+use std::cell::Cell;
 use std::fmt::Debug;
 #[derive(Clone)]
 pub struct ReverseLookup<'a> {
@@ -17,6 +18,7 @@ pub struct ReverseLookup<'a> {
     pub value: u16,
     pub request_value: Option<u16>,
     pub is_dump: bool,
+    pub last_filter: &'a Cell<Option<usize>>,
     pub buf: &'a [u8],
 }
 fn consider(fmt: &mut std::fmt::Formatter<'_>, proto: &str) -> std::fmt::Result {
@@ -34,7 +36,9 @@ impl Debug for ReverseLookup<'_> {
             request_value,
             is_dump,
             buf,
+            last_filter,
         } = self.clone();
+        let last_filter_val = last_filter.take();
         match proto {
             Protocol::Raw { protonum, .. } => {
                 if protonum == 0u16 {
@@ -878,6 +882,101 @@ impl Debug for ReverseLookup<'_> {
                     #[cfg(not(feature = "tc"))]
                     if let (100u16, Some(102u16), false) = pat {
                         return consider(fmt, "tc");
+                    }
+                    write!(
+                        fmt,
+                        "(Unknown operation) value={value}, request_value={request_value:?}, is_dump={is_dump}"
+                    )?;
+                    return Ok(());
+                }
+                if protonum == 4u16 {
+                    let pat = (value, request_value, is_dump);
+                    let mut pass = false;
+                    let filter: fn(&[u8]) -> bool = |buf| buf[1] == 6;
+                    if request_value.is_none()
+                        && last_filter_val.is_none_or(|l| l == 0usize)
+                        && filter(buf)
+                    {
+                        last_filter.set(Some(0usize));
+                        pass = true;
+                    }
+                    if request_value.is_some() && last_filter_val.is_some_and(|l| l == 0usize) {
+                        last_filter.set(Some(0usize));
+                        pass = true;
+                    }
+                    let filter: fn(&[u8]) -> bool = |buf| buf[0] == 2 || buf[0] == 10;
+                    pass = filter(buf) && pass;
+                    if pass {
+                        #[cfg(feature = "inet-diag")]
+                        if let (20u16, None, true) = pat {
+                            return Debug :: fmt (& netlink_bindings :: inet_diag :: RequestOpTcpDiagDumpRequest :: decode_request (buf) , fmt) ;
+                        }
+                        #[cfg(not(feature = "inet-diag"))]
+                        if let (20u16, None, true) = pat {
+                            return consider(fmt, "inet-diag");
+                        }
+                        #[cfg(feature = "inet-diag")]
+                        if let (20u16, Some(20u16), true) = pat {
+                            return Debug :: fmt (& netlink_bindings :: inet_diag :: RequestOpTcpDiagDumpRequest :: decode_reply (buf) , fmt) ;
+                        }
+                        #[cfg(not(feature = "inet-diag"))]
+                        if let (20u16, Some(20u16), true) = pat {
+                            return consider(fmt, "inet-diag");
+                        }
+                    }
+                    let mut pass = false;
+                    let filter: fn(&[u8]) -> bool = |buf| buf[1] == 17;
+                    if request_value.is_none()
+                        && last_filter_val.is_none_or(|l| l == 1usize)
+                        && filter(buf)
+                    {
+                        last_filter.set(Some(1usize));
+                        pass = true;
+                    }
+                    if request_value.is_some() && last_filter_val.is_some_and(|l| l == 1usize) {
+                        last_filter.set(Some(1usize));
+                        pass = true;
+                    }
+                    let filter: fn(&[u8]) -> bool = |buf| buf[0] == 2 || buf[0] == 10;
+                    pass = filter(buf) && pass;
+                    if pass {
+                        #[cfg(feature = "inet-diag")]
+                        if let (20u16, None, true) = pat {
+                            return Debug :: fmt (& netlink_bindings :: inet_diag :: RequestOpUdpDiagDumpRequest :: decode_request (buf) , fmt) ;
+                        }
+                        #[cfg(not(feature = "inet-diag"))]
+                        if let (20u16, None, true) = pat {
+                            return consider(fmt, "inet-diag");
+                        }
+                        #[cfg(feature = "inet-diag")]
+                        if let (20u16, Some(20u16), true) = pat {
+                            return Debug :: fmt (& netlink_bindings :: inet_diag :: RequestOpUdpDiagDumpRequest :: decode_reply (buf) , fmt) ;
+                        }
+                        #[cfg(not(feature = "inet-diag"))]
+                        if let (20u16, Some(20u16), true) = pat {
+                            return consider(fmt, "inet-diag");
+                        }
+                    }
+                    let mut pass = false;
+                    let filter: fn(&[u8]) -> bool = |buf| buf[0] == 1;
+                    pass = filter(buf) && pass;
+                    if pass {
+                        #[cfg(feature = "unix-diag")]
+                        if let (20u16, None, true) = pat {
+                            return Debug :: fmt (& netlink_bindings :: unix_diag :: RequestOpUnixDiagDumpRequest :: decode_request (buf) , fmt) ;
+                        }
+                        #[cfg(not(feature = "unix-diag"))]
+                        if let (20u16, None, true) = pat {
+                            return consider(fmt, "unix-diag");
+                        }
+                        #[cfg(feature = "unix-diag")]
+                        if let (20u16, Some(20u16), true) = pat {
+                            return Debug :: fmt (& netlink_bindings :: unix_diag :: RequestOpUnixDiagDumpRequest :: decode_reply (buf) , fmt) ;
+                        }
+                        #[cfg(not(feature = "unix-diag"))]
+                        if let (20u16, Some(20u16), true) = pat {
+                            return consider(fmt, "unix-diag");
+                        }
                     }
                     write!(
                         fmt,

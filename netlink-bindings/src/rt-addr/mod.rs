@@ -495,6 +495,9 @@ impl<Prev: Rec> Rec for PushAddrAttrs<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushAddrAttrs<Prev> {
     pub fn new(prev: Prev) -> Self {
@@ -679,7 +682,10 @@ impl std::fmt::Debug for PushIfaddrmsg {
         fmt.debug_struct("Ifaddrmsg")
             .field("ifa_family", &self.ifa_family())
             .field("ifa_prefixlen", &self.ifa_prefixlen())
-            .field("ifa_flags", &self.ifa_flags())
+            .field(
+                "ifa_flags",
+                &FormatFlags(self.ifa_flags().into(), IfaFlags::from_value),
+            )
             .field("ifa_scope", &self.ifa_scope())
             .field("ifa_index", &self.ifa_index())
             .finish()
@@ -770,6 +776,9 @@ pub struct PushOpNewaddrDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpNewaddrDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpNewaddrDoRequest<Prev> {
@@ -1118,6 +1127,9 @@ impl<Prev: Rec> Rec for PushOpNewaddrDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpNewaddrDoReply<Prev> {
     pub fn new(mut prev: Prev, header: &PushIfaddrmsg) -> Self {
@@ -1263,9 +1275,13 @@ impl<'r> RequestOpNewaddrDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpNewaddrDoRequest<RequestBuf<'r>> {
         PushOpNewaddrDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushIfaddrmsg, IterableOpNewaddrDoRequest<'buf>) {
+        OpNewaddrDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpNewaddrDoRequest<'_> {
-    type ReplyType<'buf> = (PushIfaddrmsg, IterableOpNewaddrDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -1278,6 +1294,7 @@ impl NetlinkRequest for RequestOpNewaddrDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushIfaddrmsg, IterableOpNewaddrDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpNewaddrDoReply::new(buf)
     }
@@ -1299,6 +1316,9 @@ pub struct PushOpDeladdrDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpDeladdrDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpDeladdrDoRequest<Prev> {
@@ -1533,6 +1553,9 @@ impl<Prev: Rec> Rec for PushOpDeladdrDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
     }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
 }
 impl<Prev: Rec> PushOpDeladdrDoReply<Prev> {
     pub fn new(mut prev: Prev, header: &PushIfaddrmsg) -> Self {
@@ -1678,9 +1701,13 @@ impl<'r> RequestOpDeladdrDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpDeladdrDoRequest<RequestBuf<'r>> {
         PushOpDeladdrDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushIfaddrmsg, IterableOpDeladdrDoRequest<'buf>) {
+        OpDeladdrDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpDeladdrDoRequest<'_> {
-    type ReplyType<'buf> = (PushIfaddrmsg, IterableOpDeladdrDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -1693,6 +1720,7 @@ impl NetlinkRequest for RequestOpDeladdrDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushIfaddrmsg, IterableOpDeladdrDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpDeladdrDoReply::new(buf)
     }
@@ -1714,6 +1742,9 @@ pub struct PushOpGetaddrDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetaddrDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetaddrDumpRequest<Prev> {
@@ -1853,6 +1884,9 @@ pub struct PushOpGetaddrDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetaddrDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetaddrDumpReply<Prev> {
@@ -2209,9 +2243,13 @@ impl<'r> RequestOpGetaddrDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetaddrDumpRequest<RequestBuf<'r>> {
         PushOpGetaddrDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushIfaddrmsg, IterableOpGetaddrDumpRequest<'buf>) {
+        OpGetaddrDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetaddrDumpRequest<'_> {
-    type ReplyType<'buf> = (PushIfaddrmsg, IterableOpGetaddrDumpReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -2224,6 +2262,7 @@ impl NetlinkRequest for RequestOpGetaddrDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushIfaddrmsg, IterableOpGetaddrDumpReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetaddrDumpReply::new(buf)
     }
@@ -2245,6 +2284,9 @@ pub struct PushOpGetmulticastDumpRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetmulticastDumpRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetmulticastDumpRequest<Prev> {
@@ -2384,6 +2426,9 @@ pub struct PushOpGetmulticastDumpReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetmulticastDumpReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetmulticastDumpReply<Prev> {
@@ -2616,9 +2661,13 @@ impl<'r> RequestOpGetmulticastDumpRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetmulticastDumpRequest<RequestBuf<'r>> {
         PushOpGetmulticastDumpRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushIfaddrmsg, IterableOpGetmulticastDumpRequest<'buf>) {
+        OpGetmulticastDumpRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetmulticastDumpRequest<'_> {
-    type ReplyType<'buf> = (PushIfaddrmsg, IterableOpGetmulticastDumpReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -2631,6 +2680,7 @@ impl NetlinkRequest for RequestOpGetmulticastDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushIfaddrmsg, IterableOpGetmulticastDumpReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetmulticastDumpReply::new(buf)
     }
@@ -2652,6 +2702,9 @@ pub struct PushOpGetmulticastDoRequest<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetmulticastDoRequest<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetmulticastDoRequest<Prev> {
@@ -2791,6 +2844,9 @@ pub struct PushOpGetmulticastDoReply<Prev: Rec> {
 impl<Prev: Rec> Rec for PushOpGetmulticastDoReply<Prev> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
     }
 }
 impl<Prev: Rec> PushOpGetmulticastDoReply<Prev> {
@@ -3021,9 +3077,13 @@ impl<'r> RequestOpGetmulticastDoRequest<'r> {
     pub fn into_encoder(self) -> PushOpGetmulticastDoRequest<RequestBuf<'r>> {
         PushOpGetmulticastDoRequest::new_without_header(self.request.buf)
     }
+    pub fn decode_request<'buf>(
+        buf: &'buf [u8],
+    ) -> (PushIfaddrmsg, IterableOpGetmulticastDoRequest<'buf>) {
+        OpGetmulticastDoRequest::new(buf)
+    }
 }
 impl NetlinkRequest for RequestOpGetmulticastDoRequest<'_> {
-    type ReplyType<'buf> = (PushIfaddrmsg, IterableOpGetmulticastDoReply<'buf>);
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -3036,6 +3096,7 @@ impl NetlinkRequest for RequestOpGetmulticastDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
+    type ReplyType<'buf> = (PushIfaddrmsg, IterableOpGetmulticastDoReply<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
         OpGetmulticastDoReply::new(buf)
     }
