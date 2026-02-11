@@ -193,25 +193,26 @@ pub fn gen_request_wrapper(
     request_header: Option<&OpHeader>,
     reply_header: Option<&OpHeader>,
     needs_value: bool,
-    transparent_attrs: Option<&str>,
+    transparent_attrs: Option<(&str, &str)>,
 ) {
     if spec.operations.list.is_empty() && spec.operations.fallback_attrs.is_none() {
         return;
     }
 
     let name = format_ident!("Request{}", kebab_to_type(request_name));
-    let (decoder, decoder_new);
-    let (request_name, reply_name) = if let Some(attrs) = transparent_attrs {
-        decoder = quote!(Self);
+    let (reply_decoder, decoder_new);
+    let (request_name, reply_name) = if let Some(transparent_attrs) = transparent_attrs {
+        reply_decoder = quote!(Self);
         decoder_new = quote!(decode);
-        (attrs, attrs)
+        transparent_attrs
     } else {
-        decoder = format_ident!("{}", kebab_to_type(reply_name)).into_token_stream();
+        reply_decoder = format_ident!("{}", kebab_to_type(reply_name)).into_token_stream();
         decoder_new = quote!(new);
         (request_name, reply_name)
     };
     let encoder = writable_type(request_name);
     let decoder_iter = iterable_name(reply_name);
+    let encoder_iter = iterable_name(request_name);
     let request_decoder = format_ident!("{}", kebab_to_type(request_name));
 
     let mut new_args = quote!();
@@ -248,10 +249,10 @@ pub fn gen_request_wrapper(
 
     let mut write_header_impl = quote!();
     let mut decode_impl = quote!();
-    let mut decode_reply = quote!(#decoder::#decoder_new);
+    let mut decode_reply = quote!(#reply_decoder::#decoder_new);
     let mut decode_request = quote!(#request_decoder::#decoder_new);
 
-    if transparent_attrs.is_some() {
+    if let Some((transparent_request_attrs, transparent_reply_attrs)) = transparent_attrs {
         header_encoder = quote!(Self);
         encoder_new = quote!(new);
         if let Some(fixed_header) = request_header {
@@ -276,26 +277,54 @@ pub fn gen_request_wrapper(
             }
         };
 
-        let attrs = transparent_attrs.unwrap();
-        let attrs = spec.find_attr(attrs);
+        let reply_attrs = spec.find_attr(transparent_reply_attrs);
         let DecoderNewImpl {
-            return_type, body, ..
-        } = gen_decoder_new_impl(attrs, reply_header);
+            return_type: reply_return_typen,
+            body: reply_body,
+            ..
+        } = gen_decoder_new_impl(reply_attrs, reply_header);
 
-        decode_impl = quote! {
-            fn decode<'a>(buf: &'a [u8]) -> #return_type {
-                #body
-            }
-        };
+        let request_attrs = spec.find_attr(transparent_request_attrs);
+        let DecoderNewImpl {
+            return_type: request_return_typen,
+            body: request_body,
+            ..
+        } = gen_decoder_new_impl(spec, request_attrs, request_header);
 
-        decode_reply = quote!(Self::decode);
-        decode_request = quote!(Self::decode);
+        if transparent_reply_attrs == transparent_request_attrs
+            && Option::zip(request_header, reply_header).is_some_and(|(l, r)| l.name == r.name)
+        {
+            decode_impl = quote! {
+                pub fn decode_request<'a>(buf: &'a [u8]) -> #request_return_typen {
+                    #request_body
+                }
+                fn decode<'a>(buf: &'a [u8]) -> #reply_return_typen {
+                    #reply_body
+                }
+            };
+
+            decode_request = quote!(Self::decode);
+            decode_reply = quote!(Self::decode);
+        } else {
+            decode_impl = quote! {
+                pub fn decode_request<'a>(buf: &'a [u8]) -> #request_return_typen {
+                    #request_body
+                }
+                fn decode_reply<'a>(buf: &'a [u8]) -> #reply_return_typen {
+                    #reply_body
+                }
+            };
+
+            decode_request = quote!(Self::decode_request);
+            decode_reply = quote!(Self::decode_reply);
+        }
     }
 
-    let (reply_type, map_decoder, new);
+    let (request_type, reply_type, map_decoder, new);
     if let Some(request_header) = request_header {
         if request_header.construct_header.is_some() {
             reply_type = quote!(#decoder_iter<'buf>);
+            request_type = quote!(#encoder_iter<'buf>);
             map_decoder = quote!();
             new = quote! {
                 pub fn new(mut request: Request<'r> #new_args) -> Self {
@@ -307,6 +336,7 @@ pub fn gen_request_wrapper(
             let request_header = writable_type(&request_header.name);
             let reply_header = writable_type(&reply_header.as_ref().unwrap().name);
             reply_type = quote!((#reply_header, #decoder_iter<'buf>));
+            request_type = quote!((#request_header, #encoder_iter<'buf>));
             map_decoder = quote!(.1);
             new = quote! {
                 pub fn new(mut request: Request<'r> #new_args, header: &#request_header) -> Self {
@@ -317,6 +347,7 @@ pub fn gen_request_wrapper(
         }
     } else {
         reply_type = quote!(#decoder_iter<'buf>);
+        request_type = quote!(#encoder_iter<'buf>);
         map_decoder = quote!();
         new = quote! {
             pub fn new(request: Request<'r> #new_args) -> Self {
@@ -340,6 +371,14 @@ pub fn gen_request_wrapper(
         panic!("The protocol is not genetlink and the protonum isn't specified")
     };
 
+    if decode_impl.is_empty() {
+        decode_impl = quote! {
+            pub fn decode_request<'buf>(buf: &'buf [u8]) -> #request_type {
+                #decode_request(buf)
+            }
+        };
+    }
+
     tokens.extend(quote! {
         #[derive(Debug)]
         pub struct #name<'r> {
@@ -360,8 +399,6 @@ pub fn gen_request_wrapper(
         }
 
         impl NetlinkRequest for #name<'_> {
-            type ReplyType<'buf> = #reply_type;
-
             fn protocol(&self) -> Protocol {
                 #proto
             }
@@ -372,6 +409,12 @@ pub fn gen_request_wrapper(
                 self.request.buf()
             }
 
+            // type RequestType<'buf> = #request_type;
+            // fn decode_request<'buf>(buf: &'buf [u8]) -> Self::RequestType<'buf> {
+            //     #decode_request(buf)
+            // }
+
+            type ReplyType<'buf> = #reply_type;
             fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
                 #decode_reply(buf)
             }

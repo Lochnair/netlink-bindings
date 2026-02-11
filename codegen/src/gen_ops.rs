@@ -120,11 +120,6 @@ pub fn gen_op(
     ops: &OperationSpec,
     request_names: &mut Vec<OpInfo>,
 ) {
-    let Some(attrset) = &ops.attribute_set else {
-        return;
-    };
-    let attrs = spec.find_attr(attrset);
-
     let is_transparent = spec.operations.transparent || ops.transparent;
     let needs_value = ops.request_type_at_runtime;
 
@@ -167,11 +162,16 @@ pub fn gen_op(
         .unwrap_or_default();
 
     let mut generate = |op_name: &str, op: &Operation| {
+        let request_attrset = None
+            .or(ops.attribute_set.as_ref())
+            .or(op.request.attribute_set.as_ref())
+            .unwrap();
+        let request_attrs = spec.find_attr(request_attrset);
         let request_name = request_kebab_name(&ops.name, op_name);
         let mut request_attrs = AttrSet {
             name: request_name.clone(),
-            subset_of: Some(attrs.name.clone()),
-            ..attrs.clone()
+            subset_of: Some(request_attrs.name.clone()),
+            ..request_attrs.clone()
         };
         if !spec.operations.all_attrs && !ops.all_attrs {
             whitelist_op_attrs(&mut request_attrs.attributes, &op.request.attributes);
@@ -185,12 +185,17 @@ pub fn gen_op(
         });
         let request_header = request_header();
 
+        let reply_attrset = None
+            .or(ops.attribute_set.as_ref())
+            .or(op.reply.attribute_set.as_ref())
+            .unwrap();
+        let reply_attrs = spec.find_attr(reply_attrset);
         let reply_header = fixed_header(&op.reply);
         let reply_name = reply_kebab_name(&ops.name, op_name);
         let mut reply_attrs = AttrSet {
             name: reply_name.clone(),
-            subset_of: Some(attrs.name.clone()),
-            ..attrs.clone()
+            subset_of: Some(reply_attrs.name.clone()),
+            ..reply_attrs.clone()
         };
         if !spec.operations.all_attrs && !ops.all_attrs {
             whitelist_op_attrs(&mut reply_attrs.attributes, &op.reply.attributes);
@@ -237,10 +242,7 @@ pub fn gen_op(
             request_header.as_ref(),
             reply_header.as_ref(),
             needs_value,
-            ops.attribute_set
-                .as_ref()
-                .map(|s| s.as_str())
-                .take_if(|_| is_transparent),
+            is_transparent.then_some((request_attrset.as_str(), reply_attrset.as_str())),
         );
     };
 

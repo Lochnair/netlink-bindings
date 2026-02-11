@@ -139,11 +139,6 @@ fn main() {
         std::process::exit(1);
     };
 
-    if !spec.exists() {
-        println!("Can't spec file doesn't exist: {spec:?}");
-        std::process::exit(1);
-    }
-
     let spec = Spec::parse_with_override(&spec);
 
     let mut ctx = Context::default();

@@ -282,6 +282,20 @@ pub struct AttrProp {
 }
 
 impl AttrProp {
+    pub fn is_num(&self) -> bool {
+        matches!(
+            self.r#type,
+            AttrType::U8
+                | AttrType::U16
+                | AttrType::U32
+                | AttrType::U64
+                | AttrType::S8
+                | AttrType::S16
+                | AttrType::S32
+                | AttrType::S64
+        )
+    }
+
     pub fn is_ipv4(&self) -> bool {
         matches!(self.r#type, AttrType::U32)
             && self.display_hint.as_ref().is_some_and(|h| h == "ipv4")
@@ -369,6 +383,7 @@ pub struct Request {
     #[serde(default)]
     pub attributes: Vec<String>,
     pub fixed_header: Option<String>,
+    pub attribute_set: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
@@ -634,12 +649,25 @@ fn merge_yaml(dst: &mut Value, src: &Value) {
 
 impl Spec {
     pub fn parse_with_override(path: &Path) -> Self {
+        let over = path.with_extension("overrides.yaml");
+        let mut parse_over = true;
+        let mut path = path;
+
+        if !path.exists() {
+            if !over.exists() {
+                println!("Spec file doesn't exist: {path:?}");
+                std::process::exit(1);
+            } else {
+                path = &over;
+                parse_over = false;
+            }
+        }
+
         println!("Parsing spec: {path:?}");
         let spec = std::fs::read_to_string(path).unwrap();
         let mut spec = Self::parse_to_value(&spec);
 
-        let over = path.with_extension("overrides.yaml");
-        if over.exists() {
+        if parse_over && over.exists() {
             println!("Parsing spec override: {over:?}");
             let over = std::fs::read_to_string(&over).unwrap();
             let over: Value = serde_yaml::from_str(&over).unwrap();

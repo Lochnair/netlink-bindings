@@ -1,5 +1,5 @@
 use proc_macro2::{Literal, TokenStream};
-use quote::{format_ident, quote, TokenStreamExt};
+use quote::{format_ident, quote};
 use std::{collections::BTreeMap, path::Path, rc::Rc};
 
 use crate::{
@@ -119,18 +119,20 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
             let prefix = format_ident!("{}", kebab_to_rust(proto));
             let mut request = format_ident!("{}", kebab_to_type(request));
             let mut reply = format_ident!("{}", kebab_to_type(reply));
-            let mut decoder = quote!(new);
+            let mut request_decoder = quote!(new);
+            let mut reply_decoder = quote!(new);
 
             if *is_transparent {
                 request = format_ident!("Request{}", request);
                 reply = request.clone();
-                decoder = quote!(decode_reply);
+                request_decoder = quote!(decode_request);
+                reply_decoder = quote!(decode_reply);
             }
 
             let mut tokens = quote! {
                 #[cfg(feature = #proto)]
                 if let (#request_value, None, #is_dump) = pat {
-                    return Debug::fmt(&#b::#prefix::#request::#decoder(buf), fmt);
+                    return Debug::fmt(&#b::#prefix::#request::#request_decoder(buf), fmt);
                 }
                 #[cfg(not(feature = #proto))]
                 if let (#request_value, None, #is_dump) = pat {
@@ -139,7 +141,7 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
 
                 #[cfg(feature = #proto)]
                 if let (#reply_value, Some(#request_value), #is_dump) = pat{
-                    return Debug::fmt(&#b::#prefix::#reply::#decoder(buf), fmt);
+                    return Debug::fmt(&#b::#prefix::#reply::#reply_decoder(buf), fmt);
                 }
                 #[cfg(not(feature = #proto))]
                 if let (#reply_value, Some(#request_value), #is_dump) = pat {
@@ -147,15 +149,14 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
                 }
             };
 
-            let pass = ops.rust_filter_request.is_none() && ops.rust_filter_reply.is_none();
-            let mut pass = quote!(let mut pass = #pass;);
+            let mut pass = quote!();
 
             if let Some(filter_request) = &ops.rust_filter_request {
                 let filter: TokenStream = syn::parse_str(filter_request).unwrap();
                 pass = quote! {
                     #pass
                     let filter: fn(&[u8]) -> bool = #filter;
-                    if last_filter_val.is_none_or(|l| l == #i) && filter(buf) {
+                    if request_value.is_none() && last_filter_val.is_none_or(|l| l == #i) && filter(buf) {
                         last_filter.set(Some(#i));
                         pass = true;
                     }
@@ -164,7 +165,7 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
                 if ops.rust_filter_reply.is_none() {
                     pass = quote! {
                         #pass
-                        if last_filter_val.is_some_and(|l| l == #i) {
+                        if request_value.is_some() && last_filter_val.is_some_and(|l| l == #i) {
                             last_filter.set(Some(#i));
                             pass = true;
                         }
@@ -187,13 +188,24 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
             if let Some(filter) = &ops.rust_filter {
                 let filter: TokenStream = syn::parse_str(filter).unwrap();
                 tokens = quote! {
+                    let mut pass = false;
                     #pass
                     let filter: fn(&[u8]) -> bool = #filter;
-                    if filter(buf) && pass {
+                    pass = filter(buf) && pass;
+                    if pass {
+                        #tokens
+                    }
+                }
+            } else if !pass.is_empty() {
+                tokens = quote! {
+                    let mut pass = false;
+                    #pass
+                    if pass {
                         #tokens
                     }
                 }
             }
+
             variants.extend(tokens);
         }
 

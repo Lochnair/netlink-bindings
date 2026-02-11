@@ -16,11 +16,15 @@ pub enum Protocol {
 pub trait NetlinkRequest {
     /// Netlink protocol to use
     fn protocol(&self) -> Protocol;
+
     /// Additional `flags` specified in the message header
     fn flags(&self) -> u16;
 
     /// Encoded payload of the message (without message header)
     fn payload(&self) -> &[u8];
+
+    // type RequestType<'buf>;
+    // fn decode_request(buf: &[u8]) -> Self::RequestType<'_>;
 
     type ReplyType<'buf>;
     fn decode_reply(buf: &[u8]) -> Self::ReplyType<'_>;
