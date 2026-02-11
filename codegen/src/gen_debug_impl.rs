@@ -6,6 +6,7 @@ use crate::{
     gen_defs::GenImplStruct,
     gen_iterable::{array_iterable_name, iterable_name},
     gen_utils::{kebab_to_type, lifetime_needed_attrs, sanitize_ident},
+    gen_writable::writable_type,
     parse_spec::{AttrSet, AttrType, DefType, IndexedArrayType, Spec},
     Context,
 };
@@ -65,7 +66,7 @@ pub fn gen_introspect_attrs(
         match &next.r#type {
             AttrType::Unused => continue,
             _ if next.r#enum.is_some() => {
-                let Some(r#enum) = &next.r#enum else {unreachable!()};
+                let r#enum = next.r#enum.as_ref().unwrap();
                 let enum_def = spec.find_def(r#enum);
                 let enum_type = format_ident!("{}", kebab_to_type(r#enum));
 
@@ -98,6 +99,18 @@ pub fn gen_introspect_attrs(
                 variants.extend(quote! {
                     #type_name::#name(#val_name) => #fmt_name.field(#field_name, #debug),
                 });
+            }
+            AttrType::Binary { r#struct: None, .. }
+                if next.display_hint.as_ref().is_some_and(|h| h.ends_with("[]")) =>
+            {
+                let c_type = next.display_hint.as_ref().unwrap().strip_suffix("[]").unwrap();
+                let rust_type = writable_type(c_type);
+                variants.extend(quote! {
+                    #type_name::#name(#val_name) => {
+                        let iter = #val_name.chunks(#rust_type::len()).map(|b| #rust_type::new_from_zeroed(b));
+                        #fmt_name.field(#field_name, &FormatIter(iter))
+                    },
+                })
             }
             AttrType::Binary { r#struct: None, .. }
                 if next.display_hint.as_ref().is_some_and(|h| h == "hex") =>
