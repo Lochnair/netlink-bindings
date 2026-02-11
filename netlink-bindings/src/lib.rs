@@ -122,3 +122,8 @@ pub mod tc;
 #[cfg(feature = "wireguard")]
 #[cfg_attr(docsrs, doc(cfg(feature = "wireguard")))]
 pub mod wireguard;
+
+#[cfg(feature = "inet-diag")]
+#[cfg_attr(docsrs, doc(cfg(feature = "inet-diag")))]
+#[path = "inet-diag/mod.rs"]
+pub mod inet_diag;

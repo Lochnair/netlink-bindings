@@ -1,0 +1,933 @@
+# This spec was initially generated using an llm, and wasn't thoroughly reviewed in full.
+
+name: inet-diag
+protocol: netlink-raw
+protonum: 4
+uapi-header: "linux/inet_diag.h"
+
+doc: |
+  Internet socket diagnostics
+
+experimental:
+  struct-type: cstruct
+  struct-prefix: false
+  struct-explicit-padding: true
+
+definitions:
+  -
+    name: tcpdiag-getsock-const
+    type: const
+    value: 18
+  -
+    name: dccpdiag-getsock-const
+    type: const
+    value: 19
+  -
+    name: getsock-max-const
+    type: const
+    value: 24
+  -
+    name: nocookie-const
+    type: const
+    value: 0xffffffff
+  -
+    name: sockid
+    doc: Socket identity
+    type: struct
+    members:
+      -
+        name: sport
+        type: u16
+        byte-order: big-endian
+      -
+        name: dport
+        type: u16
+        byte-order: big-endian
+      -
+        name: src
+        type: binary
+        len: 16
+        display-hint: hex
+      -
+        name: dst
+        type: binary
+        len: 16
+        display-hint: hex
+      -
+        name: if
+        type: u32
+      -
+        name: cookie
+        type: binary
+        len: 8
+        display-hint: hex
+  -
+    name: req
+    type: struct
+    members:
+      -
+        name: family
+        doc: Family of addresses
+        type: u8
+      -
+        name: src-len
+        type: u8
+      -
+        name: dst-len
+        type: u8
+      -
+        name: ext
+        doc: Query extended information
+        type: u8
+      -
+        name: sockid
+        type: binary
+        struct: sockid
+      -
+        name: states
+        doc: States to dump
+        type: u32
+        enum: tcp-state
+        enum-as-flags: true
+      -
+        name: dbs
+        doc: Tables to dump (NI)
+        type: u32
+  -
+    name: req-v2
+    type: struct
+    members:
+      -
+        name: family
+        type: u8
+      -
+        name: protocol
+        type: u8
+      -
+        name: ext
+        type: u8
+      -
+        name: pad
+        type: u8
+      -
+        name: states
+        type: u32
+        enum: tcp-state
+        enum-as-flags: true
+      -
+        name: sockid
+        type: binary
+        struct: sockid
+  -
+    name: req-raw
+    doc: |
+      SOCK_RAW sockets require the underlied protocol to be additionally
+      specified so we can use @pad member for this, but we can't rename it
+      because userspace programs still may depend on this name. Instead lets
+      use another structure definition as an alias for struct
+      @inet_diag_req_v2.
+    type: struct
+    members:
+      -
+        name: family
+        type: u8
+      -
+        name: protocol
+        type: u8
+      -
+        name: ext
+        type: u8
+      -
+        name: raw-protocol
+        type: u8
+      -
+        name: states
+        type: u32
+        enum: tcp-state
+        enum-as-flags: true
+      -
+        name: sockid
+        type: binary
+        struct: sockid
+  -
+    name: msg
+    type: struct
+    doc: |
+      Base info structure. It contains socket identity (addrs/ports/cookie)
+      and, alas, the information shown by netstat.
+    members:
+      -
+        name: family
+        type: u8
+      -
+        name: state
+        type: u8
+        enum: tcp-state
+      -
+        name: timer
+        type: u8
+      -
+        name: retrans
+        type: u8
+      -
+        name: sockid
+        type: binary
+        struct: sockid
+      -
+        name: expires
+        type: u32
+      -
+        name: rqueue
+        type: u32
+      -
+        name: wqueue
+        type: u32
+      -
+        name: uid
+        type: u32
+      -
+        name: inode
+        type: u32
+
+  -
+    name: bytecode-op
+    type: struct
+    doc: |
+      Bytecode is sequence of 4 byte commands followed by variable arguments.
+      All the commands identified by "code" are conditional jumps forward: to
+      offset cc+"yes" (bytes) or to offset cc+"no" (bytes). "yes" is supposed
+      to be length of the command and its arguments (in bytes).
+
+      Termination condition is to land excactly on a len'th instruction (on
+      address of one after the last one), overshooting means an unsucessfull
+      termination.
+
+      If you reading this, for your own sanity, I advice you to first try
+      reverse-lookup on the `ss` command with filters you need, and copy
+      bytecode from there.
+    members:
+      -
+        name: code
+        type: u8
+        enum: bytecode-op-code
+      -
+        name: yes
+        type: u8
+        doc: offset to jump on match
+      -
+        name: no
+        type: u16
+        doc: offset to jump on non-match
+  -
+    name: bytecode-op-code
+    type: enum
+    entries:
+      -
+        name: nop
+      -
+        name: jmp
+        doc: unconditional jump. "no" value is ignored.
+      -
+        name: sport-ge
+        doc: sock.sport >= next_instruction.no (big endian)
+      -
+        name: sport-le
+        doc: sock.sport <= next_instruction.no (big endian)
+      -
+        name: dport-ge
+        doc: sock.dport >= next_instruction.no (big endian)
+      -
+        name: dport-le
+        doc: sock.dport <= next_instruction.no (big endian)
+      -
+        name: port-auto
+        doc: |
+          check if sock is NOT bound to a port by user,
+          i.e. !(sk->userlocks & SOCK_BINDPORT_LOCK)
+      -
+        name: saddr-cond
+        doc: |
+          Check aginst source socket addr packed as hostcond struct (hc),
+          followed by big-endian ipv4 or ipv6 address (yes, it's that cursed).
+
+          The check equivalent to the following (in order):
+            no if hc.port != -1 && hc.port != sock.sport
+            yes if hc.family == AF_INET && sock.family == AF_INET6
+                  && &sock.saddr_u32[0..3] == &[0, 0, 0xffff.to_be()]
+                  && bits_eq(&sock.saddr_u8[12..], &hc.addr[..], hc.prefix_len)
+            no if hc.family != AF_UNSPEC && hc.family != family
+            yes if hc.prefix_len == 0
+            yes if bits_eq(&sock.addr[..], &hc.addr[..], hc.prefix_len)
+            no
+
+            See inet_diag_bc_run() in net/ipv4/inet_diag.c
+      -
+        name: daddr-cond
+        doc: |
+          Check aginst source socket addr using hostcond struct.
+          Same as `saddr-cond`, see its description.
+      -
+        name: dev-cond
+        doc: socket ifindex == next_instruction (native endian u32)
+      -
+        name: mark-cond
+        doc: |
+          Check check socket mark bits against markcond struct (mc).
+          The check is equivalent to: sock.mark & mc.mask == mc.mark
+      -
+        name: sport-eq
+        doc: sock.sport == next_instruction.no (big endian)
+      -
+        name: dport-eq
+        doc: sock.dport == next_instruction.no (big endian)
+      -
+        name: cgroup-cond
+        doc: sock.cgroup_id == next_2_instructions (native endian u64)
+  -
+    name: hostcond
+    type: struct
+    doc: |
+      Host condition to be placed directly into bytecode.
+      Socket address bytes should be appended right after this struct.
+    members:
+      -
+        name: family
+        doc: Socket address family
+        type: u8
+      -
+        name: prefix-len
+        doc: Number of bits to compare 
+        type: u8
+      -
+        name: port
+        type: s32
+      # Variable-length structs are cursed
+      # -
+      #   name: addr
+      #   type: binary
+  -
+    name: markcond
+    type: struct
+    members:
+      -
+        name: mark
+        type: u32
+      -
+        name: mask
+        type: u32
+  -
+    name: meminfo
+    type: struct
+    members:
+      -
+        name: rmem
+        type: u32
+      -
+        name: wmem
+        type: u32
+      -
+        name: fmem
+        type: u32
+      -
+        name: tmem
+        type: u32
+  -
+    name: sockopt-flag
+    type: flags
+    entries:
+      - recverr
+      - is-icsk
+      - freebind
+      - hdrincl
+      - mc-loop
+      - transparent
+      - mc-all
+      - nodefrag
+      - bind-address-no-port
+      - recverr-rfc4884
+      - defer-connect
+  -
+    name: tcpvegas-info
+    type: struct
+    members:
+      -
+        name: enabled
+        type: u32
+      -
+        name: rttcnt
+        type: u32
+      -
+        name: rtt
+        type: u32
+      -
+        name: minrtt
+        type: u32
+  -
+    name: tcp-dctcp-info
+    type: struct
+    members:
+      -
+        name: enabled
+        type: u16
+      -
+        name: ce-state
+        type: u16
+      -
+        name: alpha
+        type: u32
+      -
+        name: ab-ecn
+        type: u32
+      -
+        name: ab-tot
+        type: u32
+  -
+    name: tcp-bbr-info
+    type: struct
+    members:
+      -
+        name: bw-lo
+        doc: lower 32 bits of bw
+        type: u32
+      -
+        name: bw-hi
+        doc: upper 32 bits of bw
+        type: u32
+      -
+        name: min-rtt
+        doc: min-filtered RTT in uSec
+        type: u32
+      -
+        name: pacing-gain
+        doc: pacing gain shifted left 8 bits
+        type: u32
+      -
+        name: cwnd-gain
+        doc: cwnd gain shifted left 8 bits
+        type: u32
+
+  -
+    # Defined in include/net/tcp_states.h
+    name: tcp-state
+    type: enum
+    entries:
+      -
+        name: established
+        value: 1
+      -
+        name: syn-sent
+      -
+        name: syn-recv
+      -
+        name: fin-wait1
+      -
+        name: fin-wait2
+      -
+        name: time-wait
+      -
+        name: close
+      -
+        name: close-wait
+      -
+        name: last-ack
+      -
+        name: listen
+      -
+        name: closing
+        doc: Now a valid state
+      -
+        name: new-syn-recv
+      -
+        name: bound-inactive
+        doc: Pseudo-state for inet_diag
+
+  -
+    # Defined in linux/tcp.h
+    name: tcp-info
+    type: struct
+    members:
+      -
+        name: state
+        type: u8
+        doc: TCP state
+        enum: tcp-state
+      -
+        name: ca-state
+        type: u8
+        doc: Congestion avoidance state
+      -
+        name: retransmits
+        type: u8
+        doc: Number of retransmits
+      -
+        name: probes
+        type: u8
+        doc: Number of probes
+      -
+        name: backoff
+        type: u8
+        doc: Backoff count
+      -
+        name: options
+        type: u8
+        doc: TCP options
+      -
+        name: snd-wscale
+        type: cbitfield
+        sub-type: u8
+        bits: 4
+        doc: Send window scale
+      -
+        name: rcv-wscale
+        type: cbitfield
+        sub-type: u8
+        bits: 4
+        doc: Receive window scale
+      -
+        name: delivery-rate-app-limited
+        type: cbitfield
+        sub-type: u8
+        bits: 1
+        doc: Delivery rate application limited flag
+      -
+        name: fastopen-client-fail
+        type: cbitfield
+        sub-type: u8
+        bits: 2
+        doc: FastOpen client failure code
+      -
+        name: rto
+        type: u32
+        doc: Retransmission timeout in microseconds
+      -
+        name: ato
+        type: u32
+        doc: Delayed ACK timeout in microseconds
+      -
+        name: snd-mss
+        type: u32
+        doc: Send maximum segment size
+      -
+        name: rcv-mss
+        type: u32
+        doc: Receive maximum segment size
+      -
+        name: unacked
+        type: u32
+        doc: Number of unacknowledged segments
+      -
+        name: sacked
+        type: u32
+        doc: Number of SACKed segments
+      -
+        name: lost
+        type: u32
+        doc: Number of lost segments
+      -
+        name: retrans
+        type: u32
+        doc: Number of retransmitted segments
+      -
+        name: fackets
+        type: u32
+        doc: Forward Acknowledgment count
+      -
+        name: last-data-sent
+        type: u32
+        doc: Time since last data sent (jiffies)
+      -
+        name: last-ack-sent
+        type: u32
+        doc: Time since last ACK sent (jiffies, Not remembered, sorry.)
+      -
+        name: last-data-recv
+        type: u32
+        doc: Time since last data received (jiffies)
+      -
+        name: last-ack-recv
+        type: u32
+        doc: Time since last ACK received (jiffies)
+      -
+        name: pmtu
+        type: u32
+        doc: Path MTU
+      -
+        name: rcv-ssthresh
+        type: u32
+        doc: Receive slow start threshold
+      -
+        name: rtt
+        type: u32
+        doc: Smoothed round trip time in microseconds
+      -
+        name: rttvar
+        type: u32
+        doc: Round trip time variation
+      -
+        name: snd-ssthresh
+        type: u32
+        doc: Send slow start threshold
+      -
+        name: snd-cwnd
+        type: u32
+        doc: Send congestion window
+      -
+        name: advmss
+        type: u32
+        doc: Advertised MSS
+      -
+        name: reordering
+        type: u32
+        doc: Reordering threshold
+      -
+        name: rcv-rtt
+        type: u32
+        doc: Receiver side RTT
+      -
+        name: rcv-space
+        type: u32
+        doc: Receiver space
+      -
+        name: total-retrans
+        type: u32
+        doc: Total number of retransmitted segments
+      -
+        name: pacing-rate
+        type: u64
+        doc: Pacing rate in bytes per second
+      -
+        name: max-pacing-rate
+        type: u64
+        doc: Maximum pacing rate in bytes per second
+      -
+        name: bytes-acked
+        type: u64
+        doc: RFC4898 tcpEStatsAppHCThruOctetsAcked
+      -
+        name: bytes-received
+        type: u64
+        doc: RFC4898 tcpEStatsAppHCThruOctetsReceived
+      -
+        name: segs-out
+        type: u32
+        doc: RFC4898 tcpEStatsPerfSegsOut
+      -
+        name: segs-in
+        type: u32
+        doc: RFC4898 tcpEStatsPerfSegsIn
+      -
+        name: notsent-bytes
+        type: u32
+        doc: Bytes in write queue not yet sent
+      -
+        name: min-rtt
+        type: u32
+        doc: Minimum RTT observed in microseconds
+      -
+        name: data-segs-in
+        type: u32
+        doc: RFC4898 tcpEStatsDataSegsIn
+      -
+        name: data-segs-out
+        type: u32
+        doc: RFC4898 tcpEStatsDataSegsOut
+      -
+        name: delivery-rate
+        type: u64
+        doc: Delivery rate in bytes per second
+      -
+        name: busy-time
+        type: u64
+        doc: Time (usec) busy sending data
+      -
+        name: rwnd-limited
+        type: u64
+        doc: Time (usec) limited by receive window
+      -
+        name: sndbuf-limited
+        type: u64
+        doc: Time (usec) limited by send buffer
+      -
+        name: delivered
+        type: u32
+        doc: Packets delivered
+      -
+        name: delivered-ce
+        type: u32
+        doc: Packets delivered with CE marks
+      -
+        name: bytes-sent
+        type: u64
+        doc: RFC4898 tcpEStatsPerfHCDataOctetsOut
+      -
+        name: bytes-retrans
+        type: u64
+        doc: RFC4898 tcpEStatsPerfOctetsRetrans
+      -
+        name: dsack-dups
+        type: u32
+        doc: RFC4898 tcpEStatsStackDSACKDups
+      -
+        name: reord-seen
+        type: u32
+        doc: Reordering events seen
+      -
+        name: rcv-ooopack
+        type: u32
+        doc: Out-of-order packets received
+      -
+        name: snd-wnd
+        type: u32
+        doc: Peer's advertised receive window after scaling (bytes)
+      -
+        name: rcv-wnd
+        type: u32
+        doc: Local advertised receive window after scaling (bytes)
+      -
+        name: rehash
+        type: u32
+        doc: PLB or timeout triggered rehash attempts
+      -
+        name: total-rto
+        type: u16
+        doc: Total number of RTO timeouts, including SYN/SYN-ACK and recurring timeouts
+      -
+        name: total-rto-recoveries
+        type: u16
+        doc: Total number of RTO recoveries, including any unfinished recovery
+      -
+        name: total-rto-time
+        type: u32
+        doc: Total time spent in RTO recoveries in milliseconds, including any unfinished recovery
+      -
+        name: received-ce
+        type: u32
+        doc: Number of CE marks received
+      -
+        name: delivered-e1-bytes
+        type: u32
+        doc: Accurate ECN byte counters for ECT(1)
+      -
+        name: delivered-e0-bytes
+        type: u32
+        doc: Accurate ECN byte counters for ECT(0)
+      -
+        name: delivered-ce-bytes
+        type: u32
+        doc: Accurate ECN byte counters for CE
+      -
+        name: received-e1-bytes
+        type: u32
+        doc: Received bytes with ECT(1) marks
+      -
+        name: received-e0-bytes
+        type: u32
+        doc: Received bytes with ECT(0) marks
+      -
+        name: received-ce-bytes
+        type: u32
+        doc: Received bytes with CE marks
+      -
+        name: accecn-fail-mode
+        type: u16
+        doc: ACK ECN failure mode
+      -
+        name: accecn-opt-seen
+        type: u16
+        doc: ACK ECN option seen
+
+attribute-sets:
+  -
+    name: ulp-info-attrs
+    doc: Upper Layer Protocol information attributes
+    attributes:
+      -
+        name: name
+        type: string
+        doc: ULP name (e.g., "tls", "mptcp")
+      -
+        name: tls
+        type: binary
+        doc: TLS-specific information
+      -
+        name: mptcp
+        type: binary
+        doc: MPTCP-specific information
+
+  -
+    name: request-attrs
+    attributes:
+      -
+        name: bytecode
+        type: binary
+        display-hint: bytecode-op[]
+        doc: See bytecode-op
+      -
+        name: bpf-storages
+        type: nest
+        nested-attributes: bpf-storage-req
+      -
+        name: protocol
+        type: u32
+
+  -
+    name: reply-attrs
+    attributes:
+      -
+        name: meminfo
+        doc: Memory information extension
+        type: binary
+        struct: meminfo
+      -
+        name: tcp-info
+        type: binary
+        struct: tcp-info
+      -
+        name: vegasinfo
+        doc: TCP Vegas information
+        type: binary
+        struct: tcpvegas-info
+      -
+        name: cong
+        doc: Congestion control algorithm name
+        type: string
+      -
+        name: tos
+        doc: Type of Service
+        type: u8
+      -
+        name: tclass
+        doc: Traffic Class
+        type: u8
+      -
+        name: skmeminfo
+        doc: Socket memory information
+        type: binary
+      -
+        name: shutdown
+        doc: Shutdown state
+        type: u8
+      -
+        name: dctcpinfo
+        doc: TCP DCTCP information (request as INET_DIAG_VEGASINFO)
+        type: binary
+        struct: tcp-dctcp-info
+      -
+        name: protocol
+        doc: Raw socket protocol (response attribute only)
+        type: u8
+      -
+        name: skv6only
+        doc: IPv6-only socket flag
+        type: flag
+      -
+        name: locals
+        doc: Local addresses. SCTP thing.
+        type: binary
+      -
+        name: peers
+        doc: Peer addresses. SCTP thing.
+        type: binary
+      -
+        name: pad
+        type: pad
+      -
+        name: mark
+        doc: Socket mark (only with CAP_NET_ADMIN)
+        type: u32
+      -
+        name: bbritfo
+        doc: TCP BBR information (request as INET_DIAG_VEGASINFO)
+        type: binary
+        struct: tcp-bbr-info
+      -
+        name: class-id
+        doc: Class ID (request as INET_DIAG_TCLASS)
+        type: u32
+      -
+        name: md5sig
+        doc: MD5 signature information
+        type: binary
+      -
+        name: ulp-info
+        doc: Upper Layer Protocol information
+        type: nest
+        nested-attributes: ulp-info-attrs
+      -
+        name: sk-bpf-storages
+        doc: BPF storage information
+        type: nest
+        nested-attributes: bpf-storage-reply
+        multi-attr: true
+      -
+        name: cgroup-id
+        doc: Cgroup ID
+        type: u64
+      -
+        name: sockopt-flags
+        doc: Socket options
+        type: u16
+        enum: sockopt-flag
+
+  -
+    name: bpf-storage-req
+    attributes:
+      -
+        name: map-fd
+        type: u32
+        multi-attr: true
+
+  -
+    # TODO: is another indirection needed?
+    name: bpf-storage-reply
+    attributes:
+      -
+        name: storage
+        type: nest
+        nested-attributes: bpf-storage
+
+  -
+    name: bpf-storage
+    attributes:
+      -
+        name: pad
+        type: pad
+      -
+        name: map-id
+        type: u32
+      -
+        name: map-value
+        type: u64
+
+operations:
+  enum-model: directional
+  list:
+    -
+      name: tcp-diag
+      value: 20
+      rust-filter: "|buf| buf[0] == 2 || buf[0] == 10" # .sdiag_family == AF_INET or AF_INET6
+      rust-filter-request: "|buf| buf[1] == 6" # .sdiag_protocol == IPPROTO_TCP
+      transparent: true
+      dump:
+        request:
+          fixed-header: req-v2
+          attribute-set: request-attrs
+        reply:
+          fixed-header: msg
+          attribute-set: reply-attrs
+
+    -
+      name: udp-diag
+      value: 20
+      rust-filter: "|buf| buf[0] == 2 || buf[0] == 10" # .sdiag_family == AF_INET or AF_INET6
+      rust-filter-request: "|buf| buf[1] == 17" # .sdiag_protocol == IPPROTO_UDP
+      transparent: true
+      dump:
+        request:
+          fixed-header: req-v2
+          attribute-set: request-attrs
+        reply:
+          fixed-header: msg
+          attribute-set: reply-attrs
+
+    # There're more protocols, but who cares about those
