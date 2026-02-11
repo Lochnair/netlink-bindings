@@ -106,6 +106,13 @@ pub fn gen_introspect_attrs(
                     #type_name::#name(#val_name) => #fmt_name.field(#field_name, &FormatHex(#val_name)),
                 })
             }
+            AttrType::Binary { r#struct: None, .. }
+                if next.display_hint.as_ref().is_some_and(|h| h == "string") =>
+            {
+                variants.extend(quote! {
+                    #type_name::#name(#val_name) => #fmt_name.field(#field_name, &FormatBinStr(#val_name)),
+                })
+            }
             _ => {
                 variants.extend(quote! {
                     #type_name::#name(#val_name) => #fmt_name.field(#field_name, &#val_name),
