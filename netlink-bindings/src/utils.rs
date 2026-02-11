@@ -37,12 +37,12 @@ pub fn dump_assert_eq(left: &[u8], right: &[u8]) {
     }
 }
 
-pub struct FormatHex<'a>(pub &'a [u8]);
+pub struct FormatHex<T: AsRef<[u8]>>(pub T);
 
-impl Debug for FormatHex<'_> {
+impl<T: AsRef<[u8]>> Debug for FormatHex<T> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "\"")?;
-        for i in self.0 {
+        for i in self.0.as_ref() {
             write!(fmt, "{i:02x}")?
         }
         write!(fmt, "\"")?;
