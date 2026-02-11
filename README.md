@@ -179,6 +179,8 @@ wrapper for creating nftables rules.
 but manually encoding/decoding netlink messages.
 - [tc-prio](./netlink-socket/examples/tc-prio.rs) - Add, show, and delete
 traffic control queueing discipline.
+- [tcp-rtt](./netlink-socket/examples/tcp-rtt.rs) - Dump socket information,
+including RTT of a TCP socket.
 
 ## Attribute encoding
 
@@ -305,6 +307,7 @@ for encoding, and an iterator interface for decoding (internally).
 | --- | --- | --- |
 | [nlctrl](./netlink-bindings/src/nlctrl/nlctrl.md) | ✅ | |
 | [conntrack](./netlink-socket/examples/conntrack.rs) | ✅ | |
+| [inet-diag](./netlink-socket/examples/tcp-rtt.rs) | ✅ | |
 | [nftables](./netlink-socket/examples/nftables.rs) | ✅ | |
 | [nl80211](./netlink-socket/examples/nl80211.rs) | ✅ | |
 | [rt-addr](./netlink-socket/examples/wireguard-setup.rs) | ✅ | |
@@ -316,6 +319,7 @@ for encoding, and an iterator interface for decoding (internally).
 | rt-neigh | ✔️ | |
 | rt-route | ✔️ | |
 | rt-rule | ✔️ | |
+| unix-diag | ✔️ | |
 | ethtool | ? | |
 | dpll | ? | |
 | fou | ? | |
@@ -380,18 +384,43 @@ incomplete netlink specifications:
 - `operations.fallback-attrs: <attrset>` - create a placeholder request type
 with an operation type provided at runtime. Also, the provided attribute set is
 used as a fallback in reverse lookup if operation type wasn't recognized.
-- `operations.transparent: true` or `operations.[].transparent: true` - make
+- `operations.transparent: true` or `operations[].transparent: true` - make
 request types use common encoding/decoding types, instead of generating new
 ones that are narrowed down. Reduces generated code size.
-- `operations.[].request_type_at_runtime: true` - allow operation type to be
+- `operations[].request_type_at_runtime: true` - allow operation type to be
 provided at runtime.
-- `operations.all-attrs: true` or `operations.[].all-attrs: true` - don't
+- `operations.all-attrs: true` or `operations[].all-attrs: true` - don't
 narrow down attributes in generated request types.
-- `operations.[].no_ack: true` - operation doesn't support ack on success. This
+- `operations[].no_ack: true` - operation doesn't support ack on success. This
 option only affects chained requests.
-- `definitions.[].shrinkable: true` - C struct is padded with zeros or
+- `definitions[].shrinkable: true` - C struct is padded with zeros or
 truncated when needed, e.g. the struct was expanded between the kernel
 versions. The default behavior is to return a decoding error.
+- `operations[].{do,dump}.{request,reply}.attribute-set: <attrset>` -
+attribute-set can be specific to request/response, needed for certain
+netlink-raw families.
+- `operations[].rust-filter` - Rust closure to differentiate between
+netlink-raw operations when `value` isn't enough. Only used in reverse-lookup.
+The closure is of type `fn(&[u8]) -> bool`, it checks message payload, which
+usually starts with subsystem-specific header struct.
+- `operations[].rust-filter-{request,reply}` - Same, but applied only for
+requests and replies respectively.
+- `definitions[].attributes[].display-hint: <type>[]` - display as a C-like
+array, useful when it may encode data beyond a single type.
+- `definitions[].attributes[].display-hint: string` - display bytes a raw
+string.
+- `definitions[].members.type: cbitfield` - a new type to support C bitfields.
+Needs `sub-type: {u8,u16,u32}` and `bits: <n>`.
+
+Experimental options:
+
+- `experimental.struct-type: {buf,cstruct}` - how to represent a struct: an
+opaque wrapper on \[u8; n\] buffer or a repr(C) struct.
+- `experimental.struct-prefix: false` - disable "Push" prefix for structs.
+- `experimental.struct-explicit-padding: true` - always add padding fields,
+even if it would otherwise be silently inserted due to alignment.
+- `experimental.attr-binary-write: true` - generate `.write_*() -> impl Write`
+methods for attributes of binary type.
 
 Feature flags:
 
