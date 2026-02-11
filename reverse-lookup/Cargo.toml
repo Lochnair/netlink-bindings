@@ -39,6 +39,7 @@ tcp_metrics = []
 team = []
 wireguard = []
 inet-diag = []
+unix-diag = []
 
 [dependencies]
 libc = "0.2"

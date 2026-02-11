@@ -46,6 +46,7 @@ tc = []
 # team = []
 wireguard = []
 inet-diag = []
+unix-diag = []
 
 [dev-dependencies]
 libc = "0.2"

@@ -1,0 +1,169 @@
+# This spec was initially generated using an llm, and wasn't thoroughly reviewed in full.
+
+name: unix-diag
+protocol: netlink-raw
+protonum: 4
+uapi-header: "linux/unix_diag.h"
+
+doc: |
+  UNIX socket diagnostics
+
+experimental:
+  struct-type: cstruct
+  struct-prefix: false
+  struct-explicit-padding: true
+
+definitions:
+  -
+    name: req
+    type: struct
+    members:
+    -
+      name: sdiag-family
+      type: u8
+    -
+      name: sdiag-protocol
+      type: u8
+    -
+      name: pad
+      type: u16
+    -
+      name: udiag-states
+      doc: States to dump
+      type: u32
+    -
+      name: udiag-ino
+      type: u32
+    -
+      name: udiag-show
+      doc: Show flags
+      type: u32
+    -
+      name: udiag-cookie
+      type: binary
+      len: 8
+      display-hint: hex
+
+  -
+    name: msg
+    type: struct
+    members:
+    -
+      name: udiag-family
+      type: u8
+    -
+      name: udiag-type
+      type: u8
+    -
+      name: udiag-state
+      type: u8
+    -
+      name: pad
+      type: u8
+    -
+      name: udiag-ino
+      type: u32
+    -
+      name: udiag-cookie
+      type: binary
+      len: 8
+      display-hint: hex
+
+  -
+    name: vfs
+    doc: VFS inode info
+    type: struct
+    members:
+    -
+      name: udiag-vfs-ino
+      type: u32
+    -
+      name: udiag-vfs-dev
+      type: u32
+
+  -
+    name: rqlen
+    doc: Receive queue length info
+    type: struct
+    members:
+    -
+      name: udiag-rqueue
+      type: u32
+    -
+      name: udiag-wqueue
+      type: u32
+
+  -
+    name: show-flags
+    type: flags
+    entries:
+    -
+      name: name
+      doc: show name (not path)
+    -
+      name: vfs
+      doc: show VFS inode info
+    -
+      name: peer
+      doc: show peer socket info
+    -
+      name: icons
+      doc: show pending connections
+    -
+      name: rqlen
+      doc: show skb receive queue len
+    -
+      name: meminfo
+      doc: show memory info of a socket
+    -
+      name: uid
+      doc: show socket's UID
+
+attribute-sets:
+  -
+    name: unix-diag-attrs
+    attributes:
+    -
+      name: name
+      doc: Unix socket sun_path. May or may not contain '\0'.
+      type: binary
+      value: 0 # someone in 2006 fucked up (f5248b4 "unix_diag: Unix socket name NLA")
+      display-hint: string
+    -
+      name: vfs
+      type: binary
+      struct: vfs
+    -
+      name: peer
+      type: u32
+    -
+      name: icons
+      type: binary
+    -
+      name: rqlen
+      type: binary
+      struct: rqlen
+    -
+      name: meminfo
+      type: binary
+    -
+      name: shutdown
+      type: u8
+    -
+      name: uid
+      type: u32
+
+operations:
+  enum-model: directional
+  list:
+    -
+      name: unix-diag
+      value: 20
+      rust-filter: "|buf| buf[0] == 1" # .sdiag_family == AF_UNIX
+      attribute-set: unix-diag-attrs
+      transparent: true
+      dump:
+        request:
+          fixed-header: req
+        reply:
+          fixed-header: msg

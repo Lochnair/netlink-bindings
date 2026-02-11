@@ -127,3 +127,8 @@ pub mod wireguard;
 #[cfg_attr(docsrs, doc(cfg(feature = "inet-diag")))]
 #[path = "inet-diag/mod.rs"]
 pub mod inet_diag;
+
+#[cfg(feature = "unix-diag")]
+#[cfg_attr(docsrs, doc(cfg(feature = "unix-diag")))]
+#[path = "unix-diag/mod.rs"]
+pub mod unix_diag;
