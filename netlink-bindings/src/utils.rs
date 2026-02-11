@@ -37,6 +37,24 @@ pub fn dump_assert_eq(left: &[u8], right: &[u8]) {
     }
 }
 
+pub struct FormatBinStr<T: AsRef<[u8]>>(pub T);
+impl<T: AsRef<[u8]>> Debug for FormatBinStr<T> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // core::bstr is currently unstable
+        let bstr = self.0.as_ref();
+        if let Ok(cstr) = CStr::from_bytes_with_nul(bstr) {
+            write!(fmt, "{cstr:?}")?;
+        } else {
+            for c in bstr.chunks(127) {
+                let mut buf = [0u8; 128];
+                buf[..c.len()].clone_from_slice(c);
+                write!(fmt, "{:?}", CStr::from_bytes_until_nul(&buf).unwrap())?;
+            }
+        };
+        Ok(())
+    }
+}
+
 pub struct FormatHex<T: AsRef<[u8]>>(pub T);
 
 impl<T: AsRef<[u8]>> Debug for FormatHex<T> {
