@@ -189,6 +189,10 @@ pub const fn nla_type(r#type: u16) -> u16 {
 
 pub const NLA_ALIGNTO: usize = 4;
 
+pub const fn align_up(len: usize, alignment: usize) -> usize {
+    ((len) + alignment - 1) & !(alignment - 1)
+}
+
 pub const fn nla_align_up(len: usize) -> usize {
     ((len) + NLA_ALIGNTO - 1) & !(NLA_ALIGNTO - 1)
 }
@@ -231,6 +235,24 @@ fn push_header_type(buf: &mut Vec<u8>, mut r#type: u16, len: u16, is_nested: boo
     align(buf);
 
     header_offset
+}
+
+pub fn push_pad(buf: &mut Vec<u8>, pad_type: u16, alignment: usize) {
+    assert!(alignment.is_power_of_two());
+    if alignment <= 4 {
+        return;
+    }
+
+    align(buf);
+
+    let needed = align_up(buf.len(), alignment) - buf.len();
+
+    if needed == 0 {
+        return;
+    }
+
+    push_header(buf, pad_type, (needed - 4) as u16);
+    buf.extend(std::iter::repeat_n(0, needed - 4));
 }
 
 pub fn finalize_nested_header(buf: &mut Vec<u8>, offset: usize) {
