@@ -83,7 +83,10 @@ fn read(args: &CliArgs, reader: impl Read) {
             parse_dump_line(dump, &mut buf);
 
             while let Some(line) = lines.peek() {
-                if let Some(dump) = line.strip_prefix(" | ") {
+                if line.starts_with(" * ") {
+                    lines.next();
+                    continue;
+                } else if let Some(dump) = line.strip_prefix(" | ") {
                     parse_dump_line(dump, &mut buf);
                     lines.next();
                     continue;
