@@ -35,7 +35,7 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
 
         let spec = Rc::new(Spec::parse_with_override(&spec));
 
-        println!("{:?}", spec.name);
+        println!("Spec name: {:?}", spec.name);
 
         let ops = &spec.operations.list;
         if ops.is_empty() {
