@@ -8,7 +8,7 @@
 use std::collections::HashSet;
 
 use netlink_bindings::{
-    builtin::PushBuiltinNfgenmsg,
+    builtin::BuiltinNfgenmsg,
     consts,
     nl80211::{Commands, Nl80211Attrs, PushNl80211Attrs},
     rt_link,
@@ -88,9 +88,9 @@ async fn dump_wiphy(sock: &mut NetlinkSocket) -> Vec<(String, u32)> {
     request.flags |= consts::NLM_F_DUMP as u16;
 
     // First the message header.
-    // Nl80211 is a generic netlink family, so it uses PushBuiltinNfgenmsg.
-    let mut header = PushBuiltinNfgenmsg::new();
-    header.set_cmd(Commands::GetWiphy as u8);
+    // Nl80211 is a generic netlink family, so it uses BuiltinNfgenmsg.
+    let mut header = BuiltinNfgenmsg::new();
+    header.cmd = Commands::GetWiphy as u8;
     request.buf.extend(header.as_slice());
 
     // Then the actual attributes. Top-level attributes may be concatenated by
@@ -107,7 +107,7 @@ async fn dump_wiphy(sock: &mut NetlinkSocket) -> Vec<(String, u32)> {
     while let Some(res) = request.recv().await {
         // Parse a reply. Genetlink reply header doesn't carry any significant
         // information, so it can be ignored.
-        let (_genl_header, attrs) = res.unwrap().split_at(PushBuiltinNfgenmsg::len());
+        let (_genl_header, attrs) = res.unwrap().split_at(BuiltinNfgenmsg::len());
         let attrs = Nl80211Attrs::new(attrs);
 
         // And here we go
@@ -131,8 +131,8 @@ async fn dump_wiphy(sock: &mut NetlinkSocket) -> Vec<(String, u32)> {
 async fn wiphy_add_interface(sock: &mut NetlinkSocket, phy_id: u32, new_ifname: &str) -> u32 {
     let mut request = RawRequest::new();
 
-    let mut header = PushBuiltinNfgenmsg::new();
-    header.set_cmd(Commands::NewInterface as u8);
+    let mut header = BuiltinNfgenmsg::new();
+    header.cmd = Commands::NewInterface as u8;
     request.buf.extend(header.as_slice());
 
     PushNl80211Attrs::new(&mut request.buf)
@@ -144,7 +144,7 @@ async fn wiphy_add_interface(sock: &mut NetlinkSocket, phy_id: u32, new_ifname: 
 
     let mut iter = sock.request(&request).await.unwrap();
     let reply = iter.recv_one().await.unwrap();
-    let (_genl_header, attrs) = reply.split_at(PushBuiltinNfgenmsg::len());
+    let (_genl_header, attrs) = reply.split_at(BuiltinNfgenmsg::len());
     let attrs = Nl80211Attrs::new(attrs);
 
     // dbg!(attrs);
@@ -156,8 +156,8 @@ async fn wiphy_add_interface(sock: &mut NetlinkSocket, phy_id: u32, new_ifname: 
 async fn wiphy_del_interface(sock: &mut NetlinkSocket, ifindex: u32) {
     let mut request = RawRequest::new();
 
-    let mut header = PushBuiltinNfgenmsg::new();
-    header.set_cmd(Commands::DelInterface as u8);
+    let mut header = BuiltinNfgenmsg::new();
+    header.cmd = Commands::DelInterface as u8;
     request.buf.extend(header.as_slice());
 
     PushNl80211Attrs::new(&mut request.buf).push_ifindex(ifindex);
@@ -174,7 +174,7 @@ async fn get_interface_index(sock: &mut NetlinkSocket, ifname: &str) -> Option<u
     while let Some(res) = iter.recv().await {
         let (header, attrs) = res.unwrap();
         if attrs.get_ifname().unwrap().to_bytes() == ifname.as_bytes() {
-            return Some(header.ifi_index() as u32);
+            return Some(header.ifi_index as u32);
         }
     }
 

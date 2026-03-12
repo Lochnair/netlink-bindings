@@ -5,7 +5,7 @@
 
 use std::{ffi::CStr, net::Ipv4Addr};
 
-use netlink_bindings::nftables::{self, CmpOps, PayloadBase, PushNfgenmsg, Registers, VerdictCode};
+use netlink_bindings::nftables::{self, CmpOps, Nfgenmsg, PayloadBase, Registers, VerdictCode};
 use netlink_socket2::NetlinkSocket;
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
@@ -113,7 +113,7 @@ async fn append_rule(sock: &mut NetlinkSocket, table: &CStr, chain: &CStr) {
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn get_latest_genid(sock: &mut NetlinkSocket) -> u32 {
-    let request = nftables::Request::new().op_getgen_do_request(&PushNfgenmsg::new());
+    let request = nftables::Request::new().op_getgen_do_request(&Nfgenmsg::new());
     let mut iter = sock.request(&request).await.unwrap();
     let (_, attrs) = iter.recv_one().await.unwrap();
 
@@ -156,14 +156,15 @@ async fn del_chain(sock: &mut NetlinkSocket, table: &CStr, chain: &CStr) {
     }
 }
 
-fn batch_header() -> nftables::PushNfgenmsg {
-    let mut h = nftables::PushNfgenmsg::new();
+fn batch_header() -> nftables::Nfgenmsg {
+    let mut h = nftables::Nfgenmsg::new();
     h.set_res_id(10);
     h
 }
 
-fn msg_header() -> nftables::PushNfgenmsg {
-    let mut h = nftables::PushNfgenmsg::new();
-    h.set_nfgen_family(libc::AF_INET as u8); // aka ipv4
-    h
+fn msg_header() -> nftables::Nfgenmsg {
+    nftables::Nfgenmsg {
+        nfgen_family: libc::AF_INET as u8, // aka ipv4
+        ..Default::default()
+    }
 }

@@ -13,8 +13,8 @@
 use std::net::{IpAddr, SocketAddr};
 
 use netlink_bindings::{
-    rt_addr::{self, PushIfaddrmsg},
-    rt_link::{self, PushIfinfomsg},
+    rt_addr::{self, Ifaddrmsg},
+    rt_link::{self, Ifinfomsg},
     wireguard,
 };
 use netlink_socket2::NetlinkSocket;
@@ -60,7 +60,7 @@ async fn wg_dump(sock: &mut NetlinkSocket) {
     // you don't need to .clean() the buffer yourself
     let mut buf = Vec::new();
 
-    let request_links = rt_link::Request::new().op_getlink_dump_request(&PushIfinfomsg::new());
+    let request_links = rt_link::Request::new().op_getlink_dump_request(&Ifinfomsg::new());
     let mut iter = sock.request(&request_links).await.unwrap();
     while let Some(res) = iter.recv().await {
         let (_header, attrs) = res.unwrap();
@@ -120,10 +120,12 @@ async fn wg_set(
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn addr_add(sock: &mut NetlinkSocket, ifindex: u32, addr: IpAddr, addr_prefix: u8) {
-    let mut header = PushIfaddrmsg::new();
-    header.set_ifa_family(libc_addr_family(&addr) as u8);
-    header.set_ifa_index(ifindex);
-    header.set_ifa_prefixlen(addr_prefix);
+    let header = Ifaddrmsg {
+        ifa_family: libc_addr_family(&addr) as u8,
+        ifa_index: ifindex,
+        ifa_prefixlen: addr_prefix,
+        ..Default::default()
+    };
 
     let mut request = rt_addr::Request::new()
         .set_change() // Don't fail if address already assigned
@@ -140,7 +142,7 @@ async fn link_add(sock: &mut NetlinkSocket, ifname: &str) {
     let mut request = rt_link::Request::new()
         .set_create()
         // .set_excl() // If exclusive flag set, existing device will cause an error
-        .op_newlink_do_request(&rt_link::PushIfinfomsg::new());
+        .op_newlink_do_request(&rt_link::Ifinfomsg::new());
 
     request
         .encode()
@@ -154,14 +156,14 @@ async fn link_add(sock: &mut NetlinkSocket, ifname: &str) {
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn link_get_ifindex(sock: &mut NetlinkSocket, ifname: &str) -> u32 {
-    let mut request = rt_link::Request::new().op_getlink_do_request(&rt_link::PushIfinfomsg::new());
+    let mut request = rt_link::Request::new().op_getlink_do_request(&rt_link::Ifinfomsg::new());
 
     request.encode().push_ifname_bytes(ifname.as_bytes());
 
     let mut iter = sock.request(&request).await.unwrap();
     let (header, _attrs) = iter.recv_one().await.unwrap();
 
-    header.ifi_index() as u32
+    header.ifi_index as u32
 }
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]

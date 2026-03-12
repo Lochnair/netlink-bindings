@@ -7,8 +7,8 @@ use std::{io, net::Ipv4Addr};
 
 use netlink_bindings::{
     nftables::{
-        self, CmpOps, PayloadBase, PushExprListAttrs, PushNfgenmsg, PushOpNewruleDoRequest,
-        Registers, VerdictCode,
+        self, CmpOps, Nfgenmsg, PayloadBase, PushExprListAttrs, PushOpNewruleDoRequest, Registers,
+        VerdictCode,
     },
     utils,
 };
@@ -78,7 +78,7 @@ struct GenerationId(u32);
 impl GenerationId {
     #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
     async fn new_latest(sock: &mut NetlinkSocket) -> Result<Self, ReplyError> {
-        let request = nftables::Request::new().op_getgen_do_request(&PushNfgenmsg::new());
+        let request = nftables::Request::new().op_getgen_do_request(&Nfgenmsg::new());
         let mut iter = sock.request(&request).await?;
         let (_, attrs) = iter.recv_one().await?;
 
@@ -104,7 +104,7 @@ impl Transaction {
     fn new_with_genid(seq: u32, genid: GenerationId) -> Self {
         let mut inner = nftables::Chained::new(seq);
 
-        let mut h = nftables::PushNfgenmsg::new();
+        let mut h = nftables::Nfgenmsg::new();
         h.set_res_id(10);
 
         inner
@@ -117,8 +117,8 @@ impl Transaction {
     }
 
     fn create_chain(&mut self, chain: &str) {
-        let mut h = nftables::PushNfgenmsg::new();
-        h.set_nfgen_family(libc::AF_INET as u8);
+        let mut h = nftables::Nfgenmsg::new();
+        h.nfgen_family = libc::AF_INET as u8;
 
         // Create a separate table to not interfere with actual traffic
         self.inner
@@ -130,8 +130,8 @@ impl Transaction {
     }
 
     fn delete_chain(&mut self, chain: &str) {
-        let mut h = nftables::PushNfgenmsg::new();
-        h.set_nfgen_family(libc::AF_INET as u8);
+        let mut h = nftables::Nfgenmsg::new();
+        h.nfgen_family = libc::AF_INET as u8;
 
         self.inner
             .request()
@@ -146,8 +146,8 @@ impl Transaction {
     }
 
     fn rule_ipv4(&mut self, chain: &str, append: bool) -> NewRuleExprs<'_> {
-        let mut h = nftables::PushNfgenmsg::new();
-        h.set_nfgen_family(libc::AF_INET as u8); // aka ipv4
+        let mut h = nftables::Nfgenmsg::new();
+        h.nfgen_family = libc::AF_INET as u8; // aka ipv4
 
         let mut inner = self.inner.request();
         if append {
@@ -166,7 +166,7 @@ impl Transaction {
 
     #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
     async fn send(mut self, sock: &mut NetlinkSocket) -> Result<(), ReplyError> {
-        let mut h = nftables::PushNfgenmsg::new();
+        let mut h = nftables::Nfgenmsg::new();
         h.set_res_id(10);
 
         self.inner.request().op_batch_end_do_request(&h);

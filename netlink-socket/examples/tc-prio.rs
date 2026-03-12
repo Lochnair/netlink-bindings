@@ -13,7 +13,7 @@
 
 use netlink_bindings::{
     rt_link,
-    tc::{PushTcPrioQopt, PushTcmsg, Request},
+    tc::{Request, TcPrioQopt, Tcmsg},
 };
 use netlink_socket2::NetlinkSocket;
 
@@ -39,12 +39,13 @@ async fn main() {
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn tc_prio_add(sock: &mut NetlinkSocket, ifi: i32, handle: u32) {
-    let mut header = PushTcmsg::new();
-
-    header.set_family(0);
-    header.set_ifindex(ifi);
-    header.set_handle(handle);
-    header.set_parent(TC_H_ROOT);
+    let header = Tcmsg {
+        family: 0,
+        ifindex: ifi,
+        handle: handle,
+        parent: TC_H_ROOT,
+        ..Default::default()
+    };
 
     let mut req = Request::new()
         .set_create()
@@ -53,9 +54,10 @@ async fn tc_prio_add(sock: &mut NetlinkSocket, ifi: i32, handle: u32) {
 
     let priomap: [u8; 16] = [7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-    let mut tc_prio_opt = PushTcPrioQopt::new();
-    tc_prio_opt.set_bands(8);
-    tc_prio_opt.set_priomap(priomap);
+    let tc_prio_opt = TcPrioQopt {
+        bands: 8,
+        priomap: priomap,
+    };
 
     req.encode().nested_options_prio(&tc_prio_opt);
 
@@ -67,13 +69,14 @@ async fn tc_prio_add(sock: &mut NetlinkSocket, ifi: i32, handle: u32) {
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn tc_prio_show(sock: &mut NetlinkSocket, ifi: i32, qdisc_handle: u32) {
-    let mut header = PushTcmsg::new();
-
-    header.set_family(0);
-    header.set_ifindex(ifi);
-    header.set_handle(qdisc_handle);
-    header.set_parent(TC_H_ROOT);
-    header.set_info(0);
+    let header = Tcmsg {
+        family: 0,
+        ifindex: ifi,
+        handle: qdisc_handle,
+        parent: TC_H_ROOT,
+        info: 0,
+        ..Default::default()
+    };
 
     let req = Request::new().op_getqdisc_dump_request(&header);
 
@@ -81,7 +84,7 @@ async fn tc_prio_show(sock: &mut NetlinkSocket, ifi: i32, qdisc_handle: u32) {
     while let Some(res) = iter.recv().await {
         let (header, attrs) = res.unwrap();
 
-        if header.ifindex() == ifi && header.handle() == qdisc_handle {
+        if header.ifindex == ifi && header.handle == qdisc_handle {
             println!("{:#?}", (header, attrs));
             println!("tc prio show on ifi {} OK", ifi);
             return;
@@ -93,15 +96,14 @@ async fn tc_prio_show(sock: &mut NetlinkSocket, ifi: i32, qdisc_handle: u32) {
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn tc_prio_del(sock: &mut NetlinkSocket, ifi: i32, qdisc_handle: u32) {
-    let mut header = PushTcmsg::new();
-
-    header.set_family(0);
-    header.set_ifindex(ifi);
-    header.set_handle(qdisc_handle);
-    header.set_parent(TC_H_ROOT);
-    header.set_info(0);
-
-    let req = Request::new().op_delqdisc_do_request(&header);
+    let req = Request::new().op_delqdisc_do_request(&Tcmsg {
+        family: 0,
+        ifindex: ifi,
+        handle: qdisc_handle,
+        parent: TC_H_ROOT,
+        info: 0,
+        ..Default::default()
+    });
 
     let mut iter = sock.request(&req).await.unwrap();
     iter.recv_ack().await.unwrap();
@@ -117,5 +119,5 @@ pub async fn link_get_ifindex(sock: &mut NetlinkSocket, ifname: &str) -> i32 {
     let mut iter = sock.request(&request).await.unwrap();
     let (header, _attrs) = iter.recv_one().await.unwrap();
 
-    header.ifi_index()
+    header.ifi_index
 }

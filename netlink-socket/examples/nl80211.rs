@@ -104,7 +104,7 @@ async fn get_interface_index(sock: &mut NetlinkSocket, ifname: &str) -> Option<u
     while let Some(res) = iter.recv().await {
         let (header, attrs) = res.unwrap();
         if attrs.get_ifname().unwrap().to_bytes() == ifname.as_bytes() {
-            return Some(header.ifi_index() as u32);
+            return Some(header.ifi_index as u32);
         }
     }
 

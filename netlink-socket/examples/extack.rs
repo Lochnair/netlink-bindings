@@ -12,10 +12,9 @@ use netlink_bindings::rt_link;
 #[cfg_attr(feature = "tokio", tokio::main(flavor = "current_thread"))]
 #[cfg_attr(feature = "smol", macro_rules_attribute::apply(smol_macros::main))]
 async fn main() {
-    let header = rt_link::PushIfinfomsg::new();
     let mut request = rt_link::Request::new()
         .set_create()
-        .op_newlink_do_request(&header);
+        .op_newlink_do_request(&rt_link::Ifinfomsg::new());
 
     request
         .encode()
