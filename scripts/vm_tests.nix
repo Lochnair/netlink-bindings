@@ -34,6 +34,7 @@ let
         source = dir;
       };
 
+      environment.variables.TESTING = 1;
       environment.systemPackages = with pkgs; [
         conntrack-tools
         iproute2

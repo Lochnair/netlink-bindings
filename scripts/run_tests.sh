@@ -2,8 +2,31 @@
 
 set -e
 
-features="conntrack,rt-link,rt-addr,wireguard,nftables,nl80211,tc,inet-diag"
-examples="conntrack wireguard-setup nftables nftables-api nl80211 nl80211-raw tc-prio tcp-rtt"
+export TESTING=1
+features="
+  conntrack,
+  rt-link,
+  rt-addr,
+  wireguard,
+  nftables,
+  nl80211,
+  tc,
+  inet-diag,
+  netdev
+"
+examples="
+  conntrack
+  wireguard-setup
+  nftables
+  nftables-api
+  nl80211
+  nl80211-raw
+  tc-prio
+  tcp-rtt
+  multicast-simple
+  multicast-generic
+  multicast-rtnetlink
+"
 
 run() {
   echo >&2
@@ -12,7 +35,7 @@ run() {
 }
 
 cargo() {
-  run cargo "$@" --features="$features"
+  run cargo "$@" --features="$(echo $features | tr -d " ")"
 }
 
 matches() {
@@ -34,7 +57,7 @@ run_vm() {
       run nix build \
         --print-out-paths --no-link \
         -f ./scripts/vm_tests.nix \
-        --argstr bins "$examples" \
+        --argstr bins "$(echo $examples)" \
         --argstr bin_dir "target/debug/examples" \
         driver
     )"
@@ -55,12 +78,12 @@ fi
 
 cargo test
 
-for runtime in "" --features={tokio,smol}; do
+for runtime in "" tokio smol; do
   cargo run --example=extack |
-    matches 'Attribute failed policy validation: attribute "Ifname" in "OpNewlinkDoRequest": PolicyTypeAttrs \{ MaxLength: 15, Type: 11 \}'
+    matches 'Attribute failed policy validation: attribute "Ifname" in "LinkAttrs": PolicyTypeAttrs \{ MaxLength: 15, Type: 11 \}'
 
   for example in $examples; do
-    cargo run --example="$example" $runtime
+    cargo run --example="$example" --features="$runtime"
   done
 
   # Run the same examples in a VM with a bunch of different kernel versions
