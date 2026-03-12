@@ -14,19 +14,27 @@ fn message_header() {
         .chain(5u32.to_ne_bytes()) // pid
         .collect();
 
-    let h = PushNlmsghdr::new_from_slice(&payload).unwrap();
-    assert_eq!(h.get_len(), 1);
-    assert_eq!(h.get_type(), 2);
-    assert_eq!(h.flags(), 3);
-    assert_eq!(h.seq(), 4);
-    assert_eq!(h.pid(), 5);
+    let h = Nlmsghdr::new_from_slice(&payload).unwrap();
+    assert_eq!(h.len, 1);
+    assert_eq!(h.r#type, 2);
+    assert_eq!(h.flags, 3);
+    assert_eq!(h.seq, 4);
+    assert_eq!(h.pid, 5);
 
-    let mut w = PushNlmsghdr::new();
-    w.set_len(1);
-    w.set_type(2);
-    w.set_flags(3);
-    w.set_seq(4);
-    w.set_pid(5);
+    let h = Nlmsghdr::from_slice(&payload);
+    assert_eq!(h.len, 1);
+    assert_eq!(h.r#type, 2);
+    assert_eq!(h.flags, 3);
+    assert_eq!(h.seq, 4);
+    assert_eq!(h.pid, 5);
+
+    let w = Nlmsghdr {
+        len: 1,
+        r#type: 2,
+        flags: 3,
+        seq: 4,
+        pid: 5,
+    };
 
     assert_eq!(h.as_slice(), &payload[..]);
     assert_eq!(w.as_slice(), &payload[..]);

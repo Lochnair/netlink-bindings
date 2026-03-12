@@ -20,21 +20,21 @@ fn tc_qdisc_add_priomap() {
     ];
 
     dump_hex(payload);
-    let (header, attrs) = OpNewqdiscDoRequest::new(payload);
+    let (header, attrs) = tc::OpNewqdiscDo::decode_request(payload);
 
-    assert_eq!(header.family(), 0);
-    assert_eq!(header.ifindex(), 44);
-    assert_eq!(header.handle(), 65536);
-    assert_eq!(header.parent(), 4294967295);
-    assert_eq!(header.info(), 0);
+    assert_eq!(header.family, 0);
+    assert_eq!(header.ifindex, 44);
+    assert_eq!(header.handle, 65536);
+    assert_eq!(header.parent, 4294967295);
+    assert_eq!(header.info, 0);
 
     assert_eq!(attrs.get_kind(), Ok(c"prio"));
     let OptionsMsg::Prio(prio) = attrs.get_options().unwrap() else {
         unreachable!()
     };
-    assert_eq!(prio.bands(), 8);
+    assert_eq!(prio.bands, 8);
     assert_eq!(
-        prio.priomap(),
+        prio.priomap,
         [7, 6, 5, 4, 3, 2, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1,]
     );
 }

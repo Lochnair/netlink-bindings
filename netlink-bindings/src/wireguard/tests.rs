@@ -4,34 +4,28 @@ use crate::wireguard;
 use crate::wireguard::*;
 
 #[test]
-#[should_panic(
-    expected = "Error parsing header of \"OpSetDeviceDoRequest\" (unknown attribute) at offset 4"
-)]
+#[should_panic(expected = "Error parsing header of \"Wgdevice\" (unknown attribute) at offset 4")]
 fn invalid_header_size() {
     let payload = &[0x01, 0x01, 0x00, 0x00, 0x01, 0x00];
 
     dump_hex(payload);
 
     // NOTE: Decoder is configured to panic on error in #[cfg(test)]
-    println!("{:#?}", OpSetDeviceDoRequest::new(payload));
+    println!("{:#?}", OpSetDeviceDo::decode_request(payload));
 }
 
 #[test]
-#[should_panic(
-    expected = "Error parsing header of \"OpSetDeviceDoRequest\" (unknown attribute) at offset 4"
-)]
+#[should_panic(expected = "Error parsing header of \"Wgdevice\" (unknown attribute) at offset 4")]
 fn overflowing_header_size() {
     let payload = &[0x01, 0x01, 0x00, 0x00, 0x04];
 
     dump_hex(payload);
 
-    println!("{:#?}", OpSetDeviceDoRequest::new(payload));
+    println!("{:#?}", OpSetDeviceDo::decode_request(payload));
 }
 
 #[test]
-#[should_panic(
-    expected = "Error parsing attribute \"Ifindex\" of \"OpSetDeviceDoRequest\" at offset 4"
-)]
+#[should_panic(expected = "Error parsing attribute \"Ifindex\" of \"Wgdevice\" at offset 4")]
 fn invalid_len_of_fixed_payload() {
     let payload = &[
         0x01, 0x01, 0x00, 0x00, 0x06, 0x00, 0x01, 0x00, 0xff, 0x00, 0x00, 0x00,
@@ -39,17 +33,17 @@ fn invalid_len_of_fixed_payload() {
 
     dump_hex(payload);
 
-    println!("{:#?}", OpSetDeviceDoRequest::new(payload));
+    println!("{:#?}", OpSetDeviceDo::decode_request(payload));
 }
 
 #[test]
-#[should_panic(expected = "Missing attribute \"PublicKey\" in \"OpSetDeviceDoRequest\"")]
+#[should_panic(expected = "Missing attribute \"PublicKey\" in \"Wgdevice\"")]
 fn missing_attribute() {
     let payload = &[0x01, 0x01, 0x00, 0x00];
 
     dump_hex(payload);
 
-    let iter = OpSetDeviceDoRequest::new(payload);
+    let iter = OpSetDeviceDo::decode_request(payload);
     println!("{:#?}", iter);
 
     iter.get_public_key().ok();
@@ -80,7 +74,7 @@ fn wg0_set_2_allowed_addresses() {
 
     dump_hex(payload);
 
-    let req = OpSetDeviceDoRequest::new(payload);
+    let req = OpSetDeviceDo::decode_request(payload);
 
     // We should be binary compatible too
     assert_eq!(req.get_ifname(), Ok(c"wg0"));
@@ -105,7 +99,7 @@ fn wg0_set_2_allowed_addresses() {
     assert!(peers.next().is_none());
 
     let mut vec = Vec::new();
-    PushOpSetDeviceDoRequest::new(&mut vec)
+    OpSetDeviceDo::encode_request(&mut vec)
         .push_ifname(c"wg0")
         .array_peers()
         .entry_nested()
