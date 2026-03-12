@@ -863,6 +863,18 @@ impl Spec {
         }
         self.attribute_sets = attr_sets;
 
+        // Add explicit values in attribute sets
+        for attrs in &mut self.attribute_sets {
+            let mut id: u16 = 0;
+            for attr in &mut attrs.attributes {
+                id += 1;
+                if let Some(val) = &mut attr.value {
+                    id = *val;
+                }
+                attr.value = Some(id);
+            }
+        }
+
         // Replace bitfield32 type with binary struct
         for attrs in &mut self.attribute_sets {
             for attr in &mut attrs.attributes {
