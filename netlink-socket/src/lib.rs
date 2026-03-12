@@ -90,7 +90,7 @@ impl NetlinkSocket {
                 fd.as_raw_fd(),
                 libc::SOL_NETLINK,
                 libc::NETLINK_EXT_ACK,
-                (&1u32) as *const u32 as *const libc::c_void,
+                &1u32 as *const u32 as *const libc::c_void,
                 4,
             )
         };
@@ -143,7 +143,7 @@ impl NetlinkSocket {
             return Ok(*id);
         }
 
-        let mut request = nlctrl::Request::new().op_getfamily_do_request();
+        let mut request = nlctrl::Request::new().op_getfamily_do();
         request.encode().push_family_name_bytes(family_name);
 
         let Protocol::Raw {
