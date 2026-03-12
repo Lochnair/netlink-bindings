@@ -19,7 +19,13 @@ pub struct OpInfo {
 }
 
 pub fn gen_request(tokens: &mut TokenStream, _ctx: &mut Context, spec: &Spec, requests: &[OpInfo]) {
-    if spec.operations.list.is_empty() && spec.operations.fallback_attrs.is_none() {
+    if spec
+        .operations
+        .list
+        .iter()
+        .all(|ops| ops.r#do.is_none() && ops.dump.is_none())
+        && spec.operations.fallback_attrs.is_none()
+    {
         return;
     }
 
@@ -65,6 +71,17 @@ pub fn gen_request(tokens: &mut TokenStream, _ctx: &mut Context, spec: &Spec, re
                 res
             }
         });
+    }
+
+    let mut set_dump = quote!();
+    if spec.operations.list.iter().any(|ops| ops.dump.is_some()) {
+        set_dump = quote! {
+            #[doc = "Set `NLM_F_DUMP` flag"]
+            fn set_dump(mut self) -> Self {
+                self.flags |= consts::NLM_F_DUMP as u16;
+                self
+            }
+        };
     }
 
     tokens.extend(quote! {
@@ -169,11 +186,7 @@ pub fn gen_request(tokens: &mut TokenStream, _ctx: &mut Context, spec: &Spec, re
                 self
             }
 
-            #[doc = "Set `NLM_F_DUMP` flag"]
-            fn set_dump(mut self) -> Self {
-                self.flags |= consts::NLM_F_DUMP as u16;
-                self
-            }
+            #set_dump
 
             #op_funcs
         }
