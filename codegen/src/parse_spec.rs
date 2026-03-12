@@ -252,7 +252,6 @@ impl From<usize> for NumOrName {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default, PartialEq)]
-#[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 #[allow(unused)]
 pub struct AttrCheck {
@@ -262,6 +261,7 @@ pub struct AttrCheck {
     pub min: Option<NumOrName>,
     pub max: Option<NumOrName>,
     pub flags_mask: Option<NumOrName>,
+    pub unterminated_ok: Option<bool>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default, PartialEq)]
@@ -516,7 +516,7 @@ pub struct OperationSpec {
     pub config_cond: Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub struct Operations {
@@ -616,15 +616,14 @@ fn default_protocol() -> Option<String> {
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub struct Spec {
-    #[allow(unused)]
     pub name: String,
-    #[allow(unused)]
     pub version: Option<u8>,
     #[serde(default = "default_protocol")]
     pub protocol: Option<String>,
     #[allow(unused)]
     pub protonum: Option<u16>,
     pub doc: String,
+
     /// Path to the uAPI header, default is linux/${family-name}.h
     #[allow(unused)]
     pub uapi_header: Option<String>,
@@ -634,6 +633,10 @@ pub struct Spec {
     /// Additional global attributes used for kernel C code generation.
     #[allow(unused)]
     pub kernel_family: Option<KernelFamily>,
+    /// Defines if the input policy in the kernel is global, per-operation, or
+    /// split per operation type. Default is split.
+    #[allow(unused)]
+    pub kernel_policy: Option<String>,
     /// Name of the define for the version of the family.
     #[allow(unused)]
     pub c_version_name: Option<String>,
@@ -641,12 +644,21 @@ pub struct Spec {
     /// not an enum value.
     #[allow(unused)]
     pub max_by_define: Option<bool>,
+    /// The explicit name for constant holding the count of operations (last operation + 1).
+    #[allow(unused)]
+    pub cmd_cnt_name: Option<String>,
+    /// Name of the define for the last operation in the list.
+    #[allow(unused)]
+    pub cmd_max_name: Option<String>,
 
     #[serde(default)]
     pub experimental: Experimental,
 
+    #[serde(default)]
     pub definitions: Vec<Definition>,
+    #[serde(default)]
     pub attribute_sets: Vec<AttrSet>,
+    #[serde(default)]
     pub operations: Operations,
     #[allow(unused)]
     pub mcast_groups: Option<MulticastGroups>,
