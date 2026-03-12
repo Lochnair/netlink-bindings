@@ -143,23 +143,6 @@ pub fn gen_attr(
                 }
             });
         }
-        AttrType::Nest { .. } => shorthands.extend(quote! {
-            pub fn #get_name(&self) -> Result<#rust_type, ErrorContext> {
-                let mut iter = self.clone();
-                iter.pos = 0;
-                for attr in iter {
-                    if let #type_name::#variant_name(val) = attr? {
-                        return Ok(val);
-                    }
-                }
-                Err(ErrorContext::new_missing(
-                    #attrs_str,
-                    #attr_str,
-                    self.orig_loc,
-                    self.buf.as_ptr() as usize,
-                ))
-            }
-        }),
         AttrType::IndexedArray { sub_type } => {
             let item_type = match sub_type {
                 IndexedArrayType::Plain { attr } => {
