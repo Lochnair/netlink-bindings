@@ -16,6 +16,7 @@ pub struct OpInfo {
     pub header: Option<OpHeader>,
     pub needs_value: bool,
     pub no_ack: bool,
+    pub doc: TokenStream,
 }
 
 pub fn gen_request(tokens: &mut TokenStream, _ctx: &mut Context, spec: &Spec, requests: &[OpInfo]) {
@@ -39,10 +40,11 @@ pub fn gen_request(tokens: &mut TokenStream, _ctx: &mut Context, spec: &Spec, re
         name,
         header,
         needs_value,
+        doc,
         ..
     } in requests
     {
-        let req = format_ident!("Request{}", kebab_to_type(name));
+        let req = format_ident!("{}", kebab_to_type(name));
         let op = format_ident!("{}", kebab_to_rust(name));
 
         let mut op_args = quote!();
@@ -65,6 +67,7 @@ pub fn gen_request(tokens: &mut TokenStream, _ctx: &mut Context, spec: &Spec, re
         };
 
         op_funcs.extend(quote! {
+            #doc
             pub fn #op(self #op_args) -> #req<'buf> {
                 let mut res = #req::new(self #new_args);
                 res.request.do_writeback(res.protocol(), #name, #req::lookup);
@@ -208,6 +211,7 @@ pub fn gen_request_wrapper(
     reply_header: Option<&OpHeader>,
     needs_value: bool,
     transparent_attrs: Option<(&str, &str)>,
+    op_info: &OpInfo,
 ) {
     if spec.operations.list.is_empty() && spec.operations.fallback_attrs.is_none() {
         return;
@@ -394,7 +398,9 @@ pub fn gen_request_wrapper(
         };
     }
 
+    let op_info_doc = &op_info.doc;
     tokens.extend(quote! {
+        #op_info_doc
         #[derive(Debug)]
         pub struct #name<'r> {
             request: Request<'r>,

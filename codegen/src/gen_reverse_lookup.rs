@@ -336,7 +336,7 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
         }
     });
 
-    let out = crate::fmt(args, &tokens);
+    let out = crate::fmt(args, &tokens.to_string());
 
     println!("Writing {output:?}");
     std::fs::write(output, &out).unwrap();

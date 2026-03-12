@@ -42,6 +42,7 @@ pub const WARNING: &str = "\x1b[1m\x1b[33mwarning\x1b(B\x1b[m:";
 
 #[derive(Debug, Clone, Default)]
 pub struct Context {
+    pub test_exprs: HashSet<String>,
     pub generated_array_introspect: HashSet<String>,
     pub generated_array_iterable: HashSet<String>,
     pub generated_arrays: HashSet<String>,
@@ -146,11 +147,11 @@ fn main() {
         std::process::exit(1);
     };
 
-    let spec = Spec::parse_with_override(&spec);
+    let spec = Spec::parse_with_override(spec);
 
     let mut ctx = Context::default();
-
     let mut tokens = TokenStream::new();
+
     let mod_doc = &spec.doc;
     tokens.extend(quote! {
         #![doc = #mod_doc]
@@ -198,7 +199,7 @@ fn main() {
             continue;
         };
 
-        match spec.experimental.struct_type.as_ref().map(|s| s.as_str()) {
+        match spec.experimental.struct_type.as_deref() {
             None | Some("buf") => gen_struct(&mut tokens, &spec, &def.name, members),
             Some("cstruct") => gen_cstruct(&mut tokens, &spec, &def.name, members),
             t => panic!("Unknown rfc struct type: {t:?}"),
@@ -209,10 +210,30 @@ fn main() {
         tokens.extend(gen_writable(&spec, &mut ctx));
     }
     if !args.no_operations {
-        tokens.extend(gen_ops(&spec, &mut ctx));
+        gen_ops(&mut tokens, &spec, &mut ctx);
     }
 
-    let out = fmt(&args, &tokens);
+    let mut tokens_str = tokens.to_string();
+
+    if !ctx.test_exprs.is_empty() {
+        let mut tests: Vec<_> = ctx.test_exprs.iter().map(|s| s.as_str()).collect();
+        tests.sort();
+        let tests = tests.join("\n");
+        tokens_str.push_str(&format!(
+            "
+            #[cfg(test)]
+            mod generated_tests {{
+                use super::*;
+                #[test]
+                fn tests() {{
+                    {tests}
+                }}
+            }}
+        "
+        ));
+    }
+
+    let out = fmt(&args, &tokens_str);
 
     if let Some(output) = &args.output {
         println!("Writing {output:?}");
@@ -236,8 +257,7 @@ fn main() {
     }
 }
 
-fn fmt(args: &CliArgs, tokens: &TokenStream) -> Vec<u8> {
-    let tokens = tokens.to_string();
+fn fmt(args: &CliArgs, tokens: &str) -> Vec<u8> {
     if !args.no_fmt {
         let mut proc = Command::new(&args.fmt)
             .stdin(Stdio::piped())
@@ -249,7 +269,7 @@ fn fmt(args: &CliArgs, tokens: &TokenStream) -> Vec<u8> {
         proc.stdin
             .as_mut()
             .unwrap()
-            .write_all(tokens.to_string().as_bytes())
+            .write_all(tokens.as_bytes())
             .unwrap();
 
         let res = proc.wait_with_output().unwrap();
@@ -261,6 +281,6 @@ fn fmt(args: &CliArgs, tokens: &TokenStream) -> Vec<u8> {
 
         res.stdout
     } else {
-        tokens.into()
+        tokens.as_bytes().to_vec()
     }
 }
