@@ -1,0 +1,27053 @@
+#![doc = "Partial family for Ethtool Netlink\\."]
+#![allow(clippy::all)]
+#![allow(unused_imports)]
+#![allow(unused_assignments)]
+#![allow(non_snake_case)]
+#![allow(unused_variables)]
+#![allow(irrefutable_let_patterns)]
+#![allow(unreachable_code)]
+#![allow(unreachable_patterns)]
+use crate::builtin::{BuiltinBitfield32, BuiltinNfgenmsg, Nlmsghdr, PushDummy};
+use crate::{
+    consts,
+    traits::{NetlinkRequest, Protocol},
+    utils::*,
+};
+pub const PROTONAME: &str = "ethtool";
+pub const PROTONAME_CSTR: &CStr = c"ethtool";
+#[doc = "Enum - defines an integer enumeration, with values for each entry incrementing by 1, (e.g. 0, 1, 2, 3)"]
+#[derive(Debug, Clone, Copy)]
+pub enum UdpTunnelType {
+    Vxlan = 0,
+    Geneve = 1,
+    VxlanGpe = 2,
+}
+impl UdpTunnelType {
+    pub fn from_value(value: u64) -> Option<Self> {
+        Some(match value {
+            0 => Self::Vxlan,
+            1 => Self::Geneve,
+            2 => Self::VxlanGpe,
+            _ => return None,
+        })
+    }
+}
+#[doc = "common ethtool header flags"]
+#[doc = "Flags - defines an integer enumeration, with values for each entry occupying a bit, starting from bit 0, (e.g. 1, 2, 4, 8)"]
+#[derive(Debug, Clone, Copy)]
+pub enum HeaderFlags {
+    #[doc = "use compact bitsets in reply"]
+    CompactBitsets = 1 << 0,
+    #[doc = "provide optional reply for SET or ACT requests"]
+    OmitReply = 1 << 1,
+    #[doc = "request statistics, if supported by the driver"]
+    Stats = 1 << 2,
+}
+impl HeaderFlags {
+    pub fn from_value(value: u64) -> Option<Self> {
+        Some(match value {
+            n if n == 1 << 0 => Self::CompactBitsets,
+            n if n == 1 << 1 => Self::OmitReply,
+            n if n == 1 << 2 => Self::Stats,
+            _ => return None,
+        })
+    }
+}
+#[doc = "plug\\-in module firmware flashing status"]
+#[doc = "Enum - defines an integer enumeration, with values for each entry incrementing by 1, (e.g. 0, 1, 2, 3)"]
+#[derive(Debug, Clone, Copy)]
+pub enum ModuleFwFlashStatus {
+    #[doc = "The firmware flashing process has started\\."]
+    Started = 0,
+    #[doc = "The firmware flashing process is in progress\\."]
+    InProgress = 1,
+    #[doc = "The firmware flashing process was completed successfully\\."]
+    Completed = 2,
+    #[doc = "The firmware flashing process was stopped due to an error\\."]
+    Error = 3,
+}
+impl ModuleFwFlashStatus {
+    pub fn from_value(value: u64) -> Option<Self> {
+        Some(match value {
+            0 => Self::Started,
+            1 => Self::InProgress,
+            2 => Self::Completed,
+            3 => Self::Error,
+            _ => return None,
+        })
+    }
+}
+#[doc = "\"groups of PSE extended states functions\\. IEEE 802\\.3\\-2022 33\\.2\\.4\\.4\nVariables\"\n"]
+#[doc = "Enum - defines an integer enumeration, with values for each entry incrementing by 1, (e.g. 0, 1, 2, 3)"]
+#[derive(Debug, Clone, Copy)]
+pub enum C33PseExtState {
+    #[doc = "none"]
+    None = 0,
+    #[doc = "Group of error\\_condition states"]
+    ErrorCondition = 1,
+    #[doc = "Group of mr\\_mps\\_valid states"]
+    MrMpsValid = 2,
+    #[doc = "Group of mr\\_pse\\_enable states"]
+    MrPseEnable = 3,
+    #[doc = "Group of option\\_detect\\_ted states"]
+    OptionDetectTed = 4,
+    #[doc = "Group of option\\_vport\\_lim states"]
+    OptionVportLim = 5,
+    #[doc = "Group of ovld\\_detected states"]
+    OvldDetected = 6,
+    #[doc = "Group of power\\_not\\_available states"]
+    PowerNotAvailable = 7,
+    #[doc = "Group of short\\_detected states"]
+    ShortDetected = 8,
+}
+impl C33PseExtState {
+    pub fn from_value(value: u64) -> Option<Self> {
+        Some(match value {
+            0 => Self::None,
+            1 => Self::ErrorCondition,
+            2 => Self::MrMpsValid,
+            3 => Self::MrPseEnable,
+            4 => Self::OptionDetectTed,
+            5 => Self::OptionVportLim,
+            6 => Self::OvldDetected,
+            7 => Self::PowerNotAvailable,
+            8 => Self::ShortDetected,
+            _ => return None,
+        })
+    }
+}
+#[doc = "Enum - defines an integer enumeration, with values for each entry incrementing by 1, (e.g. 0, 1, 2, 3)"]
+#[derive(Debug, Clone, Copy)]
+pub enum PhyUpstreamType {
+    Mac = 0,
+    Phy = 1,
+}
+impl PhyUpstreamType {
+    pub fn from_value(value: u64) -> Option<Self> {
+        Some(match value {
+            0 => Self::Mac,
+            1 => Self::Phy,
+            _ => return None,
+        })
+    }
+}
+#[doc = "Enum - defines an integer enumeration, with values for each entry incrementing by 1, (e.g. 0, 1, 2, 3)"]
+#[derive(Debug, Clone, Copy)]
+pub enum TcpDataSplit {
+    Unknown = 0,
+    Disabled = 1,
+    Enabled = 2,
+}
+impl TcpDataSplit {
+    pub fn from_value(value: u64) -> Option<Self> {
+        Some(match value {
+            0 => Self::Unknown,
+            1 => Self::Disabled,
+            2 => Self::Enabled,
+            _ => return None,
+        })
+    }
+}
+#[doc = "Source of the hardware timestamp"]
+#[doc = "Enum - defines an integer enumeration, with values for each entry incrementing by 1, (e.g. 0, 1, 2, 3)"]
+#[derive(Debug, Clone, Copy)]
+pub enum HwtstampSource {
+    #[doc = "Hardware timestamp comes from a MAC or a device\nwhich has MAC and PHY integrated\n"]
+    Netdev = 1,
+    #[doc = "Hardware timestamp comes from one PHY device\nof the network topology\n"]
+    Phylib = 2,
+}
+impl HwtstampSource {
+    pub fn from_value(value: u64) -> Option<Self> {
+        Some(match value {
+            1 => Self::Netdev,
+            2 => Self::Phylib,
+            _ => return None,
+        })
+    }
+}
+#[doc = "PSE event list for the PSE controller"]
+#[doc = "Flags - defines an integer enumeration, with values for each entry occupying a bit, starting from bit 0, (e.g. 1, 2, 4, 8)"]
+#[derive(Debug, Clone, Copy)]
+pub enum PseEvent {
+    #[doc = "PSE output current is too high"]
+    PseEventOverCurrent = 1 << 0,
+    #[doc = "PSE in over temperature state"]
+    PseEventOverTemp = 1 << 1,
+    #[doc = "detection process occur on the PSE\\. IEEE 802\\.3\\-2022 33\\.2\\.5 and\n145\\.2\\.6 PSE detection of PDs\\. IEEE 802\\.3\\-202 30\\.9\\.1\\.1\\.5\naPSEPowerDetectionStatus\n"]
+    C33PseEventDetection = 1 << 2,
+    #[doc = "classification process occur on the PSE\\. IEEE 802\\.3\\-2022 33\\.2\\.6\nand 145\\.2\\.8 classification of PDs mutual identification\\.\nIEEE 802\\.3\\-2022 30\\.9\\.1\\.1\\.8 aPSEPowerClassification\\.\n"]
+    C33PseEventClassification = 1 << 3,
+    #[doc = "PD has been disconnected on the PSE\\. IEEE 802\\.3\\-2022 33\\.3\\.8\nand 145\\.3\\.9 PD Maintain Power Signature\\. IEEE 802\\.3\\-2022\n33\\.5\\.1\\.2\\.9 MPS Absent\\. IEEE 802\\.3\\-2022 30\\.9\\.1\\.1\\.20\naPSEMPSAbsentCounter\\.\n"]
+    C33PseEventDisconnection = 1 << 4,
+    #[doc = "PSE turned off due to over budget situation"]
+    PseEventOverBudget = 1 << 5,
+    #[doc = "PSE faced an error managing the power control from software"]
+    PseEventSwPwControlError = 1 << 6,
+}
+impl PseEvent {
+    pub fn from_value(value: u64) -> Option<Self> {
+        Some(match value {
+            n if n == 1 << 0 => Self::PseEventOverCurrent,
+            n if n == 1 << 1 => Self::PseEventOverTemp,
+            n if n == 1 << 2 => Self::C33PseEventDetection,
+            n if n == 1 << 3 => Self::C33PseEventClassification,
+            n if n == 1 << 4 => Self::C33PseEventDisconnection,
+            n if n == 1 << 5 => Self::PseEventOverBudget,
+            n if n == 1 << 6 => Self::PseEventSwPwControlError,
+            _ => return None,
+        })
+    }
+}
+#[doc = "RSS hash function transformations\\."]
+#[doc = "Flags - defines an integer enumeration, with values for each entry occupying a bit, starting from bit 0, (e.g. 1, 2, 4, 8)"]
+#[derive(Debug, Clone, Copy)]
+pub enum InputXfrm {
+    #[doc = "XOR the corresponding source and destination fields of each specified protocol\\. Both copies of the XOR'ed fields are fed into the RSS and RXHASH calculation\\. Note that this XORing reduces the input set entropy and could be exploited to reduce the RSS queue spread\\."]
+    SymXor = 1 << 0,
+    #[doc = "Similar to SYM\\_XOR, except that one copy of the XOR'ed fields is replaced by an OR of the same fields\\."]
+    SymOrXor = 1 << 1,
+}
+impl InputXfrm {
+    pub fn from_value(value: u64) -> Option<Self> {
+        Some(match value {
+            n if n == 1 << 0 => Self::SymXor,
+            n if n == 1 << 1 => Self::SymOrXor,
+            _ => return None,
+        })
+    }
+}
+#[doc = "Flags - defines an integer enumeration, with values for each entry occupying a bit, starting from bit 0, (e.g. 1, 2, 4, 8)"]
+#[derive(Debug, Clone, Copy)]
+pub enum RxfhFields {
+    L2da = 1 << 1,
+    Vlan = 1 << 2,
+    L3Proto = 1 << 3,
+    IpSrc = 1 << 4,
+    IpDst = 1 << 5,
+    #[doc = "src port in case of TCP/UDP/SCTP"]
+    L4B01 = 1 << 6,
+    #[doc = "dst port in case of TCP/UDP/SCTP"]
+    L4B23 = 1 << 7,
+    GtpTeid = 1 << 8,
+    #[doc = "IPv6 Flow Label"]
+    Ip6Fl = 1 << 9,
+    Discard = 1 << 31,
+}
+impl RxfhFields {
+    pub fn from_value(value: u64) -> Option<Self> {
+        Some(match value {
+            n if n == 1 << 1 => Self::L2da,
+            n if n == 1 << 2 => Self::Vlan,
+            n if n == 1 << 3 => Self::L3Proto,
+            n if n == 1 << 4 => Self::IpSrc,
+            n if n == 1 << 5 => Self::IpDst,
+            n if n == 1 << 6 => Self::L4B01,
+            n if n == 1 << 7 => Self::L4B23,
+            n if n == 1 << 8 => Self::GtpTeid,
+            n if n == 1 << 9 => Self::Ip6Fl,
+            n if n == 1 << 31 => Self::Discard,
+            _ => return None,
+        })
+    }
+}
+#[derive(Clone)]
+pub enum Header<'a> {
+    DevIndex(u32),
+    DevName(&'a CStr),
+    #[doc = "Associated type: [`HeaderFlags`] (enum)"]
+    Flags(u32),
+    PhyIndex(u32),
+}
+impl<'a> IterableHeader<'a> {
+    pub fn get_dev_index(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Header::DevIndex(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Header",
+            "DevIndex",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_dev_name(&self) -> Result<&'a CStr, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Header::DevName(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Header",
+            "DevName",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`HeaderFlags`] (enum)"]
+    pub fn get_flags(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Header::Flags(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Header",
+            "Flags",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_phy_index(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Header::PhyIndex(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Header",
+            "PhyIndex",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Header<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableHeader<'a> {
+        IterableHeader::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "DevIndex",
+            2u16 => "DevName",
+            3u16 => "Flags",
+            4u16 => "PhyIndex",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableHeader<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableHeader<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableHeader<'a> {
+    type Item = Result<Header<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Header::DevIndex({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Header::DevName({
+                    let res = CStr::from_bytes_with_nul(next).ok();
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Header::Flags({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Header::PhyIndex({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Header",
+            r#type.and_then(|t| Header::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableHeader<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Header");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Header::DevIndex(val) => fmt.field("DevIndex", &val),
+                Header::DevName(val) => fmt.field("DevName", &val),
+                Header::Flags(val) => {
+                    fmt.field("Flags", &FormatFlags(val.into(), HeaderFlags::from_value))
+                }
+                Header::PhyIndex(val) => fmt.field("PhyIndex", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableHeader<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Header", offset));
+            return (stack, missing_type.and_then(|t| Header::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Header::DevIndex(val) => {
+                    if last_off == offset {
+                        stack.push(("DevIndex", last_off));
+                        break;
+                    }
+                }
+                Header::DevName(val) => {
+                    if last_off == offset {
+                        stack.push(("DevName", last_off));
+                        break;
+                    }
+                }
+                Header::Flags(val) => {
+                    if last_off == offset {
+                        stack.push(("Flags", last_off));
+                        break;
+                    }
+                }
+                Header::PhyIndex(val) => {
+                    if last_off == offset {
+                        stack.push(("PhyIndex", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Header", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum BitsetBit<'a> {
+    Index(u32),
+    Name(&'a CStr),
+    Value(()),
+}
+impl<'a> IterableBitsetBit<'a> {
+    pub fn get_index(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let BitsetBit::Index(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "BitsetBit",
+            "Index",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_name(&self) -> Result<&'a CStr, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let BitsetBit::Name(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "BitsetBit",
+            "Name",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_value(&self) -> Result<(), ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let BitsetBit::Value(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "BitsetBit",
+            "Value",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl BitsetBit<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableBitsetBit<'a> {
+        IterableBitsetBit::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Index",
+            2u16 => "Name",
+            3u16 => "Value",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableBitsetBit<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableBitsetBit<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableBitsetBit<'a> {
+    type Item = Result<BitsetBit<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => BitsetBit::Index({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => BitsetBit::Name({
+                    let res = CStr::from_bytes_with_nul(next).ok();
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => BitsetBit::Value(()),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "BitsetBit",
+            r#type.and_then(|t| BitsetBit::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableBitsetBit<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("BitsetBit");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                BitsetBit::Index(val) => fmt.field("Index", &val),
+                BitsetBit::Name(val) => fmt.field("Name", &val),
+                BitsetBit::Value(val) => fmt.field("Value", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableBitsetBit<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("BitsetBit", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| BitsetBit::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                BitsetBit::Index(val) => {
+                    if last_off == offset {
+                        stack.push(("Index", last_off));
+                        break;
+                    }
+                }
+                BitsetBit::Name(val) => {
+                    if last_off == offset {
+                        stack.push(("Name", last_off));
+                        break;
+                    }
+                }
+                BitsetBit::Value(val) => {
+                    if last_off == offset {
+                        stack.push(("Value", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("BitsetBit", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum BitsetBits<'a> {
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    Bit(IterableBitsetBit<'a>),
+}
+impl<'a> IterableBitsetBits<'a> {
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn get_bit(&self) -> MultiAttrIterable<Self, BitsetBits<'a>, IterableBitsetBit<'a>> {
+        MultiAttrIterable::new(self.clone(), |variant| {
+            if let BitsetBits::Bit(val) = variant {
+                Some(val)
+            } else {
+                None
+            }
+        })
+    }
+}
+impl BitsetBits<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableBitsetBits<'a> {
+        IterableBitsetBits::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Bit",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableBitsetBits<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableBitsetBits<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableBitsetBits<'a> {
+    type Item = Result<BitsetBits<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => BitsetBits::Bit({
+                    let res = Some(IterableBitsetBit::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "BitsetBits",
+            r#type.and_then(|t| BitsetBits::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableBitsetBits<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("BitsetBits");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                BitsetBits::Bit(val) => fmt.field("Bit", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableBitsetBits<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("BitsetBits", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| BitsetBits::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                BitsetBits::Bit(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("BitsetBits", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Bitset<'a> {
+    Nomask(()),
+    Size(u32),
+    Bits(IterableBitsetBits<'a>),
+    Value(&'a [u8]),
+    Mask(&'a [u8]),
+}
+impl<'a> IterableBitset<'a> {
+    pub fn get_nomask(&self) -> Result<(), ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Bitset::Nomask(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Bitset",
+            "Nomask",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_size(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Bitset::Size(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Bitset",
+            "Size",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_bits(&self) -> Result<IterableBitsetBits<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Bitset::Bits(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Bitset",
+            "Bits",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_value(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Bitset::Value(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Bitset",
+            "Value",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_mask(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Bitset::Mask(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Bitset",
+            "Mask",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Bitset<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableBitset<'a> {
+        IterableBitset::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Nomask",
+            2u16 => "Size",
+            3u16 => "Bits",
+            4u16 => "Value",
+            5u16 => "Mask",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableBitset<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableBitset<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableBitset<'a> {
+    type Item = Result<Bitset<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Bitset::Nomask(()),
+                2u16 => Bitset::Size({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Bitset::Bits({
+                    let res = Some(IterableBitsetBits::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Bitset::Value({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Bitset::Mask({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Bitset",
+            r#type.and_then(|t| Bitset::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableBitset<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Bitset");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Bitset::Nomask(val) => fmt.field("Nomask", &val),
+                Bitset::Size(val) => fmt.field("Size", &val),
+                Bitset::Bits(val) => fmt.field("Bits", &val),
+                Bitset::Value(val) => fmt.field("Value", &val),
+                Bitset::Mask(val) => fmt.field("Mask", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableBitset<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Bitset", offset));
+            return (stack, missing_type.and_then(|t| Bitset::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Bitset::Nomask(val) => {
+                    if last_off == offset {
+                        stack.push(("Nomask", last_off));
+                        break;
+                    }
+                }
+                Bitset::Size(val) => {
+                    if last_off == offset {
+                        stack.push(("Size", last_off));
+                        break;
+                    }
+                }
+                Bitset::Bits(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Bitset::Value(val) => {
+                    if last_off == offset {
+                        stack.push(("Value", last_off));
+                        break;
+                    }
+                }
+                Bitset::Mask(val) => {
+                    if last_off == offset {
+                        stack.push(("Mask", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Bitset", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum String<'a> {
+    Index(u32),
+    Value(&'a CStr),
+}
+impl<'a> IterableString<'a> {
+    pub fn get_index(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let String::Index(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "String",
+            "Index",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_value(&self) -> Result<&'a CStr, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let String::Value(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "String",
+            "Value",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl String<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableString<'a> {
+        IterableString::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Index",
+            2u16 => "Value",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableString<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableString<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableString<'a> {
+    type Item = Result<String<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => String::Index({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => String::Value({
+                    let res = CStr::from_bytes_with_nul(next).ok();
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "String",
+            r#type.and_then(|t| String::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableString<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("String");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                String::Index(val) => fmt.field("Index", &val),
+                String::Value(val) => fmt.field("Value", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableString<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("String", offset));
+            return (stack, missing_type.and_then(|t| String::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                String::Index(val) => {
+                    if last_off == offset {
+                        stack.push(("Index", last_off));
+                        break;
+                    }
+                }
+                String::Value(val) => {
+                    if last_off == offset {
+                        stack.push(("Value", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("String", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum Strings<'a> {
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    String(IterableString<'a>),
+}
+impl<'a> IterableStrings<'a> {
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn get_string(&self) -> MultiAttrIterable<Self, Strings<'a>, IterableString<'a>> {
+        MultiAttrIterable::new(self.clone(), |variant| {
+            if let Strings::String(val) = variant {
+                Some(val)
+            } else {
+                None
+            }
+        })
+    }
+}
+impl Strings<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableStrings<'a> {
+        IterableStrings::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            0u16 => "Unspec",
+            1u16 => "String",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableStrings<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableStrings<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableStrings<'a> {
+    type Item = Result<Strings<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Strings::String({
+                    let res = Some(IterableString::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Strings",
+            r#type.and_then(|t| Strings::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableStrings<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Strings");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Strings::String(val) => fmt.field("String", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableStrings<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Strings", offset));
+            return (stack, missing_type.and_then(|t| Strings::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Strings::String(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Strings", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Stringset<'a> {
+    Id(u32),
+    Count(u32),
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    Strings(IterableStrings<'a>),
+}
+impl<'a> IterableStringset<'a> {
+    pub fn get_id(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Stringset::Id(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Stringset",
+            "Id",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_count(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Stringset::Count(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Stringset",
+            "Count",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn get_strings(&self) -> MultiAttrIterable<Self, Stringset<'a>, IterableStrings<'a>> {
+        MultiAttrIterable::new(self.clone(), |variant| {
+            if let Stringset::Strings(val) = variant {
+                Some(val)
+            } else {
+                None
+            }
+        })
+    }
+}
+impl Stringset<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableStringset<'a> {
+        IterableStringset::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Id",
+            2u16 => "Count",
+            3u16 => "Strings",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableStringset<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableStringset<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableStringset<'a> {
+    type Item = Result<Stringset<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Stringset::Id({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Stringset::Count({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Stringset::Strings({
+                    let res = Some(IterableStrings::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Stringset",
+            r#type.and_then(|t| Stringset::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableStringset<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Stringset");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Stringset::Id(val) => fmt.field("Id", &val),
+                Stringset::Count(val) => fmt.field("Count", &val),
+                Stringset::Strings(val) => fmt.field("Strings", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableStringset<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Stringset", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| Stringset::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Stringset::Id(val) => {
+                    if last_off == offset {
+                        stack.push(("Id", last_off));
+                        break;
+                    }
+                }
+                Stringset::Count(val) => {
+                    if last_off == offset {
+                        stack.push(("Count", last_off));
+                        break;
+                    }
+                }
+                Stringset::Strings(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Stringset", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Stringsets<'a> {
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    Stringset(IterableStringset<'a>),
+}
+impl<'a> IterableStringsets<'a> {
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn get_stringset(&self) -> MultiAttrIterable<Self, Stringsets<'a>, IterableStringset<'a>> {
+        MultiAttrIterable::new(self.clone(), |variant| {
+            if let Stringsets::Stringset(val) = variant {
+                Some(val)
+            } else {
+                None
+            }
+        })
+    }
+}
+impl Stringsets<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableStringsets<'a> {
+        IterableStringsets::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Stringset",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableStringsets<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableStringsets<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableStringsets<'a> {
+    type Item = Result<Stringsets<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Stringsets::Stringset({
+                    let res = Some(IterableStringset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Stringsets",
+            r#type.and_then(|t| Stringsets::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableStringsets<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Stringsets");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Stringsets::Stringset(val) => fmt.field("Stringset", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableStringsets<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Stringsets", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| Stringsets::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Stringsets::Stringset(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Stringsets", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Strset<'a> {
+    Header(IterableHeader<'a>),
+    Stringsets(IterableStringsets<'a>),
+    CountsOnly(()),
+}
+impl<'a> IterableStrset<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Strset::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Strset",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_stringsets(&self) -> Result<IterableStringsets<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Strset::Stringsets(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Strset",
+            "Stringsets",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_counts_only(&self) -> Result<(), ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Strset::CountsOnly(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Strset",
+            "CountsOnly",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Strset<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableStrset<'a> {
+        IterableStrset::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Stringsets",
+            3u16 => "CountsOnly",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableStrset<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableStrset<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableStrset<'a> {
+    type Item = Result<Strset<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Strset::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Strset::Stringsets({
+                    let res = Some(IterableStringsets::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Strset::CountsOnly(()),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Strset",
+            r#type.and_then(|t| Strset::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableStrset<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Strset");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Strset::Header(val) => fmt.field("Header", &val),
+                Strset::Stringsets(val) => fmt.field("Stringsets", &val),
+                Strset::CountsOnly(val) => fmt.field("CountsOnly", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableStrset<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Strset", offset));
+            return (stack, missing_type.and_then(|t| Strset::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Strset::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Strset::Stringsets(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Strset::CountsOnly(val) => {
+                    if last_off == offset {
+                        stack.push(("CountsOnly", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Strset", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Privflags<'a> {
+    Header(IterableHeader<'a>),
+    Flags(IterableBitset<'a>),
+}
+impl<'a> IterablePrivflags<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Privflags::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Privflags",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_flags(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Privflags::Flags(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Privflags",
+            "Flags",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Privflags<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterablePrivflags<'a> {
+        IterablePrivflags::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Flags",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterablePrivflags<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterablePrivflags<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterablePrivflags<'a> {
+    type Item = Result<Privflags<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Privflags::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Privflags::Flags({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Privflags",
+            r#type.and_then(|t| Privflags::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterablePrivflags<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Privflags");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Privflags::Header(val) => fmt.field("Header", &val),
+                Privflags::Flags(val) => fmt.field("Flags", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterablePrivflags<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Privflags", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| Privflags::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Privflags::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Privflags::Flags(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Privflags", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Rings<'a> {
+    Header(IterableHeader<'a>),
+    RxMax(u32),
+    RxMiniMax(u32),
+    RxJumboMax(u32),
+    TxMax(u32),
+    Rx(u32),
+    RxMini(u32),
+    RxJumbo(u32),
+    Tx(u32),
+    RxBufLen(u32),
+    #[doc = "Associated type: [`TcpDataSplit`] (enum)"]
+    TcpDataSplit(u8),
+    CqeSize(u32),
+    TxPush(u8),
+    RxPush(u8),
+    TxPushBufLen(u32),
+    TxPushBufLenMax(u32),
+    HdsThresh(u32),
+    HdsThreshMax(u32),
+}
+impl<'a> IterableRings<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_max(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::RxMax(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "RxMax",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_mini_max(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::RxMiniMax(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "RxMiniMax",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_jumbo_max(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::RxJumboMax(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "RxJumboMax",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_max(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::TxMax(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "TxMax",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::Rx(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "Rx",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_mini(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::RxMini(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "RxMini",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_jumbo(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::RxJumbo(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "RxJumbo",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::Tx(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "Tx",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_buf_len(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::RxBufLen(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "RxBufLen",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`TcpDataSplit`] (enum)"]
+    pub fn get_tcp_data_split(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::TcpDataSplit(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "TcpDataSplit",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_cqe_size(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::CqeSize(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "CqeSize",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_push(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::TxPush(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "TxPush",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_push(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::RxPush(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "RxPush",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_push_buf_len(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::TxPushBufLen(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "TxPushBufLen",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_push_buf_len_max(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::TxPushBufLenMax(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "TxPushBufLenMax",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hds_thresh(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::HdsThresh(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "HdsThresh",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hds_thresh_max(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rings::HdsThreshMax(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rings",
+            "HdsThreshMax",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Rings<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableRings<'a> {
+        IterableRings::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "RxMax",
+            3u16 => "RxMiniMax",
+            4u16 => "RxJumboMax",
+            5u16 => "TxMax",
+            6u16 => "Rx",
+            7u16 => "RxMini",
+            8u16 => "RxJumbo",
+            9u16 => "Tx",
+            10u16 => "RxBufLen",
+            11u16 => "TcpDataSplit",
+            12u16 => "CqeSize",
+            13u16 => "TxPush",
+            14u16 => "RxPush",
+            15u16 => "TxPushBufLen",
+            16u16 => "TxPushBufLenMax",
+            17u16 => "HdsThresh",
+            18u16 => "HdsThreshMax",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableRings<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableRings<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableRings<'a> {
+    type Item = Result<Rings<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Rings::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Rings::RxMax({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Rings::RxMiniMax({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Rings::RxJumboMax({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Rings::TxMax({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Rings::Rx({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Rings::RxMini({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => Rings::RxJumbo({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                9u16 => Rings::Tx({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                10u16 => Rings::RxBufLen({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                11u16 => Rings::TcpDataSplit({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                12u16 => Rings::CqeSize({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                13u16 => Rings::TxPush({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                14u16 => Rings::RxPush({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                15u16 => Rings::TxPushBufLen({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                16u16 => Rings::TxPushBufLenMax({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                17u16 => Rings::HdsThresh({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                18u16 => Rings::HdsThreshMax({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Rings",
+            r#type.and_then(|t| Rings::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableRings<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Rings");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Rings::Header(val) => fmt.field("Header", &val),
+                Rings::RxMax(val) => fmt.field("RxMax", &val),
+                Rings::RxMiniMax(val) => fmt.field("RxMiniMax", &val),
+                Rings::RxJumboMax(val) => fmt.field("RxJumboMax", &val),
+                Rings::TxMax(val) => fmt.field("TxMax", &val),
+                Rings::Rx(val) => fmt.field("Rx", &val),
+                Rings::RxMini(val) => fmt.field("RxMini", &val),
+                Rings::RxJumbo(val) => fmt.field("RxJumbo", &val),
+                Rings::Tx(val) => fmt.field("Tx", &val),
+                Rings::RxBufLen(val) => fmt.field("RxBufLen", &val),
+                Rings::TcpDataSplit(val) => fmt.field(
+                    "TcpDataSplit",
+                    &FormatEnum(val.into(), TcpDataSplit::from_value),
+                ),
+                Rings::CqeSize(val) => fmt.field("CqeSize", &val),
+                Rings::TxPush(val) => fmt.field("TxPush", &val),
+                Rings::RxPush(val) => fmt.field("RxPush", &val),
+                Rings::TxPushBufLen(val) => fmt.field("TxPushBufLen", &val),
+                Rings::TxPushBufLenMax(val) => fmt.field("TxPushBufLenMax", &val),
+                Rings::HdsThresh(val) => fmt.field("HdsThresh", &val),
+                Rings::HdsThreshMax(val) => fmt.field("HdsThreshMax", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableRings<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Rings", offset));
+            return (stack, missing_type.and_then(|t| Rings::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Rings::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Rings::RxMax(val) => {
+                    if last_off == offset {
+                        stack.push(("RxMax", last_off));
+                        break;
+                    }
+                }
+                Rings::RxMiniMax(val) => {
+                    if last_off == offset {
+                        stack.push(("RxMiniMax", last_off));
+                        break;
+                    }
+                }
+                Rings::RxJumboMax(val) => {
+                    if last_off == offset {
+                        stack.push(("RxJumboMax", last_off));
+                        break;
+                    }
+                }
+                Rings::TxMax(val) => {
+                    if last_off == offset {
+                        stack.push(("TxMax", last_off));
+                        break;
+                    }
+                }
+                Rings::Rx(val) => {
+                    if last_off == offset {
+                        stack.push(("Rx", last_off));
+                        break;
+                    }
+                }
+                Rings::RxMini(val) => {
+                    if last_off == offset {
+                        stack.push(("RxMini", last_off));
+                        break;
+                    }
+                }
+                Rings::RxJumbo(val) => {
+                    if last_off == offset {
+                        stack.push(("RxJumbo", last_off));
+                        break;
+                    }
+                }
+                Rings::Tx(val) => {
+                    if last_off == offset {
+                        stack.push(("Tx", last_off));
+                        break;
+                    }
+                }
+                Rings::RxBufLen(val) => {
+                    if last_off == offset {
+                        stack.push(("RxBufLen", last_off));
+                        break;
+                    }
+                }
+                Rings::TcpDataSplit(val) => {
+                    if last_off == offset {
+                        stack.push(("TcpDataSplit", last_off));
+                        break;
+                    }
+                }
+                Rings::CqeSize(val) => {
+                    if last_off == offset {
+                        stack.push(("CqeSize", last_off));
+                        break;
+                    }
+                }
+                Rings::TxPush(val) => {
+                    if last_off == offset {
+                        stack.push(("TxPush", last_off));
+                        break;
+                    }
+                }
+                Rings::RxPush(val) => {
+                    if last_off == offset {
+                        stack.push(("RxPush", last_off));
+                        break;
+                    }
+                }
+                Rings::TxPushBufLen(val) => {
+                    if last_off == offset {
+                        stack.push(("TxPushBufLen", last_off));
+                        break;
+                    }
+                }
+                Rings::TxPushBufLenMax(val) => {
+                    if last_off == offset {
+                        stack.push(("TxPushBufLenMax", last_off));
+                        break;
+                    }
+                }
+                Rings::HdsThresh(val) => {
+                    if last_off == offset {
+                        stack.push(("HdsThresh", last_off));
+                        break;
+                    }
+                }
+                Rings::HdsThreshMax(val) => {
+                    if last_off == offset {
+                        stack.push(("HdsThreshMax", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Rings", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum MmStat<'a> {
+    Pad(&'a [u8]),
+    #[doc = "aMACMergeFrameAssErrorCount"]
+    ReassemblyErrors(u64),
+    #[doc = "aMACMergeFrameSmdErrorCount"]
+    SmdErrors(u64),
+    #[doc = "aMACMergeFrameAssOkCount"]
+    ReassemblyOk(u64),
+    #[doc = "aMACMergeFragCountRx"]
+    RxFragCount(u64),
+    #[doc = "aMACMergeFragCountTx"]
+    TxFragCount(u64),
+    #[doc = "aMACMergeHoldCount"]
+    HoldCount(u64),
+}
+impl<'a> IterableMmStat<'a> {
+    pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MmStat::Pad(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MmStat",
+            "Pad",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "aMACMergeFrameAssErrorCount"]
+    pub fn get_reassembly_errors(&self) -> Result<u64, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MmStat::ReassemblyErrors(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MmStat",
+            "ReassemblyErrors",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "aMACMergeFrameSmdErrorCount"]
+    pub fn get_smd_errors(&self) -> Result<u64, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MmStat::SmdErrors(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MmStat",
+            "SmdErrors",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "aMACMergeFrameAssOkCount"]
+    pub fn get_reassembly_ok(&self) -> Result<u64, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MmStat::ReassemblyOk(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MmStat",
+            "ReassemblyOk",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "aMACMergeFragCountRx"]
+    pub fn get_rx_frag_count(&self) -> Result<u64, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MmStat::RxFragCount(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MmStat",
+            "RxFragCount",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "aMACMergeFragCountTx"]
+    pub fn get_tx_frag_count(&self) -> Result<u64, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MmStat::TxFragCount(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MmStat",
+            "TxFragCount",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "aMACMergeHoldCount"]
+    pub fn get_hold_count(&self) -> Result<u64, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MmStat::HoldCount(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MmStat",
+            "HoldCount",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl MmStat<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableMmStat<'a> {
+        IterableMmStat::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Pad",
+            2u16 => "ReassemblyErrors",
+            3u16 => "SmdErrors",
+            4u16 => "ReassemblyOk",
+            5u16 => "RxFragCount",
+            6u16 => "TxFragCount",
+            7u16 => "HoldCount",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableMmStat<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableMmStat<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableMmStat<'a> {
+    type Item = Result<MmStat<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => MmStat::Pad({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => MmStat::ReassemblyErrors({
+                    let res = parse_u64(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => MmStat::SmdErrors({
+                    let res = parse_u64(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => MmStat::ReassemblyOk({
+                    let res = parse_u64(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => MmStat::RxFragCount({
+                    let res = parse_u64(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => MmStat::TxFragCount({
+                    let res = parse_u64(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => MmStat::HoldCount({
+                    let res = parse_u64(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "MmStat",
+            r#type.and_then(|t| MmStat::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableMmStat<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("MmStat");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                MmStat::Pad(val) => fmt.field("Pad", &val),
+                MmStat::ReassemblyErrors(val) => fmt.field("ReassemblyErrors", &val),
+                MmStat::SmdErrors(val) => fmt.field("SmdErrors", &val),
+                MmStat::ReassemblyOk(val) => fmt.field("ReassemblyOk", &val),
+                MmStat::RxFragCount(val) => fmt.field("RxFragCount", &val),
+                MmStat::TxFragCount(val) => fmt.field("TxFragCount", &val),
+                MmStat::HoldCount(val) => fmt.field("HoldCount", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableMmStat<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("MmStat", offset));
+            return (stack, missing_type.and_then(|t| MmStat::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                MmStat::Pad(val) => {
+                    if last_off == offset {
+                        stack.push(("Pad", last_off));
+                        break;
+                    }
+                }
+                MmStat::ReassemblyErrors(val) => {
+                    if last_off == offset {
+                        stack.push(("ReassemblyErrors", last_off));
+                        break;
+                    }
+                }
+                MmStat::SmdErrors(val) => {
+                    if last_off == offset {
+                        stack.push(("SmdErrors", last_off));
+                        break;
+                    }
+                }
+                MmStat::ReassemblyOk(val) => {
+                    if last_off == offset {
+                        stack.push(("ReassemblyOk", last_off));
+                        break;
+                    }
+                }
+                MmStat::RxFragCount(val) => {
+                    if last_off == offset {
+                        stack.push(("RxFragCount", last_off));
+                        break;
+                    }
+                }
+                MmStat::TxFragCount(val) => {
+                    if last_off == offset {
+                        stack.push(("TxFragCount", last_off));
+                        break;
+                    }
+                }
+                MmStat::HoldCount(val) => {
+                    if last_off == offset {
+                        stack.push(("HoldCount", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("MmStat", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum Mm<'a> {
+    Header(IterableHeader<'a>),
+    PmacEnabled(u8),
+    TxEnabled(u8),
+    TxActive(u8),
+    TxMinFragSize(u32),
+    RxMinFragSize(u32),
+    VerifyEnabled(u8),
+    VerifyStatus(u8),
+    VerifyTime(u32),
+    MaxVerifyTime(u32),
+    Stats(IterableMmStat<'a>),
+}
+impl<'a> IterableMm<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mm::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mm",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_pmac_enabled(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mm::PmacEnabled(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mm",
+            "PmacEnabled",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_enabled(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mm::TxEnabled(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mm",
+            "TxEnabled",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_active(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mm::TxActive(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mm",
+            "TxActive",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_min_frag_size(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mm::TxMinFragSize(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mm",
+            "TxMinFragSize",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_min_frag_size(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mm::RxMinFragSize(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mm",
+            "RxMinFragSize",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_verify_enabled(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mm::VerifyEnabled(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mm",
+            "VerifyEnabled",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_verify_status(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mm::VerifyStatus(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mm",
+            "VerifyStatus",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_verify_time(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mm::VerifyTime(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mm",
+            "VerifyTime",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_max_verify_time(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mm::MaxVerifyTime(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mm",
+            "MaxVerifyTime",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_stats(&self) -> Result<IterableMmStat<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mm::Stats(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mm",
+            "Stats",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Mm<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableMm<'a> {
+        IterableMm::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "PmacEnabled",
+            3u16 => "TxEnabled",
+            4u16 => "TxActive",
+            5u16 => "TxMinFragSize",
+            6u16 => "RxMinFragSize",
+            7u16 => "VerifyEnabled",
+            8u16 => "VerifyStatus",
+            9u16 => "VerifyTime",
+            10u16 => "MaxVerifyTime",
+            11u16 => "Stats",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableMm<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableMm<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableMm<'a> {
+    type Item = Result<Mm<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Mm::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Mm::PmacEnabled({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Mm::TxEnabled({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Mm::TxActive({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Mm::TxMinFragSize({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Mm::RxMinFragSize({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Mm::VerifyEnabled({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => Mm::VerifyStatus({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                9u16 => Mm::VerifyTime({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                10u16 => Mm::MaxVerifyTime({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                11u16 => Mm::Stats({
+                    let res = Some(IterableMmStat::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Mm",
+            r#type.and_then(|t| Mm::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableMm<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Mm");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Mm::Header(val) => fmt.field("Header", &val),
+                Mm::PmacEnabled(val) => fmt.field("PmacEnabled", &val),
+                Mm::TxEnabled(val) => fmt.field("TxEnabled", &val),
+                Mm::TxActive(val) => fmt.field("TxActive", &val),
+                Mm::TxMinFragSize(val) => fmt.field("TxMinFragSize", &val),
+                Mm::RxMinFragSize(val) => fmt.field("RxMinFragSize", &val),
+                Mm::VerifyEnabled(val) => fmt.field("VerifyEnabled", &val),
+                Mm::VerifyStatus(val) => fmt.field("VerifyStatus", &val),
+                Mm::VerifyTime(val) => fmt.field("VerifyTime", &val),
+                Mm::MaxVerifyTime(val) => fmt.field("MaxVerifyTime", &val),
+                Mm::Stats(val) => fmt.field("Stats", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableMm<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Mm", offset));
+            return (stack, missing_type.and_then(|t| Mm::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Mm::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Mm::PmacEnabled(val) => {
+                    if last_off == offset {
+                        stack.push(("PmacEnabled", last_off));
+                        break;
+                    }
+                }
+                Mm::TxEnabled(val) => {
+                    if last_off == offset {
+                        stack.push(("TxEnabled", last_off));
+                        break;
+                    }
+                }
+                Mm::TxActive(val) => {
+                    if last_off == offset {
+                        stack.push(("TxActive", last_off));
+                        break;
+                    }
+                }
+                Mm::TxMinFragSize(val) => {
+                    if last_off == offset {
+                        stack.push(("TxMinFragSize", last_off));
+                        break;
+                    }
+                }
+                Mm::RxMinFragSize(val) => {
+                    if last_off == offset {
+                        stack.push(("RxMinFragSize", last_off));
+                        break;
+                    }
+                }
+                Mm::VerifyEnabled(val) => {
+                    if last_off == offset {
+                        stack.push(("VerifyEnabled", last_off));
+                        break;
+                    }
+                }
+                Mm::VerifyStatus(val) => {
+                    if last_off == offset {
+                        stack.push(("VerifyStatus", last_off));
+                        break;
+                    }
+                }
+                Mm::VerifyTime(val) => {
+                    if last_off == offset {
+                        stack.push(("VerifyTime", last_off));
+                        break;
+                    }
+                }
+                Mm::MaxVerifyTime(val) => {
+                    if last_off == offset {
+                        stack.push(("MaxVerifyTime", last_off));
+                        break;
+                    }
+                }
+                Mm::Stats(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Mm", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Linkinfo<'a> {
+    Header(IterableHeader<'a>),
+    Port(u8),
+    Phyaddr(u8),
+    TpMdix(u8),
+    TpMdixCtrl(u8),
+    Transceiver(u8),
+}
+impl<'a> IterableLinkinfo<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkinfo::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkinfo",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_port(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkinfo::Port(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkinfo",
+            "Port",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_phyaddr(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkinfo::Phyaddr(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkinfo",
+            "Phyaddr",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tp_mdix(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkinfo::TpMdix(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkinfo",
+            "TpMdix",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tp_mdix_ctrl(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkinfo::TpMdixCtrl(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkinfo",
+            "TpMdixCtrl",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_transceiver(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkinfo::Transceiver(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkinfo",
+            "Transceiver",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Linkinfo<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableLinkinfo<'a> {
+        IterableLinkinfo::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Port",
+            3u16 => "Phyaddr",
+            4u16 => "TpMdix",
+            5u16 => "TpMdixCtrl",
+            6u16 => "Transceiver",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableLinkinfo<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableLinkinfo<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableLinkinfo<'a> {
+    type Item = Result<Linkinfo<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Linkinfo::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Linkinfo::Port({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Linkinfo::Phyaddr({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Linkinfo::TpMdix({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Linkinfo::TpMdixCtrl({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Linkinfo::Transceiver({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Linkinfo",
+            r#type.and_then(|t| Linkinfo::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableLinkinfo<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Linkinfo");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Linkinfo::Header(val) => fmt.field("Header", &val),
+                Linkinfo::Port(val) => fmt.field("Port", &val),
+                Linkinfo::Phyaddr(val) => fmt.field("Phyaddr", &val),
+                Linkinfo::TpMdix(val) => fmt.field("TpMdix", &val),
+                Linkinfo::TpMdixCtrl(val) => fmt.field("TpMdixCtrl", &val),
+                Linkinfo::Transceiver(val) => fmt.field("Transceiver", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableLinkinfo<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Linkinfo", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| Linkinfo::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Linkinfo::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Linkinfo::Port(val) => {
+                    if last_off == offset {
+                        stack.push(("Port", last_off));
+                        break;
+                    }
+                }
+                Linkinfo::Phyaddr(val) => {
+                    if last_off == offset {
+                        stack.push(("Phyaddr", last_off));
+                        break;
+                    }
+                }
+                Linkinfo::TpMdix(val) => {
+                    if last_off == offset {
+                        stack.push(("TpMdix", last_off));
+                        break;
+                    }
+                }
+                Linkinfo::TpMdixCtrl(val) => {
+                    if last_off == offset {
+                        stack.push(("TpMdixCtrl", last_off));
+                        break;
+                    }
+                }
+                Linkinfo::Transceiver(val) => {
+                    if last_off == offset {
+                        stack.push(("Transceiver", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Linkinfo", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Linkmodes<'a> {
+    Header(IterableHeader<'a>),
+    Autoneg(u8),
+    Ours(IterableBitset<'a>),
+    Peer(IterableBitset<'a>),
+    Speed(u32),
+    Duplex(u8),
+    MasterSlaveCfg(u8),
+    MasterSlaveState(u8),
+    Lanes(u32),
+    RateMatching(u8),
+}
+impl<'a> IterableLinkmodes<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkmodes::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkmodes",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_autoneg(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkmodes::Autoneg(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkmodes",
+            "Autoneg",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_ours(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkmodes::Ours(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkmodes",
+            "Ours",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_peer(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkmodes::Peer(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkmodes",
+            "Peer",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_speed(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkmodes::Speed(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkmodes",
+            "Speed",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_duplex(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkmodes::Duplex(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkmodes",
+            "Duplex",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_master_slave_cfg(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkmodes::MasterSlaveCfg(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkmodes",
+            "MasterSlaveCfg",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_master_slave_state(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkmodes::MasterSlaveState(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkmodes",
+            "MasterSlaveState",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_lanes(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkmodes::Lanes(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkmodes",
+            "Lanes",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rate_matching(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkmodes::RateMatching(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkmodes",
+            "RateMatching",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Linkmodes<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableLinkmodes<'a> {
+        IterableLinkmodes::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Autoneg",
+            3u16 => "Ours",
+            4u16 => "Peer",
+            5u16 => "Speed",
+            6u16 => "Duplex",
+            7u16 => "MasterSlaveCfg",
+            8u16 => "MasterSlaveState",
+            9u16 => "Lanes",
+            10u16 => "RateMatching",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableLinkmodes<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableLinkmodes<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableLinkmodes<'a> {
+    type Item = Result<Linkmodes<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Linkmodes::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Linkmodes::Autoneg({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Linkmodes::Ours({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Linkmodes::Peer({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Linkmodes::Speed({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Linkmodes::Duplex({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Linkmodes::MasterSlaveCfg({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => Linkmodes::MasterSlaveState({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                9u16 => Linkmodes::Lanes({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                10u16 => Linkmodes::RateMatching({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Linkmodes",
+            r#type.and_then(|t| Linkmodes::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableLinkmodes<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Linkmodes");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Linkmodes::Header(val) => fmt.field("Header", &val),
+                Linkmodes::Autoneg(val) => fmt.field("Autoneg", &val),
+                Linkmodes::Ours(val) => fmt.field("Ours", &val),
+                Linkmodes::Peer(val) => fmt.field("Peer", &val),
+                Linkmodes::Speed(val) => fmt.field("Speed", &val),
+                Linkmodes::Duplex(val) => fmt.field("Duplex", &val),
+                Linkmodes::MasterSlaveCfg(val) => fmt.field("MasterSlaveCfg", &val),
+                Linkmodes::MasterSlaveState(val) => fmt.field("MasterSlaveState", &val),
+                Linkmodes::Lanes(val) => fmt.field("Lanes", &val),
+                Linkmodes::RateMatching(val) => fmt.field("RateMatching", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableLinkmodes<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Linkmodes", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| Linkmodes::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Linkmodes::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Linkmodes::Autoneg(val) => {
+                    if last_off == offset {
+                        stack.push(("Autoneg", last_off));
+                        break;
+                    }
+                }
+                Linkmodes::Ours(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Linkmodes::Peer(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Linkmodes::Speed(val) => {
+                    if last_off == offset {
+                        stack.push(("Speed", last_off));
+                        break;
+                    }
+                }
+                Linkmodes::Duplex(val) => {
+                    if last_off == offset {
+                        stack.push(("Duplex", last_off));
+                        break;
+                    }
+                }
+                Linkmodes::MasterSlaveCfg(val) => {
+                    if last_off == offset {
+                        stack.push(("MasterSlaveCfg", last_off));
+                        break;
+                    }
+                }
+                Linkmodes::MasterSlaveState(val) => {
+                    if last_off == offset {
+                        stack.push(("MasterSlaveState", last_off));
+                        break;
+                    }
+                }
+                Linkmodes::Lanes(val) => {
+                    if last_off == offset {
+                        stack.push(("Lanes", last_off));
+                        break;
+                    }
+                }
+                Linkmodes::RateMatching(val) => {
+                    if last_off == offset {
+                        stack.push(("RateMatching", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Linkmodes", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Linkstate<'a> {
+    Header(IterableHeader<'a>),
+    Link(u8),
+    Sqi(u32),
+    SqiMax(u32),
+    ExtState(u8),
+    ExtSubstate(u8),
+    ExtDownCnt(u32),
+}
+impl<'a> IterableLinkstate<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkstate::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkstate",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_link(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkstate::Link(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkstate",
+            "Link",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_sqi(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkstate::Sqi(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkstate",
+            "Sqi",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_sqi_max(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkstate::SqiMax(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkstate",
+            "SqiMax",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_ext_state(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkstate::ExtState(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkstate",
+            "ExtState",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_ext_substate(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkstate::ExtSubstate(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkstate",
+            "ExtSubstate",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_ext_down_cnt(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Linkstate::ExtDownCnt(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Linkstate",
+            "ExtDownCnt",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Linkstate<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableLinkstate<'a> {
+        IterableLinkstate::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Link",
+            3u16 => "Sqi",
+            4u16 => "SqiMax",
+            5u16 => "ExtState",
+            6u16 => "ExtSubstate",
+            7u16 => "ExtDownCnt",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableLinkstate<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableLinkstate<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableLinkstate<'a> {
+    type Item = Result<Linkstate<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Linkstate::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Linkstate::Link({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Linkstate::Sqi({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Linkstate::SqiMax({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Linkstate::ExtState({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Linkstate::ExtSubstate({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Linkstate::ExtDownCnt({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Linkstate",
+            r#type.and_then(|t| Linkstate::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableLinkstate<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Linkstate");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Linkstate::Header(val) => fmt.field("Header", &val),
+                Linkstate::Link(val) => fmt.field("Link", &val),
+                Linkstate::Sqi(val) => fmt.field("Sqi", &val),
+                Linkstate::SqiMax(val) => fmt.field("SqiMax", &val),
+                Linkstate::ExtState(val) => fmt.field("ExtState", &val),
+                Linkstate::ExtSubstate(val) => fmt.field("ExtSubstate", &val),
+                Linkstate::ExtDownCnt(val) => fmt.field("ExtDownCnt", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableLinkstate<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Linkstate", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| Linkstate::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Linkstate::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Linkstate::Link(val) => {
+                    if last_off == offset {
+                        stack.push(("Link", last_off));
+                        break;
+                    }
+                }
+                Linkstate::Sqi(val) => {
+                    if last_off == offset {
+                        stack.push(("Sqi", last_off));
+                        break;
+                    }
+                }
+                Linkstate::SqiMax(val) => {
+                    if last_off == offset {
+                        stack.push(("SqiMax", last_off));
+                        break;
+                    }
+                }
+                Linkstate::ExtState(val) => {
+                    if last_off == offset {
+                        stack.push(("ExtState", last_off));
+                        break;
+                    }
+                }
+                Linkstate::ExtSubstate(val) => {
+                    if last_off == offset {
+                        stack.push(("ExtSubstate", last_off));
+                        break;
+                    }
+                }
+                Linkstate::ExtDownCnt(val) => {
+                    if last_off == offset {
+                        stack.push(("ExtDownCnt", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Linkstate", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Debug<'a> {
+    Header(IterableHeader<'a>),
+    Msgmask(IterableBitset<'a>),
+}
+impl<'a> IterableDebug<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Debug::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Debug",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_msgmask(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Debug::Msgmask(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Debug",
+            "Msgmask",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Debug<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableDebug<'a> {
+        IterableDebug::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Msgmask",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableDebug<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableDebug<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableDebug<'a> {
+    type Item = Result<Debug<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Debug::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Debug::Msgmask({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Debug",
+            r#type.and_then(|t| Debug::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableDebug<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Debug");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Debug::Header(val) => fmt.field("Header", &val),
+                Debug::Msgmask(val) => fmt.field("Msgmask", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableDebug<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Debug", offset));
+            return (stack, missing_type.and_then(|t| Debug::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Debug::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Debug::Msgmask(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Debug", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Wol<'a> {
+    Header(IterableHeader<'a>),
+    Modes(IterableBitset<'a>),
+    Sopass(&'a [u8]),
+}
+impl<'a> IterableWol<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Wol::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Wol",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_modes(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Wol::Modes(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Wol",
+            "Modes",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_sopass(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Wol::Sopass(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Wol",
+            "Sopass",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Wol<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableWol<'a> {
+        IterableWol::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Modes",
+            3u16 => "Sopass",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableWol<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableWol<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableWol<'a> {
+    type Item = Result<Wol<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Wol::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Wol::Modes({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Wol::Sopass({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Wol",
+            r#type.and_then(|t| Wol::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableWol<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Wol");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Wol::Header(val) => fmt.field("Header", &val),
+                Wol::Modes(val) => fmt.field("Modes", &val),
+                Wol::Sopass(val) => fmt.field("Sopass", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableWol<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Wol", offset));
+            return (stack, missing_type.and_then(|t| Wol::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Wol::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Wol::Modes(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Wol::Sopass(val) => {
+                    if last_off == offset {
+                        stack.push(("Sopass", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Wol", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Features<'a> {
+    Header(IterableHeader<'a>),
+    Hw(IterableBitset<'a>),
+    Wanted(IterableBitset<'a>),
+    Active(IterableBitset<'a>),
+    Nochange(IterableBitset<'a>),
+}
+impl<'a> IterableFeatures<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Features::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Features",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hw(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Features::Hw(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Features",
+            "Hw",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_wanted(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Features::Wanted(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Features",
+            "Wanted",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_active(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Features::Active(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Features",
+            "Active",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_nochange(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Features::Nochange(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Features",
+            "Nochange",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Features<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableFeatures<'a> {
+        IterableFeatures::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Hw",
+            3u16 => "Wanted",
+            4u16 => "Active",
+            5u16 => "Nochange",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableFeatures<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableFeatures<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableFeatures<'a> {
+    type Item = Result<Features<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Features::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Features::Hw({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Features::Wanted({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Features::Active({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Features::Nochange({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Features",
+            r#type.and_then(|t| Features::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableFeatures<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Features");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Features::Header(val) => fmt.field("Header", &val),
+                Features::Hw(val) => fmt.field("Hw", &val),
+                Features::Wanted(val) => fmt.field("Wanted", &val),
+                Features::Active(val) => fmt.field("Active", &val),
+                Features::Nochange(val) => fmt.field("Nochange", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableFeatures<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Features", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| Features::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Features::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Features::Hw(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Features::Wanted(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Features::Active(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Features::Nochange(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Features", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Channels<'a> {
+    Header(IterableHeader<'a>),
+    RxMax(u32),
+    TxMax(u32),
+    OtherMax(u32),
+    CombinedMax(u32),
+    RxCount(u32),
+    TxCount(u32),
+    OtherCount(u32),
+    CombinedCount(u32),
+}
+impl<'a> IterableChannels<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Channels::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Channels",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_max(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Channels::RxMax(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Channels",
+            "RxMax",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_max(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Channels::TxMax(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Channels",
+            "TxMax",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_other_max(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Channels::OtherMax(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Channels",
+            "OtherMax",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_combined_max(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Channels::CombinedMax(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Channels",
+            "CombinedMax",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_count(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Channels::RxCount(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Channels",
+            "RxCount",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_count(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Channels::TxCount(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Channels",
+            "TxCount",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_other_count(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Channels::OtherCount(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Channels",
+            "OtherCount",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_combined_count(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Channels::CombinedCount(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Channels",
+            "CombinedCount",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Channels<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableChannels<'a> {
+        IterableChannels::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "RxMax",
+            3u16 => "TxMax",
+            4u16 => "OtherMax",
+            5u16 => "CombinedMax",
+            6u16 => "RxCount",
+            7u16 => "TxCount",
+            8u16 => "OtherCount",
+            9u16 => "CombinedCount",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableChannels<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableChannels<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableChannels<'a> {
+    type Item = Result<Channels<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Channels::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Channels::RxMax({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Channels::TxMax({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Channels::OtherMax({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Channels::CombinedMax({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Channels::RxCount({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Channels::TxCount({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => Channels::OtherCount({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                9u16 => Channels::CombinedCount({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Channels",
+            r#type.and_then(|t| Channels::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableChannels<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Channels");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Channels::Header(val) => fmt.field("Header", &val),
+                Channels::RxMax(val) => fmt.field("RxMax", &val),
+                Channels::TxMax(val) => fmt.field("TxMax", &val),
+                Channels::OtherMax(val) => fmt.field("OtherMax", &val),
+                Channels::CombinedMax(val) => fmt.field("CombinedMax", &val),
+                Channels::RxCount(val) => fmt.field("RxCount", &val),
+                Channels::TxCount(val) => fmt.field("TxCount", &val),
+                Channels::OtherCount(val) => fmt.field("OtherCount", &val),
+                Channels::CombinedCount(val) => fmt.field("CombinedCount", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableChannels<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Channels", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| Channels::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Channels::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Channels::RxMax(val) => {
+                    if last_off == offset {
+                        stack.push(("RxMax", last_off));
+                        break;
+                    }
+                }
+                Channels::TxMax(val) => {
+                    if last_off == offset {
+                        stack.push(("TxMax", last_off));
+                        break;
+                    }
+                }
+                Channels::OtherMax(val) => {
+                    if last_off == offset {
+                        stack.push(("OtherMax", last_off));
+                        break;
+                    }
+                }
+                Channels::CombinedMax(val) => {
+                    if last_off == offset {
+                        stack.push(("CombinedMax", last_off));
+                        break;
+                    }
+                }
+                Channels::RxCount(val) => {
+                    if last_off == offset {
+                        stack.push(("RxCount", last_off));
+                        break;
+                    }
+                }
+                Channels::TxCount(val) => {
+                    if last_off == offset {
+                        stack.push(("TxCount", last_off));
+                        break;
+                    }
+                }
+                Channels::OtherCount(val) => {
+                    if last_off == offset {
+                        stack.push(("OtherCount", last_off));
+                        break;
+                    }
+                }
+                Channels::CombinedCount(val) => {
+                    if last_off == offset {
+                        stack.push(("CombinedCount", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Channels", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum IrqModeration {
+    Usec(u32),
+    Pkts(u32),
+    Comps(u32),
+}
+impl<'a> IterableIrqModeration<'a> {
+    pub fn get_usec(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let IrqModeration::Usec(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "IrqModeration",
+            "Usec",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_pkts(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let IrqModeration::Pkts(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "IrqModeration",
+            "Pkts",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_comps(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let IrqModeration::Comps(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "IrqModeration",
+            "Comps",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl IrqModeration {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableIrqModeration<'a> {
+        IterableIrqModeration::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Usec",
+            2u16 => "Pkts",
+            3u16 => "Comps",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableIrqModeration<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableIrqModeration<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableIrqModeration<'a> {
+    type Item = Result<IrqModeration, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => IrqModeration::Usec({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => IrqModeration::Pkts({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => IrqModeration::Comps({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "IrqModeration",
+            r#type.and_then(|t| IrqModeration::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl std::fmt::Debug for IterableIrqModeration<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("IrqModeration");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                IrqModeration::Usec(val) => fmt.field("Usec", &val),
+                IrqModeration::Pkts(val) => fmt.field("Pkts", &val),
+                IrqModeration::Comps(val) => fmt.field("Comps", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableIrqModeration<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("IrqModeration", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| IrqModeration::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                IrqModeration::Usec(val) => {
+                    if last_off == offset {
+                        stack.push(("Usec", last_off));
+                        break;
+                    }
+                }
+                IrqModeration::Pkts(val) => {
+                    if last_off == offset {
+                        stack.push(("Pkts", last_off));
+                        break;
+                    }
+                }
+                IrqModeration::Comps(val) => {
+                    if last_off == offset {
+                        stack.push(("Comps", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("IrqModeration", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum Profile<'a> {
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    IrqModeration(IterableIrqModeration<'a>),
+}
+impl<'a> IterableProfile<'a> {
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn get_irq_moderation(
+        &self,
+    ) -> MultiAttrIterable<Self, Profile<'a>, IterableIrqModeration<'a>> {
+        MultiAttrIterable::new(self.clone(), |variant| {
+            if let Profile::IrqModeration(val) = variant {
+                Some(val)
+            } else {
+                None
+            }
+        })
+    }
+}
+impl Profile<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableProfile<'a> {
+        IterableProfile::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "IrqModeration",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableProfile<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableProfile<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableProfile<'a> {
+    type Item = Result<Profile<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Profile::IrqModeration({
+                    let res = Some(IterableIrqModeration::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Profile",
+            r#type.and_then(|t| Profile::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableProfile<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Profile");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Profile::IrqModeration(val) => fmt.field("IrqModeration", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableProfile<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Profile", offset));
+            return (stack, missing_type.and_then(|t| Profile::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Profile::IrqModeration(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Profile", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Coalesce<'a> {
+    Header(IterableHeader<'a>),
+    RxUsecs(u32),
+    RxMaxFrames(u32),
+    RxUsecsIrq(u32),
+    RxMaxFramesIrq(u32),
+    TxUsecs(u32),
+    TxMaxFrames(u32),
+    TxUsecsIrq(u32),
+    TxMaxFramesIrq(u32),
+    StatsBlockUsecs(u32),
+    UseAdaptiveRx(u8),
+    UseAdaptiveTx(u8),
+    PktRateLow(u32),
+    RxUsecsLow(u32),
+    RxMaxFramesLow(u32),
+    TxUsecsLow(u32),
+    TxMaxFramesLow(u32),
+    PktRateHigh(u32),
+    RxUsecsHigh(u32),
+    RxMaxFramesHigh(u32),
+    TxUsecsHigh(u32),
+    TxMaxFramesHigh(u32),
+    RateSampleInterval(u32),
+    UseCqeModeTx(u8),
+    UseCqeModeRx(u8),
+    TxAggrMaxBytes(u32),
+    TxAggrMaxFrames(u32),
+    TxAggrTimeUsecs(u32),
+    RxProfile(IterableProfile<'a>),
+    TxProfile(IterableProfile<'a>),
+}
+impl<'a> IterableCoalesce<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_usecs(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::RxUsecs(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "RxUsecs",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_max_frames(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::RxMaxFrames(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "RxMaxFrames",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_usecs_irq(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::RxUsecsIrq(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "RxUsecsIrq",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_max_frames_irq(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::RxMaxFramesIrq(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "RxMaxFramesIrq",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_usecs(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::TxUsecs(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "TxUsecs",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_max_frames(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::TxMaxFrames(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "TxMaxFrames",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_usecs_irq(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::TxUsecsIrq(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "TxUsecsIrq",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_max_frames_irq(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::TxMaxFramesIrq(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "TxMaxFramesIrq",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_stats_block_usecs(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::StatsBlockUsecs(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "StatsBlockUsecs",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_use_adaptive_rx(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::UseAdaptiveRx(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "UseAdaptiveRx",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_use_adaptive_tx(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::UseAdaptiveTx(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "UseAdaptiveTx",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_pkt_rate_low(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::PktRateLow(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "PktRateLow",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_usecs_low(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::RxUsecsLow(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "RxUsecsLow",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_max_frames_low(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::RxMaxFramesLow(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "RxMaxFramesLow",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_usecs_low(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::TxUsecsLow(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "TxUsecsLow",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_max_frames_low(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::TxMaxFramesLow(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "TxMaxFramesLow",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_pkt_rate_high(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::PktRateHigh(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "PktRateHigh",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_usecs_high(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::RxUsecsHigh(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "RxUsecsHigh",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_max_frames_high(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::RxMaxFramesHigh(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "RxMaxFramesHigh",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_usecs_high(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::TxUsecsHigh(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "TxUsecsHigh",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_max_frames_high(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::TxMaxFramesHigh(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "TxMaxFramesHigh",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rate_sample_interval(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::RateSampleInterval(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "RateSampleInterval",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_use_cqe_mode_tx(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::UseCqeModeTx(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "UseCqeModeTx",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_use_cqe_mode_rx(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::UseCqeModeRx(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "UseCqeModeRx",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_aggr_max_bytes(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::TxAggrMaxBytes(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "TxAggrMaxBytes",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_aggr_max_frames(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::TxAggrMaxFrames(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "TxAggrMaxFrames",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_aggr_time_usecs(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::TxAggrTimeUsecs(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "TxAggrTimeUsecs",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_profile(&self) -> Result<IterableProfile<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::RxProfile(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "RxProfile",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_profile(&self) -> Result<IterableProfile<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Coalesce::TxProfile(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Coalesce",
+            "TxProfile",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Coalesce<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableCoalesce<'a> {
+        IterableCoalesce::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "RxUsecs",
+            3u16 => "RxMaxFrames",
+            4u16 => "RxUsecsIrq",
+            5u16 => "RxMaxFramesIrq",
+            6u16 => "TxUsecs",
+            7u16 => "TxMaxFrames",
+            8u16 => "TxUsecsIrq",
+            9u16 => "TxMaxFramesIrq",
+            10u16 => "StatsBlockUsecs",
+            11u16 => "UseAdaptiveRx",
+            12u16 => "UseAdaptiveTx",
+            13u16 => "PktRateLow",
+            14u16 => "RxUsecsLow",
+            15u16 => "RxMaxFramesLow",
+            16u16 => "TxUsecsLow",
+            17u16 => "TxMaxFramesLow",
+            18u16 => "PktRateHigh",
+            19u16 => "RxUsecsHigh",
+            20u16 => "RxMaxFramesHigh",
+            21u16 => "TxUsecsHigh",
+            22u16 => "TxMaxFramesHigh",
+            23u16 => "RateSampleInterval",
+            24u16 => "UseCqeModeTx",
+            25u16 => "UseCqeModeRx",
+            26u16 => "TxAggrMaxBytes",
+            27u16 => "TxAggrMaxFrames",
+            28u16 => "TxAggrTimeUsecs",
+            29u16 => "RxProfile",
+            30u16 => "TxProfile",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableCoalesce<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableCoalesce<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableCoalesce<'a> {
+    type Item = Result<Coalesce<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Coalesce::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Coalesce::RxUsecs({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Coalesce::RxMaxFrames({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Coalesce::RxUsecsIrq({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Coalesce::RxMaxFramesIrq({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Coalesce::TxUsecs({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Coalesce::TxMaxFrames({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => Coalesce::TxUsecsIrq({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                9u16 => Coalesce::TxMaxFramesIrq({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                10u16 => Coalesce::StatsBlockUsecs({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                11u16 => Coalesce::UseAdaptiveRx({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                12u16 => Coalesce::UseAdaptiveTx({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                13u16 => Coalesce::PktRateLow({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                14u16 => Coalesce::RxUsecsLow({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                15u16 => Coalesce::RxMaxFramesLow({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                16u16 => Coalesce::TxUsecsLow({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                17u16 => Coalesce::TxMaxFramesLow({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                18u16 => Coalesce::PktRateHigh({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                19u16 => Coalesce::RxUsecsHigh({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                20u16 => Coalesce::RxMaxFramesHigh({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                21u16 => Coalesce::TxUsecsHigh({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                22u16 => Coalesce::TxMaxFramesHigh({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                23u16 => Coalesce::RateSampleInterval({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                24u16 => Coalesce::UseCqeModeTx({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                25u16 => Coalesce::UseCqeModeRx({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                26u16 => Coalesce::TxAggrMaxBytes({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                27u16 => Coalesce::TxAggrMaxFrames({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                28u16 => Coalesce::TxAggrTimeUsecs({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                29u16 => Coalesce::RxProfile({
+                    let res = Some(IterableProfile::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                30u16 => Coalesce::TxProfile({
+                    let res = Some(IterableProfile::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Coalesce",
+            r#type.and_then(|t| Coalesce::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableCoalesce<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Coalesce");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Coalesce::Header(val) => fmt.field("Header", &val),
+                Coalesce::RxUsecs(val) => fmt.field("RxUsecs", &val),
+                Coalesce::RxMaxFrames(val) => fmt.field("RxMaxFrames", &val),
+                Coalesce::RxUsecsIrq(val) => fmt.field("RxUsecsIrq", &val),
+                Coalesce::RxMaxFramesIrq(val) => fmt.field("RxMaxFramesIrq", &val),
+                Coalesce::TxUsecs(val) => fmt.field("TxUsecs", &val),
+                Coalesce::TxMaxFrames(val) => fmt.field("TxMaxFrames", &val),
+                Coalesce::TxUsecsIrq(val) => fmt.field("TxUsecsIrq", &val),
+                Coalesce::TxMaxFramesIrq(val) => fmt.field("TxMaxFramesIrq", &val),
+                Coalesce::StatsBlockUsecs(val) => fmt.field("StatsBlockUsecs", &val),
+                Coalesce::UseAdaptiveRx(val) => fmt.field("UseAdaptiveRx", &val),
+                Coalesce::UseAdaptiveTx(val) => fmt.field("UseAdaptiveTx", &val),
+                Coalesce::PktRateLow(val) => fmt.field("PktRateLow", &val),
+                Coalesce::RxUsecsLow(val) => fmt.field("RxUsecsLow", &val),
+                Coalesce::RxMaxFramesLow(val) => fmt.field("RxMaxFramesLow", &val),
+                Coalesce::TxUsecsLow(val) => fmt.field("TxUsecsLow", &val),
+                Coalesce::TxMaxFramesLow(val) => fmt.field("TxMaxFramesLow", &val),
+                Coalesce::PktRateHigh(val) => fmt.field("PktRateHigh", &val),
+                Coalesce::RxUsecsHigh(val) => fmt.field("RxUsecsHigh", &val),
+                Coalesce::RxMaxFramesHigh(val) => fmt.field("RxMaxFramesHigh", &val),
+                Coalesce::TxUsecsHigh(val) => fmt.field("TxUsecsHigh", &val),
+                Coalesce::TxMaxFramesHigh(val) => fmt.field("TxMaxFramesHigh", &val),
+                Coalesce::RateSampleInterval(val) => fmt.field("RateSampleInterval", &val),
+                Coalesce::UseCqeModeTx(val) => fmt.field("UseCqeModeTx", &val),
+                Coalesce::UseCqeModeRx(val) => fmt.field("UseCqeModeRx", &val),
+                Coalesce::TxAggrMaxBytes(val) => fmt.field("TxAggrMaxBytes", &val),
+                Coalesce::TxAggrMaxFrames(val) => fmt.field("TxAggrMaxFrames", &val),
+                Coalesce::TxAggrTimeUsecs(val) => fmt.field("TxAggrTimeUsecs", &val),
+                Coalesce::RxProfile(val) => fmt.field("RxProfile", &val),
+                Coalesce::TxProfile(val) => fmt.field("TxProfile", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableCoalesce<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Coalesce", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| Coalesce::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Coalesce::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Coalesce::RxUsecs(val) => {
+                    if last_off == offset {
+                        stack.push(("RxUsecs", last_off));
+                        break;
+                    }
+                }
+                Coalesce::RxMaxFrames(val) => {
+                    if last_off == offset {
+                        stack.push(("RxMaxFrames", last_off));
+                        break;
+                    }
+                }
+                Coalesce::RxUsecsIrq(val) => {
+                    if last_off == offset {
+                        stack.push(("RxUsecsIrq", last_off));
+                        break;
+                    }
+                }
+                Coalesce::RxMaxFramesIrq(val) => {
+                    if last_off == offset {
+                        stack.push(("RxMaxFramesIrq", last_off));
+                        break;
+                    }
+                }
+                Coalesce::TxUsecs(val) => {
+                    if last_off == offset {
+                        stack.push(("TxUsecs", last_off));
+                        break;
+                    }
+                }
+                Coalesce::TxMaxFrames(val) => {
+                    if last_off == offset {
+                        stack.push(("TxMaxFrames", last_off));
+                        break;
+                    }
+                }
+                Coalesce::TxUsecsIrq(val) => {
+                    if last_off == offset {
+                        stack.push(("TxUsecsIrq", last_off));
+                        break;
+                    }
+                }
+                Coalesce::TxMaxFramesIrq(val) => {
+                    if last_off == offset {
+                        stack.push(("TxMaxFramesIrq", last_off));
+                        break;
+                    }
+                }
+                Coalesce::StatsBlockUsecs(val) => {
+                    if last_off == offset {
+                        stack.push(("StatsBlockUsecs", last_off));
+                        break;
+                    }
+                }
+                Coalesce::UseAdaptiveRx(val) => {
+                    if last_off == offset {
+                        stack.push(("UseAdaptiveRx", last_off));
+                        break;
+                    }
+                }
+                Coalesce::UseAdaptiveTx(val) => {
+                    if last_off == offset {
+                        stack.push(("UseAdaptiveTx", last_off));
+                        break;
+                    }
+                }
+                Coalesce::PktRateLow(val) => {
+                    if last_off == offset {
+                        stack.push(("PktRateLow", last_off));
+                        break;
+                    }
+                }
+                Coalesce::RxUsecsLow(val) => {
+                    if last_off == offset {
+                        stack.push(("RxUsecsLow", last_off));
+                        break;
+                    }
+                }
+                Coalesce::RxMaxFramesLow(val) => {
+                    if last_off == offset {
+                        stack.push(("RxMaxFramesLow", last_off));
+                        break;
+                    }
+                }
+                Coalesce::TxUsecsLow(val) => {
+                    if last_off == offset {
+                        stack.push(("TxUsecsLow", last_off));
+                        break;
+                    }
+                }
+                Coalesce::TxMaxFramesLow(val) => {
+                    if last_off == offset {
+                        stack.push(("TxMaxFramesLow", last_off));
+                        break;
+                    }
+                }
+                Coalesce::PktRateHigh(val) => {
+                    if last_off == offset {
+                        stack.push(("PktRateHigh", last_off));
+                        break;
+                    }
+                }
+                Coalesce::RxUsecsHigh(val) => {
+                    if last_off == offset {
+                        stack.push(("RxUsecsHigh", last_off));
+                        break;
+                    }
+                }
+                Coalesce::RxMaxFramesHigh(val) => {
+                    if last_off == offset {
+                        stack.push(("RxMaxFramesHigh", last_off));
+                        break;
+                    }
+                }
+                Coalesce::TxUsecsHigh(val) => {
+                    if last_off == offset {
+                        stack.push(("TxUsecsHigh", last_off));
+                        break;
+                    }
+                }
+                Coalesce::TxMaxFramesHigh(val) => {
+                    if last_off == offset {
+                        stack.push(("TxMaxFramesHigh", last_off));
+                        break;
+                    }
+                }
+                Coalesce::RateSampleInterval(val) => {
+                    if last_off == offset {
+                        stack.push(("RateSampleInterval", last_off));
+                        break;
+                    }
+                }
+                Coalesce::UseCqeModeTx(val) => {
+                    if last_off == offset {
+                        stack.push(("UseCqeModeTx", last_off));
+                        break;
+                    }
+                }
+                Coalesce::UseCqeModeRx(val) => {
+                    if last_off == offset {
+                        stack.push(("UseCqeModeRx", last_off));
+                        break;
+                    }
+                }
+                Coalesce::TxAggrMaxBytes(val) => {
+                    if last_off == offset {
+                        stack.push(("TxAggrMaxBytes", last_off));
+                        break;
+                    }
+                }
+                Coalesce::TxAggrMaxFrames(val) => {
+                    if last_off == offset {
+                        stack.push(("TxAggrMaxFrames", last_off));
+                        break;
+                    }
+                }
+                Coalesce::TxAggrTimeUsecs(val) => {
+                    if last_off == offset {
+                        stack.push(("TxAggrTimeUsecs", last_off));
+                        break;
+                    }
+                }
+                Coalesce::RxProfile(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Coalesce::TxProfile(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Coalesce", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum PauseStat<'a> {
+    Pad(&'a [u8]),
+    TxFrames(u64),
+    RxFrames(u64),
+    #[doc = "TX pause storm event count\\. Increments each time device detects that its pause assertion condition has been true for too long for normal operation\\. As a result, the device has temporarily disabled its own Pause TX function to protect the network from itself\\. This counter should never increment under normal overload conditions; it indicates catastrophic failure like an OS crash\\. The rate of incrementing is implementation specific\\."]
+    TxPauseStormEvents(u64),
+}
+impl<'a> IterablePauseStat<'a> {
+    pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let PauseStat::Pad(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "PauseStat",
+            "Pad",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_frames(&self) -> Result<u64, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let PauseStat::TxFrames(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "PauseStat",
+            "TxFrames",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_frames(&self) -> Result<u64, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let PauseStat::RxFrames(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "PauseStat",
+            "RxFrames",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "TX pause storm event count\\. Increments each time device detects that its pause assertion condition has been true for too long for normal operation\\. As a result, the device has temporarily disabled its own Pause TX function to protect the network from itself\\. This counter should never increment under normal overload conditions; it indicates catastrophic failure like an OS crash\\. The rate of incrementing is implementation specific\\."]
+    pub fn get_tx_pause_storm_events(&self) -> Result<u64, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let PauseStat::TxPauseStormEvents(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "PauseStat",
+            "TxPauseStormEvents",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl PauseStat<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterablePauseStat<'a> {
+        IterablePauseStat::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Pad",
+            2u16 => "TxFrames",
+            3u16 => "RxFrames",
+            4u16 => "TxPauseStormEvents",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterablePauseStat<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterablePauseStat<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterablePauseStat<'a> {
+    type Item = Result<PauseStat<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => PauseStat::Pad({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => PauseStat::TxFrames({
+                    let res = parse_u64(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => PauseStat::RxFrames({
+                    let res = parse_u64(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => PauseStat::TxPauseStormEvents({
+                    let res = parse_u64(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "PauseStat",
+            r#type.and_then(|t| PauseStat::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterablePauseStat<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("PauseStat");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                PauseStat::Pad(val) => fmt.field("Pad", &val),
+                PauseStat::TxFrames(val) => fmt.field("TxFrames", &val),
+                PauseStat::RxFrames(val) => fmt.field("RxFrames", &val),
+                PauseStat::TxPauseStormEvents(val) => fmt.field("TxPauseStormEvents", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterablePauseStat<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("PauseStat", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| PauseStat::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                PauseStat::Pad(val) => {
+                    if last_off == offset {
+                        stack.push(("Pad", last_off));
+                        break;
+                    }
+                }
+                PauseStat::TxFrames(val) => {
+                    if last_off == offset {
+                        stack.push(("TxFrames", last_off));
+                        break;
+                    }
+                }
+                PauseStat::RxFrames(val) => {
+                    if last_off == offset {
+                        stack.push(("RxFrames", last_off));
+                        break;
+                    }
+                }
+                PauseStat::TxPauseStormEvents(val) => {
+                    if last_off == offset {
+                        stack.push(("TxPauseStormEvents", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("PauseStat", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum Pause<'a> {
+    Header(IterableHeader<'a>),
+    Autoneg(u8),
+    Rx(u8),
+    Tx(u8),
+    Stats(IterablePauseStat<'a>),
+    StatsSrc(u32),
+}
+impl<'a> IterablePause<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pause::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pause",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_autoneg(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pause::Autoneg(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pause",
+            "Autoneg",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pause::Rx(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pause",
+            "Rx",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pause::Tx(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pause",
+            "Tx",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_stats(&self) -> Result<IterablePauseStat<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pause::Stats(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pause",
+            "Stats",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_stats_src(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pause::StatsSrc(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pause",
+            "StatsSrc",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Pause<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterablePause<'a> {
+        IterablePause::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Autoneg",
+            3u16 => "Rx",
+            4u16 => "Tx",
+            5u16 => "Stats",
+            6u16 => "StatsSrc",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterablePause<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterablePause<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterablePause<'a> {
+    type Item = Result<Pause<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Pause::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Pause::Autoneg({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Pause::Rx({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Pause::Tx({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Pause::Stats({
+                    let res = Some(IterablePauseStat::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Pause::StatsSrc({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Pause",
+            r#type.and_then(|t| Pause::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterablePause<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Pause");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Pause::Header(val) => fmt.field("Header", &val),
+                Pause::Autoneg(val) => fmt.field("Autoneg", &val),
+                Pause::Rx(val) => fmt.field("Rx", &val),
+                Pause::Tx(val) => fmt.field("Tx", &val),
+                Pause::Stats(val) => fmt.field("Stats", &val),
+                Pause::StatsSrc(val) => fmt.field("StatsSrc", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterablePause<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Pause", offset));
+            return (stack, missing_type.and_then(|t| Pause::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Pause::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Pause::Autoneg(val) => {
+                    if last_off == offset {
+                        stack.push(("Autoneg", last_off));
+                        break;
+                    }
+                }
+                Pause::Rx(val) => {
+                    if last_off == offset {
+                        stack.push(("Rx", last_off));
+                        break;
+                    }
+                }
+                Pause::Tx(val) => {
+                    if last_off == offset {
+                        stack.push(("Tx", last_off));
+                        break;
+                    }
+                }
+                Pause::Stats(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Pause::StatsSrc(val) => {
+                    if last_off == offset {
+                        stack.push(("StatsSrc", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Pause", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Eee<'a> {
+    Header(IterableHeader<'a>),
+    ModesOurs(IterableBitset<'a>),
+    ModesPeer(IterableBitset<'a>),
+    Active(u8),
+    Enabled(u8),
+    TxLpiEnabled(u8),
+    TxLpiTimer(u32),
+}
+impl<'a> IterableEee<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Eee::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Eee",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_modes_ours(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Eee::ModesOurs(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Eee",
+            "ModesOurs",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_modes_peer(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Eee::ModesPeer(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Eee",
+            "ModesPeer",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_active(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Eee::Active(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Eee",
+            "Active",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_enabled(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Eee::Enabled(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Eee",
+            "Enabled",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_lpi_enabled(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Eee::TxLpiEnabled(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Eee",
+            "TxLpiEnabled",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_lpi_timer(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Eee::TxLpiTimer(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Eee",
+            "TxLpiTimer",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Eee<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableEee<'a> {
+        IterableEee::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "ModesOurs",
+            3u16 => "ModesPeer",
+            4u16 => "Active",
+            5u16 => "Enabled",
+            6u16 => "TxLpiEnabled",
+            7u16 => "TxLpiTimer",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableEee<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableEee<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableEee<'a> {
+    type Item = Result<Eee<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Eee::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Eee::ModesOurs({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Eee::ModesPeer({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Eee::Active({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Eee::Enabled({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Eee::TxLpiEnabled({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Eee::TxLpiTimer({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Eee",
+            r#type.and_then(|t| Eee::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableEee<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Eee");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Eee::Header(val) => fmt.field("Header", &val),
+                Eee::ModesOurs(val) => fmt.field("ModesOurs", &val),
+                Eee::ModesPeer(val) => fmt.field("ModesPeer", &val),
+                Eee::Active(val) => fmt.field("Active", &val),
+                Eee::Enabled(val) => fmt.field("Enabled", &val),
+                Eee::TxLpiEnabled(val) => fmt.field("TxLpiEnabled", &val),
+                Eee::TxLpiTimer(val) => fmt.field("TxLpiTimer", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableEee<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Eee", offset));
+            return (stack, missing_type.and_then(|t| Eee::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Eee::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Eee::ModesOurs(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Eee::ModesPeer(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Eee::Active(val) => {
+                    if last_off == offset {
+                        stack.push(("Active", last_off));
+                        break;
+                    }
+                }
+                Eee::Enabled(val) => {
+                    if last_off == offset {
+                        stack.push(("Enabled", last_off));
+                        break;
+                    }
+                }
+                Eee::TxLpiEnabled(val) => {
+                    if last_off == offset {
+                        stack.push(("TxLpiEnabled", last_off));
+                        break;
+                    }
+                }
+                Eee::TxLpiTimer(val) => {
+                    if last_off == offset {
+                        stack.push(("TxLpiTimer", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Eee", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum TsStat {
+    TxPkts(u32),
+    TxLost(u32),
+    TxErr(u32),
+    TxOnestepPktsUnconfirmed(u32),
+}
+impl<'a> IterableTsStat<'a> {
+    pub fn get_tx_pkts(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let TsStat::TxPkts(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "TsStat",
+            "TxPkts",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_lost(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let TsStat::TxLost(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "TsStat",
+            "TxLost",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_err(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let TsStat::TxErr(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "TsStat",
+            "TxErr",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_onestep_pkts_unconfirmed(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let TsStat::TxOnestepPktsUnconfirmed(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "TsStat",
+            "TxOnestepPktsUnconfirmed",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl TsStat {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableTsStat<'a> {
+        IterableTsStat::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "TxPkts",
+            2u16 => "TxLost",
+            3u16 => "TxErr",
+            4u16 => "TxOnestepPktsUnconfirmed",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableTsStat<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableTsStat<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableTsStat<'a> {
+    type Item = Result<TsStat, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => TsStat::TxPkts({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => TsStat::TxLost({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => TsStat::TxErr({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => TsStat::TxOnestepPktsUnconfirmed({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "TsStat",
+            r#type.and_then(|t| TsStat::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl std::fmt::Debug for IterableTsStat<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("TsStat");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                TsStat::TxPkts(val) => fmt.field("TxPkts", &val),
+                TsStat::TxLost(val) => fmt.field("TxLost", &val),
+                TsStat::TxErr(val) => fmt.field("TxErr", &val),
+                TsStat::TxOnestepPktsUnconfirmed(val) => {
+                    fmt.field("TxOnestepPktsUnconfirmed", &val)
+                }
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableTsStat<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("TsStat", offset));
+            return (stack, missing_type.and_then(|t| TsStat::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                TsStat::TxPkts(val) => {
+                    if last_off == offset {
+                        stack.push(("TxPkts", last_off));
+                        break;
+                    }
+                }
+                TsStat::TxLost(val) => {
+                    if last_off == offset {
+                        stack.push(("TxLost", last_off));
+                        break;
+                    }
+                }
+                TsStat::TxErr(val) => {
+                    if last_off == offset {
+                        stack.push(("TxErr", last_off));
+                        break;
+                    }
+                }
+                TsStat::TxOnestepPktsUnconfirmed(val) => {
+                    if last_off == offset {
+                        stack.push(("TxOnestepPktsUnconfirmed", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("TsStat", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum TsHwtstampProvider {
+    Index(u32),
+    Qualifier(u32),
+}
+impl<'a> IterableTsHwtstampProvider<'a> {
+    pub fn get_index(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let TsHwtstampProvider::Index(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "TsHwtstampProvider",
+            "Index",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_qualifier(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let TsHwtstampProvider::Qualifier(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "TsHwtstampProvider",
+            "Qualifier",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl TsHwtstampProvider {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableTsHwtstampProvider<'a> {
+        IterableTsHwtstampProvider::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Index",
+            2u16 => "Qualifier",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableTsHwtstampProvider<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableTsHwtstampProvider<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableTsHwtstampProvider<'a> {
+    type Item = Result<TsHwtstampProvider, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => TsHwtstampProvider::Index({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => TsHwtstampProvider::Qualifier({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "TsHwtstampProvider",
+            r#type.and_then(|t| TsHwtstampProvider::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl std::fmt::Debug for IterableTsHwtstampProvider<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("TsHwtstampProvider");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                TsHwtstampProvider::Index(val) => fmt.field("Index", &val),
+                TsHwtstampProvider::Qualifier(val) => fmt.field("Qualifier", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableTsHwtstampProvider<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("TsHwtstampProvider", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| TsHwtstampProvider::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                TsHwtstampProvider::Index(val) => {
+                    if last_off == offset {
+                        stack.push(("Index", last_off));
+                        break;
+                    }
+                }
+                TsHwtstampProvider::Qualifier(val) => {
+                    if last_off == offset {
+                        stack.push(("Qualifier", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("TsHwtstampProvider", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum Tsinfo<'a> {
+    Header(IterableHeader<'a>),
+    Timestamping(IterableBitset<'a>),
+    TxTypes(IterableBitset<'a>),
+    RxFilters(IterableBitset<'a>),
+    PhcIndex(u32),
+    Stats(IterableTsStat<'a>),
+    HwtstampProvider(IterableTsHwtstampProvider<'a>),
+    #[doc = "Associated type: [`HwtstampSource`] (enum)"]
+    HwtstampSource(u32),
+    HwtstampPhyindex(u32),
+}
+impl<'a> IterableTsinfo<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsinfo::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsinfo",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_timestamping(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsinfo::Timestamping(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsinfo",
+            "Timestamping",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_types(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsinfo::TxTypes(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsinfo",
+            "TxTypes",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_filters(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsinfo::RxFilters(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsinfo",
+            "RxFilters",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_phc_index(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsinfo::PhcIndex(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsinfo",
+            "PhcIndex",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_stats(&self) -> Result<IterableTsStat<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsinfo::Stats(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsinfo",
+            "Stats",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hwtstamp_provider(&self) -> Result<IterableTsHwtstampProvider<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsinfo::HwtstampProvider(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsinfo",
+            "HwtstampProvider",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`HwtstampSource`] (enum)"]
+    pub fn get_hwtstamp_source(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsinfo::HwtstampSource(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsinfo",
+            "HwtstampSource",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hwtstamp_phyindex(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsinfo::HwtstampPhyindex(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsinfo",
+            "HwtstampPhyindex",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Tsinfo<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableTsinfo<'a> {
+        IterableTsinfo::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Timestamping",
+            3u16 => "TxTypes",
+            4u16 => "RxFilters",
+            5u16 => "PhcIndex",
+            6u16 => "Stats",
+            7u16 => "HwtstampProvider",
+            8u16 => "HwtstampSource",
+            9u16 => "HwtstampPhyindex",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableTsinfo<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableTsinfo<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableTsinfo<'a> {
+    type Item = Result<Tsinfo<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Tsinfo::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Tsinfo::Timestamping({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Tsinfo::TxTypes({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Tsinfo::RxFilters({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Tsinfo::PhcIndex({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Tsinfo::Stats({
+                    let res = Some(IterableTsStat::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Tsinfo::HwtstampProvider({
+                    let res = Some(IterableTsHwtstampProvider::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => Tsinfo::HwtstampSource({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                9u16 => Tsinfo::HwtstampPhyindex({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Tsinfo",
+            r#type.and_then(|t| Tsinfo::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableTsinfo<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Tsinfo");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Tsinfo::Header(val) => fmt.field("Header", &val),
+                Tsinfo::Timestamping(val) => fmt.field("Timestamping", &val),
+                Tsinfo::TxTypes(val) => fmt.field("TxTypes", &val),
+                Tsinfo::RxFilters(val) => fmt.field("RxFilters", &val),
+                Tsinfo::PhcIndex(val) => fmt.field("PhcIndex", &val),
+                Tsinfo::Stats(val) => fmt.field("Stats", &val),
+                Tsinfo::HwtstampProvider(val) => fmt.field("HwtstampProvider", &val),
+                Tsinfo::HwtstampSource(val) => fmt.field(
+                    "HwtstampSource",
+                    &FormatEnum(val.into(), HwtstampSource::from_value),
+                ),
+                Tsinfo::HwtstampPhyindex(val) => fmt.field("HwtstampPhyindex", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableTsinfo<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Tsinfo", offset));
+            return (stack, missing_type.and_then(|t| Tsinfo::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Tsinfo::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Tsinfo::Timestamping(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Tsinfo::TxTypes(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Tsinfo::RxFilters(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Tsinfo::PhcIndex(val) => {
+                    if last_off == offset {
+                        stack.push(("PhcIndex", last_off));
+                        break;
+                    }
+                }
+                Tsinfo::Stats(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Tsinfo::HwtstampProvider(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Tsinfo::HwtstampSource(val) => {
+                    if last_off == offset {
+                        stack.push(("HwtstampSource", last_off));
+                        break;
+                    }
+                }
+                Tsinfo::HwtstampPhyindex(val) => {
+                    if last_off == offset {
+                        stack.push(("HwtstampPhyindex", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Tsinfo", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum CableResult {
+    #[doc = "ETHTOOL\\_A\\_CABLE\\_PAIR"]
+    Pair(u8),
+    #[doc = "ETHTOOL\\_A\\_CABLE\\_RESULT\\_CODE"]
+    Code(u8),
+    #[doc = "ETHTOOL\\_A\\_CABLE\\_INF\\_SRC"]
+    Src(u32),
+}
+impl<'a> IterableCableResult<'a> {
+    #[doc = "ETHTOOL\\_A\\_CABLE\\_PAIR"]
+    pub fn get_pair(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableResult::Pair(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableResult",
+            "Pair",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "ETHTOOL\\_A\\_CABLE\\_RESULT\\_CODE"]
+    pub fn get_code(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableResult::Code(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableResult",
+            "Code",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "ETHTOOL\\_A\\_CABLE\\_INF\\_SRC"]
+    pub fn get_src(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableResult::Src(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableResult",
+            "Src",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl CableResult {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableCableResult<'a> {
+        IterableCableResult::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Pair",
+            2u16 => "Code",
+            3u16 => "Src",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableCableResult<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableCableResult<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableCableResult<'a> {
+    type Item = Result<CableResult, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => CableResult::Pair({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => CableResult::Code({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => CableResult::Src({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "CableResult",
+            r#type.and_then(|t| CableResult::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl std::fmt::Debug for IterableCableResult<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("CableResult");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                CableResult::Pair(val) => fmt.field("Pair", &val),
+                CableResult::Code(val) => fmt.field("Code", &val),
+                CableResult::Src(val) => fmt.field("Src", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableCableResult<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("CableResult", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| CableResult::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                CableResult::Pair(val) => {
+                    if last_off == offset {
+                        stack.push(("Pair", last_off));
+                        break;
+                    }
+                }
+                CableResult::Code(val) => {
+                    if last_off == offset {
+                        stack.push(("Code", last_off));
+                        break;
+                    }
+                }
+                CableResult::Src(val) => {
+                    if last_off == offset {
+                        stack.push(("Src", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("CableResult", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum CableFaultLength {
+    Pair(u8),
+    Cm(u32),
+    Src(u32),
+}
+impl<'a> IterableCableFaultLength<'a> {
+    pub fn get_pair(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableFaultLength::Pair(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableFaultLength",
+            "Pair",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_cm(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableFaultLength::Cm(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableFaultLength",
+            "Cm",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_src(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableFaultLength::Src(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableFaultLength",
+            "Src",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl CableFaultLength {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableCableFaultLength<'a> {
+        IterableCableFaultLength::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Pair",
+            2u16 => "Cm",
+            3u16 => "Src",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableCableFaultLength<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableCableFaultLength<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableCableFaultLength<'a> {
+    type Item = Result<CableFaultLength, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => CableFaultLength::Pair({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => CableFaultLength::Cm({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => CableFaultLength::Src({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "CableFaultLength",
+            r#type.and_then(|t| CableFaultLength::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl std::fmt::Debug for IterableCableFaultLength<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("CableFaultLength");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                CableFaultLength::Pair(val) => fmt.field("Pair", &val),
+                CableFaultLength::Cm(val) => fmt.field("Cm", &val),
+                CableFaultLength::Src(val) => fmt.field("Src", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableCableFaultLength<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("CableFaultLength", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| CableFaultLength::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                CableFaultLength::Pair(val) => {
+                    if last_off == offset {
+                        stack.push(("Pair", last_off));
+                        break;
+                    }
+                }
+                CableFaultLength::Cm(val) => {
+                    if last_off == offset {
+                        stack.push(("Cm", last_off));
+                        break;
+                    }
+                }
+                CableFaultLength::Src(val) => {
+                    if last_off == offset {
+                        stack.push(("Src", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("CableFaultLength", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum CableNest<'a> {
+    Result(IterableCableResult<'a>),
+    FaultLength(IterableCableFaultLength<'a>),
+}
+impl<'a> IterableCableNest<'a> {
+    pub fn get_result(&self) -> Result<IterableCableResult<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableNest::Result(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableNest",
+            "Result",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_fault_length(&self) -> Result<IterableCableFaultLength<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableNest::FaultLength(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableNest",
+            "FaultLength",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl CableNest<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableCableNest<'a> {
+        IterableCableNest::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Result",
+            2u16 => "FaultLength",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableCableNest<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableCableNest<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableCableNest<'a> {
+    type Item = Result<CableNest<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => CableNest::Result({
+                    let res = Some(IterableCableResult::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => CableNest::FaultLength({
+                    let res = Some(IterableCableFaultLength::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "CableNest",
+            r#type.and_then(|t| CableNest::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableCableNest<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("CableNest");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                CableNest::Result(val) => fmt.field("Result", &val),
+                CableNest::FaultLength(val) => fmt.field("FaultLength", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableCableNest<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("CableNest", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| CableNest::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                CableNest::Result(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                CableNest::FaultLength(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("CableNest", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum CableTest<'a> {
+    Header(IterableHeader<'a>),
+}
+impl<'a> IterableCableTest<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableTest::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableTest",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl CableTest<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableCableTest<'a> {
+        IterableCableTest::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableCableTest<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableCableTest<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableCableTest<'a> {
+    type Item = Result<CableTest<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => CableTest::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "CableTest",
+            r#type.and_then(|t| CableTest::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableCableTest<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("CableTest");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                CableTest::Header(val) => fmt.field("Header", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableCableTest<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("CableTest", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| CableTest::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                CableTest::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("CableTest", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum CableTestNtf<'a> {
+    Header(IterableHeader<'a>),
+    #[doc = "\\_STARTED/\\_COMPLETE"]
+    Status(u8),
+    Nest(IterableCableNest<'a>),
+}
+impl<'a> IterableCableTestNtf<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableTestNtf::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableTestNtf",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "\\_STARTED/\\_COMPLETE"]
+    pub fn get_status(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableTestNtf::Status(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableTestNtf",
+            "Status",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_nest(&self) -> Result<IterableCableNest<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableTestNtf::Nest(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableTestNtf",
+            "Nest",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl CableTestNtf<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableCableTestNtf<'a> {
+        IterableCableTestNtf::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Status",
+            3u16 => "Nest",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableCableTestNtf<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableCableTestNtf<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableCableTestNtf<'a> {
+    type Item = Result<CableTestNtf<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => CableTestNtf::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => CableTestNtf::Status({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => CableTestNtf::Nest({
+                    let res = Some(IterableCableNest::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "CableTestNtf",
+            r#type.and_then(|t| CableTestNtf::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableCableTestNtf<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("CableTestNtf");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                CableTestNtf::Header(val) => fmt.field("Header", &val),
+                CableTestNtf::Status(val) => fmt.field("Status", &val),
+                CableTestNtf::Nest(val) => fmt.field("Nest", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableCableTestNtf<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("CableTestNtf", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| CableTestNtf::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                CableTestNtf::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                CableTestNtf::Status(val) => {
+                    if last_off == offset {
+                        stack.push(("Status", last_off));
+                        break;
+                    }
+                }
+                CableTestNtf::Nest(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("CableTestNtf", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum CableTestTdrCfg {
+    First(u32),
+    Last(u32),
+    Step(u32),
+    Pair(u8),
+}
+impl<'a> IterableCableTestTdrCfg<'a> {
+    pub fn get_first(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableTestTdrCfg::First(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableTestTdrCfg",
+            "First",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_last(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableTestTdrCfg::Last(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableTestTdrCfg",
+            "Last",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_step(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableTestTdrCfg::Step(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableTestTdrCfg",
+            "Step",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_pair(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableTestTdrCfg::Pair(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableTestTdrCfg",
+            "Pair",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl CableTestTdrCfg {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableCableTestTdrCfg<'a> {
+        IterableCableTestTdrCfg::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "First",
+            2u16 => "Last",
+            3u16 => "Step",
+            4u16 => "Pair",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableCableTestTdrCfg<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableCableTestTdrCfg<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableCableTestTdrCfg<'a> {
+    type Item = Result<CableTestTdrCfg, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => CableTestTdrCfg::First({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => CableTestTdrCfg::Last({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => CableTestTdrCfg::Step({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => CableTestTdrCfg::Pair({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "CableTestTdrCfg",
+            r#type.and_then(|t| CableTestTdrCfg::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl std::fmt::Debug for IterableCableTestTdrCfg<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("CableTestTdrCfg");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                CableTestTdrCfg::First(val) => fmt.field("First", &val),
+                CableTestTdrCfg::Last(val) => fmt.field("Last", &val),
+                CableTestTdrCfg::Step(val) => fmt.field("Step", &val),
+                CableTestTdrCfg::Pair(val) => fmt.field("Pair", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableCableTestTdrCfg<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("CableTestTdrCfg", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| CableTestTdrCfg::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                CableTestTdrCfg::First(val) => {
+                    if last_off == offset {
+                        stack.push(("First", last_off));
+                        break;
+                    }
+                }
+                CableTestTdrCfg::Last(val) => {
+                    if last_off == offset {
+                        stack.push(("Last", last_off));
+                        break;
+                    }
+                }
+                CableTestTdrCfg::Step(val) => {
+                    if last_off == offset {
+                        stack.push(("Step", last_off));
+                        break;
+                    }
+                }
+                CableTestTdrCfg::Pair(val) => {
+                    if last_off == offset {
+                        stack.push(("Pair", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("CableTestTdrCfg", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum CableTestTdrNtf<'a> {
+    Header(IterableHeader<'a>),
+    Status(u8),
+    Nest(IterableCableNest<'a>),
+}
+impl<'a> IterableCableTestTdrNtf<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableTestTdrNtf::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableTestTdrNtf",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_status(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableTestTdrNtf::Status(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableTestTdrNtf",
+            "Status",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_nest(&self) -> Result<IterableCableNest<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableTestTdrNtf::Nest(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableTestTdrNtf",
+            "Nest",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl CableTestTdrNtf<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableCableTestTdrNtf<'a> {
+        IterableCableTestTdrNtf::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Status",
+            3u16 => "Nest",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableCableTestTdrNtf<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableCableTestTdrNtf<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableCableTestTdrNtf<'a> {
+    type Item = Result<CableTestTdrNtf<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => CableTestTdrNtf::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => CableTestTdrNtf::Status({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => CableTestTdrNtf::Nest({
+                    let res = Some(IterableCableNest::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "CableTestTdrNtf",
+            r#type.and_then(|t| CableTestTdrNtf::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableCableTestTdrNtf<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("CableTestTdrNtf");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                CableTestTdrNtf::Header(val) => fmt.field("Header", &val),
+                CableTestTdrNtf::Status(val) => fmt.field("Status", &val),
+                CableTestTdrNtf::Nest(val) => fmt.field("Nest", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableCableTestTdrNtf<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("CableTestTdrNtf", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| CableTestTdrNtf::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                CableTestTdrNtf::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                CableTestTdrNtf::Status(val) => {
+                    if last_off == offset {
+                        stack.push(("Status", last_off));
+                        break;
+                    }
+                }
+                CableTestTdrNtf::Nest(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("CableTestTdrNtf", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum CableTestTdr<'a> {
+    Header(IterableHeader<'a>),
+    Cfg(IterableCableTestTdrCfg<'a>),
+}
+impl<'a> IterableCableTestTdr<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableTestTdr::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableTestTdr",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_cfg(&self) -> Result<IterableCableTestTdrCfg<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let CableTestTdr::Cfg(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "CableTestTdr",
+            "Cfg",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl CableTestTdr<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableCableTestTdr<'a> {
+        IterableCableTestTdr::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Cfg",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableCableTestTdr<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableCableTestTdr<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableCableTestTdr<'a> {
+    type Item = Result<CableTestTdr<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => CableTestTdr::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => CableTestTdr::Cfg({
+                    let res = Some(IterableCableTestTdrCfg::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "CableTestTdr",
+            r#type.and_then(|t| CableTestTdr::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableCableTestTdr<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("CableTestTdr");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                CableTestTdr::Header(val) => fmt.field("Header", &val),
+                CableTestTdr::Cfg(val) => fmt.field("Cfg", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableCableTestTdr<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("CableTestTdr", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| CableTestTdr::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                CableTestTdr::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                CableTestTdr::Cfg(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("CableTestTdr", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum TunnelUdpEntry {
+    Port(u16),
+    #[doc = "Associated type: [`UdpTunnelType`] (enum)"]
+    Type(u32),
+}
+impl<'a> IterableTunnelUdpEntry<'a> {
+    pub fn get_port(&self) -> Result<u16, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let TunnelUdpEntry::Port(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "TunnelUdpEntry",
+            "Port",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`UdpTunnelType`] (enum)"]
+    pub fn get_type(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let TunnelUdpEntry::Type(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "TunnelUdpEntry",
+            "Type",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl TunnelUdpEntry {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableTunnelUdpEntry<'a> {
+        IterableTunnelUdpEntry::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Port",
+            2u16 => "Type",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableTunnelUdpEntry<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableTunnelUdpEntry<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableTunnelUdpEntry<'a> {
+    type Item = Result<TunnelUdpEntry, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => TunnelUdpEntry::Port({
+                    let res = parse_be_u16(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => TunnelUdpEntry::Type({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "TunnelUdpEntry",
+            r#type.and_then(|t| TunnelUdpEntry::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl std::fmt::Debug for IterableTunnelUdpEntry<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("TunnelUdpEntry");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                TunnelUdpEntry::Port(val) => fmt.field("Port", &val),
+                TunnelUdpEntry::Type(val) => {
+                    fmt.field("Type", &FormatEnum(val.into(), UdpTunnelType::from_value))
+                }
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableTunnelUdpEntry<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("TunnelUdpEntry", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| TunnelUdpEntry::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                TunnelUdpEntry::Port(val) => {
+                    if last_off == offset {
+                        stack.push(("Port", last_off));
+                        break;
+                    }
+                }
+                TunnelUdpEntry::Type(val) => {
+                    if last_off == offset {
+                        stack.push(("Type", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("TunnelUdpEntry", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum TunnelUdpTable<'a> {
+    Size(u32),
+    Types(IterableBitset<'a>),
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    Entry(IterableTunnelUdpEntry<'a>),
+}
+impl<'a> IterableTunnelUdpTable<'a> {
+    pub fn get_size(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let TunnelUdpTable::Size(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "TunnelUdpTable",
+            "Size",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_types(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let TunnelUdpTable::Types(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "TunnelUdpTable",
+            "Types",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn get_entry(
+        &self,
+    ) -> MultiAttrIterable<Self, TunnelUdpTable<'a>, IterableTunnelUdpEntry<'a>> {
+        MultiAttrIterable::new(self.clone(), |variant| {
+            if let TunnelUdpTable::Entry(val) = variant {
+                Some(val)
+            } else {
+                None
+            }
+        })
+    }
+}
+impl TunnelUdpTable<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableTunnelUdpTable<'a> {
+        IterableTunnelUdpTable::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Size",
+            2u16 => "Types",
+            3u16 => "Entry",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableTunnelUdpTable<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableTunnelUdpTable<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableTunnelUdpTable<'a> {
+    type Item = Result<TunnelUdpTable<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => TunnelUdpTable::Size({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => TunnelUdpTable::Types({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => TunnelUdpTable::Entry({
+                    let res = Some(IterableTunnelUdpEntry::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "TunnelUdpTable",
+            r#type.and_then(|t| TunnelUdpTable::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableTunnelUdpTable<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("TunnelUdpTable");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                TunnelUdpTable::Size(val) => fmt.field("Size", &val),
+                TunnelUdpTable::Types(val) => fmt.field("Types", &val),
+                TunnelUdpTable::Entry(val) => fmt.field("Entry", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableTunnelUdpTable<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("TunnelUdpTable", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| TunnelUdpTable::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                TunnelUdpTable::Size(val) => {
+                    if last_off == offset {
+                        stack.push(("Size", last_off));
+                        break;
+                    }
+                }
+                TunnelUdpTable::Types(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                TunnelUdpTable::Entry(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("TunnelUdpTable", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum TunnelUdp<'a> {
+    Table(IterableTunnelUdpTable<'a>),
+}
+impl<'a> IterableTunnelUdp<'a> {
+    pub fn get_table(&self) -> Result<IterableTunnelUdpTable<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let TunnelUdp::Table(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "TunnelUdp",
+            "Table",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl TunnelUdp<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableTunnelUdp<'a> {
+        IterableTunnelUdp::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Table",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableTunnelUdp<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableTunnelUdp<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableTunnelUdp<'a> {
+    type Item = Result<TunnelUdp<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => TunnelUdp::Table({
+                    let res = Some(IterableTunnelUdpTable::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "TunnelUdp",
+            r#type.and_then(|t| TunnelUdp::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableTunnelUdp<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("TunnelUdp");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                TunnelUdp::Table(val) => fmt.field("Table", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableTunnelUdp<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("TunnelUdp", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| TunnelUdp::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                TunnelUdp::Table(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("TunnelUdp", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum TunnelInfo<'a> {
+    Header(IterableHeader<'a>),
+    UdpPorts(IterableTunnelUdp<'a>),
+}
+impl<'a> IterableTunnelInfo<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let TunnelInfo::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "TunnelInfo",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_udp_ports(&self) -> Result<IterableTunnelUdp<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let TunnelInfo::UdpPorts(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "TunnelInfo",
+            "UdpPorts",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl TunnelInfo<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableTunnelInfo<'a> {
+        IterableTunnelInfo::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "UdpPorts",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableTunnelInfo<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableTunnelInfo<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableTunnelInfo<'a> {
+    type Item = Result<TunnelInfo<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => TunnelInfo::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => TunnelInfo::UdpPorts({
+                    let res = Some(IterableTunnelUdp::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "TunnelInfo",
+            r#type.and_then(|t| TunnelInfo::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableTunnelInfo<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("TunnelInfo");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                TunnelInfo::Header(val) => fmt.field("Header", &val),
+                TunnelInfo::UdpPorts(val) => fmt.field("UdpPorts", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableTunnelInfo<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("TunnelInfo", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| TunnelInfo::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                TunnelInfo::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                TunnelInfo::UdpPorts(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("TunnelInfo", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum FecHist<'a> {
+    Pad(&'a [u8]),
+    #[doc = "Low bound of FEC bin (inclusive)"]
+    BinLow(u32),
+    #[doc = "High bound of FEC bin (inclusive)"]
+    BinHigh(u32),
+    #[doc = "Error count in the bin (optional if per\\-lane values exist)"]
+    BinVal(u32),
+    #[doc = "An array of per\\-lane error counters in the bin (optional)"]
+    BinValPerLane(&'a [u8]),
+}
+impl<'a> IterableFecHist<'a> {
+    pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let FecHist::Pad(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "FecHist",
+            "Pad",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Low bound of FEC bin (inclusive)"]
+    pub fn get_bin_low(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let FecHist::BinLow(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "FecHist",
+            "BinLow",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "High bound of FEC bin (inclusive)"]
+    pub fn get_bin_high(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let FecHist::BinHigh(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "FecHist",
+            "BinHigh",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Error count in the bin (optional if per\\-lane values exist)"]
+    pub fn get_bin_val(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let FecHist::BinVal(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "FecHist",
+            "BinVal",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "An array of per\\-lane error counters in the bin (optional)"]
+    pub fn get_bin_val_per_lane(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let FecHist::BinValPerLane(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "FecHist",
+            "BinValPerLane",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl FecHist<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableFecHist<'a> {
+        IterableFecHist::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            1u16 => "Pad",
+            2u16 => "BinLow",
+            3u16 => "BinHigh",
+            4u16 => "BinVal",
+            5u16 => "BinValPerLane",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableFecHist<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableFecHist<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableFecHist<'a> {
+    type Item = Result<FecHist<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => FecHist::Pad({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => FecHist::BinLow({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => FecHist::BinHigh({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => FecHist::BinVal({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => FecHist::BinValPerLane({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "FecHist",
+            r#type.and_then(|t| FecHist::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableFecHist<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("FecHist");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                FecHist::Pad(val) => fmt.field("Pad", &val),
+                FecHist::BinLow(val) => fmt.field("BinLow", &val),
+                FecHist::BinHigh(val) => fmt.field("BinHigh", &val),
+                FecHist::BinVal(val) => fmt.field("BinVal", &val),
+                FecHist::BinValPerLane(val) => fmt.field("BinValPerLane", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableFecHist<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("FecHist", offset));
+            return (stack, missing_type.and_then(|t| FecHist::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                FecHist::Pad(val) => {
+                    if last_off == offset {
+                        stack.push(("Pad", last_off));
+                        break;
+                    }
+                }
+                FecHist::BinLow(val) => {
+                    if last_off == offset {
+                        stack.push(("BinLow", last_off));
+                        break;
+                    }
+                }
+                FecHist::BinHigh(val) => {
+                    if last_off == offset {
+                        stack.push(("BinHigh", last_off));
+                        break;
+                    }
+                }
+                FecHist::BinVal(val) => {
+                    if last_off == offset {
+                        stack.push(("BinVal", last_off));
+                        break;
+                    }
+                }
+                FecHist::BinValPerLane(val) => {
+                    if last_off == offset {
+                        stack.push(("BinValPerLane", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("FecHist", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum FecStat<'a> {
+    Pad(&'a [u8]),
+    Corrected(&'a [u8]),
+    Uncorr(&'a [u8]),
+    CorrBits(&'a [u8]),
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    Hist(IterableFecHist<'a>),
+}
+impl<'a> IterableFecStat<'a> {
+    pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let FecStat::Pad(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "FecStat",
+            "Pad",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_corrected(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let FecStat::Corrected(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "FecStat",
+            "Corrected",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_uncorr(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let FecStat::Uncorr(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "FecStat",
+            "Uncorr",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_corr_bits(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let FecStat::CorrBits(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "FecStat",
+            "CorrBits",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn get_hist(&self) -> MultiAttrIterable<Self, FecStat<'a>, IterableFecHist<'a>> {
+        MultiAttrIterable::new(self.clone(), |variant| {
+            if let FecStat::Hist(val) = variant {
+                Some(val)
+            } else {
+                None
+            }
+        })
+    }
+}
+impl FecStat<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableFecStat<'a> {
+        IterableFecStat::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Pad",
+            2u16 => "Corrected",
+            3u16 => "Uncorr",
+            4u16 => "CorrBits",
+            5u16 => "Hist",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableFecStat<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableFecStat<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableFecStat<'a> {
+    type Item = Result<FecStat<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => FecStat::Pad({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => FecStat::Corrected({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => FecStat::Uncorr({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => FecStat::CorrBits({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => FecStat::Hist({
+                    let res = Some(IterableFecHist::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "FecStat",
+            r#type.and_then(|t| FecStat::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableFecStat<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("FecStat");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                FecStat::Pad(val) => fmt.field("Pad", &val),
+                FecStat::Corrected(val) => fmt.field("Corrected", &val),
+                FecStat::Uncorr(val) => fmt.field("Uncorr", &val),
+                FecStat::CorrBits(val) => fmt.field("CorrBits", &val),
+                FecStat::Hist(val) => fmt.field("Hist", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableFecStat<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("FecStat", offset));
+            return (stack, missing_type.and_then(|t| FecStat::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                FecStat::Pad(val) => {
+                    if last_off == offset {
+                        stack.push(("Pad", last_off));
+                        break;
+                    }
+                }
+                FecStat::Corrected(val) => {
+                    if last_off == offset {
+                        stack.push(("Corrected", last_off));
+                        break;
+                    }
+                }
+                FecStat::Uncorr(val) => {
+                    if last_off == offset {
+                        stack.push(("Uncorr", last_off));
+                        break;
+                    }
+                }
+                FecStat::CorrBits(val) => {
+                    if last_off == offset {
+                        stack.push(("CorrBits", last_off));
+                        break;
+                    }
+                }
+                FecStat::Hist(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("FecStat", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Fec<'a> {
+    Header(IterableHeader<'a>),
+    Modes(IterableBitset<'a>),
+    Auto(u8),
+    Active(u32),
+    Stats(IterableFecStat<'a>),
+}
+impl<'a> IterableFec<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Fec::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Fec",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_modes(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Fec::Modes(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Fec",
+            "Modes",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_auto(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Fec::Auto(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Fec",
+            "Auto",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_active(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Fec::Active(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Fec",
+            "Active",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_stats(&self) -> Result<IterableFecStat<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Fec::Stats(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Fec",
+            "Stats",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Fec<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableFec<'a> {
+        IterableFec::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Modes",
+            3u16 => "Auto",
+            4u16 => "Active",
+            5u16 => "Stats",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableFec<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableFec<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableFec<'a> {
+    type Item = Result<Fec<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Fec::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Fec::Modes({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Fec::Auto({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Fec::Active({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Fec::Stats({
+                    let res = Some(IterableFecStat::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Fec",
+            r#type.and_then(|t| Fec::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableFec<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Fec");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Fec::Header(val) => fmt.field("Header", &val),
+                Fec::Modes(val) => fmt.field("Modes", &val),
+                Fec::Auto(val) => fmt.field("Auto", &val),
+                Fec::Active(val) => fmt.field("Active", &val),
+                Fec::Stats(val) => fmt.field("Stats", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableFec<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Fec", offset));
+            return (stack, missing_type.and_then(|t| Fec::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Fec::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Fec::Modes(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Fec::Auto(val) => {
+                    if last_off == offset {
+                        stack.push(("Auto", last_off));
+                        break;
+                    }
+                }
+                Fec::Active(val) => {
+                    if last_off == offset {
+                        stack.push(("Active", last_off));
+                        break;
+                    }
+                }
+                Fec::Stats(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Fec", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum ModuleEeprom<'a> {
+    Header(IterableHeader<'a>),
+    Offset(u32),
+    Length(u32),
+    Page(u8),
+    Bank(u8),
+    I2cAddress(u8),
+    Data(&'a [u8]),
+}
+impl<'a> IterableModuleEeprom<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleEeprom::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleEeprom",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_offset(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleEeprom::Offset(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleEeprom",
+            "Offset",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_length(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleEeprom::Length(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleEeprom",
+            "Length",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_page(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleEeprom::Page(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleEeprom",
+            "Page",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_bank(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleEeprom::Bank(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleEeprom",
+            "Bank",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_i2c_address(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleEeprom::I2cAddress(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleEeprom",
+            "I2cAddress",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_data(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleEeprom::Data(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleEeprom",
+            "Data",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl ModuleEeprom<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableModuleEeprom<'a> {
+        IterableModuleEeprom::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Offset",
+            3u16 => "Length",
+            4u16 => "Page",
+            5u16 => "Bank",
+            6u16 => "I2cAddress",
+            7u16 => "Data",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableModuleEeprom<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableModuleEeprom<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableModuleEeprom<'a> {
+    type Item = Result<ModuleEeprom<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => ModuleEeprom::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => ModuleEeprom::Offset({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => ModuleEeprom::Length({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => ModuleEeprom::Page({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => ModuleEeprom::Bank({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => ModuleEeprom::I2cAddress({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => ModuleEeprom::Data({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "ModuleEeprom",
+            r#type.and_then(|t| ModuleEeprom::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableModuleEeprom<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("ModuleEeprom");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                ModuleEeprom::Header(val) => fmt.field("Header", &val),
+                ModuleEeprom::Offset(val) => fmt.field("Offset", &val),
+                ModuleEeprom::Length(val) => fmt.field("Length", &val),
+                ModuleEeprom::Page(val) => fmt.field("Page", &val),
+                ModuleEeprom::Bank(val) => fmt.field("Bank", &val),
+                ModuleEeprom::I2cAddress(val) => fmt.field("I2cAddress", &val),
+                ModuleEeprom::Data(val) => fmt.field("Data", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableModuleEeprom<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("ModuleEeprom", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| ModuleEeprom::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                ModuleEeprom::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                ModuleEeprom::Offset(val) => {
+                    if last_off == offset {
+                        stack.push(("Offset", last_off));
+                        break;
+                    }
+                }
+                ModuleEeprom::Length(val) => {
+                    if last_off == offset {
+                        stack.push(("Length", last_off));
+                        break;
+                    }
+                }
+                ModuleEeprom::Page(val) => {
+                    if last_off == offset {
+                        stack.push(("Page", last_off));
+                        break;
+                    }
+                }
+                ModuleEeprom::Bank(val) => {
+                    if last_off == offset {
+                        stack.push(("Bank", last_off));
+                        break;
+                    }
+                }
+                ModuleEeprom::I2cAddress(val) => {
+                    if last_off == offset {
+                        stack.push(("I2cAddress", last_off));
+                        break;
+                    }
+                }
+                ModuleEeprom::Data(val) => {
+                    if last_off == offset {
+                        stack.push(("Data", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("ModuleEeprom", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum StatsGrp<'a> {
+    Pad(&'a [u8]),
+    Id(u32),
+    SsId(u32),
+    Stat(u64),
+    HistRx(IterableStatsGrpHist<'a>),
+    HistTx(IterableStatsGrpHist<'a>),
+    HistBktLow(u32),
+    HistBktHi(u32),
+    HistVal(u64),
+}
+impl<'a> IterableStatsGrp<'a> {
+    pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let StatsGrp::Pad(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "StatsGrp",
+            "Pad",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_id(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let StatsGrp::Id(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "StatsGrp",
+            "Id",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_ss_id(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let StatsGrp::SsId(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "StatsGrp",
+            "SsId",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_stat(&self) -> Result<u64, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let StatsGrp::Stat(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "StatsGrp",
+            "Stat",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hist_rx(&self) -> Result<IterableStatsGrpHist<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let StatsGrp::HistRx(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "StatsGrp",
+            "HistRx",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hist_tx(&self) -> Result<IterableStatsGrpHist<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let StatsGrp::HistTx(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "StatsGrp",
+            "HistTx",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hist_bkt_low(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let StatsGrp::HistBktLow(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "StatsGrp",
+            "HistBktLow",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hist_bkt_hi(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let StatsGrp::HistBktHi(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "StatsGrp",
+            "HistBktHi",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hist_val(&self) -> Result<u64, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let StatsGrp::HistVal(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "StatsGrp",
+            "HistVal",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl StatsGrp<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableStatsGrp<'a> {
+        IterableStatsGrp::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Pad",
+            2u16 => "Id",
+            3u16 => "SsId",
+            4u16 => "Stat",
+            5u16 => "HistRx",
+            6u16 => "HistTx",
+            7u16 => "HistBktLow",
+            8u16 => "HistBktHi",
+            9u16 => "HistVal",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableStatsGrp<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableStatsGrp<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableStatsGrp<'a> {
+    type Item = Result<StatsGrp<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => StatsGrp::Pad({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => StatsGrp::Id({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => StatsGrp::SsId({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => StatsGrp::Stat({
+                    let res = parse_u64(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => StatsGrp::HistRx({
+                    let res = Some(IterableStatsGrpHist::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => StatsGrp::HistTx({
+                    let res = Some(IterableStatsGrpHist::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => StatsGrp::HistBktLow({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => StatsGrp::HistBktHi({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                9u16 => StatsGrp::HistVal({
+                    let res = parse_u64(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "StatsGrp",
+            r#type.and_then(|t| StatsGrp::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableStatsGrp<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("StatsGrp");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                StatsGrp::Pad(val) => fmt.field("Pad", &val),
+                StatsGrp::Id(val) => fmt.field("Id", &val),
+                StatsGrp::SsId(val) => fmt.field("SsId", &val),
+                StatsGrp::Stat(val) => fmt.field("Stat", &val),
+                StatsGrp::HistRx(val) => fmt.field("HistRx", &val),
+                StatsGrp::HistTx(val) => fmt.field("HistTx", &val),
+                StatsGrp::HistBktLow(val) => fmt.field("HistBktLow", &val),
+                StatsGrp::HistBktHi(val) => fmt.field("HistBktHi", &val),
+                StatsGrp::HistVal(val) => fmt.field("HistVal", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableStatsGrp<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("StatsGrp", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| StatsGrp::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                StatsGrp::Pad(val) => {
+                    if last_off == offset {
+                        stack.push(("Pad", last_off));
+                        break;
+                    }
+                }
+                StatsGrp::Id(val) => {
+                    if last_off == offset {
+                        stack.push(("Id", last_off));
+                        break;
+                    }
+                }
+                StatsGrp::SsId(val) => {
+                    if last_off == offset {
+                        stack.push(("SsId", last_off));
+                        break;
+                    }
+                }
+                StatsGrp::Stat(val) => {
+                    if last_off == offset {
+                        stack.push(("Stat", last_off));
+                        break;
+                    }
+                }
+                StatsGrp::HistRx(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                StatsGrp::HistTx(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                StatsGrp::HistBktLow(val) => {
+                    if last_off == offset {
+                        stack.push(("HistBktLow", last_off));
+                        break;
+                    }
+                }
+                StatsGrp::HistBktHi(val) => {
+                    if last_off == offset {
+                        stack.push(("HistBktHi", last_off));
+                        break;
+                    }
+                }
+                StatsGrp::HistVal(val) => {
+                    if last_off == offset {
+                        stack.push(("HistVal", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("StatsGrp", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum StatsGrpHist {
+    HistBktLow(u32),
+    HistBktHi(u32),
+    HistVal(u64),
+}
+impl<'a> IterableStatsGrpHist<'a> {
+    pub fn get_hist_bkt_low(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let StatsGrpHist::HistBktLow(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "StatsGrpHist",
+            "HistBktLow",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hist_bkt_hi(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let StatsGrpHist::HistBktHi(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "StatsGrpHist",
+            "HistBktHi",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hist_val(&self) -> Result<u64, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let StatsGrpHist::HistVal(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "StatsGrpHist",
+            "HistVal",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl StatsGrpHist {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableStatsGrpHist<'a> {
+        IterableStatsGrpHist::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        StatsGrp::attr_from_type(r#type)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableStatsGrpHist<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableStatsGrpHist<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableStatsGrpHist<'a> {
+    type Item = Result<StatsGrpHist, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                7u16 => StatsGrpHist::HistBktLow({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => StatsGrpHist::HistBktHi({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                9u16 => StatsGrpHist::HistVal({
+                    let res = parse_u64(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "StatsGrpHist",
+            r#type.and_then(|t| StatsGrpHist::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl std::fmt::Debug for IterableStatsGrpHist<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("StatsGrpHist");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                StatsGrpHist::HistBktLow(val) => fmt.field("HistBktLow", &val),
+                StatsGrpHist::HistBktHi(val) => fmt.field("HistBktHi", &val),
+                StatsGrpHist::HistVal(val) => fmt.field("HistVal", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableStatsGrpHist<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("StatsGrpHist", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| StatsGrpHist::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                StatsGrpHist::HistBktLow(val) => {
+                    if last_off == offset {
+                        stack.push(("HistBktLow", last_off));
+                        break;
+                    }
+                }
+                StatsGrpHist::HistBktHi(val) => {
+                    if last_off == offset {
+                        stack.push(("HistBktHi", last_off));
+                        break;
+                    }
+                }
+                StatsGrpHist::HistVal(val) => {
+                    if last_off == offset {
+                        stack.push(("HistVal", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("StatsGrpHist", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum Stats<'a> {
+    Pad(&'a [u8]),
+    Header(IterableHeader<'a>),
+    Groups(IterableBitset<'a>),
+    Grp(IterableStatsGrp<'a>),
+    Src(u32),
+}
+impl<'a> IterableStats<'a> {
+    pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Stats::Pad(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Stats",
+            "Pad",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Stats::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Stats",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_groups(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Stats::Groups(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Stats",
+            "Groups",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_grp(&self) -> Result<IterableStatsGrp<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Stats::Grp(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Stats",
+            "Grp",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_src(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Stats::Src(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Stats",
+            "Src",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Stats<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableStats<'a> {
+        IterableStats::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Pad",
+            2u16 => "Header",
+            3u16 => "Groups",
+            4u16 => "Grp",
+            5u16 => "Src",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableStats<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableStats<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableStats<'a> {
+    type Item = Result<Stats<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Stats::Pad({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Stats::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Stats::Groups({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Stats::Grp({
+                    let res = Some(IterableStatsGrp::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Stats::Src({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Stats",
+            r#type.and_then(|t| Stats::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableStats<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Stats");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Stats::Pad(val) => fmt.field("Pad", &val),
+                Stats::Header(val) => fmt.field("Header", &val),
+                Stats::Groups(val) => fmt.field("Groups", &val),
+                Stats::Grp(val) => fmt.field("Grp", &val),
+                Stats::Src(val) => fmt.field("Src", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableStats<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Stats", offset));
+            return (stack, missing_type.and_then(|t| Stats::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Stats::Pad(val) => {
+                    if last_off == offset {
+                        stack.push(("Pad", last_off));
+                        break;
+                    }
+                }
+                Stats::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Stats::Groups(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Stats::Grp(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Stats::Src(val) => {
+                    if last_off == offset {
+                        stack.push(("Src", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Stats", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum PhcVclocks<'a> {
+    Header(IterableHeader<'a>),
+    Num(u32),
+    Index(&'a [u8]),
+}
+impl<'a> IterablePhcVclocks<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let PhcVclocks::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "PhcVclocks",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_num(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let PhcVclocks::Num(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "PhcVclocks",
+            "Num",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_index(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let PhcVclocks::Index(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "PhcVclocks",
+            "Index",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl PhcVclocks<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterablePhcVclocks<'a> {
+        IterablePhcVclocks::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Num",
+            3u16 => "Index",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterablePhcVclocks<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterablePhcVclocks<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterablePhcVclocks<'a> {
+    type Item = Result<PhcVclocks<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => PhcVclocks::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => PhcVclocks::Num({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => PhcVclocks::Index({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "PhcVclocks",
+            r#type.and_then(|t| PhcVclocks::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterablePhcVclocks<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("PhcVclocks");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                PhcVclocks::Header(val) => fmt.field("Header", &val),
+                PhcVclocks::Num(val) => fmt.field("Num", &val),
+                PhcVclocks::Index(val) => fmt.field("Index", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterablePhcVclocks<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("PhcVclocks", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| PhcVclocks::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                PhcVclocks::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                PhcVclocks::Num(val) => {
+                    if last_off == offset {
+                        stack.push(("Num", last_off));
+                        break;
+                    }
+                }
+                PhcVclocks::Index(val) => {
+                    if last_off == offset {
+                        stack.push(("Index", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("PhcVclocks", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Module<'a> {
+    Header(IterableHeader<'a>),
+    PowerModePolicy(u8),
+    PowerMode(u8),
+}
+impl<'a> IterableModule<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Module::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Module",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_power_mode_policy(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Module::PowerModePolicy(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Module",
+            "PowerModePolicy",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_power_mode(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Module::PowerMode(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Module",
+            "PowerMode",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Module<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableModule<'a> {
+        IterableModule::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "PowerModePolicy",
+            3u16 => "PowerMode",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableModule<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableModule<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableModule<'a> {
+    type Item = Result<Module<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Module::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Module::PowerModePolicy({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Module::PowerMode({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Module",
+            r#type.and_then(|t| Module::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableModule<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Module");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Module::Header(val) => fmt.field("Header", &val),
+                Module::PowerModePolicy(val) => fmt.field("PowerModePolicy", &val),
+                Module::PowerMode(val) => fmt.field("PowerMode", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableModule<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Module", offset));
+            return (stack, missing_type.and_then(|t| Module::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Module::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Module::PowerModePolicy(val) => {
+                    if last_off == offset {
+                        stack.push(("PowerModePolicy", last_off));
+                        break;
+                    }
+                }
+                Module::PowerMode(val) => {
+                    if last_off == offset {
+                        stack.push(("PowerMode", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Module", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum C33PsePwLimit {
+    Min(u32),
+    Max(u32),
+}
+impl<'a> IterableC33PsePwLimit<'a> {
+    pub fn get_min(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let C33PsePwLimit::Min(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "C33PsePwLimit",
+            "Min",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_max(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let C33PsePwLimit::Max(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "C33PsePwLimit",
+            "Max",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl C33PsePwLimit {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableC33PsePwLimit<'a> {
+        IterableC33PsePwLimit::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Min",
+            2u16 => "Max",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableC33PsePwLimit<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableC33PsePwLimit<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableC33PsePwLimit<'a> {
+    type Item = Result<C33PsePwLimit, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => C33PsePwLimit::Min({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => C33PsePwLimit::Max({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "C33PsePwLimit",
+            r#type.and_then(|t| C33PsePwLimit::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl std::fmt::Debug for IterableC33PsePwLimit<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("C33PsePwLimit");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                C33PsePwLimit::Min(val) => fmt.field("Min", &val),
+                C33PsePwLimit::Max(val) => fmt.field("Max", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableC33PsePwLimit<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("C33PsePwLimit", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| C33PsePwLimit::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                C33PsePwLimit::Min(val) => {
+                    if last_off == offset {
+                        stack.push(("Min", last_off));
+                        break;
+                    }
+                }
+                C33PsePwLimit::Max(val) => {
+                    if last_off == offset {
+                        stack.push(("Max", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("C33PsePwLimit", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum Pse<'a> {
+    Header(IterableHeader<'a>),
+    PodlPseAdminState(u32),
+    PodlPseAdminControl(u32),
+    PodlPsePwDStatus(u32),
+    C33PseAdminState(u32),
+    C33PseAdminControl(u32),
+    C33PsePwDStatus(u32),
+    C33PsePwClass(u32),
+    C33PseActualPw(u32),
+    #[doc = "Associated type: [`C33PseExtState`] (enum)"]
+    C33PseExtState(u32),
+    C33PseExtSubstate(u32),
+    C33PseAvailPwLimit(u32),
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    C33PsePwLimitRanges(IterableC33PsePwLimit<'a>),
+    PsePwDId(u32),
+    PsePrioMax(u32),
+    PsePrio(u32),
+}
+impl<'a> IterablePse<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_podl_pse_admin_state(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::PodlPseAdminState(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "PodlPseAdminState",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_podl_pse_admin_control(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::PodlPseAdminControl(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "PodlPseAdminControl",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_podl_pse_pw_d_status(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::PodlPsePwDStatus(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "PodlPsePwDStatus",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_c33_pse_admin_state(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::C33PseAdminState(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "C33PseAdminState",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_c33_pse_admin_control(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::C33PseAdminControl(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "C33PseAdminControl",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_c33_pse_pw_d_status(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::C33PsePwDStatus(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "C33PsePwDStatus",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_c33_pse_pw_class(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::C33PsePwClass(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "C33PsePwClass",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_c33_pse_actual_pw(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::C33PseActualPw(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "C33PseActualPw",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`C33PseExtState`] (enum)"]
+    pub fn get_c33_pse_ext_state(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::C33PseExtState(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "C33PseExtState",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_c33_pse_ext_substate(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::C33PseExtSubstate(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "C33PseExtSubstate",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_c33_pse_avail_pw_limit(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::C33PseAvailPwLimit(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "C33PseAvailPwLimit",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn get_c33_pse_pw_limit_ranges(
+        &self,
+    ) -> MultiAttrIterable<Self, Pse<'a>, IterableC33PsePwLimit<'a>> {
+        MultiAttrIterable::new(self.clone(), |variant| {
+            if let Pse::C33PsePwLimitRanges(val) = variant {
+                Some(val)
+            } else {
+                None
+            }
+        })
+    }
+    pub fn get_pse_pw_d_id(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::PsePwDId(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "PsePwDId",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_pse_prio_max(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::PsePrioMax(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "PsePrioMax",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_pse_prio(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Pse::PsePrio(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Pse",
+            "PsePrio",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Pse<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterablePse<'a> {
+        IterablePse::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "PodlPseAdminState",
+            3u16 => "PodlPseAdminControl",
+            4u16 => "PodlPsePwDStatus",
+            5u16 => "C33PseAdminState",
+            6u16 => "C33PseAdminControl",
+            7u16 => "C33PsePwDStatus",
+            8u16 => "C33PsePwClass",
+            9u16 => "C33PseActualPw",
+            10u16 => "C33PseExtState",
+            11u16 => "C33PseExtSubstate",
+            12u16 => "C33PseAvailPwLimit",
+            13u16 => "C33PsePwLimitRanges",
+            14u16 => "PsePwDId",
+            15u16 => "PsePrioMax",
+            16u16 => "PsePrio",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterablePse<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterablePse<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterablePse<'a> {
+    type Item = Result<Pse<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Pse::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Pse::PodlPseAdminState({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Pse::PodlPseAdminControl({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Pse::PodlPsePwDStatus({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Pse::C33PseAdminState({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Pse::C33PseAdminControl({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Pse::C33PsePwDStatus({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => Pse::C33PsePwClass({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                9u16 => Pse::C33PseActualPw({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                10u16 => Pse::C33PseExtState({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                11u16 => Pse::C33PseExtSubstate({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                12u16 => Pse::C33PseAvailPwLimit({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                13u16 => Pse::C33PsePwLimitRanges({
+                    let res = Some(IterableC33PsePwLimit::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                14u16 => Pse::PsePwDId({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                15u16 => Pse::PsePrioMax({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                16u16 => Pse::PsePrio({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Pse",
+            r#type.and_then(|t| Pse::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterablePse<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Pse");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Pse::Header(val) => fmt.field("Header", &val),
+                Pse::PodlPseAdminState(val) => fmt.field("PodlPseAdminState", &val),
+                Pse::PodlPseAdminControl(val) => fmt.field("PodlPseAdminControl", &val),
+                Pse::PodlPsePwDStatus(val) => fmt.field("PodlPsePwDStatus", &val),
+                Pse::C33PseAdminState(val) => fmt.field("C33PseAdminState", &val),
+                Pse::C33PseAdminControl(val) => fmt.field("C33PseAdminControl", &val),
+                Pse::C33PsePwDStatus(val) => fmt.field("C33PsePwDStatus", &val),
+                Pse::C33PsePwClass(val) => fmt.field("C33PsePwClass", &val),
+                Pse::C33PseActualPw(val) => fmt.field("C33PseActualPw", &val),
+                Pse::C33PseExtState(val) => fmt.field(
+                    "C33PseExtState",
+                    &FormatEnum(val.into(), C33PseExtState::from_value),
+                ),
+                Pse::C33PseExtSubstate(val) => fmt.field("C33PseExtSubstate", &val),
+                Pse::C33PseAvailPwLimit(val) => fmt.field("C33PseAvailPwLimit", &val),
+                Pse::C33PsePwLimitRanges(val) => fmt.field("C33PsePwLimitRanges", &val),
+                Pse::PsePwDId(val) => fmt.field("PsePwDId", &val),
+                Pse::PsePrioMax(val) => fmt.field("PsePrioMax", &val),
+                Pse::PsePrio(val) => fmt.field("PsePrio", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterablePse<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Pse", offset));
+            return (stack, missing_type.and_then(|t| Pse::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Pse::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Pse::PodlPseAdminState(val) => {
+                    if last_off == offset {
+                        stack.push(("PodlPseAdminState", last_off));
+                        break;
+                    }
+                }
+                Pse::PodlPseAdminControl(val) => {
+                    if last_off == offset {
+                        stack.push(("PodlPseAdminControl", last_off));
+                        break;
+                    }
+                }
+                Pse::PodlPsePwDStatus(val) => {
+                    if last_off == offset {
+                        stack.push(("PodlPsePwDStatus", last_off));
+                        break;
+                    }
+                }
+                Pse::C33PseAdminState(val) => {
+                    if last_off == offset {
+                        stack.push(("C33PseAdminState", last_off));
+                        break;
+                    }
+                }
+                Pse::C33PseAdminControl(val) => {
+                    if last_off == offset {
+                        stack.push(("C33PseAdminControl", last_off));
+                        break;
+                    }
+                }
+                Pse::C33PsePwDStatus(val) => {
+                    if last_off == offset {
+                        stack.push(("C33PsePwDStatus", last_off));
+                        break;
+                    }
+                }
+                Pse::C33PsePwClass(val) => {
+                    if last_off == offset {
+                        stack.push(("C33PsePwClass", last_off));
+                        break;
+                    }
+                }
+                Pse::C33PseActualPw(val) => {
+                    if last_off == offset {
+                        stack.push(("C33PseActualPw", last_off));
+                        break;
+                    }
+                }
+                Pse::C33PseExtState(val) => {
+                    if last_off == offset {
+                        stack.push(("C33PseExtState", last_off));
+                        break;
+                    }
+                }
+                Pse::C33PseExtSubstate(val) => {
+                    if last_off == offset {
+                        stack.push(("C33PseExtSubstate", last_off));
+                        break;
+                    }
+                }
+                Pse::C33PseAvailPwLimit(val) => {
+                    if last_off == offset {
+                        stack.push(("C33PseAvailPwLimit", last_off));
+                        break;
+                    }
+                }
+                Pse::C33PsePwLimitRanges(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Pse::PsePwDId(val) => {
+                    if last_off == offset {
+                        stack.push(("PsePwDId", last_off));
+                        break;
+                    }
+                }
+                Pse::PsePrioMax(val) => {
+                    if last_off == offset {
+                        stack.push(("PsePrioMax", last_off));
+                        break;
+                    }
+                }
+                Pse::PsePrio(val) => {
+                    if last_off == offset {
+                        stack.push(("PsePrio", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Pse", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Flow {
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Ether(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Ip4(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Ip6(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Tcp4(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Tcp6(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Udp4(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Udp6(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Sctp4(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Sctp6(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Ah4(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Ah6(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Esp4(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Esp6(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    AhEsp4(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    AhEsp6(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Gtpu4(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Gtpu6(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Gtpc4(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    Gtpc6(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    GtpcTeid4(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    GtpcTeid6(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    GtpuEh4(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    GtpuEh6(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    GtpuUl4(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    GtpuUl6(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    GtpuDl4(u32),
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    GtpuDl6(u32),
+}
+impl<'a> IterableFlow<'a> {
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_ether(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Ether(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Ether",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_ip4(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Ip4(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Ip4",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_ip6(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Ip6(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Ip6",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_tcp4(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Tcp4(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Tcp4",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_tcp6(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Tcp6(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Tcp6",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_udp4(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Udp4(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Udp4",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_udp6(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Udp6(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Udp6",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_sctp4(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Sctp4(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Sctp4",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_sctp6(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Sctp6(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Sctp6",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_ah4(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Ah4(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Ah4",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_ah6(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Ah6(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Ah6",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_esp4(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Esp4(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Esp4",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_esp6(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Esp6(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Esp6",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_ah_esp4(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::AhEsp4(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "AhEsp4",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_ah_esp6(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::AhEsp6(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "AhEsp6",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_gtpu4(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Gtpu4(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Gtpu4",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_gtpu6(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Gtpu6(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Gtpu6",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_gtpc4(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Gtpc4(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Gtpc4",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_gtpc6(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::Gtpc6(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "Gtpc6",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_gtpc_teid4(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::GtpcTeid4(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "GtpcTeid4",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_gtpc_teid6(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::GtpcTeid6(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "GtpcTeid6",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_gtpu_eh4(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::GtpuEh4(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "GtpuEh4",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_gtpu_eh6(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::GtpuEh6(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "GtpuEh6",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_gtpu_ul4(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::GtpuUl4(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "GtpuUl4",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_gtpu_ul6(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::GtpuUl6(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "GtpuUl6",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_gtpu_dl4(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::GtpuDl4(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "GtpuDl4",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn get_gtpu_dl6(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Flow::GtpuDl6(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Flow",
+            "GtpuDl6",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Flow {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableFlow<'a> {
+        IterableFlow::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            1u16 => "Ether",
+            2u16 => "Ip4",
+            3u16 => "Ip6",
+            4u16 => "Tcp4",
+            5u16 => "Tcp6",
+            6u16 => "Udp4",
+            7u16 => "Udp6",
+            8u16 => "Sctp4",
+            9u16 => "Sctp6",
+            10u16 => "Ah4",
+            11u16 => "Ah6",
+            12u16 => "Esp4",
+            13u16 => "Esp6",
+            14u16 => "AhEsp4",
+            15u16 => "AhEsp6",
+            16u16 => "Gtpu4",
+            17u16 => "Gtpu6",
+            18u16 => "Gtpc4",
+            19u16 => "Gtpc6",
+            20u16 => "GtpcTeid4",
+            21u16 => "GtpcTeid6",
+            22u16 => "GtpuEh4",
+            23u16 => "GtpuEh6",
+            24u16 => "GtpuUl4",
+            25u16 => "GtpuUl6",
+            26u16 => "GtpuDl4",
+            27u16 => "GtpuDl6",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableFlow<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableFlow<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableFlow<'a> {
+    type Item = Result<Flow, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Flow::Ether({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Flow::Ip4({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Flow::Ip6({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Flow::Tcp4({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Flow::Tcp6({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Flow::Udp4({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Flow::Udp6({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => Flow::Sctp4({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                9u16 => Flow::Sctp6({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                10u16 => Flow::Ah4({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                11u16 => Flow::Ah6({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                12u16 => Flow::Esp4({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                13u16 => Flow::Esp6({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                14u16 => Flow::AhEsp4({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                15u16 => Flow::AhEsp6({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                16u16 => Flow::Gtpu4({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                17u16 => Flow::Gtpu6({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                18u16 => Flow::Gtpc4({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                19u16 => Flow::Gtpc6({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                20u16 => Flow::GtpcTeid4({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                21u16 => Flow::GtpcTeid6({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                22u16 => Flow::GtpuEh4({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                23u16 => Flow::GtpuEh6({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                24u16 => Flow::GtpuUl4({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                25u16 => Flow::GtpuUl6({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                26u16 => Flow::GtpuDl4({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                27u16 => Flow::GtpuDl6({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Flow",
+            r#type.and_then(|t| Flow::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl std::fmt::Debug for IterableFlow<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Flow");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Flow::Ether(val) => {
+                    fmt.field("Ether", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Ip4(val) => {
+                    fmt.field("Ip4", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Ip6(val) => {
+                    fmt.field("Ip6", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Tcp4(val) => {
+                    fmt.field("Tcp4", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Tcp6(val) => {
+                    fmt.field("Tcp6", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Udp4(val) => {
+                    fmt.field("Udp4", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Udp6(val) => {
+                    fmt.field("Udp6", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Sctp4(val) => {
+                    fmt.field("Sctp4", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Sctp6(val) => {
+                    fmt.field("Sctp6", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Ah4(val) => {
+                    fmt.field("Ah4", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Ah6(val) => {
+                    fmt.field("Ah6", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Esp4(val) => {
+                    fmt.field("Esp4", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Esp6(val) => {
+                    fmt.field("Esp6", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::AhEsp4(val) => {
+                    fmt.field("AhEsp4", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::AhEsp6(val) => {
+                    fmt.field("AhEsp6", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Gtpu4(val) => {
+                    fmt.field("Gtpu4", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Gtpu6(val) => {
+                    fmt.field("Gtpu6", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Gtpc4(val) => {
+                    fmt.field("Gtpc4", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::Gtpc6(val) => {
+                    fmt.field("Gtpc6", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::GtpcTeid4(val) => fmt.field(
+                    "GtpcTeid4",
+                    &FormatFlags(val.into(), RxfhFields::from_value),
+                ),
+                Flow::GtpcTeid6(val) => fmt.field(
+                    "GtpcTeid6",
+                    &FormatFlags(val.into(), RxfhFields::from_value),
+                ),
+                Flow::GtpuEh4(val) => {
+                    fmt.field("GtpuEh4", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::GtpuEh6(val) => {
+                    fmt.field("GtpuEh6", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::GtpuUl4(val) => {
+                    fmt.field("GtpuUl4", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::GtpuUl6(val) => {
+                    fmt.field("GtpuUl6", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::GtpuDl4(val) => {
+                    fmt.field("GtpuDl4", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+                Flow::GtpuDl6(val) => {
+                    fmt.field("GtpuDl6", &FormatFlags(val.into(), RxfhFields::from_value))
+                }
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableFlow<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Flow", offset));
+            return (stack, missing_type.and_then(|t| Flow::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Flow::Ether(val) => {
+                    if last_off == offset {
+                        stack.push(("Ether", last_off));
+                        break;
+                    }
+                }
+                Flow::Ip4(val) => {
+                    if last_off == offset {
+                        stack.push(("Ip4", last_off));
+                        break;
+                    }
+                }
+                Flow::Ip6(val) => {
+                    if last_off == offset {
+                        stack.push(("Ip6", last_off));
+                        break;
+                    }
+                }
+                Flow::Tcp4(val) => {
+                    if last_off == offset {
+                        stack.push(("Tcp4", last_off));
+                        break;
+                    }
+                }
+                Flow::Tcp6(val) => {
+                    if last_off == offset {
+                        stack.push(("Tcp6", last_off));
+                        break;
+                    }
+                }
+                Flow::Udp4(val) => {
+                    if last_off == offset {
+                        stack.push(("Udp4", last_off));
+                        break;
+                    }
+                }
+                Flow::Udp6(val) => {
+                    if last_off == offset {
+                        stack.push(("Udp6", last_off));
+                        break;
+                    }
+                }
+                Flow::Sctp4(val) => {
+                    if last_off == offset {
+                        stack.push(("Sctp4", last_off));
+                        break;
+                    }
+                }
+                Flow::Sctp6(val) => {
+                    if last_off == offset {
+                        stack.push(("Sctp6", last_off));
+                        break;
+                    }
+                }
+                Flow::Ah4(val) => {
+                    if last_off == offset {
+                        stack.push(("Ah4", last_off));
+                        break;
+                    }
+                }
+                Flow::Ah6(val) => {
+                    if last_off == offset {
+                        stack.push(("Ah6", last_off));
+                        break;
+                    }
+                }
+                Flow::Esp4(val) => {
+                    if last_off == offset {
+                        stack.push(("Esp4", last_off));
+                        break;
+                    }
+                }
+                Flow::Esp6(val) => {
+                    if last_off == offset {
+                        stack.push(("Esp6", last_off));
+                        break;
+                    }
+                }
+                Flow::AhEsp4(val) => {
+                    if last_off == offset {
+                        stack.push(("AhEsp4", last_off));
+                        break;
+                    }
+                }
+                Flow::AhEsp6(val) => {
+                    if last_off == offset {
+                        stack.push(("AhEsp6", last_off));
+                        break;
+                    }
+                }
+                Flow::Gtpu4(val) => {
+                    if last_off == offset {
+                        stack.push(("Gtpu4", last_off));
+                        break;
+                    }
+                }
+                Flow::Gtpu6(val) => {
+                    if last_off == offset {
+                        stack.push(("Gtpu6", last_off));
+                        break;
+                    }
+                }
+                Flow::Gtpc4(val) => {
+                    if last_off == offset {
+                        stack.push(("Gtpc4", last_off));
+                        break;
+                    }
+                }
+                Flow::Gtpc6(val) => {
+                    if last_off == offset {
+                        stack.push(("Gtpc6", last_off));
+                        break;
+                    }
+                }
+                Flow::GtpcTeid4(val) => {
+                    if last_off == offset {
+                        stack.push(("GtpcTeid4", last_off));
+                        break;
+                    }
+                }
+                Flow::GtpcTeid6(val) => {
+                    if last_off == offset {
+                        stack.push(("GtpcTeid6", last_off));
+                        break;
+                    }
+                }
+                Flow::GtpuEh4(val) => {
+                    if last_off == offset {
+                        stack.push(("GtpuEh4", last_off));
+                        break;
+                    }
+                }
+                Flow::GtpuEh6(val) => {
+                    if last_off == offset {
+                        stack.push(("GtpuEh6", last_off));
+                        break;
+                    }
+                }
+                Flow::GtpuUl4(val) => {
+                    if last_off == offset {
+                        stack.push(("GtpuUl4", last_off));
+                        break;
+                    }
+                }
+                Flow::GtpuUl6(val) => {
+                    if last_off == offset {
+                        stack.push(("GtpuUl6", last_off));
+                        break;
+                    }
+                }
+                Flow::GtpuDl4(val) => {
+                    if last_off == offset {
+                        stack.push(("GtpuDl4", last_off));
+                        break;
+                    }
+                }
+                Flow::GtpuDl6(val) => {
+                    if last_off == offset {
+                        stack.push(("GtpuDl6", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Flow", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum Rss<'a> {
+    Header(IterableHeader<'a>),
+    Context(u32),
+    Hfunc(u32),
+    Indir(&'a [u8]),
+    Hkey(&'a [u8]),
+    #[doc = "Associated type: [`InputXfrm`] (enum)"]
+    InputXfrm(u32),
+    StartContext(u32),
+    FlowHash(IterableFlow<'a>),
+}
+impl<'a> IterableRss<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rss::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rss",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_context(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rss::Context(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rss",
+            "Context",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hfunc(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rss::Hfunc(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rss",
+            "Hfunc",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_indir(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rss::Indir(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rss",
+            "Indir",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hkey(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rss::Hkey(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rss",
+            "Hkey",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`InputXfrm`] (enum)"]
+    pub fn get_input_xfrm(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rss::InputXfrm(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rss",
+            "InputXfrm",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_start_context(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rss::StartContext(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rss",
+            "StartContext",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_flow_hash(&self) -> Result<IterableFlow<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Rss::FlowHash(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Rss",
+            "FlowHash",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Rss<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableRss<'a> {
+        IterableRss::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Context",
+            3u16 => "Hfunc",
+            4u16 => "Indir",
+            5u16 => "Hkey",
+            6u16 => "InputXfrm",
+            7u16 => "StartContext",
+            8u16 => "FlowHash",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableRss<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableRss<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableRss<'a> {
+    type Item = Result<Rss<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Rss::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Rss::Context({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Rss::Hfunc({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Rss::Indir({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Rss::Hkey({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Rss::InputXfrm({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Rss::StartContext({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => Rss::FlowHash({
+                    let res = Some(IterableFlow::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Rss",
+            r#type.and_then(|t| Rss::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableRss<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Rss");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Rss::Header(val) => fmt.field("Header", &val),
+                Rss::Context(val) => fmt.field("Context", &val),
+                Rss::Hfunc(val) => fmt.field("Hfunc", &val),
+                Rss::Indir(val) => fmt.field("Indir", &val),
+                Rss::Hkey(val) => fmt.field("Hkey", &val),
+                Rss::InputXfrm(val) => {
+                    fmt.field("InputXfrm", &FormatFlags(val.into(), InputXfrm::from_value))
+                }
+                Rss::StartContext(val) => fmt.field("StartContext", &val),
+                Rss::FlowHash(val) => fmt.field("FlowHash", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableRss<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Rss", offset));
+            return (stack, missing_type.and_then(|t| Rss::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Rss::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Rss::Context(val) => {
+                    if last_off == offset {
+                        stack.push(("Context", last_off));
+                        break;
+                    }
+                }
+                Rss::Hfunc(val) => {
+                    if last_off == offset {
+                        stack.push(("Hfunc", last_off));
+                        break;
+                    }
+                }
+                Rss::Indir(val) => {
+                    if last_off == offset {
+                        stack.push(("Indir", last_off));
+                        break;
+                    }
+                }
+                Rss::Hkey(val) => {
+                    if last_off == offset {
+                        stack.push(("Hkey", last_off));
+                        break;
+                    }
+                }
+                Rss::InputXfrm(val) => {
+                    if last_off == offset {
+                        stack.push(("InputXfrm", last_off));
+                        break;
+                    }
+                }
+                Rss::StartContext(val) => {
+                    if last_off == offset {
+                        stack.push(("StartContext", last_off));
+                        break;
+                    }
+                }
+                Rss::FlowHash(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Rss", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Plca<'a> {
+    Header(IterableHeader<'a>),
+    Version(u16),
+    Enabled(u8),
+    Status(u8),
+    NodeCnt(u32),
+    NodeId(u32),
+    ToTmr(u32),
+    BurstCnt(u32),
+    BurstTmr(u32),
+}
+impl<'a> IterablePlca<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Plca::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Plca",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_version(&self) -> Result<u16, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Plca::Version(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Plca",
+            "Version",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_enabled(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Plca::Enabled(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Plca",
+            "Enabled",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_status(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Plca::Status(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Plca",
+            "Status",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_node_cnt(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Plca::NodeCnt(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Plca",
+            "NodeCnt",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_node_id(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Plca::NodeId(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Plca",
+            "NodeId",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_to_tmr(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Plca::ToTmr(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Plca",
+            "ToTmr",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_burst_cnt(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Plca::BurstCnt(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Plca",
+            "BurstCnt",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_burst_tmr(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Plca::BurstTmr(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Plca",
+            "BurstTmr",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Plca<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterablePlca<'a> {
+        IterablePlca::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Version",
+            3u16 => "Enabled",
+            4u16 => "Status",
+            5u16 => "NodeCnt",
+            6u16 => "NodeId",
+            7u16 => "ToTmr",
+            8u16 => "BurstCnt",
+            9u16 => "BurstTmr",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterablePlca<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterablePlca<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterablePlca<'a> {
+    type Item = Result<Plca<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Plca::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Plca::Version({
+                    let res = parse_u16(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Plca::Enabled({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Plca::Status({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Plca::NodeCnt({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Plca::NodeId({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Plca::ToTmr({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => Plca::BurstCnt({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                9u16 => Plca::BurstTmr({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Plca",
+            r#type.and_then(|t| Plca::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterablePlca<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Plca");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Plca::Header(val) => fmt.field("Header", &val),
+                Plca::Version(val) => fmt.field("Version", &val),
+                Plca::Enabled(val) => fmt.field("Enabled", &val),
+                Plca::Status(val) => fmt.field("Status", &val),
+                Plca::NodeCnt(val) => fmt.field("NodeCnt", &val),
+                Plca::NodeId(val) => fmt.field("NodeId", &val),
+                Plca::ToTmr(val) => fmt.field("ToTmr", &val),
+                Plca::BurstCnt(val) => fmt.field("BurstCnt", &val),
+                Plca::BurstTmr(val) => fmt.field("BurstTmr", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterablePlca<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Plca", offset));
+            return (stack, missing_type.and_then(|t| Plca::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Plca::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Plca::Version(val) => {
+                    if last_off == offset {
+                        stack.push(("Version", last_off));
+                        break;
+                    }
+                }
+                Plca::Enabled(val) => {
+                    if last_off == offset {
+                        stack.push(("Enabled", last_off));
+                        break;
+                    }
+                }
+                Plca::Status(val) => {
+                    if last_off == offset {
+                        stack.push(("Status", last_off));
+                        break;
+                    }
+                }
+                Plca::NodeCnt(val) => {
+                    if last_off == offset {
+                        stack.push(("NodeCnt", last_off));
+                        break;
+                    }
+                }
+                Plca::NodeId(val) => {
+                    if last_off == offset {
+                        stack.push(("NodeId", last_off));
+                        break;
+                    }
+                }
+                Plca::ToTmr(val) => {
+                    if last_off == offset {
+                        stack.push(("ToTmr", last_off));
+                        break;
+                    }
+                }
+                Plca::BurstCnt(val) => {
+                    if last_off == offset {
+                        stack.push(("BurstCnt", last_off));
+                        break;
+                    }
+                }
+                Plca::BurstTmr(val) => {
+                    if last_off == offset {
+                        stack.push(("BurstTmr", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Plca", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum ModuleFwFlash<'a> {
+    Header(IterableHeader<'a>),
+    FileName(&'a CStr),
+    Password(u32),
+    #[doc = "Associated type: [`ModuleFwFlashStatus`] (enum)"]
+    Status(u32),
+    StatusMsg(&'a CStr),
+    Done(u32),
+    Total(u32),
+}
+impl<'a> IterableModuleFwFlash<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleFwFlash::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleFwFlash",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_file_name(&self) -> Result<&'a CStr, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleFwFlash::FileName(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleFwFlash",
+            "FileName",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_password(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleFwFlash::Password(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleFwFlash",
+            "Password",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`ModuleFwFlashStatus`] (enum)"]
+    pub fn get_status(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleFwFlash::Status(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleFwFlash",
+            "Status",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_status_msg(&self) -> Result<&'a CStr, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleFwFlash::StatusMsg(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleFwFlash",
+            "StatusMsg",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_done(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleFwFlash::Done(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleFwFlash",
+            "Done",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_total(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let ModuleFwFlash::Total(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "ModuleFwFlash",
+            "Total",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl ModuleFwFlash<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableModuleFwFlash<'a> {
+        IterableModuleFwFlash::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "FileName",
+            3u16 => "Password",
+            4u16 => "Status",
+            5u16 => "StatusMsg",
+            6u16 => "Done",
+            7u16 => "Total",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableModuleFwFlash<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableModuleFwFlash<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableModuleFwFlash<'a> {
+    type Item = Result<ModuleFwFlash<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => ModuleFwFlash::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => ModuleFwFlash::FileName({
+                    let res = CStr::from_bytes_with_nul(next).ok();
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => ModuleFwFlash::Password({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => ModuleFwFlash::Status({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => ModuleFwFlash::StatusMsg({
+                    let res = CStr::from_bytes_with_nul(next).ok();
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => ModuleFwFlash::Done({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => ModuleFwFlash::Total({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "ModuleFwFlash",
+            r#type.and_then(|t| ModuleFwFlash::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableModuleFwFlash<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("ModuleFwFlash");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                ModuleFwFlash::Header(val) => fmt.field("Header", &val),
+                ModuleFwFlash::FileName(val) => fmt.field("FileName", &val),
+                ModuleFwFlash::Password(val) => fmt.field("Password", &val),
+                ModuleFwFlash::Status(val) => fmt.field(
+                    "Status",
+                    &FormatEnum(val.into(), ModuleFwFlashStatus::from_value),
+                ),
+                ModuleFwFlash::StatusMsg(val) => fmt.field("StatusMsg", &val),
+                ModuleFwFlash::Done(val) => fmt.field("Done", &val),
+                ModuleFwFlash::Total(val) => fmt.field("Total", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableModuleFwFlash<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("ModuleFwFlash", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| ModuleFwFlash::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                ModuleFwFlash::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                ModuleFwFlash::FileName(val) => {
+                    if last_off == offset {
+                        stack.push(("FileName", last_off));
+                        break;
+                    }
+                }
+                ModuleFwFlash::Password(val) => {
+                    if last_off == offset {
+                        stack.push(("Password", last_off));
+                        break;
+                    }
+                }
+                ModuleFwFlash::Status(val) => {
+                    if last_off == offset {
+                        stack.push(("Status", last_off));
+                        break;
+                    }
+                }
+                ModuleFwFlash::StatusMsg(val) => {
+                    if last_off == offset {
+                        stack.push(("StatusMsg", last_off));
+                        break;
+                    }
+                }
+                ModuleFwFlash::Done(val) => {
+                    if last_off == offset {
+                        stack.push(("Done", last_off));
+                        break;
+                    }
+                }
+                ModuleFwFlash::Total(val) => {
+                    if last_off == offset {
+                        stack.push(("Total", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("ModuleFwFlash", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Phy<'a> {
+    Header(IterableHeader<'a>),
+    Index(u32),
+    Drvname(&'a CStr),
+    Name(&'a CStr),
+    #[doc = "Associated type: [`PhyUpstreamType`] (enum)"]
+    UpstreamType(u32),
+    UpstreamIndex(u32),
+    UpstreamSfpName(&'a CStr),
+    DownstreamSfpName(&'a CStr),
+}
+impl<'a> IterablePhy<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Phy::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Phy",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_index(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Phy::Index(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Phy",
+            "Index",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_drvname(&self) -> Result<&'a CStr, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Phy::Drvname(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Phy",
+            "Drvname",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_name(&self) -> Result<&'a CStr, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Phy::Name(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Phy",
+            "Name",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "Associated type: [`PhyUpstreamType`] (enum)"]
+    pub fn get_upstream_type(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Phy::UpstreamType(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Phy",
+            "UpstreamType",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_upstream_index(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Phy::UpstreamIndex(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Phy",
+            "UpstreamIndex",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_upstream_sfp_name(&self) -> Result<&'a CStr, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Phy::UpstreamSfpName(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Phy",
+            "UpstreamSfpName",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_downstream_sfp_name(&self) -> Result<&'a CStr, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Phy::DownstreamSfpName(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Phy",
+            "DownstreamSfpName",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Phy<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterablePhy<'a> {
+        IterablePhy::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "Index",
+            3u16 => "Drvname",
+            4u16 => "Name",
+            5u16 => "UpstreamType",
+            6u16 => "UpstreamIndex",
+            7u16 => "UpstreamSfpName",
+            8u16 => "DownstreamSfpName",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterablePhy<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterablePhy<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterablePhy<'a> {
+    type Item = Result<Phy<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Phy::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Phy::Index({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Phy::Drvname({
+                    let res = CStr::from_bytes_with_nul(next).ok();
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Phy::Name({
+                    let res = CStr::from_bytes_with_nul(next).ok();
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Phy::UpstreamType({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Phy::UpstreamIndex({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Phy::UpstreamSfpName({
+                    let res = CStr::from_bytes_with_nul(next).ok();
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => Phy::DownstreamSfpName({
+                    let res = CStr::from_bytes_with_nul(next).ok();
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Phy",
+            r#type.and_then(|t| Phy::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterablePhy<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Phy");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Phy::Header(val) => fmt.field("Header", &val),
+                Phy::Index(val) => fmt.field("Index", &val),
+                Phy::Drvname(val) => fmt.field("Drvname", &val),
+                Phy::Name(val) => fmt.field("Name", &val),
+                Phy::UpstreamType(val) => fmt.field(
+                    "UpstreamType",
+                    &FormatEnum(val.into(), PhyUpstreamType::from_value),
+                ),
+                Phy::UpstreamIndex(val) => fmt.field("UpstreamIndex", &val),
+                Phy::UpstreamSfpName(val) => fmt.field("UpstreamSfpName", &val),
+                Phy::DownstreamSfpName(val) => fmt.field("DownstreamSfpName", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterablePhy<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Phy", offset));
+            return (stack, missing_type.and_then(|t| Phy::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Phy::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Phy::Index(val) => {
+                    if last_off == offset {
+                        stack.push(("Index", last_off));
+                        break;
+                    }
+                }
+                Phy::Drvname(val) => {
+                    if last_off == offset {
+                        stack.push(("Drvname", last_off));
+                        break;
+                    }
+                }
+                Phy::Name(val) => {
+                    if last_off == offset {
+                        stack.push(("Name", last_off));
+                        break;
+                    }
+                }
+                Phy::UpstreamType(val) => {
+                    if last_off == offset {
+                        stack.push(("UpstreamType", last_off));
+                        break;
+                    }
+                }
+                Phy::UpstreamIndex(val) => {
+                    if last_off == offset {
+                        stack.push(("UpstreamIndex", last_off));
+                        break;
+                    }
+                }
+                Phy::UpstreamSfpName(val) => {
+                    if last_off == offset {
+                        stack.push(("UpstreamSfpName", last_off));
+                        break;
+                    }
+                }
+                Phy::DownstreamSfpName(val) => {
+                    if last_off == offset {
+                        stack.push(("DownstreamSfpName", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Phy", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum Tsconfig<'a> {
+    Header(IterableHeader<'a>),
+    HwtstampProvider(IterableTsHwtstampProvider<'a>),
+    TxTypes(IterableBitset<'a>),
+    RxFilters(IterableBitset<'a>),
+    HwtstampFlags(IterableBitset<'a>),
+}
+impl<'a> IterableTsconfig<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsconfig::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsconfig",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hwtstamp_provider(&self) -> Result<IterableTsHwtstampProvider<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsconfig::HwtstampProvider(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsconfig",
+            "HwtstampProvider",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tx_types(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsconfig::TxTypes(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsconfig",
+            "TxTypes",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rx_filters(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsconfig::RxFilters(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsconfig",
+            "RxFilters",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_hwtstamp_flags(&self) -> Result<IterableBitset<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Tsconfig::HwtstampFlags(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Tsconfig",
+            "HwtstampFlags",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Tsconfig<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableTsconfig<'a> {
+        IterableTsconfig::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Unspec",
+            1u16 => "Header",
+            2u16 => "HwtstampProvider",
+            3u16 => "TxTypes",
+            4u16 => "RxFilters",
+            5u16 => "HwtstampFlags",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableTsconfig<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableTsconfig<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableTsconfig<'a> {
+    type Item = Result<Tsconfig<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Tsconfig::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Tsconfig::HwtstampProvider({
+                    let res = Some(IterableTsHwtstampProvider::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Tsconfig::TxTypes({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Tsconfig::RxFilters({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Tsconfig::HwtstampFlags({
+                    let res = Some(IterableBitset::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Tsconfig",
+            r#type.and_then(|t| Tsconfig::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableTsconfig<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Tsconfig");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Tsconfig::Header(val) => fmt.field("Header", &val),
+                Tsconfig::HwtstampProvider(val) => fmt.field("HwtstampProvider", &val),
+                Tsconfig::TxTypes(val) => fmt.field("TxTypes", &val),
+                Tsconfig::RxFilters(val) => fmt.field("RxFilters", &val),
+                Tsconfig::HwtstampFlags(val) => fmt.field("HwtstampFlags", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableTsconfig<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Tsconfig", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| Tsconfig::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Tsconfig::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Tsconfig::HwtstampProvider(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Tsconfig::TxTypes(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Tsconfig::RxFilters(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Tsconfig::HwtstampFlags(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Tsconfig", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum PseNtf<'a> {
+    Header(IterableHeader<'a>),
+    #[doc = "List of events reported by the PSE controller\nAssociated type: [`PseEvent`] (enum)"]
+    Events(u32),
+}
+impl<'a> IterablePseNtf<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let PseNtf::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "PseNtf",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    #[doc = "List of events reported by the PSE controller\nAssociated type: [`PseEvent`] (enum)"]
+    pub fn get_events(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let PseNtf::Events(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "PseNtf",
+            "Events",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl PseNtf<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterablePseNtf<'a> {
+        IterablePseNtf::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            1u16 => "Header",
+            2u16 => "Events",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterablePseNtf<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterablePseNtf<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterablePseNtf<'a> {
+    type Item = Result<PseNtf<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => PseNtf::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => PseNtf::Events({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "PseNtf",
+            r#type.and_then(|t| PseNtf::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterablePseNtf<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("PseNtf");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                PseNtf::Header(val) => fmt.field("Header", &val),
+                PseNtf::Events(val) => {
+                    fmt.field("Events", &FormatFlags(val.into(), PseEvent::from_value))
+                }
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterablePseNtf<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("PseNtf", offset));
+            return (stack, missing_type.and_then(|t| PseNtf::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                PseNtf::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                PseNtf::Events(val) => {
+                    if last_off == offset {
+                        stack.push(("Events", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("PseNtf", cur));
+        }
+        (stack, missing)
+    }
+}
+#[derive(Clone)]
+pub enum MseCapabilities {
+    MaxAverageMse(u32),
+    MaxPeakMse(u32),
+    RefreshRatePs(u32),
+    NumSymbols(u32),
+}
+impl<'a> IterableMseCapabilities<'a> {
+    pub fn get_max_average_mse(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MseCapabilities::MaxAverageMse(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MseCapabilities",
+            "MaxAverageMse",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_max_peak_mse(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MseCapabilities::MaxPeakMse(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MseCapabilities",
+            "MaxPeakMse",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_refresh_rate_ps(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MseCapabilities::RefreshRatePs(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MseCapabilities",
+            "RefreshRatePs",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_num_symbols(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MseCapabilities::NumSymbols(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MseCapabilities",
+            "NumSymbols",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl MseCapabilities {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableMseCapabilities<'a> {
+        IterableMseCapabilities::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            1u16 => "MaxAverageMse",
+            2u16 => "MaxPeakMse",
+            3u16 => "RefreshRatePs",
+            4u16 => "NumSymbols",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableMseCapabilities<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableMseCapabilities<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableMseCapabilities<'a> {
+    type Item = Result<MseCapabilities, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => MseCapabilities::MaxAverageMse({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => MseCapabilities::MaxPeakMse({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => MseCapabilities::RefreshRatePs({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => MseCapabilities::NumSymbols({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "MseCapabilities",
+            r#type.and_then(|t| MseCapabilities::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl std::fmt::Debug for IterableMseCapabilities<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("MseCapabilities");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                MseCapabilities::MaxAverageMse(val) => fmt.field("MaxAverageMse", &val),
+                MseCapabilities::MaxPeakMse(val) => fmt.field("MaxPeakMse", &val),
+                MseCapabilities::RefreshRatePs(val) => fmt.field("RefreshRatePs", &val),
+                MseCapabilities::NumSymbols(val) => fmt.field("NumSymbols", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableMseCapabilities<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("MseCapabilities", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| MseCapabilities::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                MseCapabilities::MaxAverageMse(val) => {
+                    if last_off == offset {
+                        stack.push(("MaxAverageMse", last_off));
+                        break;
+                    }
+                }
+                MseCapabilities::MaxPeakMse(val) => {
+                    if last_off == offset {
+                        stack.push(("MaxPeakMse", last_off));
+                        break;
+                    }
+                }
+                MseCapabilities::RefreshRatePs(val) => {
+                    if last_off == offset {
+                        stack.push(("RefreshRatePs", last_off));
+                        break;
+                    }
+                }
+                MseCapabilities::NumSymbols(val) => {
+                    if last_off == offset {
+                        stack.push(("NumSymbols", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("MseCapabilities", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum MseSnapshot {
+    AverageMse(u32),
+    PeakMse(u32),
+    WorstPeakMse(u32),
+}
+impl<'a> IterableMseSnapshot<'a> {
+    pub fn get_average_mse(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MseSnapshot::AverageMse(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MseSnapshot",
+            "AverageMse",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_peak_mse(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MseSnapshot::PeakMse(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MseSnapshot",
+            "PeakMse",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_worst_peak_mse(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let MseSnapshot::WorstPeakMse(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "MseSnapshot",
+            "WorstPeakMse",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl MseSnapshot {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableMseSnapshot<'a> {
+        IterableMseSnapshot::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            1u16 => "AverageMse",
+            2u16 => "PeakMse",
+            3u16 => "WorstPeakMse",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableMseSnapshot<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableMseSnapshot<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableMseSnapshot<'a> {
+    type Item = Result<MseSnapshot, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => MseSnapshot::AverageMse({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => MseSnapshot::PeakMse({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => MseSnapshot::WorstPeakMse({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "MseSnapshot",
+            r#type.and_then(|t| MseSnapshot::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl std::fmt::Debug for IterableMseSnapshot<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("MseSnapshot");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                MseSnapshot::AverageMse(val) => fmt.field("AverageMse", &val),
+                MseSnapshot::PeakMse(val) => fmt.field("PeakMse", &val),
+                MseSnapshot::WorstPeakMse(val) => fmt.field("WorstPeakMse", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableMseSnapshot<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("MseSnapshot", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| MseSnapshot::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                MseSnapshot::AverageMse(val) => {
+                    if last_off == offset {
+                        stack.push(("AverageMse", last_off));
+                        break;
+                    }
+                }
+                MseSnapshot::PeakMse(val) => {
+                    if last_off == offset {
+                        stack.push(("PeakMse", last_off));
+                        break;
+                    }
+                }
+                MseSnapshot::WorstPeakMse(val) => {
+                    if last_off == offset {
+                        stack.push(("WorstPeakMse", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("MseSnapshot", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
+pub enum Mse<'a> {
+    Header(IterableHeader<'a>),
+    Capabilities(IterableMseCapabilities<'a>),
+    ChannelA(IterableMseSnapshot<'a>),
+    ChannelB(IterableMseSnapshot<'a>),
+    ChannelC(IterableMseSnapshot<'a>),
+    ChannelD(IterableMseSnapshot<'a>),
+    WorstChannel(IterableMseSnapshot<'a>),
+    Link(IterableMseSnapshot<'a>),
+}
+impl<'a> IterableMse<'a> {
+    pub fn get_header(&self) -> Result<IterableHeader<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mse::Header(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mse",
+            "Header",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_capabilities(&self) -> Result<IterableMseCapabilities<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mse::Capabilities(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mse",
+            "Capabilities",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_channel_a(&self) -> Result<IterableMseSnapshot<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mse::ChannelA(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mse",
+            "ChannelA",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_channel_b(&self) -> Result<IterableMseSnapshot<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mse::ChannelB(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mse",
+            "ChannelB",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_channel_c(&self) -> Result<IterableMseSnapshot<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mse::ChannelC(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mse",
+            "ChannelC",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_channel_d(&self) -> Result<IterableMseSnapshot<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mse::ChannelD(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mse",
+            "ChannelD",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_worst_channel(&self) -> Result<IterableMseSnapshot<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mse::WorstChannel(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mse",
+            "WorstChannel",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_link(&self) -> Result<IterableMseSnapshot<'a>, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let Mse::Link(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "Mse",
+            "Link",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl Mse<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableMse<'a> {
+        IterableMse::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            1u16 => "Header",
+            2u16 => "Capabilities",
+            3u16 => "ChannelA",
+            4u16 => "ChannelB",
+            5u16 => "ChannelC",
+            6u16 => "ChannelD",
+            7u16 => "WorstChannel",
+            8u16 => "Link",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableMse<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableMse<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableMse<'a> {
+    type Item = Result<Mse<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => Mse::Header({
+                    let res = Some(IterableHeader::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => Mse::Capabilities({
+                    let res = Some(IterableMseCapabilities::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => Mse::ChannelA({
+                    let res = Some(IterableMseSnapshot::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => Mse::ChannelB({
+                    let res = Some(IterableMseSnapshot::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => Mse::ChannelC({
+                    let res = Some(IterableMseSnapshot::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => Mse::ChannelD({
+                    let res = Some(IterableMseSnapshot::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => Mse::WorstChannel({
+                    let res = Some(IterableMseSnapshot::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => Mse::Link({
+                    let res = Some(IterableMseSnapshot::with_loc(next, self.orig_loc));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "Mse",
+            r#type.and_then(|t| Mse::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableMse<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("Mse");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                Mse::Header(val) => fmt.field("Header", &val),
+                Mse::Capabilities(val) => fmt.field("Capabilities", &val),
+                Mse::ChannelA(val) => fmt.field("ChannelA", &val),
+                Mse::ChannelB(val) => fmt.field("ChannelB", &val),
+                Mse::ChannelC(val) => fmt.field("ChannelC", &val),
+                Mse::ChannelD(val) => fmt.field("ChannelD", &val),
+                Mse::WorstChannel(val) => fmt.field("WorstChannel", &val),
+                Mse::Link(val) => fmt.field("Link", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableMse<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("Mse", offset));
+            return (stack, missing_type.and_then(|t| Mse::attr_from_type(t)));
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        let mut missing = None;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                Mse::Header(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Mse::Capabilities(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Mse::ChannelA(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Mse::ChannelB(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Mse::ChannelC(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Mse::ChannelD(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Mse::WorstChannel(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                Mse::Link(val) => {
+                    (stack, missing) = val.lookup_attr(offset, missing_type);
+                    if !stack.is_empty() {
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("Mse", cur));
+        }
+        (stack, missing)
+    }
+}
+pub struct PushHeader<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushHeader<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushHeader<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_dev_index(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_dev_name(mut self, value: &CStr) -> Self {
+        push_header(
+            self.as_rec_mut(),
+            2u16,
+            value.to_bytes_with_nul().len() as u16,
+        );
+        self.as_rec_mut().extend(value.to_bytes_with_nul());
+        self
+    }
+    pub fn push_dev_name_bytes(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 2u16, (value.len() + 1) as u16);
+        self.as_rec_mut().extend(value);
+        self.as_rec_mut().push(0);
+        self
+    }
+    #[doc = "Associated type: [`HeaderFlags`] (enum)"]
+    pub fn push_flags(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_phy_index(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushHeader<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushBitsetBit<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushBitsetBit<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushBitsetBit<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_index(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_name(mut self, value: &CStr) -> Self {
+        push_header(
+            self.as_rec_mut(),
+            2u16,
+            value.to_bytes_with_nul().len() as u16,
+        );
+        self.as_rec_mut().extend(value.to_bytes_with_nul());
+        self
+    }
+    pub fn push_name_bytes(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 2u16, (value.len() + 1) as u16);
+        self.as_rec_mut().extend(value);
+        self.as_rec_mut().push(0);
+        self
+    }
+    pub fn push_value(mut self, value: ()) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 0 as u16);
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushBitsetBit<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushBitsetBits<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushBitsetBits<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushBitsetBits<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn nested_bit(mut self) -> PushBitsetBit<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushBitsetBit {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushBitsetBits<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushBitset<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushBitset<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushBitset<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_nomask(mut self, value: ()) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 0 as u16);
+        self
+    }
+    pub fn push_size(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn nested_bits(mut self) -> PushBitsetBits<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 3u16);
+        PushBitsetBits {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_value(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 4u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    pub fn push_mask(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 5u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushBitset<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushString<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushString<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushString<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_index(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_value(mut self, value: &CStr) -> Self {
+        push_header(
+            self.as_rec_mut(),
+            2u16,
+            value.to_bytes_with_nul().len() as u16,
+        );
+        self.as_rec_mut().extend(value.to_bytes_with_nul());
+        self
+    }
+    pub fn push_value_bytes(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 2u16, (value.len() + 1) as u16);
+        self.as_rec_mut().extend(value);
+        self.as_rec_mut().push(0);
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushString<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushStrings<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushStrings<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushStrings<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn nested_string(mut self) -> PushString<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushString {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushStrings<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushStringset<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushStringset<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushStringset<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_id(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_count(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn nested_strings(mut self) -> PushStrings<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 3u16);
+        PushStrings {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushStringset<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushStringsets<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushStringsets<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushStringsets<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn nested_stringset(mut self) -> PushStringset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushStringset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushStringsets<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushStrset<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushStrset<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushStrset<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_stringsets(mut self) -> PushStringsets<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushStringsets {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_counts_only(mut self, value: ()) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 0 as u16);
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushStrset<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushPrivflags<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushPrivflags<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushPrivflags<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_flags(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushPrivflags<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushRings<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushRings<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushRings<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_rx_max(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_mini_max(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_jumbo_max(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_max(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_mini(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_jumbo(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 8u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 9u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_buf_len(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 10u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`TcpDataSplit`] (enum)"]
+    pub fn push_tcp_data_split(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 11u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_cqe_size(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 12u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_push(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 13u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_push(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 14u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_push_buf_len(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 15u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_push_buf_len_max(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 16u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_hds_thresh(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 17u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_hds_thresh_max(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 18u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushRings<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushMmStat<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushMmStat<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushMmStat<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_pad(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    #[doc = "aMACMergeFrameAssErrorCount"]
+    pub fn push_reassembly_errors(mut self, value: u64) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 8 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "aMACMergeFrameSmdErrorCount"]
+    pub fn push_smd_errors(mut self, value: u64) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 8 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "aMACMergeFrameAssOkCount"]
+    pub fn push_reassembly_ok(mut self, value: u64) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 8 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "aMACMergeFragCountRx"]
+    pub fn push_rx_frag_count(mut self, value: u64) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 8 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "aMACMergeFragCountTx"]
+    pub fn push_tx_frag_count(mut self, value: u64) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 8 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "aMACMergeHoldCount"]
+    pub fn push_hold_count(mut self, value: u64) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 8 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushMmStat<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushMm<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushMm<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushMm<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_pmac_enabled(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_enabled(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_active(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_min_frag_size(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_min_frag_size(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_verify_enabled(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_verify_status(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 8u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_verify_time(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 9u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_max_verify_time(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 10u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn nested_stats(mut self) -> PushMmStat<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 11u16);
+        PushMmStat {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushMm<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushLinkinfo<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushLinkinfo<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushLinkinfo<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_port(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_phyaddr(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tp_mdix(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tp_mdix_ctrl(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_transceiver(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushLinkinfo<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushLinkmodes<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushLinkmodes<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushLinkmodes<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_autoneg(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn nested_ours(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 3u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_peer(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 4u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_speed(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_duplex(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_master_slave_cfg(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_master_slave_state(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 8u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_lanes(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 9u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rate_matching(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 10u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushLinkmodes<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushLinkstate<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushLinkstate<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushLinkstate<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_link(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_sqi(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_sqi_max(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_ext_state(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_ext_substate(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_ext_down_cnt(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushLinkstate<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushDebug<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushDebug<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushDebug<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_msgmask(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushDebug<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushWol<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushWol<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushWol<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_modes(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_sopass(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 3u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushWol<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushFeatures<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushFeatures<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushFeatures<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_hw(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_wanted(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 3u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_active(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 4u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_nochange(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 5u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushFeatures<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushChannels<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushChannels<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushChannels<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_rx_max(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_max(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_other_max(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_combined_max(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_count(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_count(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_other_count(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 8u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_combined_count(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 9u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushChannels<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushIrqModeration<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushIrqModeration<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushIrqModeration<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_usec(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_pkts(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_comps(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushIrqModeration<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushProfile<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushProfile<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushProfile<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn nested_irq_moderation(mut self) -> PushIrqModeration<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushIrqModeration {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushProfile<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushCoalesce<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushCoalesce<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushCoalesce<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_rx_usecs(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_max_frames(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_usecs_irq(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_max_frames_irq(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_usecs(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_max_frames(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_usecs_irq(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 8u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_max_frames_irq(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 9u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_stats_block_usecs(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 10u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_use_adaptive_rx(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 11u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_use_adaptive_tx(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 12u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_pkt_rate_low(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 13u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_usecs_low(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 14u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_max_frames_low(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 15u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_usecs_low(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 16u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_max_frames_low(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 17u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_pkt_rate_high(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 18u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_usecs_high(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 19u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_max_frames_high(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 20u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_usecs_high(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 21u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_max_frames_high(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 22u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rate_sample_interval(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 23u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_use_cqe_mode_tx(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 24u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_use_cqe_mode_rx(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 25u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_aggr_max_bytes(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 26u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_aggr_max_frames(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 27u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_aggr_time_usecs(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 28u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn nested_rx_profile(mut self) -> PushProfile<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 29u16);
+        PushProfile {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_tx_profile(mut self) -> PushProfile<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 30u16);
+        PushProfile {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushCoalesce<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushPauseStat<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushPauseStat<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushPauseStat<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_pad(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    pub fn push_tx_frames(mut self, value: u64) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 8 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx_frames(mut self, value: u64) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 8 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "TX pause storm event count\\. Increments each time device detects that its pause assertion condition has been true for too long for normal operation\\. As a result, the device has temporarily disabled its own Pause TX function to protect the network from itself\\. This counter should never increment under normal overload conditions; it indicates catastrophic failure like an OS crash\\. The rate of incrementing is implementation specific\\."]
+    pub fn push_tx_pause_storm_events(mut self, value: u64) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 8 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushPauseStat<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushPause<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushPause<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushPause<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_autoneg(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_rx(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn nested_stats(mut self) -> PushPauseStat<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 5u16);
+        PushPauseStat {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_stats_src(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushPause<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushEee<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushEee<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushEee<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_modes_ours(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_modes_peer(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 3u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_active(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_enabled(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_lpi_enabled(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_lpi_timer(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushEee<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushTsStat<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushTsStat<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushTsStat<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_tx_pkts(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_lost(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_err(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tx_onestep_pkts_unconfirmed(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushTsStat<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushTsHwtstampProvider<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushTsHwtstampProvider<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushTsHwtstampProvider<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_index(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_qualifier(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushTsHwtstampProvider<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushTsinfo<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushTsinfo<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushTsinfo<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_timestamping(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_tx_types(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 3u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_rx_filters(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 4u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_phc_index(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn nested_stats(mut self) -> PushTsStat<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 6u16);
+        PushTsStat {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_hwtstamp_provider(mut self) -> PushTsHwtstampProvider<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 7u16);
+        PushTsHwtstampProvider {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    #[doc = "Associated type: [`HwtstampSource`] (enum)"]
+    pub fn push_hwtstamp_source(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 8u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_hwtstamp_phyindex(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 9u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushTsinfo<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushCableResult<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushCableResult<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushCableResult<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    #[doc = "ETHTOOL\\_A\\_CABLE\\_PAIR"]
+    pub fn push_pair(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "ETHTOOL\\_A\\_CABLE\\_RESULT\\_CODE"]
+    pub fn push_code(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "ETHTOOL\\_A\\_CABLE\\_INF\\_SRC"]
+    pub fn push_src(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushCableResult<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushCableFaultLength<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushCableFaultLength<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushCableFaultLength<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_pair(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_cm(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_src(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushCableFaultLength<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushCableNest<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushCableNest<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushCableNest<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_result(mut self) -> PushCableResult<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushCableResult {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_fault_length(mut self) -> PushCableFaultLength<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushCableFaultLength {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushCableNest<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushCableTest<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushCableTest<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushCableTest<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushCableTest<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushCableTestNtf<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushCableTestNtf<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushCableTestNtf<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    #[doc = "\\_STARTED/\\_COMPLETE"]
+    pub fn push_status(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn nested_nest(mut self) -> PushCableNest<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 3u16);
+        PushCableNest {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushCableTestNtf<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushCableTestTdrCfg<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushCableTestTdrCfg<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushCableTestTdrCfg<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_first(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_last(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_step(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_pair(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushCableTestTdrCfg<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushCableTestTdrNtf<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushCableTestTdrNtf<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushCableTestTdrNtf<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_status(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn nested_nest(mut self) -> PushCableNest<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 3u16);
+        PushCableNest {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushCableTestTdrNtf<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushCableTestTdr<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushCableTestTdr<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushCableTestTdr<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_cfg(mut self) -> PushCableTestTdrCfg<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushCableTestTdrCfg {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushCableTestTdr<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushTunnelUdpEntry<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushTunnelUdpEntry<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushTunnelUdpEntry<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_port(mut self, value: u16) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 2 as u16);
+        self.as_rec_mut().extend(value.to_be_bytes());
+        self
+    }
+    #[doc = "Associated type: [`UdpTunnelType`] (enum)"]
+    pub fn push_type(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushTunnelUdpEntry<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushTunnelUdpTable<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushTunnelUdpTable<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushTunnelUdpTable<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_size(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn nested_types(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn nested_entry(mut self) -> PushTunnelUdpEntry<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 3u16);
+        PushTunnelUdpEntry {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushTunnelUdpTable<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushTunnelUdp<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushTunnelUdp<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushTunnelUdp<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_table(mut self) -> PushTunnelUdpTable<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushTunnelUdpTable {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushTunnelUdp<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushTunnelInfo<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushTunnelInfo<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushTunnelInfo<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_udp_ports(mut self) -> PushTunnelUdp<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushTunnelUdp {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushTunnelInfo<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushFecHist<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushFecHist<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushFecHist<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_pad(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    #[doc = "Low bound of FEC bin (inclusive)"]
+    pub fn push_bin_low(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "High bound of FEC bin (inclusive)"]
+    pub fn push_bin_high(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Error count in the bin (optional if per\\-lane values exist)"]
+    pub fn push_bin_val(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "An array of per\\-lane error counters in the bin (optional)"]
+    pub fn push_bin_val_per_lane(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 5u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushFecHist<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushFecStat<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushFecStat<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushFecStat<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_pad(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    pub fn push_corrected(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    pub fn push_uncorr(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 3u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    pub fn push_corr_bits(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 4u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn nested_hist(mut self) -> PushFecHist<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 5u16);
+        PushFecHist {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushFecStat<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushFec<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushFec<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushFec<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_modes(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_auto(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_active(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn nested_stats(mut self) -> PushFecStat<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 5u16);
+        PushFecStat {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushFec<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushModuleEeprom<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushModuleEeprom<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushModuleEeprom<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_offset(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_length(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_page(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_bank(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_i2c_address(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_data(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 7u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushModuleEeprom<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushStatsGrp<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushStatsGrp<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushStatsGrp<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_pad(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    pub fn push_id(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_ss_id(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_stat(mut self, value: u64) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 8 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn nested_hist_rx(mut self) -> PushStatsGrpHist<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 5u16);
+        PushStatsGrpHist {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_hist_tx(mut self) -> PushStatsGrpHist<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 6u16);
+        PushStatsGrpHist {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_hist_bkt_low(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_hist_bkt_hi(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 8u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_hist_val(mut self, value: u64) -> Self {
+        push_header(self.as_rec_mut(), 9u16, 8 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushStatsGrp<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushStatsGrpHist<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushStatsGrpHist<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushStatsGrpHist<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_hist_bkt_low(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_hist_bkt_hi(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 8u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_hist_val(mut self, value: u64) -> Self {
+        push_header(self.as_rec_mut(), 9u16, 8 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushStatsGrpHist<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushStats<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushStats<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushStats<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_pad(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_groups(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 3u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_grp(mut self) -> PushStatsGrp<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 4u16);
+        PushStatsGrp {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_src(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushStats<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushPhcVclocks<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushPhcVclocks<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushPhcVclocks<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_num(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_index(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 3u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushPhcVclocks<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushModule<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushModule<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushModule<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_power_mode_policy(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_power_mode(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushModule<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushC33PsePwLimit<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushC33PsePwLimit<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushC33PsePwLimit<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_min(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_max(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushC33PsePwLimit<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushPse<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushPse<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushPse<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_podl_pse_admin_state(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_podl_pse_admin_control(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_podl_pse_pw_d_status(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_c33_pse_admin_state(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_c33_pse_admin_control(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_c33_pse_pw_d_status(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_c33_pse_pw_class(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 8u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_c33_pse_actual_pw(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 9u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`C33PseExtState`] (enum)"]
+    pub fn push_c33_pse_ext_state(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 10u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_c33_pse_ext_substate(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 11u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_c33_pse_avail_pw_limit(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 12u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Attribute may repeat multiple times (treat it as array)"]
+    pub fn nested_c33_pse_pw_limit_ranges(mut self) -> PushC33PsePwLimit<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 13u16);
+        PushC33PsePwLimit {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_pse_pw_d_id(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 14u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_pse_prio_max(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 15u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_pse_prio(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 16u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushPse<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushFlow<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushFlow<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushFlow<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_ether(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_ip4(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_ip6(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_tcp4(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_tcp6(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_udp4(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_udp6(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_sctp4(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 8u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_sctp6(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 9u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_ah4(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 10u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_ah6(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 11u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_esp4(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 12u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_esp6(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 13u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_ah_esp4(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 14u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_ah_esp6(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 15u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_gtpu4(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 16u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_gtpu6(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 17u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_gtpc4(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 18u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_gtpc6(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 19u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_gtpc_teid4(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 20u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_gtpc_teid6(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 21u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_gtpu_eh4(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 22u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_gtpu_eh6(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 23u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_gtpu_ul4(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 24u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_gtpu_ul6(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 25u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_gtpu_dl4(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 26u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`RxfhFields`] (enum)"]
+    pub fn push_gtpu_dl6(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 27u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushFlow<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushRss<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushRss<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushRss<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_context(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_hfunc(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_indir(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 4u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    pub fn push_hkey(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 5u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    #[doc = "Associated type: [`InputXfrm`] (enum)"]
+    pub fn push_input_xfrm(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_start_context(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn nested_flow_hash(mut self) -> PushFlow<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 8u16);
+        PushFlow {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushRss<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushPlca<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushPlca<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushPlca<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_version(mut self, value: u16) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 2 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_enabled(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_status(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_node_cnt(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_node_id(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_to_tmr(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_burst_cnt(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 8u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_burst_tmr(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 9u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushPlca<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushModuleFwFlash<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushModuleFwFlash<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushModuleFwFlash<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_file_name(mut self, value: &CStr) -> Self {
+        push_header(
+            self.as_rec_mut(),
+            2u16,
+            value.to_bytes_with_nul().len() as u16,
+        );
+        self.as_rec_mut().extend(value.to_bytes_with_nul());
+        self
+    }
+    pub fn push_file_name_bytes(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 2u16, (value.len() + 1) as u16);
+        self.as_rec_mut().extend(value);
+        self.as_rec_mut().push(0);
+        self
+    }
+    pub fn push_password(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    #[doc = "Associated type: [`ModuleFwFlashStatus`] (enum)"]
+    pub fn push_status(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_status_msg(mut self, value: &CStr) -> Self {
+        push_header(
+            self.as_rec_mut(),
+            5u16,
+            value.to_bytes_with_nul().len() as u16,
+        );
+        self.as_rec_mut().extend(value.to_bytes_with_nul());
+        self
+    }
+    pub fn push_status_msg_bytes(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 5u16, (value.len() + 1) as u16);
+        self.as_rec_mut().extend(value);
+        self.as_rec_mut().push(0);
+        self
+    }
+    pub fn push_done(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_total(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushModuleFwFlash<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushPhy<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushPhy<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushPhy<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn push_index(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_drvname(mut self, value: &CStr) -> Self {
+        push_header(
+            self.as_rec_mut(),
+            3u16,
+            value.to_bytes_with_nul().len() as u16,
+        );
+        self.as_rec_mut().extend(value.to_bytes_with_nul());
+        self
+    }
+    pub fn push_drvname_bytes(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 3u16, (value.len() + 1) as u16);
+        self.as_rec_mut().extend(value);
+        self.as_rec_mut().push(0);
+        self
+    }
+    pub fn push_name(mut self, value: &CStr) -> Self {
+        push_header(
+            self.as_rec_mut(),
+            4u16,
+            value.to_bytes_with_nul().len() as u16,
+        );
+        self.as_rec_mut().extend(value.to_bytes_with_nul());
+        self
+    }
+    pub fn push_name_bytes(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 4u16, (value.len() + 1) as u16);
+        self.as_rec_mut().extend(value);
+        self.as_rec_mut().push(0);
+        self
+    }
+    #[doc = "Associated type: [`PhyUpstreamType`] (enum)"]
+    pub fn push_upstream_type(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_upstream_index(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_upstream_sfp_name(mut self, value: &CStr) -> Self {
+        push_header(
+            self.as_rec_mut(),
+            7u16,
+            value.to_bytes_with_nul().len() as u16,
+        );
+        self.as_rec_mut().extend(value.to_bytes_with_nul());
+        self
+    }
+    pub fn push_upstream_sfp_name_bytes(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 7u16, (value.len() + 1) as u16);
+        self.as_rec_mut().extend(value);
+        self.as_rec_mut().push(0);
+        self
+    }
+    pub fn push_downstream_sfp_name(mut self, value: &CStr) -> Self {
+        push_header(
+            self.as_rec_mut(),
+            8u16,
+            value.to_bytes_with_nul().len() as u16,
+        );
+        self.as_rec_mut().extend(value.to_bytes_with_nul());
+        self
+    }
+    pub fn push_downstream_sfp_name_bytes(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 8u16, (value.len() + 1) as u16);
+        self.as_rec_mut().extend(value);
+        self.as_rec_mut().push(0);
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushPhy<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushTsconfig<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushTsconfig<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushTsconfig<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_hwtstamp_provider(mut self) -> PushTsHwtstampProvider<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushTsHwtstampProvider {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_tx_types(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 3u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_rx_filters(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 4u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_hwtstamp_flags(mut self) -> PushBitset<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 5u16);
+        PushBitset {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushTsconfig<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushPseNtf<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushPseNtf<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushPseNtf<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    #[doc = "List of events reported by the PSE controller\nAssociated type: [`PseEvent`] (enum)"]
+    pub fn push_events(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushPseNtf<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushMseCapabilities<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushMseCapabilities<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushMseCapabilities<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_max_average_mse(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_max_peak_mse(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_refresh_rate_ps(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_num_symbols(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 4u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushMseCapabilities<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushMseSnapshot<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushMseSnapshot<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushMseSnapshot<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_average_mse(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_peak_mse(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_worst_peak_mse(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushMseSnapshot<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushMse<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushMse<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushMse<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn nested_header(mut self) -> PushHeader<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
+        PushHeader {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_capabilities(mut self) -> PushMseCapabilities<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        PushMseCapabilities {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_channel_a(mut self) -> PushMseSnapshot<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 3u16);
+        PushMseSnapshot {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_channel_b(mut self) -> PushMseSnapshot<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 4u16);
+        PushMseSnapshot {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_channel_c(mut self) -> PushMseSnapshot<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 5u16);
+        PushMseSnapshot {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_channel_d(mut self) -> PushMseSnapshot<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 6u16);
+        PushMseSnapshot {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_worst_channel(mut self) -> PushMseSnapshot<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 7u16);
+        PushMseSnapshot {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+    pub fn nested_link(mut self) -> PushMseSnapshot<Self> {
+        let header_offset = push_nested_header(self.as_rec_mut(), 8u16);
+        PushMseSnapshot {
+            prev: Some(self),
+            header_offset: Some(header_offset),
+        }
+    }
+}
+impl<Prev: Rec> Drop for PushMse<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct NotifGroup;
+impl NotifGroup {
+    pub const MONITOR: &str = "monitor";
+    pub const MONITOR_CSTR: &CStr = c"monitor";
+}
+#[doc = "Get string set from the kernel\\.\nRequest attributes:\n- [.nested_header()](PushStrset::nested_header)\n- [.nested_stringsets()](PushStrset::nested_stringsets)\n- [.push_counts_only()](PushStrset::push_counts_only)\n\nReply attributes:\n- [.get_header()](IterableStrset::get_header)\n- [.get_stringsets()](IterableStrset::get_stringsets)\n"]
+#[derive(Debug)]
+pub struct OpStrsetGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpStrsetGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushStrset<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushStrset::new(buf)
+    }
+    pub fn encode(&mut self) -> PushStrset<&mut Vec<u8>> {
+        PushStrset::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushStrset<RequestBuf<'r>> {
+        PushStrset::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableStrset<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableStrset::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 1u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpStrsetGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableStrset<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get string set from the kernel\\.\nRequest attributes:\n- [.nested_header()](PushStrset::nested_header)\n- [.nested_stringsets()](PushStrset::nested_stringsets)\n- [.push_counts_only()](PushStrset::push_counts_only)\n\nReply attributes:\n- [.get_header()](IterableStrset::get_header)\n- [.get_stringsets()](IterableStrset::get_stringsets)\n"]
+#[derive(Debug)]
+pub struct OpStrsetGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpStrsetGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushStrset<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushStrset::new(buf)
+    }
+    pub fn encode(&mut self) -> PushStrset<&mut Vec<u8>> {
+        PushStrset::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushStrset<RequestBuf<'r>> {
+        PushStrset::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableStrset<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableStrset::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 1u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpStrsetGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableStrset<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get link info\\.\nRequest attributes:\n- [.nested_header()](PushLinkinfo::nested_header)\n\nReply attributes:\n- [.get_header()](IterableLinkinfo::get_header)\n- [.get_port()](IterableLinkinfo::get_port)\n- [.get_phyaddr()](IterableLinkinfo::get_phyaddr)\n- [.get_tp_mdix()](IterableLinkinfo::get_tp_mdix)\n- [.get_tp_mdix_ctrl()](IterableLinkinfo::get_tp_mdix_ctrl)\n- [.get_transceiver()](IterableLinkinfo::get_transceiver)\n"]
+#[derive(Debug)]
+pub struct OpLinkinfoGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpLinkinfoGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushLinkinfo<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushLinkinfo::new(buf)
+    }
+    pub fn encode(&mut self) -> PushLinkinfo<&mut Vec<u8>> {
+        PushLinkinfo::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushLinkinfo<RequestBuf<'r>> {
+        PushLinkinfo::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableLinkinfo<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableLinkinfo::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 2u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpLinkinfoGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableLinkinfo<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get link info\\.\nRequest attributes:\n- [.nested_header()](PushLinkinfo::nested_header)\n\nReply attributes:\n- [.get_header()](IterableLinkinfo::get_header)\n- [.get_port()](IterableLinkinfo::get_port)\n- [.get_phyaddr()](IterableLinkinfo::get_phyaddr)\n- [.get_tp_mdix()](IterableLinkinfo::get_tp_mdix)\n- [.get_tp_mdix_ctrl()](IterableLinkinfo::get_tp_mdix_ctrl)\n- [.get_transceiver()](IterableLinkinfo::get_transceiver)\n"]
+#[derive(Debug)]
+pub struct OpLinkinfoGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpLinkinfoGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushLinkinfo<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushLinkinfo::new(buf)
+    }
+    pub fn encode(&mut self) -> PushLinkinfo<&mut Vec<u8>> {
+        PushLinkinfo::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushLinkinfo<RequestBuf<'r>> {
+        PushLinkinfo::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableLinkinfo<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableLinkinfo::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 2u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpLinkinfoGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableLinkinfo<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set link info\\.\nRequest attributes:\n- [.nested_header()](PushLinkinfo::nested_header)\n- [.push_port()](PushLinkinfo::push_port)\n- [.push_phyaddr()](PushLinkinfo::push_phyaddr)\n- [.push_tp_mdix()](PushLinkinfo::push_tp_mdix)\n- [.push_tp_mdix_ctrl()](PushLinkinfo::push_tp_mdix_ctrl)\n- [.push_transceiver()](PushLinkinfo::push_transceiver)\n"]
+#[derive(Debug)]
+pub struct OpLinkinfoSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpLinkinfoSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushLinkinfo<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushLinkinfo::new(buf)
+    }
+    pub fn encode(&mut self) -> PushLinkinfo<&mut Vec<u8>> {
+        PushLinkinfo::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushLinkinfo<RequestBuf<'r>> {
+        PushLinkinfo::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableLinkinfo<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableLinkinfo::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 3u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpLinkinfoSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableLinkinfo<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get link modes\\.\nRequest attributes:\n- [.nested_header()](PushLinkmodes::nested_header)\n\nReply attributes:\n- [.get_header()](IterableLinkmodes::get_header)\n- [.get_autoneg()](IterableLinkmodes::get_autoneg)\n- [.get_ours()](IterableLinkmodes::get_ours)\n- [.get_peer()](IterableLinkmodes::get_peer)\n- [.get_speed()](IterableLinkmodes::get_speed)\n- [.get_duplex()](IterableLinkmodes::get_duplex)\n- [.get_master_slave_cfg()](IterableLinkmodes::get_master_slave_cfg)\n- [.get_master_slave_state()](IterableLinkmodes::get_master_slave_state)\n- [.get_lanes()](IterableLinkmodes::get_lanes)\n- [.get_rate_matching()](IterableLinkmodes::get_rate_matching)\n"]
+#[derive(Debug)]
+pub struct OpLinkmodesGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpLinkmodesGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushLinkmodes<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushLinkmodes::new(buf)
+    }
+    pub fn encode(&mut self) -> PushLinkmodes<&mut Vec<u8>> {
+        PushLinkmodes::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushLinkmodes<RequestBuf<'r>> {
+        PushLinkmodes::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableLinkmodes<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableLinkmodes::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 5u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpLinkmodesGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableLinkmodes<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get link modes\\.\nRequest attributes:\n- [.nested_header()](PushLinkmodes::nested_header)\n\nReply attributes:\n- [.get_header()](IterableLinkmodes::get_header)\n- [.get_autoneg()](IterableLinkmodes::get_autoneg)\n- [.get_ours()](IterableLinkmodes::get_ours)\n- [.get_peer()](IterableLinkmodes::get_peer)\n- [.get_speed()](IterableLinkmodes::get_speed)\n- [.get_duplex()](IterableLinkmodes::get_duplex)\n- [.get_master_slave_cfg()](IterableLinkmodes::get_master_slave_cfg)\n- [.get_master_slave_state()](IterableLinkmodes::get_master_slave_state)\n- [.get_lanes()](IterableLinkmodes::get_lanes)\n- [.get_rate_matching()](IterableLinkmodes::get_rate_matching)\n"]
+#[derive(Debug)]
+pub struct OpLinkmodesGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpLinkmodesGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushLinkmodes<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushLinkmodes::new(buf)
+    }
+    pub fn encode(&mut self) -> PushLinkmodes<&mut Vec<u8>> {
+        PushLinkmodes::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushLinkmodes<RequestBuf<'r>> {
+        PushLinkmodes::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableLinkmodes<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableLinkmodes::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 5u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpLinkmodesGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableLinkmodes<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set link modes\\.\nRequest attributes:\n- [.nested_header()](PushLinkmodes::nested_header)\n- [.push_autoneg()](PushLinkmodes::push_autoneg)\n- [.nested_ours()](PushLinkmodes::nested_ours)\n- [.nested_peer()](PushLinkmodes::nested_peer)\n- [.push_speed()](PushLinkmodes::push_speed)\n- [.push_duplex()](PushLinkmodes::push_duplex)\n- [.push_master_slave_cfg()](PushLinkmodes::push_master_slave_cfg)\n- [.push_master_slave_state()](PushLinkmodes::push_master_slave_state)\n- [.push_lanes()](PushLinkmodes::push_lanes)\n- [.push_rate_matching()](PushLinkmodes::push_rate_matching)\n"]
+#[derive(Debug)]
+pub struct OpLinkmodesSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpLinkmodesSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushLinkmodes<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushLinkmodes::new(buf)
+    }
+    pub fn encode(&mut self) -> PushLinkmodes<&mut Vec<u8>> {
+        PushLinkmodes::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushLinkmodes<RequestBuf<'r>> {
+        PushLinkmodes::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableLinkmodes<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableLinkmodes::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 6u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpLinkmodesSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableLinkmodes<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get link state\\.\nRequest attributes:\n- [.nested_header()](PushLinkstate::nested_header)\n\nReply attributes:\n- [.get_header()](IterableLinkstate::get_header)\n- [.get_link()](IterableLinkstate::get_link)\n- [.get_sqi()](IterableLinkstate::get_sqi)\n- [.get_sqi_max()](IterableLinkstate::get_sqi_max)\n- [.get_ext_state()](IterableLinkstate::get_ext_state)\n- [.get_ext_substate()](IterableLinkstate::get_ext_substate)\n- [.get_ext_down_cnt()](IterableLinkstate::get_ext_down_cnt)\n"]
+#[derive(Debug)]
+pub struct OpLinkstateGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpLinkstateGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushLinkstate<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushLinkstate::new(buf)
+    }
+    pub fn encode(&mut self) -> PushLinkstate<&mut Vec<u8>> {
+        PushLinkstate::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushLinkstate<RequestBuf<'r>> {
+        PushLinkstate::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableLinkstate<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableLinkstate::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 8u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpLinkstateGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableLinkstate<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get link state\\.\nRequest attributes:\n- [.nested_header()](PushLinkstate::nested_header)\n\nReply attributes:\n- [.get_header()](IterableLinkstate::get_header)\n- [.get_link()](IterableLinkstate::get_link)\n- [.get_sqi()](IterableLinkstate::get_sqi)\n- [.get_sqi_max()](IterableLinkstate::get_sqi_max)\n- [.get_ext_state()](IterableLinkstate::get_ext_state)\n- [.get_ext_substate()](IterableLinkstate::get_ext_substate)\n- [.get_ext_down_cnt()](IterableLinkstate::get_ext_down_cnt)\n"]
+#[derive(Debug)]
+pub struct OpLinkstateGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpLinkstateGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushLinkstate<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushLinkstate::new(buf)
+    }
+    pub fn encode(&mut self) -> PushLinkstate<&mut Vec<u8>> {
+        PushLinkstate::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushLinkstate<RequestBuf<'r>> {
+        PushLinkstate::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableLinkstate<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableLinkstate::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 8u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpLinkstateGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableLinkstate<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get debug message mask\\.\nRequest attributes:\n- [.nested_header()](PushDebug::nested_header)\n\nReply attributes:\n- [.get_header()](IterableDebug::get_header)\n- [.get_msgmask()](IterableDebug::get_msgmask)\n"]
+#[derive(Debug)]
+pub struct OpDebugGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpDebugGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushDebug<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushDebug::new(buf)
+    }
+    pub fn encode(&mut self) -> PushDebug<&mut Vec<u8>> {
+        PushDebug::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushDebug<RequestBuf<'r>> {
+        PushDebug::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableDebug<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableDebug::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 9u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpDebugGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableDebug<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get debug message mask\\.\nRequest attributes:\n- [.nested_header()](PushDebug::nested_header)\n\nReply attributes:\n- [.get_header()](IterableDebug::get_header)\n- [.get_msgmask()](IterableDebug::get_msgmask)\n"]
+#[derive(Debug)]
+pub struct OpDebugGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpDebugGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushDebug<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushDebug::new(buf)
+    }
+    pub fn encode(&mut self) -> PushDebug<&mut Vec<u8>> {
+        PushDebug::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushDebug<RequestBuf<'r>> {
+        PushDebug::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableDebug<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableDebug::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 9u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpDebugGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableDebug<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set debug message mask\\.\nRequest attributes:\n- [.nested_header()](PushDebug::nested_header)\n- [.nested_msgmask()](PushDebug::nested_msgmask)\n"]
+#[derive(Debug)]
+pub struct OpDebugSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpDebugSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushDebug<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushDebug::new(buf)
+    }
+    pub fn encode(&mut self) -> PushDebug<&mut Vec<u8>> {
+        PushDebug::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushDebug<RequestBuf<'r>> {
+        PushDebug::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableDebug<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableDebug::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 10u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpDebugSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableDebug<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get WOL params\\.\nRequest attributes:\n- [.nested_header()](PushWol::nested_header)\n\nReply attributes:\n- [.get_header()](IterableWol::get_header)\n- [.get_modes()](IterableWol::get_modes)\n- [.get_sopass()](IterableWol::get_sopass)\n"]
+#[derive(Debug)]
+pub struct OpWolGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpWolGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushWol<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushWol::new(buf)
+    }
+    pub fn encode(&mut self) -> PushWol<&mut Vec<u8>> {
+        PushWol::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushWol<RequestBuf<'r>> {
+        PushWol::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableWol<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableWol::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 12u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpWolGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableWol<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get WOL params\\.\nRequest attributes:\n- [.nested_header()](PushWol::nested_header)\n\nReply attributes:\n- [.get_header()](IterableWol::get_header)\n- [.get_modes()](IterableWol::get_modes)\n- [.get_sopass()](IterableWol::get_sopass)\n"]
+#[derive(Debug)]
+pub struct OpWolGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpWolGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushWol<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushWol::new(buf)
+    }
+    pub fn encode(&mut self) -> PushWol<&mut Vec<u8>> {
+        PushWol::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushWol<RequestBuf<'r>> {
+        PushWol::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableWol<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableWol::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 12u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpWolGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableWol<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set WOL params\\.\nRequest attributes:\n- [.nested_header()](PushWol::nested_header)\n- [.nested_modes()](PushWol::nested_modes)\n- [.push_sopass()](PushWol::push_sopass)\n"]
+#[derive(Debug)]
+pub struct OpWolSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpWolSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushWol<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushWol::new(buf)
+    }
+    pub fn encode(&mut self) -> PushWol<&mut Vec<u8>> {
+        PushWol::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushWol<RequestBuf<'r>> {
+        PushWol::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableWol<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableWol::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 13u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpWolSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableWol<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get features\\.\nRequest attributes:\n- [.nested_header()](PushFeatures::nested_header)\n\nReply attributes:\n- [.get_header()](IterableFeatures::get_header)\n- [.get_hw()](IterableFeatures::get_hw)\n- [.get_wanted()](IterableFeatures::get_wanted)\n- [.get_active()](IterableFeatures::get_active)\n- [.get_nochange()](IterableFeatures::get_nochange)\n"]
+#[derive(Debug)]
+pub struct OpFeaturesGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpFeaturesGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushFeatures<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushFeatures::new(buf)
+    }
+    pub fn encode(&mut self) -> PushFeatures<&mut Vec<u8>> {
+        PushFeatures::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushFeatures<RequestBuf<'r>> {
+        PushFeatures::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableFeatures<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableFeatures::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 15u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpFeaturesGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableFeatures<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get features\\.\nRequest attributes:\n- [.nested_header()](PushFeatures::nested_header)\n\nReply attributes:\n- [.get_header()](IterableFeatures::get_header)\n- [.get_hw()](IterableFeatures::get_hw)\n- [.get_wanted()](IterableFeatures::get_wanted)\n- [.get_active()](IterableFeatures::get_active)\n- [.get_nochange()](IterableFeatures::get_nochange)\n"]
+#[derive(Debug)]
+pub struct OpFeaturesGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpFeaturesGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushFeatures<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushFeatures::new(buf)
+    }
+    pub fn encode(&mut self) -> PushFeatures<&mut Vec<u8>> {
+        PushFeatures::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushFeatures<RequestBuf<'r>> {
+        PushFeatures::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableFeatures<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableFeatures::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 15u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpFeaturesGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableFeatures<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set features\\.\nRequest attributes:\n- [.nested_header()](PushFeatures::nested_header)\n- [.nested_hw()](PushFeatures::nested_hw)\n- [.nested_wanted()](PushFeatures::nested_wanted)\n- [.nested_active()](PushFeatures::nested_active)\n- [.nested_nochange()](PushFeatures::nested_nochange)\n\nReply attributes:\n- [.get_header()](IterableFeatures::get_header)\n- [.get_hw()](IterableFeatures::get_hw)\n- [.get_wanted()](IterableFeatures::get_wanted)\n- [.get_active()](IterableFeatures::get_active)\n- [.get_nochange()](IterableFeatures::get_nochange)\n"]
+#[derive(Debug)]
+pub struct OpFeaturesSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpFeaturesSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushFeatures<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushFeatures::new(buf)
+    }
+    pub fn encode(&mut self) -> PushFeatures<&mut Vec<u8>> {
+        PushFeatures::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushFeatures<RequestBuf<'r>> {
+        PushFeatures::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableFeatures<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableFeatures::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 16u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpFeaturesSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableFeatures<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get device private flags\\.\nRequest attributes:\n- [.nested_header()](PushPrivflags::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePrivflags::get_header)\n- [.get_flags()](IterablePrivflags::get_flags)\n"]
+#[derive(Debug)]
+pub struct OpPrivflagsGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPrivflagsGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPrivflags<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPrivflags::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPrivflags<&mut Vec<u8>> {
+        PushPrivflags::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPrivflags<RequestBuf<'r>> {
+        PushPrivflags::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePrivflags<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePrivflags::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 18u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPrivflagsGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePrivflags<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get device private flags\\.\nRequest attributes:\n- [.nested_header()](PushPrivflags::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePrivflags::get_header)\n- [.get_flags()](IterablePrivflags::get_flags)\n"]
+#[derive(Debug)]
+pub struct OpPrivflagsGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPrivflagsGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPrivflags<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPrivflags::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPrivflags<&mut Vec<u8>> {
+        PushPrivflags::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPrivflags<RequestBuf<'r>> {
+        PushPrivflags::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePrivflags<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePrivflags::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 18u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPrivflagsGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePrivflags<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set device private flags\\.\nRequest attributes:\n- [.nested_header()](PushPrivflags::nested_header)\n- [.nested_flags()](PushPrivflags::nested_flags)\n"]
+#[derive(Debug)]
+pub struct OpPrivflagsSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPrivflagsSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPrivflags<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPrivflags::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPrivflags<&mut Vec<u8>> {
+        PushPrivflags::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPrivflags<RequestBuf<'r>> {
+        PushPrivflags::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePrivflags<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePrivflags::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 19u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPrivflagsSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePrivflags<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get ring params\\.\nRequest attributes:\n- [.nested_header()](PushRings::nested_header)\n\nReply attributes:\n- [.get_header()](IterableRings::get_header)\n- [.get_rx_max()](IterableRings::get_rx_max)\n- [.get_rx_mini_max()](IterableRings::get_rx_mini_max)\n- [.get_rx_jumbo_max()](IterableRings::get_rx_jumbo_max)\n- [.get_tx_max()](IterableRings::get_tx_max)\n- [.get_rx()](IterableRings::get_rx)\n- [.get_rx_mini()](IterableRings::get_rx_mini)\n- [.get_rx_jumbo()](IterableRings::get_rx_jumbo)\n- [.get_tx()](IterableRings::get_tx)\n- [.get_rx_buf_len()](IterableRings::get_rx_buf_len)\n- [.get_tcp_data_split()](IterableRings::get_tcp_data_split)\n- [.get_cqe_size()](IterableRings::get_cqe_size)\n- [.get_tx_push()](IterableRings::get_tx_push)\n- [.get_rx_push()](IterableRings::get_rx_push)\n- [.get_tx_push_buf_len()](IterableRings::get_tx_push_buf_len)\n- [.get_tx_push_buf_len_max()](IterableRings::get_tx_push_buf_len_max)\n- [.get_hds_thresh()](IterableRings::get_hds_thresh)\n- [.get_hds_thresh_max()](IterableRings::get_hds_thresh_max)\n"]
+#[derive(Debug)]
+pub struct OpRingsGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpRingsGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushRings<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushRings::new(buf)
+    }
+    pub fn encode(&mut self) -> PushRings<&mut Vec<u8>> {
+        PushRings::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushRings<RequestBuf<'r>> {
+        PushRings::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableRings<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableRings::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 21u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpRingsGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableRings<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get ring params\\.\nRequest attributes:\n- [.nested_header()](PushRings::nested_header)\n\nReply attributes:\n- [.get_header()](IterableRings::get_header)\n- [.get_rx_max()](IterableRings::get_rx_max)\n- [.get_rx_mini_max()](IterableRings::get_rx_mini_max)\n- [.get_rx_jumbo_max()](IterableRings::get_rx_jumbo_max)\n- [.get_tx_max()](IterableRings::get_tx_max)\n- [.get_rx()](IterableRings::get_rx)\n- [.get_rx_mini()](IterableRings::get_rx_mini)\n- [.get_rx_jumbo()](IterableRings::get_rx_jumbo)\n- [.get_tx()](IterableRings::get_tx)\n- [.get_rx_buf_len()](IterableRings::get_rx_buf_len)\n- [.get_tcp_data_split()](IterableRings::get_tcp_data_split)\n- [.get_cqe_size()](IterableRings::get_cqe_size)\n- [.get_tx_push()](IterableRings::get_tx_push)\n- [.get_rx_push()](IterableRings::get_rx_push)\n- [.get_tx_push_buf_len()](IterableRings::get_tx_push_buf_len)\n- [.get_tx_push_buf_len_max()](IterableRings::get_tx_push_buf_len_max)\n- [.get_hds_thresh()](IterableRings::get_hds_thresh)\n- [.get_hds_thresh_max()](IterableRings::get_hds_thresh_max)\n"]
+#[derive(Debug)]
+pub struct OpRingsGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpRingsGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushRings<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushRings::new(buf)
+    }
+    pub fn encode(&mut self) -> PushRings<&mut Vec<u8>> {
+        PushRings::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushRings<RequestBuf<'r>> {
+        PushRings::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableRings<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableRings::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 21u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpRingsGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableRings<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set ring params\\.\nRequest attributes:\n- [.nested_header()](PushRings::nested_header)\n- [.push_rx_max()](PushRings::push_rx_max)\n- [.push_rx_mini_max()](PushRings::push_rx_mini_max)\n- [.push_rx_jumbo_max()](PushRings::push_rx_jumbo_max)\n- [.push_tx_max()](PushRings::push_tx_max)\n- [.push_rx()](PushRings::push_rx)\n- [.push_rx_mini()](PushRings::push_rx_mini)\n- [.push_rx_jumbo()](PushRings::push_rx_jumbo)\n- [.push_tx()](PushRings::push_tx)\n- [.push_rx_buf_len()](PushRings::push_rx_buf_len)\n- [.push_tcp_data_split()](PushRings::push_tcp_data_split)\n- [.push_cqe_size()](PushRings::push_cqe_size)\n- [.push_tx_push()](PushRings::push_tx_push)\n- [.push_rx_push()](PushRings::push_rx_push)\n- [.push_tx_push_buf_len()](PushRings::push_tx_push_buf_len)\n- [.push_tx_push_buf_len_max()](PushRings::push_tx_push_buf_len_max)\n- [.push_hds_thresh()](PushRings::push_hds_thresh)\n- [.push_hds_thresh_max()](PushRings::push_hds_thresh_max)\n"]
+#[derive(Debug)]
+pub struct OpRingsSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpRingsSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushRings<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushRings::new(buf)
+    }
+    pub fn encode(&mut self) -> PushRings<&mut Vec<u8>> {
+        PushRings::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushRings<RequestBuf<'r>> {
+        PushRings::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableRings<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableRings::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 22u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpRingsSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableRings<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get channel params\\.\nRequest attributes:\n- [.nested_header()](PushChannels::nested_header)\n\nReply attributes:\n- [.get_header()](IterableChannels::get_header)\n- [.get_rx_max()](IterableChannels::get_rx_max)\n- [.get_tx_max()](IterableChannels::get_tx_max)\n- [.get_other_max()](IterableChannels::get_other_max)\n- [.get_combined_max()](IterableChannels::get_combined_max)\n- [.get_rx_count()](IterableChannels::get_rx_count)\n- [.get_tx_count()](IterableChannels::get_tx_count)\n- [.get_other_count()](IterableChannels::get_other_count)\n- [.get_combined_count()](IterableChannels::get_combined_count)\n"]
+#[derive(Debug)]
+pub struct OpChannelsGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpChannelsGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushChannels<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushChannels::new(buf)
+    }
+    pub fn encode(&mut self) -> PushChannels<&mut Vec<u8>> {
+        PushChannels::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushChannels<RequestBuf<'r>> {
+        PushChannels::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableChannels<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableChannels::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 24u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpChannelsGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableChannels<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get channel params\\.\nRequest attributes:\n- [.nested_header()](PushChannels::nested_header)\n\nReply attributes:\n- [.get_header()](IterableChannels::get_header)\n- [.get_rx_max()](IterableChannels::get_rx_max)\n- [.get_tx_max()](IterableChannels::get_tx_max)\n- [.get_other_max()](IterableChannels::get_other_max)\n- [.get_combined_max()](IterableChannels::get_combined_max)\n- [.get_rx_count()](IterableChannels::get_rx_count)\n- [.get_tx_count()](IterableChannels::get_tx_count)\n- [.get_other_count()](IterableChannels::get_other_count)\n- [.get_combined_count()](IterableChannels::get_combined_count)\n"]
+#[derive(Debug)]
+pub struct OpChannelsGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpChannelsGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushChannels<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushChannels::new(buf)
+    }
+    pub fn encode(&mut self) -> PushChannels<&mut Vec<u8>> {
+        PushChannels::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushChannels<RequestBuf<'r>> {
+        PushChannels::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableChannels<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableChannels::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 24u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpChannelsGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableChannels<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set channel params\\.\nRequest attributes:\n- [.nested_header()](PushChannels::nested_header)\n- [.push_rx_max()](PushChannels::push_rx_max)\n- [.push_tx_max()](PushChannels::push_tx_max)\n- [.push_other_max()](PushChannels::push_other_max)\n- [.push_combined_max()](PushChannels::push_combined_max)\n- [.push_rx_count()](PushChannels::push_rx_count)\n- [.push_tx_count()](PushChannels::push_tx_count)\n- [.push_other_count()](PushChannels::push_other_count)\n- [.push_combined_count()](PushChannels::push_combined_count)\n"]
+#[derive(Debug)]
+pub struct OpChannelsSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpChannelsSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushChannels<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushChannels::new(buf)
+    }
+    pub fn encode(&mut self) -> PushChannels<&mut Vec<u8>> {
+        PushChannels::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushChannels<RequestBuf<'r>> {
+        PushChannels::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableChannels<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableChannels::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 25u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpChannelsSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableChannels<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get coalesce params\\.\nRequest attributes:\n- [.nested_header()](PushCoalesce::nested_header)\n\nReply attributes:\n- [.get_header()](IterableCoalesce::get_header)\n- [.get_rx_usecs()](IterableCoalesce::get_rx_usecs)\n- [.get_rx_max_frames()](IterableCoalesce::get_rx_max_frames)\n- [.get_rx_usecs_irq()](IterableCoalesce::get_rx_usecs_irq)\n- [.get_rx_max_frames_irq()](IterableCoalesce::get_rx_max_frames_irq)\n- [.get_tx_usecs()](IterableCoalesce::get_tx_usecs)\n- [.get_tx_max_frames()](IterableCoalesce::get_tx_max_frames)\n- [.get_tx_usecs_irq()](IterableCoalesce::get_tx_usecs_irq)\n- [.get_tx_max_frames_irq()](IterableCoalesce::get_tx_max_frames_irq)\n- [.get_stats_block_usecs()](IterableCoalesce::get_stats_block_usecs)\n- [.get_use_adaptive_rx()](IterableCoalesce::get_use_adaptive_rx)\n- [.get_use_adaptive_tx()](IterableCoalesce::get_use_adaptive_tx)\n- [.get_pkt_rate_low()](IterableCoalesce::get_pkt_rate_low)\n- [.get_rx_usecs_low()](IterableCoalesce::get_rx_usecs_low)\n- [.get_rx_max_frames_low()](IterableCoalesce::get_rx_max_frames_low)\n- [.get_tx_usecs_low()](IterableCoalesce::get_tx_usecs_low)\n- [.get_tx_max_frames_low()](IterableCoalesce::get_tx_max_frames_low)\n- [.get_pkt_rate_high()](IterableCoalesce::get_pkt_rate_high)\n- [.get_rx_usecs_high()](IterableCoalesce::get_rx_usecs_high)\n- [.get_rx_max_frames_high()](IterableCoalesce::get_rx_max_frames_high)\n- [.get_tx_usecs_high()](IterableCoalesce::get_tx_usecs_high)\n- [.get_tx_max_frames_high()](IterableCoalesce::get_tx_max_frames_high)\n- [.get_rate_sample_interval()](IterableCoalesce::get_rate_sample_interval)\n- [.get_use_cqe_mode_tx()](IterableCoalesce::get_use_cqe_mode_tx)\n- [.get_use_cqe_mode_rx()](IterableCoalesce::get_use_cqe_mode_rx)\n- [.get_tx_aggr_max_bytes()](IterableCoalesce::get_tx_aggr_max_bytes)\n- [.get_tx_aggr_max_frames()](IterableCoalesce::get_tx_aggr_max_frames)\n- [.get_tx_aggr_time_usecs()](IterableCoalesce::get_tx_aggr_time_usecs)\n- [.get_rx_profile()](IterableCoalesce::get_rx_profile)\n- [.get_tx_profile()](IterableCoalesce::get_tx_profile)\n"]
+#[derive(Debug)]
+pub struct OpCoalesceGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpCoalesceGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushCoalesce<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushCoalesce::new(buf)
+    }
+    pub fn encode(&mut self) -> PushCoalesce<&mut Vec<u8>> {
+        PushCoalesce::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushCoalesce<RequestBuf<'r>> {
+        PushCoalesce::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableCoalesce<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableCoalesce::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 27u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpCoalesceGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableCoalesce<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get coalesce params\\.\nRequest attributes:\n- [.nested_header()](PushCoalesce::nested_header)\n\nReply attributes:\n- [.get_header()](IterableCoalesce::get_header)\n- [.get_rx_usecs()](IterableCoalesce::get_rx_usecs)\n- [.get_rx_max_frames()](IterableCoalesce::get_rx_max_frames)\n- [.get_rx_usecs_irq()](IterableCoalesce::get_rx_usecs_irq)\n- [.get_rx_max_frames_irq()](IterableCoalesce::get_rx_max_frames_irq)\n- [.get_tx_usecs()](IterableCoalesce::get_tx_usecs)\n- [.get_tx_max_frames()](IterableCoalesce::get_tx_max_frames)\n- [.get_tx_usecs_irq()](IterableCoalesce::get_tx_usecs_irq)\n- [.get_tx_max_frames_irq()](IterableCoalesce::get_tx_max_frames_irq)\n- [.get_stats_block_usecs()](IterableCoalesce::get_stats_block_usecs)\n- [.get_use_adaptive_rx()](IterableCoalesce::get_use_adaptive_rx)\n- [.get_use_adaptive_tx()](IterableCoalesce::get_use_adaptive_tx)\n- [.get_pkt_rate_low()](IterableCoalesce::get_pkt_rate_low)\n- [.get_rx_usecs_low()](IterableCoalesce::get_rx_usecs_low)\n- [.get_rx_max_frames_low()](IterableCoalesce::get_rx_max_frames_low)\n- [.get_tx_usecs_low()](IterableCoalesce::get_tx_usecs_low)\n- [.get_tx_max_frames_low()](IterableCoalesce::get_tx_max_frames_low)\n- [.get_pkt_rate_high()](IterableCoalesce::get_pkt_rate_high)\n- [.get_rx_usecs_high()](IterableCoalesce::get_rx_usecs_high)\n- [.get_rx_max_frames_high()](IterableCoalesce::get_rx_max_frames_high)\n- [.get_tx_usecs_high()](IterableCoalesce::get_tx_usecs_high)\n- [.get_tx_max_frames_high()](IterableCoalesce::get_tx_max_frames_high)\n- [.get_rate_sample_interval()](IterableCoalesce::get_rate_sample_interval)\n- [.get_use_cqe_mode_tx()](IterableCoalesce::get_use_cqe_mode_tx)\n- [.get_use_cqe_mode_rx()](IterableCoalesce::get_use_cqe_mode_rx)\n- [.get_tx_aggr_max_bytes()](IterableCoalesce::get_tx_aggr_max_bytes)\n- [.get_tx_aggr_max_frames()](IterableCoalesce::get_tx_aggr_max_frames)\n- [.get_tx_aggr_time_usecs()](IterableCoalesce::get_tx_aggr_time_usecs)\n- [.get_rx_profile()](IterableCoalesce::get_rx_profile)\n- [.get_tx_profile()](IterableCoalesce::get_tx_profile)\n"]
+#[derive(Debug)]
+pub struct OpCoalesceGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpCoalesceGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushCoalesce<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushCoalesce::new(buf)
+    }
+    pub fn encode(&mut self) -> PushCoalesce<&mut Vec<u8>> {
+        PushCoalesce::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushCoalesce<RequestBuf<'r>> {
+        PushCoalesce::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableCoalesce<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableCoalesce::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 27u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpCoalesceGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableCoalesce<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set coalesce params\\.\nRequest attributes:\n- [.nested_header()](PushCoalesce::nested_header)\n- [.push_rx_usecs()](PushCoalesce::push_rx_usecs)\n- [.push_rx_max_frames()](PushCoalesce::push_rx_max_frames)\n- [.push_rx_usecs_irq()](PushCoalesce::push_rx_usecs_irq)\n- [.push_rx_max_frames_irq()](PushCoalesce::push_rx_max_frames_irq)\n- [.push_tx_usecs()](PushCoalesce::push_tx_usecs)\n- [.push_tx_max_frames()](PushCoalesce::push_tx_max_frames)\n- [.push_tx_usecs_irq()](PushCoalesce::push_tx_usecs_irq)\n- [.push_tx_max_frames_irq()](PushCoalesce::push_tx_max_frames_irq)\n- [.push_stats_block_usecs()](PushCoalesce::push_stats_block_usecs)\n- [.push_use_adaptive_rx()](PushCoalesce::push_use_adaptive_rx)\n- [.push_use_adaptive_tx()](PushCoalesce::push_use_adaptive_tx)\n- [.push_pkt_rate_low()](PushCoalesce::push_pkt_rate_low)\n- [.push_rx_usecs_low()](PushCoalesce::push_rx_usecs_low)\n- [.push_rx_max_frames_low()](PushCoalesce::push_rx_max_frames_low)\n- [.push_tx_usecs_low()](PushCoalesce::push_tx_usecs_low)\n- [.push_tx_max_frames_low()](PushCoalesce::push_tx_max_frames_low)\n- [.push_pkt_rate_high()](PushCoalesce::push_pkt_rate_high)\n- [.push_rx_usecs_high()](PushCoalesce::push_rx_usecs_high)\n- [.push_rx_max_frames_high()](PushCoalesce::push_rx_max_frames_high)\n- [.push_tx_usecs_high()](PushCoalesce::push_tx_usecs_high)\n- [.push_tx_max_frames_high()](PushCoalesce::push_tx_max_frames_high)\n- [.push_rate_sample_interval()](PushCoalesce::push_rate_sample_interval)\n- [.push_use_cqe_mode_tx()](PushCoalesce::push_use_cqe_mode_tx)\n- [.push_use_cqe_mode_rx()](PushCoalesce::push_use_cqe_mode_rx)\n- [.push_tx_aggr_max_bytes()](PushCoalesce::push_tx_aggr_max_bytes)\n- [.push_tx_aggr_max_frames()](PushCoalesce::push_tx_aggr_max_frames)\n- [.push_tx_aggr_time_usecs()](PushCoalesce::push_tx_aggr_time_usecs)\n- [.nested_rx_profile()](PushCoalesce::nested_rx_profile)\n- [.nested_tx_profile()](PushCoalesce::nested_tx_profile)\n"]
+#[derive(Debug)]
+pub struct OpCoalesceSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpCoalesceSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushCoalesce<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushCoalesce::new(buf)
+    }
+    pub fn encode(&mut self) -> PushCoalesce<&mut Vec<u8>> {
+        PushCoalesce::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushCoalesce<RequestBuf<'r>> {
+        PushCoalesce::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableCoalesce<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableCoalesce::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 28u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpCoalesceSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableCoalesce<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get pause params\\.\nRequest attributes:\n- [.nested_header()](PushPause::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePause::get_header)\n- [.get_autoneg()](IterablePause::get_autoneg)\n- [.get_rx()](IterablePause::get_rx)\n- [.get_tx()](IterablePause::get_tx)\n- [.get_stats()](IterablePause::get_stats)\n- [.get_stats_src()](IterablePause::get_stats_src)\n"]
+#[derive(Debug)]
+pub struct OpPauseGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPauseGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPause<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPause::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPause<&mut Vec<u8>> {
+        PushPause::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPause<RequestBuf<'r>> {
+        PushPause::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePause<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePause::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 30u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPauseGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePause<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get pause params\\.\nRequest attributes:\n- [.nested_header()](PushPause::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePause::get_header)\n- [.get_autoneg()](IterablePause::get_autoneg)\n- [.get_rx()](IterablePause::get_rx)\n- [.get_tx()](IterablePause::get_tx)\n- [.get_stats()](IterablePause::get_stats)\n- [.get_stats_src()](IterablePause::get_stats_src)\n"]
+#[derive(Debug)]
+pub struct OpPauseGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPauseGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPause<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPause::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPause<&mut Vec<u8>> {
+        PushPause::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPause<RequestBuf<'r>> {
+        PushPause::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePause<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePause::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 30u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPauseGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePause<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set pause params\\.\nRequest attributes:\n- [.nested_header()](PushPause::nested_header)\n- [.push_autoneg()](PushPause::push_autoneg)\n- [.push_rx()](PushPause::push_rx)\n- [.push_tx()](PushPause::push_tx)\n- [.nested_stats()](PushPause::nested_stats)\n- [.push_stats_src()](PushPause::push_stats_src)\n"]
+#[derive(Debug)]
+pub struct OpPauseSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPauseSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPause<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPause::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPause<&mut Vec<u8>> {
+        PushPause::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPause<RequestBuf<'r>> {
+        PushPause::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePause<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePause::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 31u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPauseSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePause<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get eee params\\.\nRequest attributes:\n- [.nested_header()](PushEee::nested_header)\n\nReply attributes:\n- [.get_header()](IterableEee::get_header)\n- [.get_modes_ours()](IterableEee::get_modes_ours)\n- [.get_modes_peer()](IterableEee::get_modes_peer)\n- [.get_active()](IterableEee::get_active)\n- [.get_enabled()](IterableEee::get_enabled)\n- [.get_tx_lpi_enabled()](IterableEee::get_tx_lpi_enabled)\n- [.get_tx_lpi_timer()](IterableEee::get_tx_lpi_timer)\n"]
+#[derive(Debug)]
+pub struct OpEeeGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpEeeGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushEee<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushEee::new(buf)
+    }
+    pub fn encode(&mut self) -> PushEee<&mut Vec<u8>> {
+        PushEee::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushEee<RequestBuf<'r>> {
+        PushEee::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableEee<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableEee::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 33u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpEeeGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableEee<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get eee params\\.\nRequest attributes:\n- [.nested_header()](PushEee::nested_header)\n\nReply attributes:\n- [.get_header()](IterableEee::get_header)\n- [.get_modes_ours()](IterableEee::get_modes_ours)\n- [.get_modes_peer()](IterableEee::get_modes_peer)\n- [.get_active()](IterableEee::get_active)\n- [.get_enabled()](IterableEee::get_enabled)\n- [.get_tx_lpi_enabled()](IterableEee::get_tx_lpi_enabled)\n- [.get_tx_lpi_timer()](IterableEee::get_tx_lpi_timer)\n"]
+#[derive(Debug)]
+pub struct OpEeeGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpEeeGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushEee<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushEee::new(buf)
+    }
+    pub fn encode(&mut self) -> PushEee<&mut Vec<u8>> {
+        PushEee::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushEee<RequestBuf<'r>> {
+        PushEee::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableEee<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableEee::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 33u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpEeeGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableEee<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set eee params\\.\nRequest attributes:\n- [.nested_header()](PushEee::nested_header)\n- [.nested_modes_ours()](PushEee::nested_modes_ours)\n- [.nested_modes_peer()](PushEee::nested_modes_peer)\n- [.push_active()](PushEee::push_active)\n- [.push_enabled()](PushEee::push_enabled)\n- [.push_tx_lpi_enabled()](PushEee::push_tx_lpi_enabled)\n- [.push_tx_lpi_timer()](PushEee::push_tx_lpi_timer)\n"]
+#[derive(Debug)]
+pub struct OpEeeSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpEeeSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushEee<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushEee::new(buf)
+    }
+    pub fn encode(&mut self) -> PushEee<&mut Vec<u8>> {
+        PushEee::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushEee<RequestBuf<'r>> {
+        PushEee::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableEee<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableEee::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 34u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpEeeSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableEee<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get tsinfo params\\.\nRequest attributes:\n- [.nested_header()](PushTsinfo::nested_header)\n- [.nested_hwtstamp_provider()](PushTsinfo::nested_hwtstamp_provider)\n\nReply attributes:\n- [.get_header()](IterableTsinfo::get_header)\n- [.get_timestamping()](IterableTsinfo::get_timestamping)\n- [.get_tx_types()](IterableTsinfo::get_tx_types)\n- [.get_rx_filters()](IterableTsinfo::get_rx_filters)\n- [.get_phc_index()](IterableTsinfo::get_phc_index)\n- [.get_stats()](IterableTsinfo::get_stats)\n- [.get_hwtstamp_provider()](IterableTsinfo::get_hwtstamp_provider)\n- [.get_hwtstamp_source()](IterableTsinfo::get_hwtstamp_source)\n- [.get_hwtstamp_phyindex()](IterableTsinfo::get_hwtstamp_phyindex)\n"]
+#[derive(Debug)]
+pub struct OpTsinfoGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpTsinfoGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushTsinfo<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushTsinfo::new(buf)
+    }
+    pub fn encode(&mut self) -> PushTsinfo<&mut Vec<u8>> {
+        PushTsinfo::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushTsinfo<RequestBuf<'r>> {
+        PushTsinfo::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableTsinfo<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableTsinfo::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 36u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpTsinfoGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableTsinfo<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get tsinfo params\\.\nRequest attributes:\n- [.nested_header()](PushTsinfo::nested_header)\n- [.nested_hwtstamp_provider()](PushTsinfo::nested_hwtstamp_provider)\n\nReply attributes:\n- [.get_header()](IterableTsinfo::get_header)\n- [.get_timestamping()](IterableTsinfo::get_timestamping)\n- [.get_tx_types()](IterableTsinfo::get_tx_types)\n- [.get_rx_filters()](IterableTsinfo::get_rx_filters)\n- [.get_phc_index()](IterableTsinfo::get_phc_index)\n- [.get_stats()](IterableTsinfo::get_stats)\n- [.get_hwtstamp_provider()](IterableTsinfo::get_hwtstamp_provider)\n- [.get_hwtstamp_source()](IterableTsinfo::get_hwtstamp_source)\n- [.get_hwtstamp_phyindex()](IterableTsinfo::get_hwtstamp_phyindex)\n"]
+#[derive(Debug)]
+pub struct OpTsinfoGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpTsinfoGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushTsinfo<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushTsinfo::new(buf)
+    }
+    pub fn encode(&mut self) -> PushTsinfo<&mut Vec<u8>> {
+        PushTsinfo::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushTsinfo<RequestBuf<'r>> {
+        PushTsinfo::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableTsinfo<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableTsinfo::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 36u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpTsinfoGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableTsinfo<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Cable test\\.\nRequest attributes:\n- [.nested_header()](PushCableTest::nested_header)\n"]
+#[derive(Debug)]
+pub struct OpCableTestActDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpCableTestActDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushCableTest<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushCableTest::new(buf)
+    }
+    pub fn encode(&mut self) -> PushCableTest<&mut Vec<u8>> {
+        PushCableTest::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushCableTest<RequestBuf<'r>> {
+        PushCableTest::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableCableTest<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableCableTest::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 37u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpCableTestActDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableCableTest<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Cable test TDR\\.\nRequest attributes:\n- [.nested_header()](PushCableTestTdr::nested_header)\n"]
+#[derive(Debug)]
+pub struct OpCableTestTdrActDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpCableTestTdrActDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushCableTestTdr<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushCableTestTdr::new(buf)
+    }
+    pub fn encode(&mut self) -> PushCableTestTdr<&mut Vec<u8>> {
+        PushCableTestTdr::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushCableTestTdr<RequestBuf<'r>> {
+        PushCableTestTdr::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableCableTestTdr<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableCableTestTdr::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 39u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpCableTestTdrActDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableCableTestTdr<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get tsinfo params\\.\nRequest attributes:\n- [.nested_header()](PushTunnelInfo::nested_header)\n\nReply attributes:\n- [.get_header()](IterableTunnelInfo::get_header)\n- [.get_udp_ports()](IterableTunnelInfo::get_udp_ports)\n"]
+#[derive(Debug)]
+pub struct OpTunnelInfoGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpTunnelInfoGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushTunnelInfo<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushTunnelInfo::new(buf)
+    }
+    pub fn encode(&mut self) -> PushTunnelInfo<&mut Vec<u8>> {
+        PushTunnelInfo::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushTunnelInfo<RequestBuf<'r>> {
+        PushTunnelInfo::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableTunnelInfo<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableTunnelInfo::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 41u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpTunnelInfoGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableTunnelInfo<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get tsinfo params\\.\nRequest attributes:\n- [.nested_header()](PushTunnelInfo::nested_header)\n\nReply attributes:\n- [.get_header()](IterableTunnelInfo::get_header)\n- [.get_udp_ports()](IterableTunnelInfo::get_udp_ports)\n"]
+#[derive(Debug)]
+pub struct OpTunnelInfoGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpTunnelInfoGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushTunnelInfo<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushTunnelInfo::new(buf)
+    }
+    pub fn encode(&mut self) -> PushTunnelInfo<&mut Vec<u8>> {
+        PushTunnelInfo::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushTunnelInfo<RequestBuf<'r>> {
+        PushTunnelInfo::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableTunnelInfo<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableTunnelInfo::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 41u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpTunnelInfoGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableTunnelInfo<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get FEC params\\.\nRequest attributes:\n- [.nested_header()](PushFec::nested_header)\n\nReply attributes:\n- [.get_header()](IterableFec::get_header)\n- [.get_modes()](IterableFec::get_modes)\n- [.get_auto()](IterableFec::get_auto)\n- [.get_active()](IterableFec::get_active)\n- [.get_stats()](IterableFec::get_stats)\n"]
+#[derive(Debug)]
+pub struct OpFecGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpFecGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushFec<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushFec::new(buf)
+    }
+    pub fn encode(&mut self) -> PushFec<&mut Vec<u8>> {
+        PushFec::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushFec<RequestBuf<'r>> {
+        PushFec::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableFec<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableFec::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 42u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpFecGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableFec<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get FEC params\\.\nRequest attributes:\n- [.nested_header()](PushFec::nested_header)\n\nReply attributes:\n- [.get_header()](IterableFec::get_header)\n- [.get_modes()](IterableFec::get_modes)\n- [.get_auto()](IterableFec::get_auto)\n- [.get_active()](IterableFec::get_active)\n- [.get_stats()](IterableFec::get_stats)\n"]
+#[derive(Debug)]
+pub struct OpFecGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpFecGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushFec<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushFec::new(buf)
+    }
+    pub fn encode(&mut self) -> PushFec<&mut Vec<u8>> {
+        PushFec::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushFec<RequestBuf<'r>> {
+        PushFec::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableFec<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableFec::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 42u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpFecGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableFec<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set FEC params\\.\nRequest attributes:\n- [.nested_header()](PushFec::nested_header)\n- [.nested_modes()](PushFec::nested_modes)\n- [.push_auto()](PushFec::push_auto)\n- [.push_active()](PushFec::push_active)\n- [.nested_stats()](PushFec::nested_stats)\n"]
+#[derive(Debug)]
+pub struct OpFecSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpFecSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushFec<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushFec::new(buf)
+    }
+    pub fn encode(&mut self) -> PushFec<&mut Vec<u8>> {
+        PushFec::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushFec<RequestBuf<'r>> {
+        PushFec::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableFec<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableFec::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 43u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpFecSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableFec<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get module EEPROM params\\.\nRequest attributes:\n- [.nested_header()](PushModuleEeprom::nested_header)\n- [.push_offset()](PushModuleEeprom::push_offset)\n- [.push_length()](PushModuleEeprom::push_length)\n- [.push_page()](PushModuleEeprom::push_page)\n- [.push_bank()](PushModuleEeprom::push_bank)\n- [.push_i2c_address()](PushModuleEeprom::push_i2c_address)\n\nReply attributes:\n- [.get_header()](IterableModuleEeprom::get_header)\n- [.get_data()](IterableModuleEeprom::get_data)\n"]
+#[derive(Debug)]
+pub struct OpModuleEepromGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpModuleEepromGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushModuleEeprom<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushModuleEeprom::new(buf)
+    }
+    pub fn encode(&mut self) -> PushModuleEeprom<&mut Vec<u8>> {
+        PushModuleEeprom::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushModuleEeprom<RequestBuf<'r>> {
+        PushModuleEeprom::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableModuleEeprom<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableModuleEeprom::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 45u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpModuleEepromGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableModuleEeprom<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get module EEPROM params\\.\nRequest attributes:\n- [.nested_header()](PushModuleEeprom::nested_header)\n- [.push_offset()](PushModuleEeprom::push_offset)\n- [.push_length()](PushModuleEeprom::push_length)\n- [.push_page()](PushModuleEeprom::push_page)\n- [.push_bank()](PushModuleEeprom::push_bank)\n- [.push_i2c_address()](PushModuleEeprom::push_i2c_address)\n\nReply attributes:\n- [.get_header()](IterableModuleEeprom::get_header)\n- [.get_data()](IterableModuleEeprom::get_data)\n"]
+#[derive(Debug)]
+pub struct OpModuleEepromGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpModuleEepromGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushModuleEeprom<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushModuleEeprom::new(buf)
+    }
+    pub fn encode(&mut self) -> PushModuleEeprom<&mut Vec<u8>> {
+        PushModuleEeprom::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushModuleEeprom<RequestBuf<'r>> {
+        PushModuleEeprom::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableModuleEeprom<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableModuleEeprom::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 45u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpModuleEepromGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableModuleEeprom<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get statistics\\.\nRequest attributes:\n- [.nested_header()](PushStats::nested_header)\n- [.nested_groups()](PushStats::nested_groups)\n\nReply attributes:\n- [.get_header()](IterableStats::get_header)\n- [.get_groups()](IterableStats::get_groups)\n- [.get_grp()](IterableStats::get_grp)\n- [.get_src()](IterableStats::get_src)\n"]
+#[derive(Debug)]
+pub struct OpStatsGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpStatsGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushStats<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushStats::new(buf)
+    }
+    pub fn encode(&mut self) -> PushStats<&mut Vec<u8>> {
+        PushStats::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushStats<RequestBuf<'r>> {
+        PushStats::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableStats<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableStats::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 46u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpStatsGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableStats<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get statistics\\.\nRequest attributes:\n- [.nested_header()](PushStats::nested_header)\n- [.nested_groups()](PushStats::nested_groups)\n\nReply attributes:\n- [.get_header()](IterableStats::get_header)\n- [.get_groups()](IterableStats::get_groups)\n- [.get_grp()](IterableStats::get_grp)\n- [.get_src()](IterableStats::get_src)\n"]
+#[derive(Debug)]
+pub struct OpStatsGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpStatsGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushStats<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushStats::new(buf)
+    }
+    pub fn encode(&mut self) -> PushStats<&mut Vec<u8>> {
+        PushStats::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushStats<RequestBuf<'r>> {
+        PushStats::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableStats<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableStats::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 46u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpStatsGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableStats<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get PHC VCLOCKs\\.\nRequest attributes:\n- [.nested_header()](PushPhcVclocks::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePhcVclocks::get_header)\n- [.get_num()](IterablePhcVclocks::get_num)\n"]
+#[derive(Debug)]
+pub struct OpPhcVclocksGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPhcVclocksGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPhcVclocks<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPhcVclocks::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPhcVclocks<&mut Vec<u8>> {
+        PushPhcVclocks::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPhcVclocks<RequestBuf<'r>> {
+        PushPhcVclocks::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePhcVclocks<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePhcVclocks::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 47u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPhcVclocksGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePhcVclocks<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get PHC VCLOCKs\\.\nRequest attributes:\n- [.nested_header()](PushPhcVclocks::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePhcVclocks::get_header)\n- [.get_num()](IterablePhcVclocks::get_num)\n"]
+#[derive(Debug)]
+pub struct OpPhcVclocksGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPhcVclocksGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPhcVclocks<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPhcVclocks::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPhcVclocks<&mut Vec<u8>> {
+        PushPhcVclocks::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPhcVclocks<RequestBuf<'r>> {
+        PushPhcVclocks::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePhcVclocks<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePhcVclocks::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 47u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPhcVclocksGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePhcVclocks<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get module params\\.\nRequest attributes:\n- [.nested_header()](PushModule::nested_header)\n\nReply attributes:\n- [.get_header()](IterableModule::get_header)\n- [.get_power_mode_policy()](IterableModule::get_power_mode_policy)\n- [.get_power_mode()](IterableModule::get_power_mode)\n"]
+#[derive(Debug)]
+pub struct OpModuleGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpModuleGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushModule<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushModule::new(buf)
+    }
+    pub fn encode(&mut self) -> PushModule<&mut Vec<u8>> {
+        PushModule::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushModule<RequestBuf<'r>> {
+        PushModule::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableModule<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableModule::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 48u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpModuleGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableModule<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get module params\\.\nRequest attributes:\n- [.nested_header()](PushModule::nested_header)\n\nReply attributes:\n- [.get_header()](IterableModule::get_header)\n- [.get_power_mode_policy()](IterableModule::get_power_mode_policy)\n- [.get_power_mode()](IterableModule::get_power_mode)\n"]
+#[derive(Debug)]
+pub struct OpModuleGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpModuleGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushModule<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushModule::new(buf)
+    }
+    pub fn encode(&mut self) -> PushModule<&mut Vec<u8>> {
+        PushModule::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushModule<RequestBuf<'r>> {
+        PushModule::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableModule<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableModule::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 48u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpModuleGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableModule<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set module params\\.\nRequest attributes:\n- [.nested_header()](PushModule::nested_header)\n- [.push_power_mode_policy()](PushModule::push_power_mode_policy)\n- [.push_power_mode()](PushModule::push_power_mode)\n"]
+#[derive(Debug)]
+pub struct OpModuleSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpModuleSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushModule<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushModule::new(buf)
+    }
+    pub fn encode(&mut self) -> PushModule<&mut Vec<u8>> {
+        PushModule::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushModule<RequestBuf<'r>> {
+        PushModule::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableModule<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableModule::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 49u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpModuleSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableModule<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get Power Sourcing Equipment params\\.\nRequest attributes:\n- [.nested_header()](PushPse::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePse::get_header)\n- [.get_podl_pse_admin_state()](IterablePse::get_podl_pse_admin_state)\n- [.get_podl_pse_admin_control()](IterablePse::get_podl_pse_admin_control)\n- [.get_podl_pse_pw_d_status()](IterablePse::get_podl_pse_pw_d_status)\n- [.get_c33_pse_admin_state()](IterablePse::get_c33_pse_admin_state)\n- [.get_c33_pse_admin_control()](IterablePse::get_c33_pse_admin_control)\n- [.get_c33_pse_pw_d_status()](IterablePse::get_c33_pse_pw_d_status)\n- [.get_c33_pse_pw_class()](IterablePse::get_c33_pse_pw_class)\n- [.get_c33_pse_actual_pw()](IterablePse::get_c33_pse_actual_pw)\n- [.get_c33_pse_ext_state()](IterablePse::get_c33_pse_ext_state)\n- [.get_c33_pse_ext_substate()](IterablePse::get_c33_pse_ext_substate)\n- [.get_c33_pse_avail_pw_limit()](IterablePse::get_c33_pse_avail_pw_limit)\n- [.get_c33_pse_pw_limit_ranges()](IterablePse::get_c33_pse_pw_limit_ranges)\n- [.get_pse_pw_d_id()](IterablePse::get_pse_pw_d_id)\n- [.get_pse_prio_max()](IterablePse::get_pse_prio_max)\n- [.get_pse_prio()](IterablePse::get_pse_prio)\n"]
+#[derive(Debug)]
+pub struct OpPseGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPseGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPse<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPse::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPse<&mut Vec<u8>> {
+        PushPse::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPse<RequestBuf<'r>> {
+        PushPse::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePse<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePse::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 51u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPseGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePse<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get Power Sourcing Equipment params\\.\nRequest attributes:\n- [.nested_header()](PushPse::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePse::get_header)\n- [.get_podl_pse_admin_state()](IterablePse::get_podl_pse_admin_state)\n- [.get_podl_pse_admin_control()](IterablePse::get_podl_pse_admin_control)\n- [.get_podl_pse_pw_d_status()](IterablePse::get_podl_pse_pw_d_status)\n- [.get_c33_pse_admin_state()](IterablePse::get_c33_pse_admin_state)\n- [.get_c33_pse_admin_control()](IterablePse::get_c33_pse_admin_control)\n- [.get_c33_pse_pw_d_status()](IterablePse::get_c33_pse_pw_d_status)\n- [.get_c33_pse_pw_class()](IterablePse::get_c33_pse_pw_class)\n- [.get_c33_pse_actual_pw()](IterablePse::get_c33_pse_actual_pw)\n- [.get_c33_pse_ext_state()](IterablePse::get_c33_pse_ext_state)\n- [.get_c33_pse_ext_substate()](IterablePse::get_c33_pse_ext_substate)\n- [.get_c33_pse_avail_pw_limit()](IterablePse::get_c33_pse_avail_pw_limit)\n- [.get_c33_pse_pw_limit_ranges()](IterablePse::get_c33_pse_pw_limit_ranges)\n- [.get_pse_pw_d_id()](IterablePse::get_pse_pw_d_id)\n- [.get_pse_prio_max()](IterablePse::get_pse_prio_max)\n- [.get_pse_prio()](IterablePse::get_pse_prio)\n"]
+#[derive(Debug)]
+pub struct OpPseGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPseGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPse<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPse::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPse<&mut Vec<u8>> {
+        PushPse::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPse<RequestBuf<'r>> {
+        PushPse::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePse<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePse::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 51u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPseGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePse<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set Power Sourcing Equipment params\\.\nRequest attributes:\n- [.nested_header()](PushPse::nested_header)\n- [.push_podl_pse_admin_control()](PushPse::push_podl_pse_admin_control)\n- [.push_c33_pse_admin_control()](PushPse::push_c33_pse_admin_control)\n- [.push_c33_pse_avail_pw_limit()](PushPse::push_c33_pse_avail_pw_limit)\n- [.push_pse_prio()](PushPse::push_pse_prio)\n"]
+#[derive(Debug)]
+pub struct OpPseSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPseSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPse<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPse::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPse<&mut Vec<u8>> {
+        PushPse::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPse<RequestBuf<'r>> {
+        PushPse::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePse<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePse::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 52u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPseSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePse<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get RSS params\\.\nRequest attributes:\n- [.nested_header()](PushRss::nested_header)\n- [.push_start_context()](PushRss::push_start_context)\n\nReply attributes:\n- [.get_header()](IterableRss::get_header)\n- [.get_context()](IterableRss::get_context)\n- [.get_hfunc()](IterableRss::get_hfunc)\n- [.get_indir()](IterableRss::get_indir)\n- [.get_hkey()](IterableRss::get_hkey)\n- [.get_input_xfrm()](IterableRss::get_input_xfrm)\n- [.get_flow_hash()](IterableRss::get_flow_hash)\n"]
+#[derive(Debug)]
+pub struct OpRssGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpRssGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushRss<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushRss::new(buf)
+    }
+    pub fn encode(&mut self) -> PushRss<&mut Vec<u8>> {
+        PushRss::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushRss<RequestBuf<'r>> {
+        PushRss::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableRss<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableRss::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 53u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpRssGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableRss<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get RSS params\\.\nRequest attributes:\n- [.nested_header()](PushRss::nested_header)\n- [.push_context()](PushRss::push_context)\n\nReply attributes:\n- [.get_header()](IterableRss::get_header)\n- [.get_context()](IterableRss::get_context)\n- [.get_hfunc()](IterableRss::get_hfunc)\n- [.get_indir()](IterableRss::get_indir)\n- [.get_hkey()](IterableRss::get_hkey)\n- [.get_input_xfrm()](IterableRss::get_input_xfrm)\n- [.get_flow_hash()](IterableRss::get_flow_hash)\n"]
+#[derive(Debug)]
+pub struct OpRssGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpRssGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushRss<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushRss::new(buf)
+    }
+    pub fn encode(&mut self) -> PushRss<&mut Vec<u8>> {
+        PushRss::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushRss<RequestBuf<'r>> {
+        PushRss::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableRss<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableRss::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 53u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpRssGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableRss<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get PLCA params\\.\nRequest attributes:\n- [.nested_header()](PushPlca::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePlca::get_header)\n- [.get_version()](IterablePlca::get_version)\n- [.get_enabled()](IterablePlca::get_enabled)\n- [.get_status()](IterablePlca::get_status)\n- [.get_node_cnt()](IterablePlca::get_node_cnt)\n- [.get_node_id()](IterablePlca::get_node_id)\n- [.get_to_tmr()](IterablePlca::get_to_tmr)\n- [.get_burst_cnt()](IterablePlca::get_burst_cnt)\n- [.get_burst_tmr()](IterablePlca::get_burst_tmr)\n"]
+#[derive(Debug)]
+pub struct OpPlcaGetCfgDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPlcaGetCfgDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPlca<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPlca::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPlca<&mut Vec<u8>> {
+        PushPlca::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPlca<RequestBuf<'r>> {
+        PushPlca::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePlca<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePlca::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 54u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPlcaGetCfgDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePlca<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get PLCA params\\.\nRequest attributes:\n- [.nested_header()](PushPlca::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePlca::get_header)\n- [.get_version()](IterablePlca::get_version)\n- [.get_enabled()](IterablePlca::get_enabled)\n- [.get_status()](IterablePlca::get_status)\n- [.get_node_cnt()](IterablePlca::get_node_cnt)\n- [.get_node_id()](IterablePlca::get_node_id)\n- [.get_to_tmr()](IterablePlca::get_to_tmr)\n- [.get_burst_cnt()](IterablePlca::get_burst_cnt)\n- [.get_burst_tmr()](IterablePlca::get_burst_tmr)\n"]
+#[derive(Debug)]
+pub struct OpPlcaGetCfgDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPlcaGetCfgDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPlca<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPlca::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPlca<&mut Vec<u8>> {
+        PushPlca::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPlca<RequestBuf<'r>> {
+        PushPlca::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePlca<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePlca::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 54u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPlcaGetCfgDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePlca<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set PLCA params\\.\nRequest attributes:\n- [.nested_header()](PushPlca::nested_header)\n- [.push_version()](PushPlca::push_version)\n- [.push_enabled()](PushPlca::push_enabled)\n- [.push_status()](PushPlca::push_status)\n- [.push_node_cnt()](PushPlca::push_node_cnt)\n- [.push_node_id()](PushPlca::push_node_id)\n- [.push_to_tmr()](PushPlca::push_to_tmr)\n- [.push_burst_cnt()](PushPlca::push_burst_cnt)\n- [.push_burst_tmr()](PushPlca::push_burst_tmr)\n"]
+#[derive(Debug)]
+pub struct OpPlcaSetCfgDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPlcaSetCfgDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPlca<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPlca::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPlca<&mut Vec<u8>> {
+        PushPlca::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPlca<RequestBuf<'r>> {
+        PushPlca::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePlca<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePlca::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 55u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPlcaSetCfgDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePlca<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get PLCA status params\\.\nRequest attributes:\n- [.nested_header()](PushPlca::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePlca::get_header)\n- [.get_version()](IterablePlca::get_version)\n- [.get_enabled()](IterablePlca::get_enabled)\n- [.get_status()](IterablePlca::get_status)\n- [.get_node_cnt()](IterablePlca::get_node_cnt)\n- [.get_node_id()](IterablePlca::get_node_id)\n- [.get_to_tmr()](IterablePlca::get_to_tmr)\n- [.get_burst_cnt()](IterablePlca::get_burst_cnt)\n- [.get_burst_tmr()](IterablePlca::get_burst_tmr)\n"]
+#[derive(Debug)]
+pub struct OpPlcaGetStatusDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPlcaGetStatusDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPlca<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPlca::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPlca<&mut Vec<u8>> {
+        PushPlca::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPlca<RequestBuf<'r>> {
+        PushPlca::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePlca<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePlca::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 56u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPlcaGetStatusDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePlca<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get PLCA status params\\.\nRequest attributes:\n- [.nested_header()](PushPlca::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePlca::get_header)\n- [.get_version()](IterablePlca::get_version)\n- [.get_enabled()](IterablePlca::get_enabled)\n- [.get_status()](IterablePlca::get_status)\n- [.get_node_cnt()](IterablePlca::get_node_cnt)\n- [.get_node_id()](IterablePlca::get_node_id)\n- [.get_to_tmr()](IterablePlca::get_to_tmr)\n- [.get_burst_cnt()](IterablePlca::get_burst_cnt)\n- [.get_burst_tmr()](IterablePlca::get_burst_tmr)\n"]
+#[derive(Debug)]
+pub struct OpPlcaGetStatusDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPlcaGetStatusDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPlca<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPlca::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPlca<&mut Vec<u8>> {
+        PushPlca::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPlca<RequestBuf<'r>> {
+        PushPlca::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePlca<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePlca::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 56u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPlcaGetStatusDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePlca<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get MAC Merge configuration and state\nRequest attributes:\n- [.nested_header()](PushMm::nested_header)\n\nReply attributes:\n- [.get_header()](IterableMm::get_header)\n- [.get_pmac_enabled()](IterableMm::get_pmac_enabled)\n- [.get_tx_enabled()](IterableMm::get_tx_enabled)\n- [.get_tx_active()](IterableMm::get_tx_active)\n- [.get_tx_min_frag_size()](IterableMm::get_tx_min_frag_size)\n- [.get_rx_min_frag_size()](IterableMm::get_rx_min_frag_size)\n- [.get_verify_enabled()](IterableMm::get_verify_enabled)\n- [.get_verify_time()](IterableMm::get_verify_time)\n- [.get_max_verify_time()](IterableMm::get_max_verify_time)\n- [.get_stats()](IterableMm::get_stats)\n"]
+#[derive(Debug)]
+pub struct OpMmGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpMmGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushMm<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushMm::new(buf)
+    }
+    pub fn encode(&mut self) -> PushMm<&mut Vec<u8>> {
+        PushMm::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushMm<RequestBuf<'r>> {
+        PushMm::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableMm<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableMm::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 58u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpMmGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableMm<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get MAC Merge configuration and state\nRequest attributes:\n- [.nested_header()](PushMm::nested_header)\n\nReply attributes:\n- [.get_header()](IterableMm::get_header)\n- [.get_pmac_enabled()](IterableMm::get_pmac_enabled)\n- [.get_tx_enabled()](IterableMm::get_tx_enabled)\n- [.get_tx_active()](IterableMm::get_tx_active)\n- [.get_tx_min_frag_size()](IterableMm::get_tx_min_frag_size)\n- [.get_rx_min_frag_size()](IterableMm::get_rx_min_frag_size)\n- [.get_verify_enabled()](IterableMm::get_verify_enabled)\n- [.get_verify_time()](IterableMm::get_verify_time)\n- [.get_max_verify_time()](IterableMm::get_max_verify_time)\n- [.get_stats()](IterableMm::get_stats)\n"]
+#[derive(Debug)]
+pub struct OpMmGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpMmGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushMm<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushMm::new(buf)
+    }
+    pub fn encode(&mut self) -> PushMm<&mut Vec<u8>> {
+        PushMm::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushMm<RequestBuf<'r>> {
+        PushMm::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableMm<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableMm::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 58u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpMmGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableMm<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set MAC Merge configuration\nRequest attributes:\n- [.nested_header()](PushMm::nested_header)\n- [.push_pmac_enabled()](PushMm::push_pmac_enabled)\n- [.push_tx_enabled()](PushMm::push_tx_enabled)\n- [.push_tx_min_frag_size()](PushMm::push_tx_min_frag_size)\n- [.push_verify_enabled()](PushMm::push_verify_enabled)\n- [.push_verify_time()](PushMm::push_verify_time)\n"]
+#[derive(Debug)]
+pub struct OpMmSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpMmSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushMm<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushMm::new(buf)
+    }
+    pub fn encode(&mut self) -> PushMm<&mut Vec<u8>> {
+        PushMm::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushMm<RequestBuf<'r>> {
+        PushMm::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableMm<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableMm::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 59u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpMmSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableMm<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Flash transceiver module firmware\\.\nRequest attributes:\n- [.nested_header()](PushModuleFwFlash::nested_header)\n- [.push_file_name()](PushModuleFwFlash::push_file_name)\n- [.push_password()](PushModuleFwFlash::push_password)\n"]
+#[derive(Debug)]
+pub struct OpModuleFwFlashActDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpModuleFwFlashActDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushModuleFwFlash<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushModuleFwFlash::new(buf)
+    }
+    pub fn encode(&mut self) -> PushModuleFwFlash<&mut Vec<u8>> {
+        PushModuleFwFlash::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushModuleFwFlash<RequestBuf<'r>> {
+        PushModuleFwFlash::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableModuleFwFlash<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableModuleFwFlash::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 61u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpModuleFwFlashActDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableModuleFwFlash<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get PHY devices attached to an interface\nRequest attributes:\n- [.nested_header()](PushPhy::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePhy::get_header)\n- [.get_index()](IterablePhy::get_index)\n- [.get_drvname()](IterablePhy::get_drvname)\n- [.get_name()](IterablePhy::get_name)\n- [.get_upstream_type()](IterablePhy::get_upstream_type)\n- [.get_upstream_index()](IterablePhy::get_upstream_index)\n- [.get_upstream_sfp_name()](IterablePhy::get_upstream_sfp_name)\n- [.get_downstream_sfp_name()](IterablePhy::get_downstream_sfp_name)\n"]
+#[derive(Debug)]
+pub struct OpPhyGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPhyGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPhy<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPhy::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPhy<&mut Vec<u8>> {
+        PushPhy::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPhy<RequestBuf<'r>> {
+        PushPhy::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePhy<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePhy::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 63u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPhyGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePhy<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get PHY devices attached to an interface\nRequest attributes:\n- [.nested_header()](PushPhy::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePhy::get_header)\n- [.get_index()](IterablePhy::get_index)\n- [.get_drvname()](IterablePhy::get_drvname)\n- [.get_name()](IterablePhy::get_name)\n- [.get_upstream_type()](IterablePhy::get_upstream_type)\n- [.get_upstream_index()](IterablePhy::get_upstream_index)\n- [.get_upstream_sfp_name()](IterablePhy::get_upstream_sfp_name)\n- [.get_downstream_sfp_name()](IterablePhy::get_downstream_sfp_name)\n"]
+#[derive(Debug)]
+pub struct OpPhyGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpPhyGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushPhy<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushPhy::new(buf)
+    }
+    pub fn encode(&mut self) -> PushPhy<&mut Vec<u8>> {
+        PushPhy::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushPhy<RequestBuf<'r>> {
+        PushPhy::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterablePhy<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterablePhy::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 63u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpPhyGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterablePhy<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get hwtstamp config\\.\nRequest attributes:\n- [.nested_header()](PushTsconfig::nested_header)\n\nReply attributes:\n- [.get_header()](IterableTsconfig::get_header)\n- [.get_hwtstamp_provider()](IterableTsconfig::get_hwtstamp_provider)\n- [.get_tx_types()](IterableTsconfig::get_tx_types)\n- [.get_rx_filters()](IterableTsconfig::get_rx_filters)\n- [.get_hwtstamp_flags()](IterableTsconfig::get_hwtstamp_flags)\n"]
+#[derive(Debug)]
+pub struct OpTsconfigGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpTsconfigGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushTsconfig<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushTsconfig::new(buf)
+    }
+    pub fn encode(&mut self) -> PushTsconfig<&mut Vec<u8>> {
+        PushTsconfig::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushTsconfig<RequestBuf<'r>> {
+        PushTsconfig::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableTsconfig<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableTsconfig::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 65u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpTsconfigGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableTsconfig<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get hwtstamp config\\.\nRequest attributes:\n- [.nested_header()](PushTsconfig::nested_header)\n\nReply attributes:\n- [.get_header()](IterableTsconfig::get_header)\n- [.get_hwtstamp_provider()](IterableTsconfig::get_hwtstamp_provider)\n- [.get_tx_types()](IterableTsconfig::get_tx_types)\n- [.get_rx_filters()](IterableTsconfig::get_rx_filters)\n- [.get_hwtstamp_flags()](IterableTsconfig::get_hwtstamp_flags)\n"]
+#[derive(Debug)]
+pub struct OpTsconfigGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpTsconfigGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushTsconfig<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushTsconfig::new(buf)
+    }
+    pub fn encode(&mut self) -> PushTsconfig<&mut Vec<u8>> {
+        PushTsconfig::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushTsconfig<RequestBuf<'r>> {
+        PushTsconfig::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableTsconfig<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableTsconfig::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 65u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpTsconfigGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableTsconfig<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set hwtstamp config\\.\nRequest attributes:\n- [.nested_header()](PushTsconfig::nested_header)\n- [.nested_hwtstamp_provider()](PushTsconfig::nested_hwtstamp_provider)\n- [.nested_tx_types()](PushTsconfig::nested_tx_types)\n- [.nested_rx_filters()](PushTsconfig::nested_rx_filters)\n- [.nested_hwtstamp_flags()](PushTsconfig::nested_hwtstamp_flags)\n\nReply attributes:\n- [.get_header()](IterableTsconfig::get_header)\n- [.get_hwtstamp_provider()](IterableTsconfig::get_hwtstamp_provider)\n- [.get_tx_types()](IterableTsconfig::get_tx_types)\n- [.get_rx_filters()](IterableTsconfig::get_rx_filters)\n- [.get_hwtstamp_flags()](IterableTsconfig::get_hwtstamp_flags)\n"]
+#[derive(Debug)]
+pub struct OpTsconfigSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpTsconfigSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushTsconfig<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushTsconfig::new(buf)
+    }
+    pub fn encode(&mut self) -> PushTsconfig<&mut Vec<u8>> {
+        PushTsconfig::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushTsconfig<RequestBuf<'r>> {
+        PushTsconfig::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableTsconfig<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableTsconfig::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 66u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpTsconfigSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableTsconfig<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Set RSS params\\.\nRequest attributes:\n- [.nested_header()](PushRss::nested_header)\n- [.push_context()](PushRss::push_context)\n- [.push_hfunc()](PushRss::push_hfunc)\n- [.push_indir()](PushRss::push_indir)\n- [.push_hkey()](PushRss::push_hkey)\n- [.push_input_xfrm()](PushRss::push_input_xfrm)\n- [.nested_flow_hash()](PushRss::nested_flow_hash)\n"]
+#[derive(Debug)]
+pub struct OpRssSetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpRssSetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushRss<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushRss::new(buf)
+    }
+    pub fn encode(&mut self) -> PushRss<&mut Vec<u8>> {
+        PushRss::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushRss<RequestBuf<'r>> {
+        PushRss::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableRss<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableRss::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 68u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpRssSetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableRss<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Create an RSS context\\.\nRequest attributes:\n- [.nested_header()](PushRss::nested_header)\n- [.push_context()](PushRss::push_context)\n- [.push_hfunc()](PushRss::push_hfunc)\n- [.push_indir()](PushRss::push_indir)\n- [.push_hkey()](PushRss::push_hkey)\n- [.push_input_xfrm()](PushRss::push_input_xfrm)\n\nReply attributes:\n- [.get_header()](IterableRss::get_header)\n- [.get_context()](IterableRss::get_context)\n- [.get_hfunc()](IterableRss::get_hfunc)\n- [.get_indir()](IterableRss::get_indir)\n- [.get_hkey()](IterableRss::get_hkey)\n- [.get_input_xfrm()](IterableRss::get_input_xfrm)\n"]
+#[derive(Debug)]
+pub struct OpRssCreateActDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpRssCreateActDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushRss<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushRss::new(buf)
+    }
+    pub fn encode(&mut self) -> PushRss<&mut Vec<u8>> {
+        PushRss::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushRss<RequestBuf<'r>> {
+        PushRss::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableRss<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableRss::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 70u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpRssCreateActDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableRss<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Delete an RSS context\\.\nRequest attributes:\n- [.nested_header()](PushRss::nested_header)\n- [.push_context()](PushRss::push_context)\n"]
+#[derive(Debug)]
+pub struct OpRssDeleteActDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpRssDeleteActDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushRss<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushRss::new(buf)
+    }
+    pub fn encode(&mut self) -> PushRss<&mut Vec<u8>> {
+        PushRss::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushRss<RequestBuf<'r>> {
+        PushRss::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableRss<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableRss::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 72u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpRssDeleteActDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableRss<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get PHY MSE measurement data and capabilities\\.\nRequest attributes:\n- [.nested_header()](PushMse::nested_header)\n\nReply attributes:\n- [.get_header()](IterableMse::get_header)\n- [.get_capabilities()](IterableMse::get_capabilities)\n- [.get_channel_a()](IterableMse::get_channel_a)\n- [.get_channel_b()](IterableMse::get_channel_b)\n- [.get_channel_c()](IterableMse::get_channel_c)\n- [.get_channel_d()](IterableMse::get_channel_d)\n- [.get_worst_channel()](IterableMse::get_worst_channel)\n- [.get_link()](IterableMse::get_link)\n"]
+#[derive(Debug)]
+pub struct OpMseGetDump<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpMseGetDump<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self {
+            request: request.set_dump(),
+        }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushMse<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushMse::new(buf)
+    }
+    pub fn encode(&mut self) -> PushMse<&mut Vec<u8>> {
+        PushMse::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushMse<RequestBuf<'r>> {
+        PushMse::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableMse<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableMse::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 74u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpMseGetDump<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableMse<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+#[doc = "Get PHY MSE measurement data and capabilities\\.\nRequest attributes:\n- [.nested_header()](PushMse::nested_header)\n\nReply attributes:\n- [.get_header()](IterableMse::get_header)\n- [.get_capabilities()](IterableMse::get_capabilities)\n- [.get_channel_a()](IterableMse::get_channel_a)\n- [.get_channel_b()](IterableMse::get_channel_b)\n- [.get_channel_c()](IterableMse::get_channel_c)\n- [.get_channel_d()](IterableMse::get_channel_d)\n- [.get_worst_channel()](IterableMse::get_worst_channel)\n- [.get_link()](IterableMse::get_link)\n"]
+#[derive(Debug)]
+pub struct OpMseGetDo<'r> {
+    request: Request<'r>,
+}
+impl<'r> OpMseGetDo<'r> {
+    pub fn new(mut request: Request<'r>) -> Self {
+        Self::write_header(request.buf_mut());
+        Self { request: request }
+    }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushMse<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushMse::new(buf)
+    }
+    pub fn encode(&mut self) -> PushMse<&mut Vec<u8>> {
+        PushMse::new(self.request.buf_mut())
+    }
+    pub fn into_encoder(self) -> PushMse<RequestBuf<'r>> {
+        PushMse::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableMse<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableMse::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 74u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
+    }
+}
+impl NetlinkRequest for OpMseGetDo<'_> {
+    fn protocol(&self) -> Protocol {
+        Protocol::Generic("ethtool".as_bytes())
+    }
+    fn flags(&self) -> u16 {
+        self.request.flags
+    }
+    fn payload(&self) -> &[u8] {
+        self.request.buf()
+    }
+    type ReplyType<'buf> = IterableMse<'buf>;
+    fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
+        Self::decode_request(buf)
+    }
+    fn lookup(
+        buf: &[u8],
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
+    }
+}
+use crate::traits::LookupFn;
+use crate::utils::RequestBuf;
+#[derive(Debug)]
+pub struct Request<'buf> {
+    buf: RequestBuf<'buf>,
+    flags: u16,
+    writeback: Option<&'buf mut Option<RequestInfo>>,
+}
+#[allow(unused)]
+#[derive(Debug, Clone)]
+pub struct RequestInfo {
+    protocol: Protocol,
+    flags: u16,
+    name: &'static str,
+    lookup: LookupFn,
+}
+impl Request<'static> {
+    pub fn new() -> Self {
+        Self::new_from_buf(Vec::new())
+    }
+    pub fn new_from_buf(buf: Vec<u8>) -> Self {
+        Self {
+            flags: 0,
+            buf: RequestBuf::Own(buf),
+            writeback: None,
+        }
+    }
+    pub fn into_buf(self) -> Vec<u8> {
+        match self.buf {
+            RequestBuf::Own(buf) => buf,
+            _ => unreachable!(),
+        }
+    }
+}
+impl<'buf> Request<'buf> {
+    pub fn new_with_buf(buf: &'buf mut Vec<u8>) -> Self {
+        buf.clear();
+        Self::new_extend(buf)
+    }
+    pub fn new_extend(buf: &'buf mut Vec<u8>) -> Self {
+        Self {
+            flags: 0,
+            buf: RequestBuf::Ref(buf),
+            writeback: None,
+        }
+    }
+    fn do_writeback(&mut self, protocol: Protocol, name: &'static str, lookup: LookupFn) {
+        let Some(writeback) = &mut self.writeback else {
+            return;
+        };
+        **writeback = Some(RequestInfo {
+            protocol,
+            flags: self.flags,
+            name,
+            lookup,
+        })
+    }
+    pub fn buf(&self) -> &Vec<u8> {
+        self.buf.buf()
+    }
+    pub fn buf_mut(&mut self) -> &mut Vec<u8> {
+        self.buf.buf_mut()
+    }
+    #[doc = "Set `NLM_F_CREATE` flag"]
+    pub fn set_create(mut self) -> Self {
+        self.flags |= consts::NLM_F_CREATE as u16;
+        self
+    }
+    #[doc = "Set `NLM_F_EXCL` flag"]
+    pub fn set_excl(mut self) -> Self {
+        self.flags |= consts::NLM_F_EXCL as u16;
+        self
+    }
+    #[doc = "Set `NLM_F_REPLACE` flag"]
+    pub fn set_replace(mut self) -> Self {
+        self.flags |= consts::NLM_F_REPLACE as u16;
+        self
+    }
+    #[doc = "Set `NLM_F_CREATE` and `NLM_F_REPLACE` flag"]
+    pub fn set_change(self) -> Self {
+        self.set_create().set_replace()
+    }
+    #[doc = "Set `NLM_F_APPEND` flag"]
+    pub fn set_append(mut self) -> Self {
+        self.flags |= consts::NLM_F_APPEND as u16;
+        self
+    }
+    #[doc = "Set `self.flags |= flags`"]
+    pub fn set_flags(mut self, flags: u16) -> Self {
+        self.flags |= flags;
+        self
+    }
+    #[doc = "Set `self.flags ^= self.flags & flags`"]
+    pub fn unset_flags(mut self, flags: u16) -> Self {
+        self.flags ^= self.flags & flags;
+        self
+    }
+    #[doc = "Set `NLM_F_DUMP` flag"]
+    fn set_dump(mut self) -> Self {
+        self.flags |= consts::NLM_F_DUMP as u16;
+        self
+    }
+    #[doc = "Get string set from the kernel\\.\nRequest attributes:\n- [.nested_header()](PushStrset::nested_header)\n- [.nested_stringsets()](PushStrset::nested_stringsets)\n- [.push_counts_only()](PushStrset::push_counts_only)\n\nReply attributes:\n- [.get_header()](IterableStrset::get_header)\n- [.get_stringsets()](IterableStrset::get_stringsets)\n"]
+    pub fn op_strset_get_dump(self) -> OpStrsetGetDump<'buf> {
+        let mut res = OpStrsetGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-strset-get-dump",
+            OpStrsetGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get string set from the kernel\\.\nRequest attributes:\n- [.nested_header()](PushStrset::nested_header)\n- [.nested_stringsets()](PushStrset::nested_stringsets)\n- [.push_counts_only()](PushStrset::push_counts_only)\n\nReply attributes:\n- [.get_header()](IterableStrset::get_header)\n- [.get_stringsets()](IterableStrset::get_stringsets)\n"]
+    pub fn op_strset_get_do(self) -> OpStrsetGetDo<'buf> {
+        let mut res = OpStrsetGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-strset-get-do", OpStrsetGetDo::lookup);
+        res
+    }
+    #[doc = "Get link info\\.\nRequest attributes:\n- [.nested_header()](PushLinkinfo::nested_header)\n\nReply attributes:\n- [.get_header()](IterableLinkinfo::get_header)\n- [.get_port()](IterableLinkinfo::get_port)\n- [.get_phyaddr()](IterableLinkinfo::get_phyaddr)\n- [.get_tp_mdix()](IterableLinkinfo::get_tp_mdix)\n- [.get_tp_mdix_ctrl()](IterableLinkinfo::get_tp_mdix_ctrl)\n- [.get_transceiver()](IterableLinkinfo::get_transceiver)\n"]
+    pub fn op_linkinfo_get_dump(self) -> OpLinkinfoGetDump<'buf> {
+        let mut res = OpLinkinfoGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-linkinfo-get-dump",
+            OpLinkinfoGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get link info\\.\nRequest attributes:\n- [.nested_header()](PushLinkinfo::nested_header)\n\nReply attributes:\n- [.get_header()](IterableLinkinfo::get_header)\n- [.get_port()](IterableLinkinfo::get_port)\n- [.get_phyaddr()](IterableLinkinfo::get_phyaddr)\n- [.get_tp_mdix()](IterableLinkinfo::get_tp_mdix)\n- [.get_tp_mdix_ctrl()](IterableLinkinfo::get_tp_mdix_ctrl)\n- [.get_transceiver()](IterableLinkinfo::get_transceiver)\n"]
+    pub fn op_linkinfo_get_do(self) -> OpLinkinfoGetDo<'buf> {
+        let mut res = OpLinkinfoGetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-linkinfo-get-do",
+            OpLinkinfoGetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Set link info\\.\nRequest attributes:\n- [.nested_header()](PushLinkinfo::nested_header)\n- [.push_port()](PushLinkinfo::push_port)\n- [.push_phyaddr()](PushLinkinfo::push_phyaddr)\n- [.push_tp_mdix()](PushLinkinfo::push_tp_mdix)\n- [.push_tp_mdix_ctrl()](PushLinkinfo::push_tp_mdix_ctrl)\n- [.push_transceiver()](PushLinkinfo::push_transceiver)\n"]
+    pub fn op_linkinfo_set_do(self) -> OpLinkinfoSetDo<'buf> {
+        let mut res = OpLinkinfoSetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-linkinfo-set-do",
+            OpLinkinfoSetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get link modes\\.\nRequest attributes:\n- [.nested_header()](PushLinkmodes::nested_header)\n\nReply attributes:\n- [.get_header()](IterableLinkmodes::get_header)\n- [.get_autoneg()](IterableLinkmodes::get_autoneg)\n- [.get_ours()](IterableLinkmodes::get_ours)\n- [.get_peer()](IterableLinkmodes::get_peer)\n- [.get_speed()](IterableLinkmodes::get_speed)\n- [.get_duplex()](IterableLinkmodes::get_duplex)\n- [.get_master_slave_cfg()](IterableLinkmodes::get_master_slave_cfg)\n- [.get_master_slave_state()](IterableLinkmodes::get_master_slave_state)\n- [.get_lanes()](IterableLinkmodes::get_lanes)\n- [.get_rate_matching()](IterableLinkmodes::get_rate_matching)\n"]
+    pub fn op_linkmodes_get_dump(self) -> OpLinkmodesGetDump<'buf> {
+        let mut res = OpLinkmodesGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-linkmodes-get-dump",
+            OpLinkmodesGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get link modes\\.\nRequest attributes:\n- [.nested_header()](PushLinkmodes::nested_header)\n\nReply attributes:\n- [.get_header()](IterableLinkmodes::get_header)\n- [.get_autoneg()](IterableLinkmodes::get_autoneg)\n- [.get_ours()](IterableLinkmodes::get_ours)\n- [.get_peer()](IterableLinkmodes::get_peer)\n- [.get_speed()](IterableLinkmodes::get_speed)\n- [.get_duplex()](IterableLinkmodes::get_duplex)\n- [.get_master_slave_cfg()](IterableLinkmodes::get_master_slave_cfg)\n- [.get_master_slave_state()](IterableLinkmodes::get_master_slave_state)\n- [.get_lanes()](IterableLinkmodes::get_lanes)\n- [.get_rate_matching()](IterableLinkmodes::get_rate_matching)\n"]
+    pub fn op_linkmodes_get_do(self) -> OpLinkmodesGetDo<'buf> {
+        let mut res = OpLinkmodesGetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-linkmodes-get-do",
+            OpLinkmodesGetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Set link modes\\.\nRequest attributes:\n- [.nested_header()](PushLinkmodes::nested_header)\n- [.push_autoneg()](PushLinkmodes::push_autoneg)\n- [.nested_ours()](PushLinkmodes::nested_ours)\n- [.nested_peer()](PushLinkmodes::nested_peer)\n- [.push_speed()](PushLinkmodes::push_speed)\n- [.push_duplex()](PushLinkmodes::push_duplex)\n- [.push_master_slave_cfg()](PushLinkmodes::push_master_slave_cfg)\n- [.push_master_slave_state()](PushLinkmodes::push_master_slave_state)\n- [.push_lanes()](PushLinkmodes::push_lanes)\n- [.push_rate_matching()](PushLinkmodes::push_rate_matching)\n"]
+    pub fn op_linkmodes_set_do(self) -> OpLinkmodesSetDo<'buf> {
+        let mut res = OpLinkmodesSetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-linkmodes-set-do",
+            OpLinkmodesSetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get link state\\.\nRequest attributes:\n- [.nested_header()](PushLinkstate::nested_header)\n\nReply attributes:\n- [.get_header()](IterableLinkstate::get_header)\n- [.get_link()](IterableLinkstate::get_link)\n- [.get_sqi()](IterableLinkstate::get_sqi)\n- [.get_sqi_max()](IterableLinkstate::get_sqi_max)\n- [.get_ext_state()](IterableLinkstate::get_ext_state)\n- [.get_ext_substate()](IterableLinkstate::get_ext_substate)\n- [.get_ext_down_cnt()](IterableLinkstate::get_ext_down_cnt)\n"]
+    pub fn op_linkstate_get_dump(self) -> OpLinkstateGetDump<'buf> {
+        let mut res = OpLinkstateGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-linkstate-get-dump",
+            OpLinkstateGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get link state\\.\nRequest attributes:\n- [.nested_header()](PushLinkstate::nested_header)\n\nReply attributes:\n- [.get_header()](IterableLinkstate::get_header)\n- [.get_link()](IterableLinkstate::get_link)\n- [.get_sqi()](IterableLinkstate::get_sqi)\n- [.get_sqi_max()](IterableLinkstate::get_sqi_max)\n- [.get_ext_state()](IterableLinkstate::get_ext_state)\n- [.get_ext_substate()](IterableLinkstate::get_ext_substate)\n- [.get_ext_down_cnt()](IterableLinkstate::get_ext_down_cnt)\n"]
+    pub fn op_linkstate_get_do(self) -> OpLinkstateGetDo<'buf> {
+        let mut res = OpLinkstateGetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-linkstate-get-do",
+            OpLinkstateGetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get debug message mask\\.\nRequest attributes:\n- [.nested_header()](PushDebug::nested_header)\n\nReply attributes:\n- [.get_header()](IterableDebug::get_header)\n- [.get_msgmask()](IterableDebug::get_msgmask)\n"]
+    pub fn op_debug_get_dump(self) -> OpDebugGetDump<'buf> {
+        let mut res = OpDebugGetDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-debug-get-dump", OpDebugGetDump::lookup);
+        res
+    }
+    #[doc = "Get debug message mask\\.\nRequest attributes:\n- [.nested_header()](PushDebug::nested_header)\n\nReply attributes:\n- [.get_header()](IterableDebug::get_header)\n- [.get_msgmask()](IterableDebug::get_msgmask)\n"]
+    pub fn op_debug_get_do(self) -> OpDebugGetDo<'buf> {
+        let mut res = OpDebugGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-debug-get-do", OpDebugGetDo::lookup);
+        res
+    }
+    #[doc = "Set debug message mask\\.\nRequest attributes:\n- [.nested_header()](PushDebug::nested_header)\n- [.nested_msgmask()](PushDebug::nested_msgmask)\n"]
+    pub fn op_debug_set_do(self) -> OpDebugSetDo<'buf> {
+        let mut res = OpDebugSetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-debug-set-do", OpDebugSetDo::lookup);
+        res
+    }
+    #[doc = "Get WOL params\\.\nRequest attributes:\n- [.nested_header()](PushWol::nested_header)\n\nReply attributes:\n- [.get_header()](IterableWol::get_header)\n- [.get_modes()](IterableWol::get_modes)\n- [.get_sopass()](IterableWol::get_sopass)\n"]
+    pub fn op_wol_get_dump(self) -> OpWolGetDump<'buf> {
+        let mut res = OpWolGetDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-wol-get-dump", OpWolGetDump::lookup);
+        res
+    }
+    #[doc = "Get WOL params\\.\nRequest attributes:\n- [.nested_header()](PushWol::nested_header)\n\nReply attributes:\n- [.get_header()](IterableWol::get_header)\n- [.get_modes()](IterableWol::get_modes)\n- [.get_sopass()](IterableWol::get_sopass)\n"]
+    pub fn op_wol_get_do(self) -> OpWolGetDo<'buf> {
+        let mut res = OpWolGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-wol-get-do", OpWolGetDo::lookup);
+        res
+    }
+    #[doc = "Set WOL params\\.\nRequest attributes:\n- [.nested_header()](PushWol::nested_header)\n- [.nested_modes()](PushWol::nested_modes)\n- [.push_sopass()](PushWol::push_sopass)\n"]
+    pub fn op_wol_set_do(self) -> OpWolSetDo<'buf> {
+        let mut res = OpWolSetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-wol-set-do", OpWolSetDo::lookup);
+        res
+    }
+    #[doc = "Get features\\.\nRequest attributes:\n- [.nested_header()](PushFeatures::nested_header)\n\nReply attributes:\n- [.get_header()](IterableFeatures::get_header)\n- [.get_hw()](IterableFeatures::get_hw)\n- [.get_wanted()](IterableFeatures::get_wanted)\n- [.get_active()](IterableFeatures::get_active)\n- [.get_nochange()](IterableFeatures::get_nochange)\n"]
+    pub fn op_features_get_dump(self) -> OpFeaturesGetDump<'buf> {
+        let mut res = OpFeaturesGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-features-get-dump",
+            OpFeaturesGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get features\\.\nRequest attributes:\n- [.nested_header()](PushFeatures::nested_header)\n\nReply attributes:\n- [.get_header()](IterableFeatures::get_header)\n- [.get_hw()](IterableFeatures::get_hw)\n- [.get_wanted()](IterableFeatures::get_wanted)\n- [.get_active()](IterableFeatures::get_active)\n- [.get_nochange()](IterableFeatures::get_nochange)\n"]
+    pub fn op_features_get_do(self) -> OpFeaturesGetDo<'buf> {
+        let mut res = OpFeaturesGetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-features-get-do",
+            OpFeaturesGetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Set features\\.\nRequest attributes:\n- [.nested_header()](PushFeatures::nested_header)\n- [.nested_hw()](PushFeatures::nested_hw)\n- [.nested_wanted()](PushFeatures::nested_wanted)\n- [.nested_active()](PushFeatures::nested_active)\n- [.nested_nochange()](PushFeatures::nested_nochange)\n\nReply attributes:\n- [.get_header()](IterableFeatures::get_header)\n- [.get_hw()](IterableFeatures::get_hw)\n- [.get_wanted()](IterableFeatures::get_wanted)\n- [.get_active()](IterableFeatures::get_active)\n- [.get_nochange()](IterableFeatures::get_nochange)\n"]
+    pub fn op_features_set_do(self) -> OpFeaturesSetDo<'buf> {
+        let mut res = OpFeaturesSetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-features-set-do",
+            OpFeaturesSetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get device private flags\\.\nRequest attributes:\n- [.nested_header()](PushPrivflags::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePrivflags::get_header)\n- [.get_flags()](IterablePrivflags::get_flags)\n"]
+    pub fn op_privflags_get_dump(self) -> OpPrivflagsGetDump<'buf> {
+        let mut res = OpPrivflagsGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-privflags-get-dump",
+            OpPrivflagsGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get device private flags\\.\nRequest attributes:\n- [.nested_header()](PushPrivflags::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePrivflags::get_header)\n- [.get_flags()](IterablePrivflags::get_flags)\n"]
+    pub fn op_privflags_get_do(self) -> OpPrivflagsGetDo<'buf> {
+        let mut res = OpPrivflagsGetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-privflags-get-do",
+            OpPrivflagsGetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Set device private flags\\.\nRequest attributes:\n- [.nested_header()](PushPrivflags::nested_header)\n- [.nested_flags()](PushPrivflags::nested_flags)\n"]
+    pub fn op_privflags_set_do(self) -> OpPrivflagsSetDo<'buf> {
+        let mut res = OpPrivflagsSetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-privflags-set-do",
+            OpPrivflagsSetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get ring params\\.\nRequest attributes:\n- [.nested_header()](PushRings::nested_header)\n\nReply attributes:\n- [.get_header()](IterableRings::get_header)\n- [.get_rx_max()](IterableRings::get_rx_max)\n- [.get_rx_mini_max()](IterableRings::get_rx_mini_max)\n- [.get_rx_jumbo_max()](IterableRings::get_rx_jumbo_max)\n- [.get_tx_max()](IterableRings::get_tx_max)\n- [.get_rx()](IterableRings::get_rx)\n- [.get_rx_mini()](IterableRings::get_rx_mini)\n- [.get_rx_jumbo()](IterableRings::get_rx_jumbo)\n- [.get_tx()](IterableRings::get_tx)\n- [.get_rx_buf_len()](IterableRings::get_rx_buf_len)\n- [.get_tcp_data_split()](IterableRings::get_tcp_data_split)\n- [.get_cqe_size()](IterableRings::get_cqe_size)\n- [.get_tx_push()](IterableRings::get_tx_push)\n- [.get_rx_push()](IterableRings::get_rx_push)\n- [.get_tx_push_buf_len()](IterableRings::get_tx_push_buf_len)\n- [.get_tx_push_buf_len_max()](IterableRings::get_tx_push_buf_len_max)\n- [.get_hds_thresh()](IterableRings::get_hds_thresh)\n- [.get_hds_thresh_max()](IterableRings::get_hds_thresh_max)\n"]
+    pub fn op_rings_get_dump(self) -> OpRingsGetDump<'buf> {
+        let mut res = OpRingsGetDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-rings-get-dump", OpRingsGetDump::lookup);
+        res
+    }
+    #[doc = "Get ring params\\.\nRequest attributes:\n- [.nested_header()](PushRings::nested_header)\n\nReply attributes:\n- [.get_header()](IterableRings::get_header)\n- [.get_rx_max()](IterableRings::get_rx_max)\n- [.get_rx_mini_max()](IterableRings::get_rx_mini_max)\n- [.get_rx_jumbo_max()](IterableRings::get_rx_jumbo_max)\n- [.get_tx_max()](IterableRings::get_tx_max)\n- [.get_rx()](IterableRings::get_rx)\n- [.get_rx_mini()](IterableRings::get_rx_mini)\n- [.get_rx_jumbo()](IterableRings::get_rx_jumbo)\n- [.get_tx()](IterableRings::get_tx)\n- [.get_rx_buf_len()](IterableRings::get_rx_buf_len)\n- [.get_tcp_data_split()](IterableRings::get_tcp_data_split)\n- [.get_cqe_size()](IterableRings::get_cqe_size)\n- [.get_tx_push()](IterableRings::get_tx_push)\n- [.get_rx_push()](IterableRings::get_rx_push)\n- [.get_tx_push_buf_len()](IterableRings::get_tx_push_buf_len)\n- [.get_tx_push_buf_len_max()](IterableRings::get_tx_push_buf_len_max)\n- [.get_hds_thresh()](IterableRings::get_hds_thresh)\n- [.get_hds_thresh_max()](IterableRings::get_hds_thresh_max)\n"]
+    pub fn op_rings_get_do(self) -> OpRingsGetDo<'buf> {
+        let mut res = OpRingsGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-rings-get-do", OpRingsGetDo::lookup);
+        res
+    }
+    #[doc = "Set ring params\\.\nRequest attributes:\n- [.nested_header()](PushRings::nested_header)\n- [.push_rx_max()](PushRings::push_rx_max)\n- [.push_rx_mini_max()](PushRings::push_rx_mini_max)\n- [.push_rx_jumbo_max()](PushRings::push_rx_jumbo_max)\n- [.push_tx_max()](PushRings::push_tx_max)\n- [.push_rx()](PushRings::push_rx)\n- [.push_rx_mini()](PushRings::push_rx_mini)\n- [.push_rx_jumbo()](PushRings::push_rx_jumbo)\n- [.push_tx()](PushRings::push_tx)\n- [.push_rx_buf_len()](PushRings::push_rx_buf_len)\n- [.push_tcp_data_split()](PushRings::push_tcp_data_split)\n- [.push_cqe_size()](PushRings::push_cqe_size)\n- [.push_tx_push()](PushRings::push_tx_push)\n- [.push_rx_push()](PushRings::push_rx_push)\n- [.push_tx_push_buf_len()](PushRings::push_tx_push_buf_len)\n- [.push_tx_push_buf_len_max()](PushRings::push_tx_push_buf_len_max)\n- [.push_hds_thresh()](PushRings::push_hds_thresh)\n- [.push_hds_thresh_max()](PushRings::push_hds_thresh_max)\n"]
+    pub fn op_rings_set_do(self) -> OpRingsSetDo<'buf> {
+        let mut res = OpRingsSetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-rings-set-do", OpRingsSetDo::lookup);
+        res
+    }
+    #[doc = "Get channel params\\.\nRequest attributes:\n- [.nested_header()](PushChannels::nested_header)\n\nReply attributes:\n- [.get_header()](IterableChannels::get_header)\n- [.get_rx_max()](IterableChannels::get_rx_max)\n- [.get_tx_max()](IterableChannels::get_tx_max)\n- [.get_other_max()](IterableChannels::get_other_max)\n- [.get_combined_max()](IterableChannels::get_combined_max)\n- [.get_rx_count()](IterableChannels::get_rx_count)\n- [.get_tx_count()](IterableChannels::get_tx_count)\n- [.get_other_count()](IterableChannels::get_other_count)\n- [.get_combined_count()](IterableChannels::get_combined_count)\n"]
+    pub fn op_channels_get_dump(self) -> OpChannelsGetDump<'buf> {
+        let mut res = OpChannelsGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-channels-get-dump",
+            OpChannelsGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get channel params\\.\nRequest attributes:\n- [.nested_header()](PushChannels::nested_header)\n\nReply attributes:\n- [.get_header()](IterableChannels::get_header)\n- [.get_rx_max()](IterableChannels::get_rx_max)\n- [.get_tx_max()](IterableChannels::get_tx_max)\n- [.get_other_max()](IterableChannels::get_other_max)\n- [.get_combined_max()](IterableChannels::get_combined_max)\n- [.get_rx_count()](IterableChannels::get_rx_count)\n- [.get_tx_count()](IterableChannels::get_tx_count)\n- [.get_other_count()](IterableChannels::get_other_count)\n- [.get_combined_count()](IterableChannels::get_combined_count)\n"]
+    pub fn op_channels_get_do(self) -> OpChannelsGetDo<'buf> {
+        let mut res = OpChannelsGetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-channels-get-do",
+            OpChannelsGetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Set channel params\\.\nRequest attributes:\n- [.nested_header()](PushChannels::nested_header)\n- [.push_rx_max()](PushChannels::push_rx_max)\n- [.push_tx_max()](PushChannels::push_tx_max)\n- [.push_other_max()](PushChannels::push_other_max)\n- [.push_combined_max()](PushChannels::push_combined_max)\n- [.push_rx_count()](PushChannels::push_rx_count)\n- [.push_tx_count()](PushChannels::push_tx_count)\n- [.push_other_count()](PushChannels::push_other_count)\n- [.push_combined_count()](PushChannels::push_combined_count)\n"]
+    pub fn op_channels_set_do(self) -> OpChannelsSetDo<'buf> {
+        let mut res = OpChannelsSetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-channels-set-do",
+            OpChannelsSetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get coalesce params\\.\nRequest attributes:\n- [.nested_header()](PushCoalesce::nested_header)\n\nReply attributes:\n- [.get_header()](IterableCoalesce::get_header)\n- [.get_rx_usecs()](IterableCoalesce::get_rx_usecs)\n- [.get_rx_max_frames()](IterableCoalesce::get_rx_max_frames)\n- [.get_rx_usecs_irq()](IterableCoalesce::get_rx_usecs_irq)\n- [.get_rx_max_frames_irq()](IterableCoalesce::get_rx_max_frames_irq)\n- [.get_tx_usecs()](IterableCoalesce::get_tx_usecs)\n- [.get_tx_max_frames()](IterableCoalesce::get_tx_max_frames)\n- [.get_tx_usecs_irq()](IterableCoalesce::get_tx_usecs_irq)\n- [.get_tx_max_frames_irq()](IterableCoalesce::get_tx_max_frames_irq)\n- [.get_stats_block_usecs()](IterableCoalesce::get_stats_block_usecs)\n- [.get_use_adaptive_rx()](IterableCoalesce::get_use_adaptive_rx)\n- [.get_use_adaptive_tx()](IterableCoalesce::get_use_adaptive_tx)\n- [.get_pkt_rate_low()](IterableCoalesce::get_pkt_rate_low)\n- [.get_rx_usecs_low()](IterableCoalesce::get_rx_usecs_low)\n- [.get_rx_max_frames_low()](IterableCoalesce::get_rx_max_frames_low)\n- [.get_tx_usecs_low()](IterableCoalesce::get_tx_usecs_low)\n- [.get_tx_max_frames_low()](IterableCoalesce::get_tx_max_frames_low)\n- [.get_pkt_rate_high()](IterableCoalesce::get_pkt_rate_high)\n- [.get_rx_usecs_high()](IterableCoalesce::get_rx_usecs_high)\n- [.get_rx_max_frames_high()](IterableCoalesce::get_rx_max_frames_high)\n- [.get_tx_usecs_high()](IterableCoalesce::get_tx_usecs_high)\n- [.get_tx_max_frames_high()](IterableCoalesce::get_tx_max_frames_high)\n- [.get_rate_sample_interval()](IterableCoalesce::get_rate_sample_interval)\n- [.get_use_cqe_mode_tx()](IterableCoalesce::get_use_cqe_mode_tx)\n- [.get_use_cqe_mode_rx()](IterableCoalesce::get_use_cqe_mode_rx)\n- [.get_tx_aggr_max_bytes()](IterableCoalesce::get_tx_aggr_max_bytes)\n- [.get_tx_aggr_max_frames()](IterableCoalesce::get_tx_aggr_max_frames)\n- [.get_tx_aggr_time_usecs()](IterableCoalesce::get_tx_aggr_time_usecs)\n- [.get_rx_profile()](IterableCoalesce::get_rx_profile)\n- [.get_tx_profile()](IterableCoalesce::get_tx_profile)\n"]
+    pub fn op_coalesce_get_dump(self) -> OpCoalesceGetDump<'buf> {
+        let mut res = OpCoalesceGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-coalesce-get-dump",
+            OpCoalesceGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get coalesce params\\.\nRequest attributes:\n- [.nested_header()](PushCoalesce::nested_header)\n\nReply attributes:\n- [.get_header()](IterableCoalesce::get_header)\n- [.get_rx_usecs()](IterableCoalesce::get_rx_usecs)\n- [.get_rx_max_frames()](IterableCoalesce::get_rx_max_frames)\n- [.get_rx_usecs_irq()](IterableCoalesce::get_rx_usecs_irq)\n- [.get_rx_max_frames_irq()](IterableCoalesce::get_rx_max_frames_irq)\n- [.get_tx_usecs()](IterableCoalesce::get_tx_usecs)\n- [.get_tx_max_frames()](IterableCoalesce::get_tx_max_frames)\n- [.get_tx_usecs_irq()](IterableCoalesce::get_tx_usecs_irq)\n- [.get_tx_max_frames_irq()](IterableCoalesce::get_tx_max_frames_irq)\n- [.get_stats_block_usecs()](IterableCoalesce::get_stats_block_usecs)\n- [.get_use_adaptive_rx()](IterableCoalesce::get_use_adaptive_rx)\n- [.get_use_adaptive_tx()](IterableCoalesce::get_use_adaptive_tx)\n- [.get_pkt_rate_low()](IterableCoalesce::get_pkt_rate_low)\n- [.get_rx_usecs_low()](IterableCoalesce::get_rx_usecs_low)\n- [.get_rx_max_frames_low()](IterableCoalesce::get_rx_max_frames_low)\n- [.get_tx_usecs_low()](IterableCoalesce::get_tx_usecs_low)\n- [.get_tx_max_frames_low()](IterableCoalesce::get_tx_max_frames_low)\n- [.get_pkt_rate_high()](IterableCoalesce::get_pkt_rate_high)\n- [.get_rx_usecs_high()](IterableCoalesce::get_rx_usecs_high)\n- [.get_rx_max_frames_high()](IterableCoalesce::get_rx_max_frames_high)\n- [.get_tx_usecs_high()](IterableCoalesce::get_tx_usecs_high)\n- [.get_tx_max_frames_high()](IterableCoalesce::get_tx_max_frames_high)\n- [.get_rate_sample_interval()](IterableCoalesce::get_rate_sample_interval)\n- [.get_use_cqe_mode_tx()](IterableCoalesce::get_use_cqe_mode_tx)\n- [.get_use_cqe_mode_rx()](IterableCoalesce::get_use_cqe_mode_rx)\n- [.get_tx_aggr_max_bytes()](IterableCoalesce::get_tx_aggr_max_bytes)\n- [.get_tx_aggr_max_frames()](IterableCoalesce::get_tx_aggr_max_frames)\n- [.get_tx_aggr_time_usecs()](IterableCoalesce::get_tx_aggr_time_usecs)\n- [.get_rx_profile()](IterableCoalesce::get_rx_profile)\n- [.get_tx_profile()](IterableCoalesce::get_tx_profile)\n"]
+    pub fn op_coalesce_get_do(self) -> OpCoalesceGetDo<'buf> {
+        let mut res = OpCoalesceGetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-coalesce-get-do",
+            OpCoalesceGetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Set coalesce params\\.\nRequest attributes:\n- [.nested_header()](PushCoalesce::nested_header)\n- [.push_rx_usecs()](PushCoalesce::push_rx_usecs)\n- [.push_rx_max_frames()](PushCoalesce::push_rx_max_frames)\n- [.push_rx_usecs_irq()](PushCoalesce::push_rx_usecs_irq)\n- [.push_rx_max_frames_irq()](PushCoalesce::push_rx_max_frames_irq)\n- [.push_tx_usecs()](PushCoalesce::push_tx_usecs)\n- [.push_tx_max_frames()](PushCoalesce::push_tx_max_frames)\n- [.push_tx_usecs_irq()](PushCoalesce::push_tx_usecs_irq)\n- [.push_tx_max_frames_irq()](PushCoalesce::push_tx_max_frames_irq)\n- [.push_stats_block_usecs()](PushCoalesce::push_stats_block_usecs)\n- [.push_use_adaptive_rx()](PushCoalesce::push_use_adaptive_rx)\n- [.push_use_adaptive_tx()](PushCoalesce::push_use_adaptive_tx)\n- [.push_pkt_rate_low()](PushCoalesce::push_pkt_rate_low)\n- [.push_rx_usecs_low()](PushCoalesce::push_rx_usecs_low)\n- [.push_rx_max_frames_low()](PushCoalesce::push_rx_max_frames_low)\n- [.push_tx_usecs_low()](PushCoalesce::push_tx_usecs_low)\n- [.push_tx_max_frames_low()](PushCoalesce::push_tx_max_frames_low)\n- [.push_pkt_rate_high()](PushCoalesce::push_pkt_rate_high)\n- [.push_rx_usecs_high()](PushCoalesce::push_rx_usecs_high)\n- [.push_rx_max_frames_high()](PushCoalesce::push_rx_max_frames_high)\n- [.push_tx_usecs_high()](PushCoalesce::push_tx_usecs_high)\n- [.push_tx_max_frames_high()](PushCoalesce::push_tx_max_frames_high)\n- [.push_rate_sample_interval()](PushCoalesce::push_rate_sample_interval)\n- [.push_use_cqe_mode_tx()](PushCoalesce::push_use_cqe_mode_tx)\n- [.push_use_cqe_mode_rx()](PushCoalesce::push_use_cqe_mode_rx)\n- [.push_tx_aggr_max_bytes()](PushCoalesce::push_tx_aggr_max_bytes)\n- [.push_tx_aggr_max_frames()](PushCoalesce::push_tx_aggr_max_frames)\n- [.push_tx_aggr_time_usecs()](PushCoalesce::push_tx_aggr_time_usecs)\n- [.nested_rx_profile()](PushCoalesce::nested_rx_profile)\n- [.nested_tx_profile()](PushCoalesce::nested_tx_profile)\n"]
+    pub fn op_coalesce_set_do(self) -> OpCoalesceSetDo<'buf> {
+        let mut res = OpCoalesceSetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-coalesce-set-do",
+            OpCoalesceSetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get pause params\\.\nRequest attributes:\n- [.nested_header()](PushPause::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePause::get_header)\n- [.get_autoneg()](IterablePause::get_autoneg)\n- [.get_rx()](IterablePause::get_rx)\n- [.get_tx()](IterablePause::get_tx)\n- [.get_stats()](IterablePause::get_stats)\n- [.get_stats_src()](IterablePause::get_stats_src)\n"]
+    pub fn op_pause_get_dump(self) -> OpPauseGetDump<'buf> {
+        let mut res = OpPauseGetDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-pause-get-dump", OpPauseGetDump::lookup);
+        res
+    }
+    #[doc = "Get pause params\\.\nRequest attributes:\n- [.nested_header()](PushPause::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePause::get_header)\n- [.get_autoneg()](IterablePause::get_autoneg)\n- [.get_rx()](IterablePause::get_rx)\n- [.get_tx()](IterablePause::get_tx)\n- [.get_stats()](IterablePause::get_stats)\n- [.get_stats_src()](IterablePause::get_stats_src)\n"]
+    pub fn op_pause_get_do(self) -> OpPauseGetDo<'buf> {
+        let mut res = OpPauseGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-pause-get-do", OpPauseGetDo::lookup);
+        res
+    }
+    #[doc = "Set pause params\\.\nRequest attributes:\n- [.nested_header()](PushPause::nested_header)\n- [.push_autoneg()](PushPause::push_autoneg)\n- [.push_rx()](PushPause::push_rx)\n- [.push_tx()](PushPause::push_tx)\n- [.nested_stats()](PushPause::nested_stats)\n- [.push_stats_src()](PushPause::push_stats_src)\n"]
+    pub fn op_pause_set_do(self) -> OpPauseSetDo<'buf> {
+        let mut res = OpPauseSetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-pause-set-do", OpPauseSetDo::lookup);
+        res
+    }
+    #[doc = "Get eee params\\.\nRequest attributes:\n- [.nested_header()](PushEee::nested_header)\n\nReply attributes:\n- [.get_header()](IterableEee::get_header)\n- [.get_modes_ours()](IterableEee::get_modes_ours)\n- [.get_modes_peer()](IterableEee::get_modes_peer)\n- [.get_active()](IterableEee::get_active)\n- [.get_enabled()](IterableEee::get_enabled)\n- [.get_tx_lpi_enabled()](IterableEee::get_tx_lpi_enabled)\n- [.get_tx_lpi_timer()](IterableEee::get_tx_lpi_timer)\n"]
+    pub fn op_eee_get_dump(self) -> OpEeeGetDump<'buf> {
+        let mut res = OpEeeGetDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-eee-get-dump", OpEeeGetDump::lookup);
+        res
+    }
+    #[doc = "Get eee params\\.\nRequest attributes:\n- [.nested_header()](PushEee::nested_header)\n\nReply attributes:\n- [.get_header()](IterableEee::get_header)\n- [.get_modes_ours()](IterableEee::get_modes_ours)\n- [.get_modes_peer()](IterableEee::get_modes_peer)\n- [.get_active()](IterableEee::get_active)\n- [.get_enabled()](IterableEee::get_enabled)\n- [.get_tx_lpi_enabled()](IterableEee::get_tx_lpi_enabled)\n- [.get_tx_lpi_timer()](IterableEee::get_tx_lpi_timer)\n"]
+    pub fn op_eee_get_do(self) -> OpEeeGetDo<'buf> {
+        let mut res = OpEeeGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-eee-get-do", OpEeeGetDo::lookup);
+        res
+    }
+    #[doc = "Set eee params\\.\nRequest attributes:\n- [.nested_header()](PushEee::nested_header)\n- [.nested_modes_ours()](PushEee::nested_modes_ours)\n- [.nested_modes_peer()](PushEee::nested_modes_peer)\n- [.push_active()](PushEee::push_active)\n- [.push_enabled()](PushEee::push_enabled)\n- [.push_tx_lpi_enabled()](PushEee::push_tx_lpi_enabled)\n- [.push_tx_lpi_timer()](PushEee::push_tx_lpi_timer)\n"]
+    pub fn op_eee_set_do(self) -> OpEeeSetDo<'buf> {
+        let mut res = OpEeeSetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-eee-set-do", OpEeeSetDo::lookup);
+        res
+    }
+    #[doc = "Get tsinfo params\\.\nRequest attributes:\n- [.nested_header()](PushTsinfo::nested_header)\n- [.nested_hwtstamp_provider()](PushTsinfo::nested_hwtstamp_provider)\n\nReply attributes:\n- [.get_header()](IterableTsinfo::get_header)\n- [.get_timestamping()](IterableTsinfo::get_timestamping)\n- [.get_tx_types()](IterableTsinfo::get_tx_types)\n- [.get_rx_filters()](IterableTsinfo::get_rx_filters)\n- [.get_phc_index()](IterableTsinfo::get_phc_index)\n- [.get_stats()](IterableTsinfo::get_stats)\n- [.get_hwtstamp_provider()](IterableTsinfo::get_hwtstamp_provider)\n- [.get_hwtstamp_source()](IterableTsinfo::get_hwtstamp_source)\n- [.get_hwtstamp_phyindex()](IterableTsinfo::get_hwtstamp_phyindex)\n"]
+    pub fn op_tsinfo_get_dump(self) -> OpTsinfoGetDump<'buf> {
+        let mut res = OpTsinfoGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-tsinfo-get-dump",
+            OpTsinfoGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get tsinfo params\\.\nRequest attributes:\n- [.nested_header()](PushTsinfo::nested_header)\n- [.nested_hwtstamp_provider()](PushTsinfo::nested_hwtstamp_provider)\n\nReply attributes:\n- [.get_header()](IterableTsinfo::get_header)\n- [.get_timestamping()](IterableTsinfo::get_timestamping)\n- [.get_tx_types()](IterableTsinfo::get_tx_types)\n- [.get_rx_filters()](IterableTsinfo::get_rx_filters)\n- [.get_phc_index()](IterableTsinfo::get_phc_index)\n- [.get_stats()](IterableTsinfo::get_stats)\n- [.get_hwtstamp_provider()](IterableTsinfo::get_hwtstamp_provider)\n- [.get_hwtstamp_source()](IterableTsinfo::get_hwtstamp_source)\n- [.get_hwtstamp_phyindex()](IterableTsinfo::get_hwtstamp_phyindex)\n"]
+    pub fn op_tsinfo_get_do(self) -> OpTsinfoGetDo<'buf> {
+        let mut res = OpTsinfoGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-tsinfo-get-do", OpTsinfoGetDo::lookup);
+        res
+    }
+    #[doc = "Cable test\\.\nRequest attributes:\n- [.nested_header()](PushCableTest::nested_header)\n"]
+    pub fn op_cable_test_act_do(self) -> OpCableTestActDo<'buf> {
+        let mut res = OpCableTestActDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-cable-test-act-do",
+            OpCableTestActDo::lookup,
+        );
+        res
+    }
+    #[doc = "Cable test TDR\\.\nRequest attributes:\n- [.nested_header()](PushCableTestTdr::nested_header)\n"]
+    pub fn op_cable_test_tdr_act_do(self) -> OpCableTestTdrActDo<'buf> {
+        let mut res = OpCableTestTdrActDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-cable-test-tdr-act-do",
+            OpCableTestTdrActDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get tsinfo params\\.\nRequest attributes:\n- [.nested_header()](PushTunnelInfo::nested_header)\n\nReply attributes:\n- [.get_header()](IterableTunnelInfo::get_header)\n- [.get_udp_ports()](IterableTunnelInfo::get_udp_ports)\n"]
+    pub fn op_tunnel_info_get_dump(self) -> OpTunnelInfoGetDump<'buf> {
+        let mut res = OpTunnelInfoGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-tunnel-info-get-dump",
+            OpTunnelInfoGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get tsinfo params\\.\nRequest attributes:\n- [.nested_header()](PushTunnelInfo::nested_header)\n\nReply attributes:\n- [.get_header()](IterableTunnelInfo::get_header)\n- [.get_udp_ports()](IterableTunnelInfo::get_udp_ports)\n"]
+    pub fn op_tunnel_info_get_do(self) -> OpTunnelInfoGetDo<'buf> {
+        let mut res = OpTunnelInfoGetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-tunnel-info-get-do",
+            OpTunnelInfoGetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get FEC params\\.\nRequest attributes:\n- [.nested_header()](PushFec::nested_header)\n\nReply attributes:\n- [.get_header()](IterableFec::get_header)\n- [.get_modes()](IterableFec::get_modes)\n- [.get_auto()](IterableFec::get_auto)\n- [.get_active()](IterableFec::get_active)\n- [.get_stats()](IterableFec::get_stats)\n"]
+    pub fn op_fec_get_dump(self) -> OpFecGetDump<'buf> {
+        let mut res = OpFecGetDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-fec-get-dump", OpFecGetDump::lookup);
+        res
+    }
+    #[doc = "Get FEC params\\.\nRequest attributes:\n- [.nested_header()](PushFec::nested_header)\n\nReply attributes:\n- [.get_header()](IterableFec::get_header)\n- [.get_modes()](IterableFec::get_modes)\n- [.get_auto()](IterableFec::get_auto)\n- [.get_active()](IterableFec::get_active)\n- [.get_stats()](IterableFec::get_stats)\n"]
+    pub fn op_fec_get_do(self) -> OpFecGetDo<'buf> {
+        let mut res = OpFecGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-fec-get-do", OpFecGetDo::lookup);
+        res
+    }
+    #[doc = "Set FEC params\\.\nRequest attributes:\n- [.nested_header()](PushFec::nested_header)\n- [.nested_modes()](PushFec::nested_modes)\n- [.push_auto()](PushFec::push_auto)\n- [.push_active()](PushFec::push_active)\n- [.nested_stats()](PushFec::nested_stats)\n"]
+    pub fn op_fec_set_do(self) -> OpFecSetDo<'buf> {
+        let mut res = OpFecSetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-fec-set-do", OpFecSetDo::lookup);
+        res
+    }
+    #[doc = "Get module EEPROM params\\.\nRequest attributes:\n- [.nested_header()](PushModuleEeprom::nested_header)\n- [.push_offset()](PushModuleEeprom::push_offset)\n- [.push_length()](PushModuleEeprom::push_length)\n- [.push_page()](PushModuleEeprom::push_page)\n- [.push_bank()](PushModuleEeprom::push_bank)\n- [.push_i2c_address()](PushModuleEeprom::push_i2c_address)\n\nReply attributes:\n- [.get_header()](IterableModuleEeprom::get_header)\n- [.get_data()](IterableModuleEeprom::get_data)\n"]
+    pub fn op_module_eeprom_get_dump(self) -> OpModuleEepromGetDump<'buf> {
+        let mut res = OpModuleEepromGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-module-eeprom-get-dump",
+            OpModuleEepromGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get module EEPROM params\\.\nRequest attributes:\n- [.nested_header()](PushModuleEeprom::nested_header)\n- [.push_offset()](PushModuleEeprom::push_offset)\n- [.push_length()](PushModuleEeprom::push_length)\n- [.push_page()](PushModuleEeprom::push_page)\n- [.push_bank()](PushModuleEeprom::push_bank)\n- [.push_i2c_address()](PushModuleEeprom::push_i2c_address)\n\nReply attributes:\n- [.get_header()](IterableModuleEeprom::get_header)\n- [.get_data()](IterableModuleEeprom::get_data)\n"]
+    pub fn op_module_eeprom_get_do(self) -> OpModuleEepromGetDo<'buf> {
+        let mut res = OpModuleEepromGetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-module-eeprom-get-do",
+            OpModuleEepromGetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get statistics\\.\nRequest attributes:\n- [.nested_header()](PushStats::nested_header)\n- [.nested_groups()](PushStats::nested_groups)\n\nReply attributes:\n- [.get_header()](IterableStats::get_header)\n- [.get_groups()](IterableStats::get_groups)\n- [.get_grp()](IterableStats::get_grp)\n- [.get_src()](IterableStats::get_src)\n"]
+    pub fn op_stats_get_dump(self) -> OpStatsGetDump<'buf> {
+        let mut res = OpStatsGetDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-stats-get-dump", OpStatsGetDump::lookup);
+        res
+    }
+    #[doc = "Get statistics\\.\nRequest attributes:\n- [.nested_header()](PushStats::nested_header)\n- [.nested_groups()](PushStats::nested_groups)\n\nReply attributes:\n- [.get_header()](IterableStats::get_header)\n- [.get_groups()](IterableStats::get_groups)\n- [.get_grp()](IterableStats::get_grp)\n- [.get_src()](IterableStats::get_src)\n"]
+    pub fn op_stats_get_do(self) -> OpStatsGetDo<'buf> {
+        let mut res = OpStatsGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-stats-get-do", OpStatsGetDo::lookup);
+        res
+    }
+    #[doc = "Get PHC VCLOCKs\\.\nRequest attributes:\n- [.nested_header()](PushPhcVclocks::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePhcVclocks::get_header)\n- [.get_num()](IterablePhcVclocks::get_num)\n"]
+    pub fn op_phc_vclocks_get_dump(self) -> OpPhcVclocksGetDump<'buf> {
+        let mut res = OpPhcVclocksGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-phc-vclocks-get-dump",
+            OpPhcVclocksGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get PHC VCLOCKs\\.\nRequest attributes:\n- [.nested_header()](PushPhcVclocks::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePhcVclocks::get_header)\n- [.get_num()](IterablePhcVclocks::get_num)\n"]
+    pub fn op_phc_vclocks_get_do(self) -> OpPhcVclocksGetDo<'buf> {
+        let mut res = OpPhcVclocksGetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-phc-vclocks-get-do",
+            OpPhcVclocksGetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get module params\\.\nRequest attributes:\n- [.nested_header()](PushModule::nested_header)\n\nReply attributes:\n- [.get_header()](IterableModule::get_header)\n- [.get_power_mode_policy()](IterableModule::get_power_mode_policy)\n- [.get_power_mode()](IterableModule::get_power_mode)\n"]
+    pub fn op_module_get_dump(self) -> OpModuleGetDump<'buf> {
+        let mut res = OpModuleGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-module-get-dump",
+            OpModuleGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get module params\\.\nRequest attributes:\n- [.nested_header()](PushModule::nested_header)\n\nReply attributes:\n- [.get_header()](IterableModule::get_header)\n- [.get_power_mode_policy()](IterableModule::get_power_mode_policy)\n- [.get_power_mode()](IterableModule::get_power_mode)\n"]
+    pub fn op_module_get_do(self) -> OpModuleGetDo<'buf> {
+        let mut res = OpModuleGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-module-get-do", OpModuleGetDo::lookup);
+        res
+    }
+    #[doc = "Set module params\\.\nRequest attributes:\n- [.nested_header()](PushModule::nested_header)\n- [.push_power_mode_policy()](PushModule::push_power_mode_policy)\n- [.push_power_mode()](PushModule::push_power_mode)\n"]
+    pub fn op_module_set_do(self) -> OpModuleSetDo<'buf> {
+        let mut res = OpModuleSetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-module-set-do", OpModuleSetDo::lookup);
+        res
+    }
+    #[doc = "Get Power Sourcing Equipment params\\.\nRequest attributes:\n- [.nested_header()](PushPse::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePse::get_header)\n- [.get_podl_pse_admin_state()](IterablePse::get_podl_pse_admin_state)\n- [.get_podl_pse_admin_control()](IterablePse::get_podl_pse_admin_control)\n- [.get_podl_pse_pw_d_status()](IterablePse::get_podl_pse_pw_d_status)\n- [.get_c33_pse_admin_state()](IterablePse::get_c33_pse_admin_state)\n- [.get_c33_pse_admin_control()](IterablePse::get_c33_pse_admin_control)\n- [.get_c33_pse_pw_d_status()](IterablePse::get_c33_pse_pw_d_status)\n- [.get_c33_pse_pw_class()](IterablePse::get_c33_pse_pw_class)\n- [.get_c33_pse_actual_pw()](IterablePse::get_c33_pse_actual_pw)\n- [.get_c33_pse_ext_state()](IterablePse::get_c33_pse_ext_state)\n- [.get_c33_pse_ext_substate()](IterablePse::get_c33_pse_ext_substate)\n- [.get_c33_pse_avail_pw_limit()](IterablePse::get_c33_pse_avail_pw_limit)\n- [.get_c33_pse_pw_limit_ranges()](IterablePse::get_c33_pse_pw_limit_ranges)\n- [.get_pse_pw_d_id()](IterablePse::get_pse_pw_d_id)\n- [.get_pse_prio_max()](IterablePse::get_pse_prio_max)\n- [.get_pse_prio()](IterablePse::get_pse_prio)\n"]
+    pub fn op_pse_get_dump(self) -> OpPseGetDump<'buf> {
+        let mut res = OpPseGetDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-pse-get-dump", OpPseGetDump::lookup);
+        res
+    }
+    #[doc = "Get Power Sourcing Equipment params\\.\nRequest attributes:\n- [.nested_header()](PushPse::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePse::get_header)\n- [.get_podl_pse_admin_state()](IterablePse::get_podl_pse_admin_state)\n- [.get_podl_pse_admin_control()](IterablePse::get_podl_pse_admin_control)\n- [.get_podl_pse_pw_d_status()](IterablePse::get_podl_pse_pw_d_status)\n- [.get_c33_pse_admin_state()](IterablePse::get_c33_pse_admin_state)\n- [.get_c33_pse_admin_control()](IterablePse::get_c33_pse_admin_control)\n- [.get_c33_pse_pw_d_status()](IterablePse::get_c33_pse_pw_d_status)\n- [.get_c33_pse_pw_class()](IterablePse::get_c33_pse_pw_class)\n- [.get_c33_pse_actual_pw()](IterablePse::get_c33_pse_actual_pw)\n- [.get_c33_pse_ext_state()](IterablePse::get_c33_pse_ext_state)\n- [.get_c33_pse_ext_substate()](IterablePse::get_c33_pse_ext_substate)\n- [.get_c33_pse_avail_pw_limit()](IterablePse::get_c33_pse_avail_pw_limit)\n- [.get_c33_pse_pw_limit_ranges()](IterablePse::get_c33_pse_pw_limit_ranges)\n- [.get_pse_pw_d_id()](IterablePse::get_pse_pw_d_id)\n- [.get_pse_prio_max()](IterablePse::get_pse_prio_max)\n- [.get_pse_prio()](IterablePse::get_pse_prio)\n"]
+    pub fn op_pse_get_do(self) -> OpPseGetDo<'buf> {
+        let mut res = OpPseGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-pse-get-do", OpPseGetDo::lookup);
+        res
+    }
+    #[doc = "Set Power Sourcing Equipment params\\.\nRequest attributes:\n- [.nested_header()](PushPse::nested_header)\n- [.push_podl_pse_admin_control()](PushPse::push_podl_pse_admin_control)\n- [.push_c33_pse_admin_control()](PushPse::push_c33_pse_admin_control)\n- [.push_c33_pse_avail_pw_limit()](PushPse::push_c33_pse_avail_pw_limit)\n- [.push_pse_prio()](PushPse::push_pse_prio)\n"]
+    pub fn op_pse_set_do(self) -> OpPseSetDo<'buf> {
+        let mut res = OpPseSetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-pse-set-do", OpPseSetDo::lookup);
+        res
+    }
+    #[doc = "Get RSS params\\.\nRequest attributes:\n- [.nested_header()](PushRss::nested_header)\n- [.push_start_context()](PushRss::push_start_context)\n\nReply attributes:\n- [.get_header()](IterableRss::get_header)\n- [.get_context()](IterableRss::get_context)\n- [.get_hfunc()](IterableRss::get_hfunc)\n- [.get_indir()](IterableRss::get_indir)\n- [.get_hkey()](IterableRss::get_hkey)\n- [.get_input_xfrm()](IterableRss::get_input_xfrm)\n- [.get_flow_hash()](IterableRss::get_flow_hash)\n"]
+    pub fn op_rss_get_dump(self) -> OpRssGetDump<'buf> {
+        let mut res = OpRssGetDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-rss-get-dump", OpRssGetDump::lookup);
+        res
+    }
+    #[doc = "Get RSS params\\.\nRequest attributes:\n- [.nested_header()](PushRss::nested_header)\n- [.push_context()](PushRss::push_context)\n\nReply attributes:\n- [.get_header()](IterableRss::get_header)\n- [.get_context()](IterableRss::get_context)\n- [.get_hfunc()](IterableRss::get_hfunc)\n- [.get_indir()](IterableRss::get_indir)\n- [.get_hkey()](IterableRss::get_hkey)\n- [.get_input_xfrm()](IterableRss::get_input_xfrm)\n- [.get_flow_hash()](IterableRss::get_flow_hash)\n"]
+    pub fn op_rss_get_do(self) -> OpRssGetDo<'buf> {
+        let mut res = OpRssGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-rss-get-do", OpRssGetDo::lookup);
+        res
+    }
+    #[doc = "Get PLCA params\\.\nRequest attributes:\n- [.nested_header()](PushPlca::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePlca::get_header)\n- [.get_version()](IterablePlca::get_version)\n- [.get_enabled()](IterablePlca::get_enabled)\n- [.get_status()](IterablePlca::get_status)\n- [.get_node_cnt()](IterablePlca::get_node_cnt)\n- [.get_node_id()](IterablePlca::get_node_id)\n- [.get_to_tmr()](IterablePlca::get_to_tmr)\n- [.get_burst_cnt()](IterablePlca::get_burst_cnt)\n- [.get_burst_tmr()](IterablePlca::get_burst_tmr)\n"]
+    pub fn op_plca_get_cfg_dump(self) -> OpPlcaGetCfgDump<'buf> {
+        let mut res = OpPlcaGetCfgDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-plca-get-cfg-dump",
+            OpPlcaGetCfgDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get PLCA params\\.\nRequest attributes:\n- [.nested_header()](PushPlca::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePlca::get_header)\n- [.get_version()](IterablePlca::get_version)\n- [.get_enabled()](IterablePlca::get_enabled)\n- [.get_status()](IterablePlca::get_status)\n- [.get_node_cnt()](IterablePlca::get_node_cnt)\n- [.get_node_id()](IterablePlca::get_node_id)\n- [.get_to_tmr()](IterablePlca::get_to_tmr)\n- [.get_burst_cnt()](IterablePlca::get_burst_cnt)\n- [.get_burst_tmr()](IterablePlca::get_burst_tmr)\n"]
+    pub fn op_plca_get_cfg_do(self) -> OpPlcaGetCfgDo<'buf> {
+        let mut res = OpPlcaGetCfgDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-plca-get-cfg-do", OpPlcaGetCfgDo::lookup);
+        res
+    }
+    #[doc = "Set PLCA params\\.\nRequest attributes:\n- [.nested_header()](PushPlca::nested_header)\n- [.push_version()](PushPlca::push_version)\n- [.push_enabled()](PushPlca::push_enabled)\n- [.push_status()](PushPlca::push_status)\n- [.push_node_cnt()](PushPlca::push_node_cnt)\n- [.push_node_id()](PushPlca::push_node_id)\n- [.push_to_tmr()](PushPlca::push_to_tmr)\n- [.push_burst_cnt()](PushPlca::push_burst_cnt)\n- [.push_burst_tmr()](PushPlca::push_burst_tmr)\n"]
+    pub fn op_plca_set_cfg_do(self) -> OpPlcaSetCfgDo<'buf> {
+        let mut res = OpPlcaSetCfgDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-plca-set-cfg-do", OpPlcaSetCfgDo::lookup);
+        res
+    }
+    #[doc = "Get PLCA status params\\.\nRequest attributes:\n- [.nested_header()](PushPlca::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePlca::get_header)\n- [.get_version()](IterablePlca::get_version)\n- [.get_enabled()](IterablePlca::get_enabled)\n- [.get_status()](IterablePlca::get_status)\n- [.get_node_cnt()](IterablePlca::get_node_cnt)\n- [.get_node_id()](IterablePlca::get_node_id)\n- [.get_to_tmr()](IterablePlca::get_to_tmr)\n- [.get_burst_cnt()](IterablePlca::get_burst_cnt)\n- [.get_burst_tmr()](IterablePlca::get_burst_tmr)\n"]
+    pub fn op_plca_get_status_dump(self) -> OpPlcaGetStatusDump<'buf> {
+        let mut res = OpPlcaGetStatusDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-plca-get-status-dump",
+            OpPlcaGetStatusDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get PLCA status params\\.\nRequest attributes:\n- [.nested_header()](PushPlca::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePlca::get_header)\n- [.get_version()](IterablePlca::get_version)\n- [.get_enabled()](IterablePlca::get_enabled)\n- [.get_status()](IterablePlca::get_status)\n- [.get_node_cnt()](IterablePlca::get_node_cnt)\n- [.get_node_id()](IterablePlca::get_node_id)\n- [.get_to_tmr()](IterablePlca::get_to_tmr)\n- [.get_burst_cnt()](IterablePlca::get_burst_cnt)\n- [.get_burst_tmr()](IterablePlca::get_burst_tmr)\n"]
+    pub fn op_plca_get_status_do(self) -> OpPlcaGetStatusDo<'buf> {
+        let mut res = OpPlcaGetStatusDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-plca-get-status-do",
+            OpPlcaGetStatusDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get MAC Merge configuration and state\nRequest attributes:\n- [.nested_header()](PushMm::nested_header)\n\nReply attributes:\n- [.get_header()](IterableMm::get_header)\n- [.get_pmac_enabled()](IterableMm::get_pmac_enabled)\n- [.get_tx_enabled()](IterableMm::get_tx_enabled)\n- [.get_tx_active()](IterableMm::get_tx_active)\n- [.get_tx_min_frag_size()](IterableMm::get_tx_min_frag_size)\n- [.get_rx_min_frag_size()](IterableMm::get_rx_min_frag_size)\n- [.get_verify_enabled()](IterableMm::get_verify_enabled)\n- [.get_verify_time()](IterableMm::get_verify_time)\n- [.get_max_verify_time()](IterableMm::get_max_verify_time)\n- [.get_stats()](IterableMm::get_stats)\n"]
+    pub fn op_mm_get_dump(self) -> OpMmGetDump<'buf> {
+        let mut res = OpMmGetDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-mm-get-dump", OpMmGetDump::lookup);
+        res
+    }
+    #[doc = "Get MAC Merge configuration and state\nRequest attributes:\n- [.nested_header()](PushMm::nested_header)\n\nReply attributes:\n- [.get_header()](IterableMm::get_header)\n- [.get_pmac_enabled()](IterableMm::get_pmac_enabled)\n- [.get_tx_enabled()](IterableMm::get_tx_enabled)\n- [.get_tx_active()](IterableMm::get_tx_active)\n- [.get_tx_min_frag_size()](IterableMm::get_tx_min_frag_size)\n- [.get_rx_min_frag_size()](IterableMm::get_rx_min_frag_size)\n- [.get_verify_enabled()](IterableMm::get_verify_enabled)\n- [.get_verify_time()](IterableMm::get_verify_time)\n- [.get_max_verify_time()](IterableMm::get_max_verify_time)\n- [.get_stats()](IterableMm::get_stats)\n"]
+    pub fn op_mm_get_do(self) -> OpMmGetDo<'buf> {
+        let mut res = OpMmGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-mm-get-do", OpMmGetDo::lookup);
+        res
+    }
+    #[doc = "Set MAC Merge configuration\nRequest attributes:\n- [.nested_header()](PushMm::nested_header)\n- [.push_pmac_enabled()](PushMm::push_pmac_enabled)\n- [.push_tx_enabled()](PushMm::push_tx_enabled)\n- [.push_tx_min_frag_size()](PushMm::push_tx_min_frag_size)\n- [.push_verify_enabled()](PushMm::push_verify_enabled)\n- [.push_verify_time()](PushMm::push_verify_time)\n"]
+    pub fn op_mm_set_do(self) -> OpMmSetDo<'buf> {
+        let mut res = OpMmSetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-mm-set-do", OpMmSetDo::lookup);
+        res
+    }
+    #[doc = "Flash transceiver module firmware\\.\nRequest attributes:\n- [.nested_header()](PushModuleFwFlash::nested_header)\n- [.push_file_name()](PushModuleFwFlash::push_file_name)\n- [.push_password()](PushModuleFwFlash::push_password)\n"]
+    pub fn op_module_fw_flash_act_do(self) -> OpModuleFwFlashActDo<'buf> {
+        let mut res = OpModuleFwFlashActDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-module-fw-flash-act-do",
+            OpModuleFwFlashActDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get PHY devices attached to an interface\nRequest attributes:\n- [.nested_header()](PushPhy::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePhy::get_header)\n- [.get_index()](IterablePhy::get_index)\n- [.get_drvname()](IterablePhy::get_drvname)\n- [.get_name()](IterablePhy::get_name)\n- [.get_upstream_type()](IterablePhy::get_upstream_type)\n- [.get_upstream_index()](IterablePhy::get_upstream_index)\n- [.get_upstream_sfp_name()](IterablePhy::get_upstream_sfp_name)\n- [.get_downstream_sfp_name()](IterablePhy::get_downstream_sfp_name)\n"]
+    pub fn op_phy_get_dump(self) -> OpPhyGetDump<'buf> {
+        let mut res = OpPhyGetDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-phy-get-dump", OpPhyGetDump::lookup);
+        res
+    }
+    #[doc = "Get PHY devices attached to an interface\nRequest attributes:\n- [.nested_header()](PushPhy::nested_header)\n\nReply attributes:\n- [.get_header()](IterablePhy::get_header)\n- [.get_index()](IterablePhy::get_index)\n- [.get_drvname()](IterablePhy::get_drvname)\n- [.get_name()](IterablePhy::get_name)\n- [.get_upstream_type()](IterablePhy::get_upstream_type)\n- [.get_upstream_index()](IterablePhy::get_upstream_index)\n- [.get_upstream_sfp_name()](IterablePhy::get_upstream_sfp_name)\n- [.get_downstream_sfp_name()](IterablePhy::get_downstream_sfp_name)\n"]
+    pub fn op_phy_get_do(self) -> OpPhyGetDo<'buf> {
+        let mut res = OpPhyGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-phy-get-do", OpPhyGetDo::lookup);
+        res
+    }
+    #[doc = "Get hwtstamp config\\.\nRequest attributes:\n- [.nested_header()](PushTsconfig::nested_header)\n\nReply attributes:\n- [.get_header()](IterableTsconfig::get_header)\n- [.get_hwtstamp_provider()](IterableTsconfig::get_hwtstamp_provider)\n- [.get_tx_types()](IterableTsconfig::get_tx_types)\n- [.get_rx_filters()](IterableTsconfig::get_rx_filters)\n- [.get_hwtstamp_flags()](IterableTsconfig::get_hwtstamp_flags)\n"]
+    pub fn op_tsconfig_get_dump(self) -> OpTsconfigGetDump<'buf> {
+        let mut res = OpTsconfigGetDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-tsconfig-get-dump",
+            OpTsconfigGetDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get hwtstamp config\\.\nRequest attributes:\n- [.nested_header()](PushTsconfig::nested_header)\n\nReply attributes:\n- [.get_header()](IterableTsconfig::get_header)\n- [.get_hwtstamp_provider()](IterableTsconfig::get_hwtstamp_provider)\n- [.get_tx_types()](IterableTsconfig::get_tx_types)\n- [.get_rx_filters()](IterableTsconfig::get_rx_filters)\n- [.get_hwtstamp_flags()](IterableTsconfig::get_hwtstamp_flags)\n"]
+    pub fn op_tsconfig_get_do(self) -> OpTsconfigGetDo<'buf> {
+        let mut res = OpTsconfigGetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-tsconfig-get-do",
+            OpTsconfigGetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Set hwtstamp config\\.\nRequest attributes:\n- [.nested_header()](PushTsconfig::nested_header)\n- [.nested_hwtstamp_provider()](PushTsconfig::nested_hwtstamp_provider)\n- [.nested_tx_types()](PushTsconfig::nested_tx_types)\n- [.nested_rx_filters()](PushTsconfig::nested_rx_filters)\n- [.nested_hwtstamp_flags()](PushTsconfig::nested_hwtstamp_flags)\n\nReply attributes:\n- [.get_header()](IterableTsconfig::get_header)\n- [.get_hwtstamp_provider()](IterableTsconfig::get_hwtstamp_provider)\n- [.get_tx_types()](IterableTsconfig::get_tx_types)\n- [.get_rx_filters()](IterableTsconfig::get_rx_filters)\n- [.get_hwtstamp_flags()](IterableTsconfig::get_hwtstamp_flags)\n"]
+    pub fn op_tsconfig_set_do(self) -> OpTsconfigSetDo<'buf> {
+        let mut res = OpTsconfigSetDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-tsconfig-set-do",
+            OpTsconfigSetDo::lookup,
+        );
+        res
+    }
+    #[doc = "Set RSS params\\.\nRequest attributes:\n- [.nested_header()](PushRss::nested_header)\n- [.push_context()](PushRss::push_context)\n- [.push_hfunc()](PushRss::push_hfunc)\n- [.push_indir()](PushRss::push_indir)\n- [.push_hkey()](PushRss::push_hkey)\n- [.push_input_xfrm()](PushRss::push_input_xfrm)\n- [.nested_flow_hash()](PushRss::nested_flow_hash)\n"]
+    pub fn op_rss_set_do(self) -> OpRssSetDo<'buf> {
+        let mut res = OpRssSetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-rss-set-do", OpRssSetDo::lookup);
+        res
+    }
+    #[doc = "Create an RSS context\\.\nRequest attributes:\n- [.nested_header()](PushRss::nested_header)\n- [.push_context()](PushRss::push_context)\n- [.push_hfunc()](PushRss::push_hfunc)\n- [.push_indir()](PushRss::push_indir)\n- [.push_hkey()](PushRss::push_hkey)\n- [.push_input_xfrm()](PushRss::push_input_xfrm)\n\nReply attributes:\n- [.get_header()](IterableRss::get_header)\n- [.get_context()](IterableRss::get_context)\n- [.get_hfunc()](IterableRss::get_hfunc)\n- [.get_indir()](IterableRss::get_indir)\n- [.get_hkey()](IterableRss::get_hkey)\n- [.get_input_xfrm()](IterableRss::get_input_xfrm)\n"]
+    pub fn op_rss_create_act_do(self) -> OpRssCreateActDo<'buf> {
+        let mut res = OpRssCreateActDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-rss-create-act-do",
+            OpRssCreateActDo::lookup,
+        );
+        res
+    }
+    #[doc = "Delete an RSS context\\.\nRequest attributes:\n- [.nested_header()](PushRss::nested_header)\n- [.push_context()](PushRss::push_context)\n"]
+    pub fn op_rss_delete_act_do(self) -> OpRssDeleteActDo<'buf> {
+        let mut res = OpRssDeleteActDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-rss-delete-act-do",
+            OpRssDeleteActDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get PHY MSE measurement data and capabilities\\.\nRequest attributes:\n- [.nested_header()](PushMse::nested_header)\n\nReply attributes:\n- [.get_header()](IterableMse::get_header)\n- [.get_capabilities()](IterableMse::get_capabilities)\n- [.get_channel_a()](IterableMse::get_channel_a)\n- [.get_channel_b()](IterableMse::get_channel_b)\n- [.get_channel_c()](IterableMse::get_channel_c)\n- [.get_channel_d()](IterableMse::get_channel_d)\n- [.get_worst_channel()](IterableMse::get_worst_channel)\n- [.get_link()](IterableMse::get_link)\n"]
+    pub fn op_mse_get_dump(self) -> OpMseGetDump<'buf> {
+        let mut res = OpMseGetDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-mse-get-dump", OpMseGetDump::lookup);
+        res
+    }
+    #[doc = "Get PHY MSE measurement data and capabilities\\.\nRequest attributes:\n- [.nested_header()](PushMse::nested_header)\n\nReply attributes:\n- [.get_header()](IterableMse::get_header)\n- [.get_capabilities()](IterableMse::get_capabilities)\n- [.get_channel_a()](IterableMse::get_channel_a)\n- [.get_channel_b()](IterableMse::get_channel_b)\n- [.get_channel_c()](IterableMse::get_channel_c)\n- [.get_channel_d()](IterableMse::get_channel_d)\n- [.get_worst_channel()](IterableMse::get_worst_channel)\n- [.get_link()](IterableMse::get_link)\n"]
+    pub fn op_mse_get_do(self) -> OpMseGetDo<'buf> {
+        let mut res = OpMseGetDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-mse-get-do", OpMseGetDo::lookup);
+        res
+    }
+}
+#[cfg(test)]
+mod generated_tests {
+    use super::*;
+    #[test]
+    fn tests() {
+        let _ = IterableChannels::get_combined_count;
+        let _ = IterableChannels::get_combined_max;
+        let _ = IterableChannels::get_header;
+        let _ = IterableChannels::get_other_count;
+        let _ = IterableChannels::get_other_max;
+        let _ = IterableChannels::get_rx_count;
+        let _ = IterableChannels::get_rx_max;
+        let _ = IterableChannels::get_tx_count;
+        let _ = IterableChannels::get_tx_max;
+        let _ = IterableCoalesce::get_header;
+        let _ = IterableCoalesce::get_pkt_rate_high;
+        let _ = IterableCoalesce::get_pkt_rate_low;
+        let _ = IterableCoalesce::get_rate_sample_interval;
+        let _ = IterableCoalesce::get_rx_max_frames;
+        let _ = IterableCoalesce::get_rx_max_frames_high;
+        let _ = IterableCoalesce::get_rx_max_frames_irq;
+        let _ = IterableCoalesce::get_rx_max_frames_low;
+        let _ = IterableCoalesce::get_rx_profile;
+        let _ = IterableCoalesce::get_rx_usecs;
+        let _ = IterableCoalesce::get_rx_usecs_high;
+        let _ = IterableCoalesce::get_rx_usecs_irq;
+        let _ = IterableCoalesce::get_rx_usecs_low;
+        let _ = IterableCoalesce::get_stats_block_usecs;
+        let _ = IterableCoalesce::get_tx_aggr_max_bytes;
+        let _ = IterableCoalesce::get_tx_aggr_max_frames;
+        let _ = IterableCoalesce::get_tx_aggr_time_usecs;
+        let _ = IterableCoalesce::get_tx_max_frames;
+        let _ = IterableCoalesce::get_tx_max_frames_high;
+        let _ = IterableCoalesce::get_tx_max_frames_irq;
+        let _ = IterableCoalesce::get_tx_max_frames_low;
+        let _ = IterableCoalesce::get_tx_profile;
+        let _ = IterableCoalesce::get_tx_usecs;
+        let _ = IterableCoalesce::get_tx_usecs_high;
+        let _ = IterableCoalesce::get_tx_usecs_irq;
+        let _ = IterableCoalesce::get_tx_usecs_low;
+        let _ = IterableCoalesce::get_use_adaptive_rx;
+        let _ = IterableCoalesce::get_use_adaptive_tx;
+        let _ = IterableCoalesce::get_use_cqe_mode_rx;
+        let _ = IterableCoalesce::get_use_cqe_mode_tx;
+        let _ = IterableDebug::get_header;
+        let _ = IterableDebug::get_msgmask;
+        let _ = IterableEee::get_active;
+        let _ = IterableEee::get_enabled;
+        let _ = IterableEee::get_header;
+        let _ = IterableEee::get_modes_ours;
+        let _ = IterableEee::get_modes_peer;
+        let _ = IterableEee::get_tx_lpi_enabled;
+        let _ = IterableEee::get_tx_lpi_timer;
+        let _ = IterableFeatures::get_active;
+        let _ = IterableFeatures::get_header;
+        let _ = IterableFeatures::get_hw;
+        let _ = IterableFeatures::get_nochange;
+        let _ = IterableFeatures::get_wanted;
+        let _ = IterableFec::get_active;
+        let _ = IterableFec::get_auto;
+        let _ = IterableFec::get_header;
+        let _ = IterableFec::get_modes;
+        let _ = IterableFec::get_stats;
+        let _ = IterableLinkinfo::get_header;
+        let _ = IterableLinkinfo::get_phyaddr;
+        let _ = IterableLinkinfo::get_port;
+        let _ = IterableLinkinfo::get_tp_mdix;
+        let _ = IterableLinkinfo::get_tp_mdix_ctrl;
+        let _ = IterableLinkinfo::get_transceiver;
+        let _ = IterableLinkmodes::get_autoneg;
+        let _ = IterableLinkmodes::get_duplex;
+        let _ = IterableLinkmodes::get_header;
+        let _ = IterableLinkmodes::get_lanes;
+        let _ = IterableLinkmodes::get_master_slave_cfg;
+        let _ = IterableLinkmodes::get_master_slave_state;
+        let _ = IterableLinkmodes::get_ours;
+        let _ = IterableLinkmodes::get_peer;
+        let _ = IterableLinkmodes::get_rate_matching;
+        let _ = IterableLinkmodes::get_speed;
+        let _ = IterableLinkstate::get_ext_down_cnt;
+        let _ = IterableLinkstate::get_ext_state;
+        let _ = IterableLinkstate::get_ext_substate;
+        let _ = IterableLinkstate::get_header;
+        let _ = IterableLinkstate::get_link;
+        let _ = IterableLinkstate::get_sqi;
+        let _ = IterableLinkstate::get_sqi_max;
+        let _ = IterableMm::get_header;
+        let _ = IterableMm::get_max_verify_time;
+        let _ = IterableMm::get_pmac_enabled;
+        let _ = IterableMm::get_rx_min_frag_size;
+        let _ = IterableMm::get_stats;
+        let _ = IterableMm::get_tx_active;
+        let _ = IterableMm::get_tx_enabled;
+        let _ = IterableMm::get_tx_min_frag_size;
+        let _ = IterableMm::get_verify_enabled;
+        let _ = IterableMm::get_verify_time;
+        let _ = IterableModule::get_header;
+        let _ = IterableModule::get_power_mode;
+        let _ = IterableModule::get_power_mode_policy;
+        let _ = IterableModuleEeprom::get_data;
+        let _ = IterableModuleEeprom::get_header;
+        let _ = IterableMse::get_capabilities;
+        let _ = IterableMse::get_channel_a;
+        let _ = IterableMse::get_channel_b;
+        let _ = IterableMse::get_channel_c;
+        let _ = IterableMse::get_channel_d;
+        let _ = IterableMse::get_header;
+        let _ = IterableMse::get_link;
+        let _ = IterableMse::get_worst_channel;
+        let _ = IterablePause::get_autoneg;
+        let _ = IterablePause::get_header;
+        let _ = IterablePause::get_rx;
+        let _ = IterablePause::get_stats;
+        let _ = IterablePause::get_stats_src;
+        let _ = IterablePause::get_tx;
+        let _ = IterablePhcVclocks::get_header;
+        let _ = IterablePhcVclocks::get_num;
+        let _ = IterablePhy::get_downstream_sfp_name;
+        let _ = IterablePhy::get_drvname;
+        let _ = IterablePhy::get_header;
+        let _ = IterablePhy::get_index;
+        let _ = IterablePhy::get_name;
+        let _ = IterablePhy::get_upstream_index;
+        let _ = IterablePhy::get_upstream_sfp_name;
+        let _ = IterablePhy::get_upstream_type;
+        let _ = IterablePlca::get_burst_cnt;
+        let _ = IterablePlca::get_burst_tmr;
+        let _ = IterablePlca::get_enabled;
+        let _ = IterablePlca::get_header;
+        let _ = IterablePlca::get_node_cnt;
+        let _ = IterablePlca::get_node_id;
+        let _ = IterablePlca::get_status;
+        let _ = IterablePlca::get_to_tmr;
+        let _ = IterablePlca::get_version;
+        let _ = IterablePrivflags::get_flags;
+        let _ = IterablePrivflags::get_header;
+        let _ = IterablePse::get_c33_pse_actual_pw;
+        let _ = IterablePse::get_c33_pse_admin_control;
+        let _ = IterablePse::get_c33_pse_admin_state;
+        let _ = IterablePse::get_c33_pse_avail_pw_limit;
+        let _ = IterablePse::get_c33_pse_ext_state;
+        let _ = IterablePse::get_c33_pse_ext_substate;
+        let _ = IterablePse::get_c33_pse_pw_class;
+        let _ = IterablePse::get_c33_pse_pw_d_status;
+        let _ = IterablePse::get_c33_pse_pw_limit_ranges;
+        let _ = IterablePse::get_header;
+        let _ = IterablePse::get_podl_pse_admin_control;
+        let _ = IterablePse::get_podl_pse_admin_state;
+        let _ = IterablePse::get_podl_pse_pw_d_status;
+        let _ = IterablePse::get_pse_prio;
+        let _ = IterablePse::get_pse_prio_max;
+        let _ = IterablePse::get_pse_pw_d_id;
+        let _ = IterableRings::get_cqe_size;
+        let _ = IterableRings::get_hds_thresh;
+        let _ = IterableRings::get_hds_thresh_max;
+        let _ = IterableRings::get_header;
+        let _ = IterableRings::get_rx;
+        let _ = IterableRings::get_rx_buf_len;
+        let _ = IterableRings::get_rx_jumbo;
+        let _ = IterableRings::get_rx_jumbo_max;
+        let _ = IterableRings::get_rx_max;
+        let _ = IterableRings::get_rx_mini;
+        let _ = IterableRings::get_rx_mini_max;
+        let _ = IterableRings::get_rx_push;
+        let _ = IterableRings::get_tcp_data_split;
+        let _ = IterableRings::get_tx;
+        let _ = IterableRings::get_tx_max;
+        let _ = IterableRings::get_tx_push;
+        let _ = IterableRings::get_tx_push_buf_len;
+        let _ = IterableRings::get_tx_push_buf_len_max;
+        let _ = IterableRss::get_context;
+        let _ = IterableRss::get_flow_hash;
+        let _ = IterableRss::get_header;
+        let _ = IterableRss::get_hfunc;
+        let _ = IterableRss::get_hkey;
+        let _ = IterableRss::get_indir;
+        let _ = IterableRss::get_input_xfrm;
+        let _ = IterableStats::get_groups;
+        let _ = IterableStats::get_grp;
+        let _ = IterableStats::get_header;
+        let _ = IterableStats::get_src;
+        let _ = IterableStrset::get_header;
+        let _ = IterableStrset::get_stringsets;
+        let _ = IterableTsconfig::get_header;
+        let _ = IterableTsconfig::get_hwtstamp_flags;
+        let _ = IterableTsconfig::get_hwtstamp_provider;
+        let _ = IterableTsconfig::get_rx_filters;
+        let _ = IterableTsconfig::get_tx_types;
+        let _ = IterableTsinfo::get_header;
+        let _ = IterableTsinfo::get_hwtstamp_phyindex;
+        let _ = IterableTsinfo::get_hwtstamp_provider;
+        let _ = IterableTsinfo::get_hwtstamp_source;
+        let _ = IterableTsinfo::get_phc_index;
+        let _ = IterableTsinfo::get_rx_filters;
+        let _ = IterableTsinfo::get_stats;
+        let _ = IterableTsinfo::get_timestamping;
+        let _ = IterableTsinfo::get_tx_types;
+        let _ = IterableTunnelInfo::get_header;
+        let _ = IterableTunnelInfo::get_udp_ports;
+        let _ = IterableWol::get_header;
+        let _ = IterableWol::get_modes;
+        let _ = IterableWol::get_sopass;
+        let _ = PushCableTest::<&mut Vec<u8>>::nested_header;
+        let _ = PushCableTestTdr::<&mut Vec<u8>>::nested_header;
+        let _ = PushChannels::<&mut Vec<u8>>::nested_header;
+        let _ = PushChannels::<&mut Vec<u8>>::push_combined_count;
+        let _ = PushChannels::<&mut Vec<u8>>::push_combined_max;
+        let _ = PushChannels::<&mut Vec<u8>>::push_other_count;
+        let _ = PushChannels::<&mut Vec<u8>>::push_other_max;
+        let _ = PushChannels::<&mut Vec<u8>>::push_rx_count;
+        let _ = PushChannels::<&mut Vec<u8>>::push_rx_max;
+        let _ = PushChannels::<&mut Vec<u8>>::push_tx_count;
+        let _ = PushChannels::<&mut Vec<u8>>::push_tx_max;
+        let _ = PushCoalesce::<&mut Vec<u8>>::nested_header;
+        let _ = PushCoalesce::<&mut Vec<u8>>::nested_rx_profile;
+        let _ = PushCoalesce::<&mut Vec<u8>>::nested_tx_profile;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_pkt_rate_high;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_pkt_rate_low;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_rate_sample_interval;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_rx_max_frames;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_rx_max_frames_high;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_rx_max_frames_irq;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_rx_max_frames_low;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_rx_usecs;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_rx_usecs_high;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_rx_usecs_irq;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_rx_usecs_low;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_stats_block_usecs;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_tx_aggr_max_bytes;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_tx_aggr_max_frames;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_tx_aggr_time_usecs;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_tx_max_frames;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_tx_max_frames_high;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_tx_max_frames_irq;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_tx_max_frames_low;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_tx_usecs;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_tx_usecs_high;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_tx_usecs_irq;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_tx_usecs_low;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_use_adaptive_rx;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_use_adaptive_tx;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_use_cqe_mode_rx;
+        let _ = PushCoalesce::<&mut Vec<u8>>::push_use_cqe_mode_tx;
+        let _ = PushDebug::<&mut Vec<u8>>::nested_header;
+        let _ = PushDebug::<&mut Vec<u8>>::nested_msgmask;
+        let _ = PushEee::<&mut Vec<u8>>::nested_header;
+        let _ = PushEee::<&mut Vec<u8>>::nested_modes_ours;
+        let _ = PushEee::<&mut Vec<u8>>::nested_modes_peer;
+        let _ = PushEee::<&mut Vec<u8>>::push_active;
+        let _ = PushEee::<&mut Vec<u8>>::push_enabled;
+        let _ = PushEee::<&mut Vec<u8>>::push_tx_lpi_enabled;
+        let _ = PushEee::<&mut Vec<u8>>::push_tx_lpi_timer;
+        let _ = PushFeatures::<&mut Vec<u8>>::nested_active;
+        let _ = PushFeatures::<&mut Vec<u8>>::nested_header;
+        let _ = PushFeatures::<&mut Vec<u8>>::nested_hw;
+        let _ = PushFeatures::<&mut Vec<u8>>::nested_nochange;
+        let _ = PushFeatures::<&mut Vec<u8>>::nested_wanted;
+        let _ = PushFec::<&mut Vec<u8>>::nested_header;
+        let _ = PushFec::<&mut Vec<u8>>::nested_modes;
+        let _ = PushFec::<&mut Vec<u8>>::nested_stats;
+        let _ = PushFec::<&mut Vec<u8>>::push_active;
+        let _ = PushFec::<&mut Vec<u8>>::push_auto;
+        let _ = PushLinkinfo::<&mut Vec<u8>>::nested_header;
+        let _ = PushLinkinfo::<&mut Vec<u8>>::push_phyaddr;
+        let _ = PushLinkinfo::<&mut Vec<u8>>::push_port;
+        let _ = PushLinkinfo::<&mut Vec<u8>>::push_tp_mdix;
+        let _ = PushLinkinfo::<&mut Vec<u8>>::push_tp_mdix_ctrl;
+        let _ = PushLinkinfo::<&mut Vec<u8>>::push_transceiver;
+        let _ = PushLinkmodes::<&mut Vec<u8>>::nested_header;
+        let _ = PushLinkmodes::<&mut Vec<u8>>::nested_ours;
+        let _ = PushLinkmodes::<&mut Vec<u8>>::nested_peer;
+        let _ = PushLinkmodes::<&mut Vec<u8>>::push_autoneg;
+        let _ = PushLinkmodes::<&mut Vec<u8>>::push_duplex;
+        let _ = PushLinkmodes::<&mut Vec<u8>>::push_lanes;
+        let _ = PushLinkmodes::<&mut Vec<u8>>::push_master_slave_cfg;
+        let _ = PushLinkmodes::<&mut Vec<u8>>::push_master_slave_state;
+        let _ = PushLinkmodes::<&mut Vec<u8>>::push_rate_matching;
+        let _ = PushLinkmodes::<&mut Vec<u8>>::push_speed;
+        let _ = PushLinkstate::<&mut Vec<u8>>::nested_header;
+        let _ = PushMm::<&mut Vec<u8>>::nested_header;
+        let _ = PushMm::<&mut Vec<u8>>::push_pmac_enabled;
+        let _ = PushMm::<&mut Vec<u8>>::push_tx_enabled;
+        let _ = PushMm::<&mut Vec<u8>>::push_tx_min_frag_size;
+        let _ = PushMm::<&mut Vec<u8>>::push_verify_enabled;
+        let _ = PushMm::<&mut Vec<u8>>::push_verify_time;
+        let _ = PushModule::<&mut Vec<u8>>::nested_header;
+        let _ = PushModule::<&mut Vec<u8>>::push_power_mode;
+        let _ = PushModule::<&mut Vec<u8>>::push_power_mode_policy;
+        let _ = PushModuleEeprom::<&mut Vec<u8>>::nested_header;
+        let _ = PushModuleEeprom::<&mut Vec<u8>>::push_bank;
+        let _ = PushModuleEeprom::<&mut Vec<u8>>::push_i2c_address;
+        let _ = PushModuleEeprom::<&mut Vec<u8>>::push_length;
+        let _ = PushModuleEeprom::<&mut Vec<u8>>::push_offset;
+        let _ = PushModuleEeprom::<&mut Vec<u8>>::push_page;
+        let _ = PushModuleFwFlash::<&mut Vec<u8>>::nested_header;
+        let _ = PushModuleFwFlash::<&mut Vec<u8>>::push_file_name;
+        let _ = PushModuleFwFlash::<&mut Vec<u8>>::push_password;
+        let _ = PushMse::<&mut Vec<u8>>::nested_header;
+        let _ = PushPause::<&mut Vec<u8>>::nested_header;
+        let _ = PushPause::<&mut Vec<u8>>::nested_stats;
+        let _ = PushPause::<&mut Vec<u8>>::push_autoneg;
+        let _ = PushPause::<&mut Vec<u8>>::push_rx;
+        let _ = PushPause::<&mut Vec<u8>>::push_stats_src;
+        let _ = PushPause::<&mut Vec<u8>>::push_tx;
+        let _ = PushPhcVclocks::<&mut Vec<u8>>::nested_header;
+        let _ = PushPhy::<&mut Vec<u8>>::nested_header;
+        let _ = PushPlca::<&mut Vec<u8>>::nested_header;
+        let _ = PushPlca::<&mut Vec<u8>>::push_burst_cnt;
+        let _ = PushPlca::<&mut Vec<u8>>::push_burst_tmr;
+        let _ = PushPlca::<&mut Vec<u8>>::push_enabled;
+        let _ = PushPlca::<&mut Vec<u8>>::push_node_cnt;
+        let _ = PushPlca::<&mut Vec<u8>>::push_node_id;
+        let _ = PushPlca::<&mut Vec<u8>>::push_status;
+        let _ = PushPlca::<&mut Vec<u8>>::push_to_tmr;
+        let _ = PushPlca::<&mut Vec<u8>>::push_version;
+        let _ = PushPrivflags::<&mut Vec<u8>>::nested_flags;
+        let _ = PushPrivflags::<&mut Vec<u8>>::nested_header;
+        let _ = PushPse::<&mut Vec<u8>>::nested_header;
+        let _ = PushPse::<&mut Vec<u8>>::push_c33_pse_admin_control;
+        let _ = PushPse::<&mut Vec<u8>>::push_c33_pse_avail_pw_limit;
+        let _ = PushPse::<&mut Vec<u8>>::push_podl_pse_admin_control;
+        let _ = PushPse::<&mut Vec<u8>>::push_pse_prio;
+        let _ = PushRings::<&mut Vec<u8>>::nested_header;
+        let _ = PushRings::<&mut Vec<u8>>::push_cqe_size;
+        let _ = PushRings::<&mut Vec<u8>>::push_hds_thresh;
+        let _ = PushRings::<&mut Vec<u8>>::push_hds_thresh_max;
+        let _ = PushRings::<&mut Vec<u8>>::push_rx;
+        let _ = PushRings::<&mut Vec<u8>>::push_rx_buf_len;
+        let _ = PushRings::<&mut Vec<u8>>::push_rx_jumbo;
+        let _ = PushRings::<&mut Vec<u8>>::push_rx_jumbo_max;
+        let _ = PushRings::<&mut Vec<u8>>::push_rx_max;
+        let _ = PushRings::<&mut Vec<u8>>::push_rx_mini;
+        let _ = PushRings::<&mut Vec<u8>>::push_rx_mini_max;
+        let _ = PushRings::<&mut Vec<u8>>::push_rx_push;
+        let _ = PushRings::<&mut Vec<u8>>::push_tcp_data_split;
+        let _ = PushRings::<&mut Vec<u8>>::push_tx;
+        let _ = PushRings::<&mut Vec<u8>>::push_tx_max;
+        let _ = PushRings::<&mut Vec<u8>>::push_tx_push;
+        let _ = PushRings::<&mut Vec<u8>>::push_tx_push_buf_len;
+        let _ = PushRings::<&mut Vec<u8>>::push_tx_push_buf_len_max;
+        let _ = PushRss::<&mut Vec<u8>>::nested_flow_hash;
+        let _ = PushRss::<&mut Vec<u8>>::nested_header;
+        let _ = PushRss::<&mut Vec<u8>>::push_context;
+        let _ = PushRss::<&mut Vec<u8>>::push_hfunc;
+        let _ = PushRss::<&mut Vec<u8>>::push_hkey;
+        let _ = PushRss::<&mut Vec<u8>>::push_indir;
+        let _ = PushRss::<&mut Vec<u8>>::push_input_xfrm;
+        let _ = PushRss::<&mut Vec<u8>>::push_start_context;
+        let _ = PushStats::<&mut Vec<u8>>::nested_groups;
+        let _ = PushStats::<&mut Vec<u8>>::nested_header;
+        let _ = PushStrset::<&mut Vec<u8>>::nested_header;
+        let _ = PushStrset::<&mut Vec<u8>>::nested_stringsets;
+        let _ = PushStrset::<&mut Vec<u8>>::push_counts_only;
+        let _ = PushTsconfig::<&mut Vec<u8>>::nested_header;
+        let _ = PushTsconfig::<&mut Vec<u8>>::nested_hwtstamp_flags;
+        let _ = PushTsconfig::<&mut Vec<u8>>::nested_hwtstamp_provider;
+        let _ = PushTsconfig::<&mut Vec<u8>>::nested_rx_filters;
+        let _ = PushTsconfig::<&mut Vec<u8>>::nested_tx_types;
+        let _ = PushTsinfo::<&mut Vec<u8>>::nested_header;
+        let _ = PushTsinfo::<&mut Vec<u8>>::nested_hwtstamp_provider;
+        let _ = PushTunnelInfo::<&mut Vec<u8>>::nested_header;
+        let _ = PushWol::<&mut Vec<u8>>::nested_header;
+        let _ = PushWol::<&mut Vec<u8>>::nested_modes;
+        let _ = PushWol::<&mut Vec<u8>>::push_sopass;
+    }
+}

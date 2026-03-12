@@ -4,7 +4,7 @@
 ## Do (request)
 
 ```rust
-PushOpGetfamilyDoRequest::new(&mut vec)
+PushOpGetfamilyDo::new(&mut vec)
   .push_family_name(val) // &CStr
   .push_family_name_bytes(val) // &[u8]
   ;
@@ -28,7 +28,7 @@ for entry in attrs.get_mcast_groups() {
 for entry in attrs.get_ops() {
   entry.get_id(); // u32
 
-  // Associated type: "OpFlags" (1 bit per enumeration)
+  // Associated type: [`OpFlags`] (1 bit per enumeration)
   entry.get_flags(); // u32
 }
 attrs.get_version(); // u32
@@ -37,7 +37,7 @@ attrs.get_version(); // u32
 ## Dump (request)
 
 ```rust
-PushOpGetfamilyDumpRequest::new(&mut vec)
+PushOpGetfamilyDump::new(&mut vec)
   ;
 ```
 
@@ -59,7 +59,7 @@ for entry in attrs.get_mcast_groups() {
 for entry in attrs.get_ops() {
   entry.get_id(); // u32
 
-  // Associated type: "OpFlags" (1 bit per enumeration)
+  // Associated type: [`OpFlags`] (1 bit per enumeration)
   entry.get_flags(); // u32
 }
 attrs.get_version(); // u32
@@ -70,7 +70,7 @@ attrs.get_version(); // u32
 ## Dump (request)
 
 ```rust
-PushOpGetpolicyDumpRequest::new(&mut vec)
+PushOpGetpolicyDump::new(&mut vec)
   .push_family_name(val) // &CStr
   .push_family_name_bytes(val) // &[u8]
   .push_family_id(val) // u16
@@ -92,7 +92,7 @@ attrs.get_family_id(); // u16
 { // Nested Policy
   let attrs = attrs.get_policy();
 
-  // Associated type: "AttrType" (enum)
+  // Associated type: [`AttrType`] (enum)
   attrs.get_type(); // u32
   attrs.get_min_value_s(); // i64
   attrs.get_max_value_s(); // i64

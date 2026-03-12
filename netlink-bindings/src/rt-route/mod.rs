@@ -1,4 +1,4 @@
-#![doc = "Route configuration over rtnetlink."]
+#![doc = "Route configuration over rtnetlink\\."]
 #![allow(clippy::all)]
 #![allow(unused_imports)]
 #![allow(unused_assignments)]
@@ -7,13 +7,14 @@
 #![allow(irrefutable_let_patterns)]
 #![allow(unreachable_code)]
 #![allow(unreachable_patterns)]
-use crate::builtin::{PushBuiltinBitfield32, PushBuiltinNfgenmsg, PushDummy, PushNlmsghdr};
+use crate::builtin::{BuiltinBitfield32, BuiltinNfgenmsg, Nlmsghdr, PushDummy};
 use crate::{
     consts,
     traits::{NetlinkRequest, Protocol},
     utils::*,
 };
-pub const PROTONAME: &CStr = c"rt-route";
+pub const PROTONAME: &str = "rt-route";
+pub const PROTONAME_CSTR: &CStr = c"rt-route";
 pub const PROTONUM: u16 = 0u16;
 #[doc = "Enum - defines an integer enumeration, with values for each entry incrementing by 1, (e.g. 0, 1, 2, 3)"]
 #[derive(Debug, Clone, Copy)]
@@ -50,20 +51,182 @@ impl RtmType {
         })
     }
 }
+#[repr(C, packed(4))]
+pub struct Rtmsg {
+    pub rtm_family: u8,
+    pub rtm_dst_len: u8,
+    pub rtm_src_len: u8,
+    pub rtm_tos: u8,
+    pub rtm_table: u8,
+    pub rtm_protocol: u8,
+    pub rtm_scope: u8,
+    #[doc = "Associated type: [`RtmType`] (enum)"]
+    pub rtm_type: u8,
+    pub rtm_flags: u32,
+}
+impl Clone for Rtmsg {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for Rtmsg {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl Rtmsg {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 12usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 12usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 12usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 12usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<Rtmsg>() == 12usize);
+        12usize
+    }
+}
+impl std::fmt::Debug for Rtmsg {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("Rtmsg")
+            .field("rtm_family", &self.rtm_family)
+            .field("rtm_dst_len", &self.rtm_dst_len)
+            .field("rtm_src_len", &self.rtm_src_len)
+            .field("rtm_tos", &self.rtm_tos)
+            .field("rtm_table", &self.rtm_table)
+            .field("rtm_protocol", &self.rtm_protocol)
+            .field("rtm_scope", &self.rtm_scope)
+            .field(
+                "rtm_type",
+                &FormatEnum(self.rtm_type.into(), RtmType::from_value),
+            )
+            .field("rtm_flags", &self.rtm_flags)
+            .finish()
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct RtaCacheinfo {
+    pub rta_clntref: u32,
+    pub rta_lastuse: u32,
+    pub rta_expires: u32,
+    pub rta_error: u32,
+    pub rta_used: u32,
+}
+impl Clone for RtaCacheinfo {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for RtaCacheinfo {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl RtaCacheinfo {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 20usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 20usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 20usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 20usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<RtaCacheinfo>() == 20usize);
+        20usize
+    }
+}
 #[derive(Clone)]
 pub enum RouteAttrs<'a> {
-    Dst(&'a [u8]),
-    Src(&'a [u8]),
+    Dst(std::net::IpAddr),
+    Src(std::net::IpAddr),
     Iif(u32),
     Oif(u32),
-    Gateway(&'a [u8]),
+    Gateway(std::net::IpAddr),
     Priority(u32),
-    Prefsrc(&'a [u8]),
+    Prefsrc(std::net::IpAddr),
     Metrics(IterableMetrics<'a>),
     Multipath(&'a [u8]),
     Protoinfo(&'a [u8]),
     Flow(u32),
-    Cacheinfo(PushRtaCacheinfo),
+    Cacheinfo(RtaCacheinfo),
     Session(&'a [u8]),
     MpAlgo(&'a [u8]),
     Table(u32),
@@ -85,7 +248,7 @@ pub enum RouteAttrs<'a> {
     Flowlabel(u32),
 }
 impl<'a> IterableRouteAttrs<'a> {
-    pub fn get_dst(&self) -> Result<&'a [u8], ErrorContext> {
+    pub fn get_dst(&self) -> Result<std::net::IpAddr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -100,7 +263,7 @@ impl<'a> IterableRouteAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_src(&self) -> Result<&'a [u8], ErrorContext> {
+    pub fn get_src(&self) -> Result<std::net::IpAddr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -145,7 +308,7 @@ impl<'a> IterableRouteAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_gateway(&self) -> Result<&'a [u8], ErrorContext> {
+    pub fn get_gateway(&self) -> Result<std::net::IpAddr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -175,7 +338,7 @@ impl<'a> IterableRouteAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_prefsrc(&self) -> Result<&'a [u8], ErrorContext> {
+    pub fn get_prefsrc(&self) -> Result<std::net::IpAddr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -250,7 +413,7 @@ impl<'a> IterableRouteAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_cacheinfo(&self) -> Result<PushRtaCacheinfo, ErrorContext> {
+    pub fn get_cacheinfo(&self) -> Result<RtaCacheinfo, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -627,12 +790,12 @@ impl<'a> Iterator for IterableRouteAttrs<'a> {
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => RouteAttrs::Dst({
-                    let res = Some(next);
+                    let res = parse_ip(next);
                     let Some(val) = res else { break };
                     val
                 }),
                 2u16 => RouteAttrs::Src({
-                    let res = Some(next);
+                    let res = parse_ip(next);
                     let Some(val) = res else { break };
                     val
                 }),
@@ -647,7 +810,7 @@ impl<'a> Iterator for IterableRouteAttrs<'a> {
                     val
                 }),
                 5u16 => RouteAttrs::Gateway({
-                    let res = Some(next);
+                    let res = parse_ip(next);
                     let Some(val) = res else { break };
                     val
                 }),
@@ -657,7 +820,7 @@ impl<'a> Iterator for IterableRouteAttrs<'a> {
                     val
                 }),
                 7u16 => RouteAttrs::Prefsrc({
-                    let res = Some(next);
+                    let res = parse_ip(next);
                     let Some(val) = res else { break };
                     val
                 }),
@@ -682,7 +845,7 @@ impl<'a> Iterator for IterableRouteAttrs<'a> {
                     val
                 }),
                 12u16 => RouteAttrs::Cacheinfo({
-                    let res = PushRtaCacheinfo::new_from_slice(next);
+                    let res = Some(RtaCacheinfo::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -852,7 +1015,7 @@ impl IterableRouteAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("RouteAttrs", offset));
             return (
                 stack,
@@ -1545,7 +1708,7 @@ impl IterableMetrics<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("Metrics", offset));
             return (stack, missing_type.and_then(|t| Metrics::attr_from_type(t)));
         }
@@ -1695,14 +1858,24 @@ impl<Prev: Rec> PushRouteAttrs<Prev> {
         }
         prev
     }
-    pub fn push_dst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
+    pub fn push_dst(mut self, value: std::net::IpAddr) -> Self {
+        push_header(self.as_rec_mut(), 1u16, {
+            match &value {
+                IpAddr::V4(_) => 4,
+                IpAddr::V6(_) => 16,
+            }
+        } as u16);
+        encode_ip(self.as_rec_mut(), value);
         self
     }
-    pub fn push_src(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
+    pub fn push_src(mut self, value: std::net::IpAddr) -> Self {
+        push_header(self.as_rec_mut(), 2u16, {
+            match &value {
+                IpAddr::V4(_) => 4,
+                IpAddr::V6(_) => 16,
+            }
+        } as u16);
+        encode_ip(self.as_rec_mut(), value);
         self
     }
     pub fn push_iif(mut self, value: u32) -> Self {
@@ -1715,9 +1888,14 @@ impl<Prev: Rec> PushRouteAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    pub fn push_gateway(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 5u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
+    pub fn push_gateway(mut self, value: std::net::IpAddr) -> Self {
+        push_header(self.as_rec_mut(), 5u16, {
+            match &value {
+                IpAddr::V4(_) => 4,
+                IpAddr::V6(_) => 16,
+            }
+        } as u16);
+        encode_ip(self.as_rec_mut(), value);
         self
     }
     pub fn push_priority(mut self, value: u32) -> Self {
@@ -1725,9 +1903,14 @@ impl<Prev: Rec> PushRouteAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    pub fn push_prefsrc(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 7u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
+    pub fn push_prefsrc(mut self, value: std::net::IpAddr) -> Self {
+        push_header(self.as_rec_mut(), 7u16, {
+            match &value {
+                IpAddr::V4(_) => 4,
+                IpAddr::V6(_) => 16,
+            }
+        } as u16);
+        encode_ip(self.as_rec_mut(), value);
         self
     }
     pub fn nested_metrics(mut self) -> PushMetrics<Self> {
@@ -1752,7 +1935,7 @@ impl<Prev: Rec> PushRouteAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    pub fn push_cacheinfo(mut self, value: PushRtaCacheinfo) -> Self {
+    pub fn push_cacheinfo(mut self, value: RtaCacheinfo) -> Self {
         push_header(self.as_rec_mut(), 12u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -1993,1460 +2176,43 @@ impl<Prev: Rec> Drop for PushMetrics<Prev> {
         }
     }
 }
-#[derive(Clone)]
-pub struct PushRtmsg {
-    pub(crate) buf: [u8; 12usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushRtmsg {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 12usize],
-        }
-    }
-}
-impl PushRtmsg {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        12usize
-    }
-    pub fn rtm_family(&self) -> u8 {
-        parse_u8(&self.buf[0usize..1usize]).unwrap()
-    }
-    pub fn set_rtm_family(&mut self, value: u8) {
-        self.buf[0usize..1usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rtm_dst_len(&self) -> u8 {
-        parse_u8(&self.buf[1usize..2usize]).unwrap()
-    }
-    pub fn set_rtm_dst_len(&mut self, value: u8) {
-        self.buf[1usize..2usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rtm_src_len(&self) -> u8 {
-        parse_u8(&self.buf[2usize..3usize]).unwrap()
-    }
-    pub fn set_rtm_src_len(&mut self, value: u8) {
-        self.buf[2usize..3usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rtm_tos(&self) -> u8 {
-        parse_u8(&self.buf[3usize..4usize]).unwrap()
-    }
-    pub fn set_rtm_tos(&mut self, value: u8) {
-        self.buf[3usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rtm_table(&self) -> u8 {
-        parse_u8(&self.buf[4usize..5usize]).unwrap()
-    }
-    pub fn set_rtm_table(&mut self, value: u8) {
-        self.buf[4usize..5usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rtm_protocol(&self) -> u8 {
-        parse_u8(&self.buf[5usize..6usize]).unwrap()
-    }
-    pub fn set_rtm_protocol(&mut self, value: u8) {
-        self.buf[5usize..6usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rtm_scope(&self) -> u8 {
-        parse_u8(&self.buf[6usize..7usize]).unwrap()
-    }
-    pub fn set_rtm_scope(&mut self, value: u8) {
-        self.buf[6usize..7usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    #[doc = "Associated type: \"RtmType\" (enum)"]
-    pub fn rtm_type(&self) -> u8 {
-        parse_u8(&self.buf[7usize..8usize]).unwrap()
-    }
-    #[doc = "Associated type: \"RtmType\" (enum)"]
-    pub fn set_rtm_type(&mut self, value: u8) {
-        self.buf[7usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rtm_flags(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
-    }
-    pub fn set_rtm_flags(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushRtmsg {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("Rtmsg")
-            .field("rtm_family", &self.rtm_family())
-            .field("rtm_dst_len", &self.rtm_dst_len())
-            .field("rtm_src_len", &self.rtm_src_len())
-            .field("rtm_tos", &self.rtm_tos())
-            .field("rtm_table", &self.rtm_table())
-            .field("rtm_protocol", &self.rtm_protocol())
-            .field("rtm_scope", &self.rtm_scope())
-            .field(
-                "rtm_type",
-                &FormatEnum(self.rtm_type().into(), RtmType::from_value),
-            )
-            .field("rtm_flags", &self.rtm_flags())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushRtaCacheinfo {
-    pub(crate) buf: [u8; 20usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushRtaCacheinfo {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 20usize],
-        }
-    }
-}
-impl PushRtaCacheinfo {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        20usize
-    }
-    pub fn rta_clntref(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_rta_clntref(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rta_lastuse(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_rta_lastuse(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rta_expires(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
-    }
-    pub fn set_rta_expires(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rta_error(&self) -> u32 {
-        parse_u32(&self.buf[12usize..16usize]).unwrap()
-    }
-    pub fn set_rta_error(&mut self, value: u32) {
-        self.buf[12usize..16usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rta_used(&self) -> u32 {
-        parse_u32(&self.buf[16usize..20usize]).unwrap()
-    }
-    pub fn set_rta_used(&mut self, value: u32) {
-        self.buf[16usize..20usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushRtaCacheinfo {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("RtaCacheinfo")
-            .field("rta_clntref", &self.rta_clntref())
-            .field("rta_lastuse", &self.rta_lastuse())
-            .field("rta_expires", &self.rta_expires())
-            .field("rta_error", &self.rta_error())
-            .field("rta_used", &self.rta_used())
-            .finish()
-    }
-}
-#[doc = "Dump route information."]
-pub struct PushOpGetrouteDumpRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetrouteDumpRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetrouteDumpRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushRtmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushRtmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetrouteDumpRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Dump route information."]
-#[derive(Clone)]
-pub enum OpGetrouteDumpRequest {}
-impl<'a> IterableOpGetrouteDumpRequest<'a> {}
-impl OpGetrouteDumpRequest {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushRtmsg, IterableOpGetrouteDumpRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushRtmsg::len()));
-        (
-            PushRtmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetrouteDumpRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        RouteAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetrouteDumpRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetrouteDumpRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetrouteDumpRequest<'a> {
-    type Item = Result<OpGetrouteDumpRequest, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetrouteDumpRequest",
-            r#type.and_then(|t| OpGetrouteDumpRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpGetrouteDumpRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetrouteDumpRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetrouteDumpRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushRtmsg::len() {
-            stack.push(("OpGetrouteDumpRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetrouteDumpRequest::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
-#[doc = "Dump route information."]
-pub struct PushOpGetrouteDumpReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetrouteDumpReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetrouteDumpReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushRtmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushRtmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_dst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_src(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_iif(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 3u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_oif(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gateway(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 5u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_priority(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 6u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_prefsrc(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 7u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn nested_metrics(mut self) -> PushMetrics<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 8u16);
-        PushMetrics {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_multipath(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 9u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_flow(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 11u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_cacheinfo(mut self, value: PushRtaCacheinfo) -> Self {
-        push_header(self.as_rec_mut(), 12u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_table(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 15u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_mark(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 16u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_mfc_stats(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 17u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_via(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 18u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_newdst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 19u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_pref(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 20u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_encap_type(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 21u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_encap(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 22u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_expires(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 23u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_pad(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 24u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_uid(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 25u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ttl_propagate(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 26u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ip_proto(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 27u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_sport(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 28u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_dport(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 29u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_nh_id(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 30u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_flowlabel(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 31u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetrouteDumpReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Dump route information."]
-#[derive(Clone)]
-pub enum OpGetrouteDumpReply<'a> {
-    Dst(&'a [u8]),
-    Src(&'a [u8]),
-    Iif(u32),
-    Oif(u32),
-    Gateway(&'a [u8]),
-    Priority(u32),
-    Prefsrc(&'a [u8]),
-    Metrics(IterableMetrics<'a>),
-    Multipath(&'a [u8]),
-    Flow(u32),
-    Cacheinfo(PushRtaCacheinfo),
-    Table(u32),
-    Mark(u32),
-    MfcStats(&'a [u8]),
-    Via(&'a [u8]),
-    Newdst(&'a [u8]),
-    Pref(u8),
-    EncapType(u16),
-    Encap(&'a [u8]),
-    Expires(u32),
-    Pad(&'a [u8]),
-    Uid(u32),
-    TtlPropagate(u8),
-    IpProto(u8),
-    Sport(u16),
-    Dport(u16),
-    NhId(u32),
-    Flowlabel(u32),
-}
-impl<'a> IterableOpGetrouteDumpReply<'a> {
-    pub fn get_dst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Dst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Dst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_src(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Src(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Src",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_iif(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Iif(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Iif",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_oif(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Oif(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Oif",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gateway(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Gateway(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Gateway",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_priority(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Priority(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Priority",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_prefsrc(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Prefsrc(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Prefsrc",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_metrics(&self) -> Result<IterableMetrics<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Metrics(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Metrics",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_multipath(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Multipath(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Multipath",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_flow(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Flow(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Flow",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_cacheinfo(&self) -> Result<PushRtaCacheinfo, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Cacheinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Cacheinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_table(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Table(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Table",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mark(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Mark(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Mark",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mfc_stats(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::MfcStats(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "MfcStats",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_via(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Via(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Via",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_newdst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Newdst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Newdst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_pref(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Pref(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Pref",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_encap_type(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::EncapType(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "EncapType",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_encap(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Encap(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Encap",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_expires(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Expires(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Expires",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Pad(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Pad",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_uid(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Uid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Uid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ttl_propagate(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::TtlPropagate(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "TtlPropagate",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ip_proto(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::IpProto(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "IpProto",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_sport(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Sport(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Sport",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_dport(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Dport(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Dport",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_nh_id(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::NhId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "NhId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_flowlabel(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDumpReply::Flowlabel(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDumpReply",
-            "Flowlabel",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetrouteDumpReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushRtmsg, IterableOpGetrouteDumpReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushRtmsg::len()));
-        (
-            PushRtmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetrouteDumpReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        RouteAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetrouteDumpReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetrouteDumpReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetrouteDumpReply<'a> {
-    type Item = Result<OpGetrouteDumpReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetrouteDumpReply::Dst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetrouteDumpReply::Src({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetrouteDumpReply::Iif({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetrouteDumpReply::Oif({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetrouteDumpReply::Gateway({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpGetrouteDumpReply::Priority({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpGetrouteDumpReply::Prefsrc({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetrouteDumpReply::Metrics({
-                    let res = Some(IterableMetrics::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpGetrouteDumpReply::Multipath({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                11u16 => OpGetrouteDumpReply::Flow({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                12u16 => OpGetrouteDumpReply::Cacheinfo({
-                    let res = PushRtaCacheinfo::new_from_slice(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                15u16 => OpGetrouteDumpReply::Table({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                16u16 => OpGetrouteDumpReply::Mark({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                17u16 => OpGetrouteDumpReply::MfcStats({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                18u16 => OpGetrouteDumpReply::Via({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                19u16 => OpGetrouteDumpReply::Newdst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                20u16 => OpGetrouteDumpReply::Pref({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                21u16 => OpGetrouteDumpReply::EncapType({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                22u16 => OpGetrouteDumpReply::Encap({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                23u16 => OpGetrouteDumpReply::Expires({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                24u16 => OpGetrouteDumpReply::Pad({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                25u16 => OpGetrouteDumpReply::Uid({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                26u16 => OpGetrouteDumpReply::TtlPropagate({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                27u16 => OpGetrouteDumpReply::IpProto({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                28u16 => OpGetrouteDumpReply::Sport({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                29u16 => OpGetrouteDumpReply::Dport({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                30u16 => OpGetrouteDumpReply::NhId({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                31u16 => OpGetrouteDumpReply::Flowlabel({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetrouteDumpReply",
-            r#type.and_then(|t| OpGetrouteDumpReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetrouteDumpReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetrouteDumpReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetrouteDumpReply::Dst(val) => fmt.field("Dst", &val),
-                OpGetrouteDumpReply::Src(val) => fmt.field("Src", &val),
-                OpGetrouteDumpReply::Iif(val) => fmt.field("Iif", &val),
-                OpGetrouteDumpReply::Oif(val) => fmt.field("Oif", &val),
-                OpGetrouteDumpReply::Gateway(val) => fmt.field("Gateway", &val),
-                OpGetrouteDumpReply::Priority(val) => fmt.field("Priority", &val),
-                OpGetrouteDumpReply::Prefsrc(val) => fmt.field("Prefsrc", &val),
-                OpGetrouteDumpReply::Metrics(val) => fmt.field("Metrics", &val),
-                OpGetrouteDumpReply::Multipath(val) => fmt.field("Multipath", &val),
-                OpGetrouteDumpReply::Flow(val) => fmt.field("Flow", &val),
-                OpGetrouteDumpReply::Cacheinfo(val) => fmt.field("Cacheinfo", &val),
-                OpGetrouteDumpReply::Table(val) => fmt.field("Table", &val),
-                OpGetrouteDumpReply::Mark(val) => fmt.field("Mark", &val),
-                OpGetrouteDumpReply::MfcStats(val) => fmt.field("MfcStats", &val),
-                OpGetrouteDumpReply::Via(val) => fmt.field("Via", &val),
-                OpGetrouteDumpReply::Newdst(val) => fmt.field("Newdst", &val),
-                OpGetrouteDumpReply::Pref(val) => fmt.field("Pref", &val),
-                OpGetrouteDumpReply::EncapType(val) => fmt.field("EncapType", &val),
-                OpGetrouteDumpReply::Encap(val) => fmt.field("Encap", &val),
-                OpGetrouteDumpReply::Expires(val) => fmt.field("Expires", &val),
-                OpGetrouteDumpReply::Pad(val) => fmt.field("Pad", &val),
-                OpGetrouteDumpReply::Uid(val) => fmt.field("Uid", &val),
-                OpGetrouteDumpReply::TtlPropagate(val) => fmt.field("TtlPropagate", &val),
-                OpGetrouteDumpReply::IpProto(val) => fmt.field("IpProto", &val),
-                OpGetrouteDumpReply::Sport(val) => fmt.field("Sport", &val),
-                OpGetrouteDumpReply::Dport(val) => fmt.field("Dport", &val),
-                OpGetrouteDumpReply::NhId(val) => fmt.field("NhId", &val),
-                OpGetrouteDumpReply::Flowlabel(val) => fmt.field("Flowlabel", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetrouteDumpReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushRtmsg::len() {
-            stack.push(("OpGetrouteDumpReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetrouteDumpReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetrouteDumpReply::Dst(val) => {
-                    if last_off == offset {
-                        stack.push(("Dst", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Src(val) => {
-                    if last_off == offset {
-                        stack.push(("Src", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Iif(val) => {
-                    if last_off == offset {
-                        stack.push(("Iif", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Oif(val) => {
-                    if last_off == offset {
-                        stack.push(("Oif", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Gateway(val) => {
-                    if last_off == offset {
-                        stack.push(("Gateway", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Priority(val) => {
-                    if last_off == offset {
-                        stack.push(("Priority", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Prefsrc(val) => {
-                    if last_off == offset {
-                        stack.push(("Prefsrc", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Metrics(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Multipath(val) => {
-                    if last_off == offset {
-                        stack.push(("Multipath", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Flow(val) => {
-                    if last_off == offset {
-                        stack.push(("Flow", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Cacheinfo(val) => {
-                    if last_off == offset {
-                        stack.push(("Cacheinfo", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Table(val) => {
-                    if last_off == offset {
-                        stack.push(("Table", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Mark(val) => {
-                    if last_off == offset {
-                        stack.push(("Mark", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::MfcStats(val) => {
-                    if last_off == offset {
-                        stack.push(("MfcStats", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Via(val) => {
-                    if last_off == offset {
-                        stack.push(("Via", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Newdst(val) => {
-                    if last_off == offset {
-                        stack.push(("Newdst", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Pref(val) => {
-                    if last_off == offset {
-                        stack.push(("Pref", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::EncapType(val) => {
-                    if last_off == offset {
-                        stack.push(("EncapType", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Encap(val) => {
-                    if last_off == offset {
-                        stack.push(("Encap", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Expires(val) => {
-                    if last_off == offset {
-                        stack.push(("Expires", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Pad(val) => {
-                    if last_off == offset {
-                        stack.push(("Pad", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Uid(val) => {
-                    if last_off == offset {
-                        stack.push(("Uid", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::TtlPropagate(val) => {
-                    if last_off == offset {
-                        stack.push(("TtlPropagate", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::IpProto(val) => {
-                    if last_off == offset {
-                        stack.push(("IpProto", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Sport(val) => {
-                    if last_off == offset {
-                        stack.push(("Sport", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Dport(val) => {
-                    if last_off == offset {
-                        stack.push(("Dport", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::NhId(val) => {
-                    if last_off == offset {
-                        stack.push(("NhId", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDumpReply::Flowlabel(val) => {
-                    if last_off == offset {
-                        stack.push(("Flowlabel", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetrouteDumpReply", cur));
-        }
-        (stack, missing)
-    }
-}
+#[doc = "Dump route information\\.\n\nReply attributes:\n- [.get_dst()](IterableRouteAttrs::get_dst)\n- [.get_src()](IterableRouteAttrs::get_src)\n- [.get_iif()](IterableRouteAttrs::get_iif)\n- [.get_oif()](IterableRouteAttrs::get_oif)\n- [.get_gateway()](IterableRouteAttrs::get_gateway)\n- [.get_priority()](IterableRouteAttrs::get_priority)\n- [.get_prefsrc()](IterableRouteAttrs::get_prefsrc)\n- [.get_metrics()](IterableRouteAttrs::get_metrics)\n- [.get_multipath()](IterableRouteAttrs::get_multipath)\n- [.get_flow()](IterableRouteAttrs::get_flow)\n- [.get_cacheinfo()](IterableRouteAttrs::get_cacheinfo)\n- [.get_table()](IterableRouteAttrs::get_table)\n- [.get_mark()](IterableRouteAttrs::get_mark)\n- [.get_mfc_stats()](IterableRouteAttrs::get_mfc_stats)\n- [.get_via()](IterableRouteAttrs::get_via)\n- [.get_newdst()](IterableRouteAttrs::get_newdst)\n- [.get_pref()](IterableRouteAttrs::get_pref)\n- [.get_encap_type()](IterableRouteAttrs::get_encap_type)\n- [.get_encap()](IterableRouteAttrs::get_encap)\n- [.get_expires()](IterableRouteAttrs::get_expires)\n- [.get_pad()](IterableRouteAttrs::get_pad)\n- [.get_uid()](IterableRouteAttrs::get_uid)\n- [.get_ttl_propagate()](IterableRouteAttrs::get_ttl_propagate)\n- [.get_ip_proto()](IterableRouteAttrs::get_ip_proto)\n- [.get_sport()](IterableRouteAttrs::get_sport)\n- [.get_dport()](IterableRouteAttrs::get_dport)\n- [.get_nh_id()](IterableRouteAttrs::get_nh_id)\n- [.get_flowlabel()](IterableRouteAttrs::get_flowlabel)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetrouteDumpRequest<'r> {
+pub struct OpGetrouteDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetrouteDumpRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushRtmsg) -> Self {
-        PushOpGetrouteDumpRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpGetrouteDump<'r> {
+    pub fn new(mut request: Request<'r>, header: &Rtmsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self {
             request: request.set_dump(),
         }
     }
-    pub fn encode(&mut self) -> PushOpGetrouteDumpRequest<&mut Vec<u8>> {
-        PushOpGetrouteDumpRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Rtmsg,
+    ) -> PushRouteAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushRouteAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetrouteDumpRequest<RequestBuf<'r>> {
-        PushOpGetrouteDumpRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushRouteAttrs<&mut Vec<u8>> {
+        PushRouteAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(
-        buf: &'buf [u8],
-    ) -> (PushRtmsg, IterableOpGetrouteDumpRequest<'buf>) {
-        OpGetrouteDumpRequest::new(buf)
+    pub fn into_encoder(self) -> PushRouteAttrs<RequestBuf<'r>> {
+        PushRouteAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Rtmsg, IterableRouteAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Rtmsg::len()));
+        (
+            Rtmsg::new_from_slice(header).unwrap_or_default(),
+            IterableRouteAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Rtmsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetrouteDumpRequest<'_> {
+impl NetlinkRequest for OpGetrouteDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -3459,1617 +2225,55 @@ impl NetlinkRequest for RequestOpGetrouteDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushRtmsg, IterableOpGetrouteDumpReply<'buf>);
+    type ReplyType<'buf> = (Rtmsg, IterableRouteAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetrouteDumpReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetrouteDumpRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Dump route information."]
-pub struct PushOpGetrouteDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetrouteDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetrouteDoRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushRtmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushRtmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_dst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_src(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_iif(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 3u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_oif(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_mark(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 16u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_uid(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 25u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ip_proto(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 27u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_sport(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 28u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_dport(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 29u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_flowlabel(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 31u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetrouteDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Dump route information."]
-#[derive(Clone)]
-pub enum OpGetrouteDoRequest<'a> {
-    Dst(&'a [u8]),
-    Src(&'a [u8]),
-    Iif(u32),
-    Oif(u32),
-    Mark(u32),
-    Uid(u32),
-    IpProto(u8),
-    Sport(u16),
-    Dport(u16),
-    Flowlabel(u32),
-}
-impl<'a> IterableOpGetrouteDoRequest<'a> {
-    pub fn get_dst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoRequest::Dst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoRequest",
-            "Dst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_src(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoRequest::Src(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoRequest",
-            "Src",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_iif(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoRequest::Iif(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoRequest",
-            "Iif",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_oif(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoRequest::Oif(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoRequest",
-            "Oif",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mark(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoRequest::Mark(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoRequest",
-            "Mark",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_uid(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoRequest::Uid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoRequest",
-            "Uid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ip_proto(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoRequest::IpProto(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoRequest",
-            "IpProto",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_sport(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoRequest::Sport(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoRequest",
-            "Sport",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_dport(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoRequest::Dport(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoRequest",
-            "Dport",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_flowlabel(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoRequest::Flowlabel(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoRequest",
-            "Flowlabel",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetrouteDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushRtmsg, IterableOpGetrouteDoRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushRtmsg::len()));
-        (
-            PushRtmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetrouteDoRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        RouteAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetrouteDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetrouteDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetrouteDoRequest<'a> {
-    type Item = Result<OpGetrouteDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetrouteDoRequest::Dst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetrouteDoRequest::Src({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetrouteDoRequest::Iif({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetrouteDoRequest::Oif({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                16u16 => OpGetrouteDoRequest::Mark({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                25u16 => OpGetrouteDoRequest::Uid({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                27u16 => OpGetrouteDoRequest::IpProto({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                28u16 => OpGetrouteDoRequest::Sport({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                29u16 => OpGetrouteDoRequest::Dport({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                31u16 => OpGetrouteDoRequest::Flowlabel({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetrouteDoRequest",
-            r#type.and_then(|t| OpGetrouteDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetrouteDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetrouteDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetrouteDoRequest::Dst(val) => fmt.field("Dst", &val),
-                OpGetrouteDoRequest::Src(val) => fmt.field("Src", &val),
-                OpGetrouteDoRequest::Iif(val) => fmt.field("Iif", &val),
-                OpGetrouteDoRequest::Oif(val) => fmt.field("Oif", &val),
-                OpGetrouteDoRequest::Mark(val) => fmt.field("Mark", &val),
-                OpGetrouteDoRequest::Uid(val) => fmt.field("Uid", &val),
-                OpGetrouteDoRequest::IpProto(val) => fmt.field("IpProto", &val),
-                OpGetrouteDoRequest::Sport(val) => fmt.field("Sport", &val),
-                OpGetrouteDoRequest::Dport(val) => fmt.field("Dport", &val),
-                OpGetrouteDoRequest::Flowlabel(val) => fmt.field("Flowlabel", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetrouteDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushRtmsg::len() {
-            stack.push(("OpGetrouteDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetrouteDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetrouteDoRequest::Dst(val) => {
-                    if last_off == offset {
-                        stack.push(("Dst", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoRequest::Src(val) => {
-                    if last_off == offset {
-                        stack.push(("Src", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoRequest::Iif(val) => {
-                    if last_off == offset {
-                        stack.push(("Iif", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoRequest::Oif(val) => {
-                    if last_off == offset {
-                        stack.push(("Oif", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoRequest::Mark(val) => {
-                    if last_off == offset {
-                        stack.push(("Mark", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoRequest::Uid(val) => {
-                    if last_off == offset {
-                        stack.push(("Uid", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoRequest::IpProto(val) => {
-                    if last_off == offset {
-                        stack.push(("IpProto", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoRequest::Sport(val) => {
-                    if last_off == offset {
-                        stack.push(("Sport", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoRequest::Dport(val) => {
-                    if last_off == offset {
-                        stack.push(("Dport", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoRequest::Flowlabel(val) => {
-                    if last_off == offset {
-                        stack.push(("Flowlabel", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetrouteDoRequest", cur));
-        }
-        (stack, None)
-    }
-}
-#[doc = "Dump route information."]
-pub struct PushOpGetrouteDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetrouteDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetrouteDoReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushRtmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushRtmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_dst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_src(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_iif(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 3u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_oif(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gateway(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 5u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_priority(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 6u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_prefsrc(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 7u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn nested_metrics(mut self) -> PushMetrics<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 8u16);
-        PushMetrics {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_multipath(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 9u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_flow(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 11u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_cacheinfo(mut self, value: PushRtaCacheinfo) -> Self {
-        push_header(self.as_rec_mut(), 12u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_table(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 15u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_mark(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 16u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_mfc_stats(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 17u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_via(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 18u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_newdst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 19u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_pref(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 20u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_encap_type(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 21u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_encap(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 22u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_expires(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 23u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_pad(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 24u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_uid(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 25u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ttl_propagate(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 26u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ip_proto(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 27u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_sport(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 28u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_dport(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 29u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_nh_id(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 30u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_flowlabel(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 31u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetrouteDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Dump route information."]
-#[derive(Clone)]
-pub enum OpGetrouteDoReply<'a> {
-    Dst(&'a [u8]),
-    Src(&'a [u8]),
-    Iif(u32),
-    Oif(u32),
-    Gateway(&'a [u8]),
-    Priority(u32),
-    Prefsrc(&'a [u8]),
-    Metrics(IterableMetrics<'a>),
-    Multipath(&'a [u8]),
-    Flow(u32),
-    Cacheinfo(PushRtaCacheinfo),
-    Table(u32),
-    Mark(u32),
-    MfcStats(&'a [u8]),
-    Via(&'a [u8]),
-    Newdst(&'a [u8]),
-    Pref(u8),
-    EncapType(u16),
-    Encap(&'a [u8]),
-    Expires(u32),
-    Pad(&'a [u8]),
-    Uid(u32),
-    TtlPropagate(u8),
-    IpProto(u8),
-    Sport(u16),
-    Dport(u16),
-    NhId(u32),
-    Flowlabel(u32),
-}
-impl<'a> IterableOpGetrouteDoReply<'a> {
-    pub fn get_dst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Dst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Dst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_src(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Src(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Src",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_iif(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Iif(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Iif",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_oif(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Oif(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Oif",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gateway(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Gateway(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Gateway",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_priority(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Priority(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Priority",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_prefsrc(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Prefsrc(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Prefsrc",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_metrics(&self) -> Result<IterableMetrics<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Metrics(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Metrics",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_multipath(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Multipath(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Multipath",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_flow(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Flow(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Flow",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_cacheinfo(&self) -> Result<PushRtaCacheinfo, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Cacheinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Cacheinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_table(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Table(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Table",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mark(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Mark(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Mark",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mfc_stats(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::MfcStats(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "MfcStats",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_via(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Via(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Via",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_newdst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Newdst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Newdst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_pref(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Pref(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Pref",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_encap_type(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::EncapType(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "EncapType",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_encap(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Encap(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Encap",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_expires(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Expires(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Expires",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Pad(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Pad",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_uid(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Uid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Uid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ttl_propagate(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::TtlPropagate(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "TtlPropagate",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ip_proto(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::IpProto(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "IpProto",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_sport(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Sport(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Sport",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_dport(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Dport(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Dport",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_nh_id(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::NhId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "NhId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_flowlabel(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetrouteDoReply::Flowlabel(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetrouteDoReply",
-            "Flowlabel",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetrouteDoReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushRtmsg, IterableOpGetrouteDoReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushRtmsg::len()));
-        (
-            PushRtmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetrouteDoReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        RouteAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetrouteDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetrouteDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetrouteDoReply<'a> {
-    type Item = Result<OpGetrouteDoReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetrouteDoReply::Dst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetrouteDoReply::Src({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetrouteDoReply::Iif({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetrouteDoReply::Oif({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetrouteDoReply::Gateway({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpGetrouteDoReply::Priority({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpGetrouteDoReply::Prefsrc({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetrouteDoReply::Metrics({
-                    let res = Some(IterableMetrics::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpGetrouteDoReply::Multipath({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                11u16 => OpGetrouteDoReply::Flow({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                12u16 => OpGetrouteDoReply::Cacheinfo({
-                    let res = PushRtaCacheinfo::new_from_slice(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                15u16 => OpGetrouteDoReply::Table({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                16u16 => OpGetrouteDoReply::Mark({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                17u16 => OpGetrouteDoReply::MfcStats({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                18u16 => OpGetrouteDoReply::Via({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                19u16 => OpGetrouteDoReply::Newdst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                20u16 => OpGetrouteDoReply::Pref({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                21u16 => OpGetrouteDoReply::EncapType({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                22u16 => OpGetrouteDoReply::Encap({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                23u16 => OpGetrouteDoReply::Expires({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                24u16 => OpGetrouteDoReply::Pad({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                25u16 => OpGetrouteDoReply::Uid({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                26u16 => OpGetrouteDoReply::TtlPropagate({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                27u16 => OpGetrouteDoReply::IpProto({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                28u16 => OpGetrouteDoReply::Sport({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                29u16 => OpGetrouteDoReply::Dport({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                30u16 => OpGetrouteDoReply::NhId({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                31u16 => OpGetrouteDoReply::Flowlabel({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetrouteDoReply",
-            r#type.and_then(|t| OpGetrouteDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetrouteDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetrouteDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetrouteDoReply::Dst(val) => fmt.field("Dst", &val),
-                OpGetrouteDoReply::Src(val) => fmt.field("Src", &val),
-                OpGetrouteDoReply::Iif(val) => fmt.field("Iif", &val),
-                OpGetrouteDoReply::Oif(val) => fmt.field("Oif", &val),
-                OpGetrouteDoReply::Gateway(val) => fmt.field("Gateway", &val),
-                OpGetrouteDoReply::Priority(val) => fmt.field("Priority", &val),
-                OpGetrouteDoReply::Prefsrc(val) => fmt.field("Prefsrc", &val),
-                OpGetrouteDoReply::Metrics(val) => fmt.field("Metrics", &val),
-                OpGetrouteDoReply::Multipath(val) => fmt.field("Multipath", &val),
-                OpGetrouteDoReply::Flow(val) => fmt.field("Flow", &val),
-                OpGetrouteDoReply::Cacheinfo(val) => fmt.field("Cacheinfo", &val),
-                OpGetrouteDoReply::Table(val) => fmt.field("Table", &val),
-                OpGetrouteDoReply::Mark(val) => fmt.field("Mark", &val),
-                OpGetrouteDoReply::MfcStats(val) => fmt.field("MfcStats", &val),
-                OpGetrouteDoReply::Via(val) => fmt.field("Via", &val),
-                OpGetrouteDoReply::Newdst(val) => fmt.field("Newdst", &val),
-                OpGetrouteDoReply::Pref(val) => fmt.field("Pref", &val),
-                OpGetrouteDoReply::EncapType(val) => fmt.field("EncapType", &val),
-                OpGetrouteDoReply::Encap(val) => fmt.field("Encap", &val),
-                OpGetrouteDoReply::Expires(val) => fmt.field("Expires", &val),
-                OpGetrouteDoReply::Pad(val) => fmt.field("Pad", &val),
-                OpGetrouteDoReply::Uid(val) => fmt.field("Uid", &val),
-                OpGetrouteDoReply::TtlPropagate(val) => fmt.field("TtlPropagate", &val),
-                OpGetrouteDoReply::IpProto(val) => fmt.field("IpProto", &val),
-                OpGetrouteDoReply::Sport(val) => fmt.field("Sport", &val),
-                OpGetrouteDoReply::Dport(val) => fmt.field("Dport", &val),
-                OpGetrouteDoReply::NhId(val) => fmt.field("NhId", &val),
-                OpGetrouteDoReply::Flowlabel(val) => fmt.field("Flowlabel", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetrouteDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushRtmsg::len() {
-            stack.push(("OpGetrouteDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetrouteDoReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetrouteDoReply::Dst(val) => {
-                    if last_off == offset {
-                        stack.push(("Dst", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Src(val) => {
-                    if last_off == offset {
-                        stack.push(("Src", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Iif(val) => {
-                    if last_off == offset {
-                        stack.push(("Iif", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Oif(val) => {
-                    if last_off == offset {
-                        stack.push(("Oif", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Gateway(val) => {
-                    if last_off == offset {
-                        stack.push(("Gateway", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Priority(val) => {
-                    if last_off == offset {
-                        stack.push(("Priority", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Prefsrc(val) => {
-                    if last_off == offset {
-                        stack.push(("Prefsrc", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Metrics(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Multipath(val) => {
-                    if last_off == offset {
-                        stack.push(("Multipath", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Flow(val) => {
-                    if last_off == offset {
-                        stack.push(("Flow", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Cacheinfo(val) => {
-                    if last_off == offset {
-                        stack.push(("Cacheinfo", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Table(val) => {
-                    if last_off == offset {
-                        stack.push(("Table", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Mark(val) => {
-                    if last_off == offset {
-                        stack.push(("Mark", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::MfcStats(val) => {
-                    if last_off == offset {
-                        stack.push(("MfcStats", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Via(val) => {
-                    if last_off == offset {
-                        stack.push(("Via", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Newdst(val) => {
-                    if last_off == offset {
-                        stack.push(("Newdst", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Pref(val) => {
-                    if last_off == offset {
-                        stack.push(("Pref", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::EncapType(val) => {
-                    if last_off == offset {
-                        stack.push(("EncapType", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Encap(val) => {
-                    if last_off == offset {
-                        stack.push(("Encap", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Expires(val) => {
-                    if last_off == offset {
-                        stack.push(("Expires", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Pad(val) => {
-                    if last_off == offset {
-                        stack.push(("Pad", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Uid(val) => {
-                    if last_off == offset {
-                        stack.push(("Uid", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::TtlPropagate(val) => {
-                    if last_off == offset {
-                        stack.push(("TtlPropagate", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::IpProto(val) => {
-                    if last_off == offset {
-                        stack.push(("IpProto", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Sport(val) => {
-                    if last_off == offset {
-                        stack.push(("Sport", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Dport(val) => {
-                    if last_off == offset {
-                        stack.push(("Dport", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::NhId(val) => {
-                    if last_off == offset {
-                        stack.push(("NhId", last_off));
-                        break;
-                    }
-                }
-                OpGetrouteDoReply::Flowlabel(val) => {
-                    if last_off == offset {
-                        stack.push(("Flowlabel", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetrouteDoReply", cur));
-        }
-        (stack, missing)
-    }
-}
+#[doc = "Dump route information\\.\nRequest attributes:\n- [.push_dst()](PushRouteAttrs::push_dst)\n- [.push_src()](PushRouteAttrs::push_src)\n- [.push_iif()](PushRouteAttrs::push_iif)\n- [.push_oif()](PushRouteAttrs::push_oif)\n- [.push_mark()](PushRouteAttrs::push_mark)\n- [.push_uid()](PushRouteAttrs::push_uid)\n- [.push_ip_proto()](PushRouteAttrs::push_ip_proto)\n- [.push_sport()](PushRouteAttrs::push_sport)\n- [.push_dport()](PushRouteAttrs::push_dport)\n- [.push_flowlabel()](PushRouteAttrs::push_flowlabel)\n\nReply attributes:\n- [.get_dst()](IterableRouteAttrs::get_dst)\n- [.get_src()](IterableRouteAttrs::get_src)\n- [.get_iif()](IterableRouteAttrs::get_iif)\n- [.get_oif()](IterableRouteAttrs::get_oif)\n- [.get_gateway()](IterableRouteAttrs::get_gateway)\n- [.get_priority()](IterableRouteAttrs::get_priority)\n- [.get_prefsrc()](IterableRouteAttrs::get_prefsrc)\n- [.get_metrics()](IterableRouteAttrs::get_metrics)\n- [.get_multipath()](IterableRouteAttrs::get_multipath)\n- [.get_flow()](IterableRouteAttrs::get_flow)\n- [.get_cacheinfo()](IterableRouteAttrs::get_cacheinfo)\n- [.get_table()](IterableRouteAttrs::get_table)\n- [.get_mark()](IterableRouteAttrs::get_mark)\n- [.get_mfc_stats()](IterableRouteAttrs::get_mfc_stats)\n- [.get_via()](IterableRouteAttrs::get_via)\n- [.get_newdst()](IterableRouteAttrs::get_newdst)\n- [.get_pref()](IterableRouteAttrs::get_pref)\n- [.get_encap_type()](IterableRouteAttrs::get_encap_type)\n- [.get_encap()](IterableRouteAttrs::get_encap)\n- [.get_expires()](IterableRouteAttrs::get_expires)\n- [.get_pad()](IterableRouteAttrs::get_pad)\n- [.get_uid()](IterableRouteAttrs::get_uid)\n- [.get_ttl_propagate()](IterableRouteAttrs::get_ttl_propagate)\n- [.get_ip_proto()](IterableRouteAttrs::get_ip_proto)\n- [.get_sport()](IterableRouteAttrs::get_sport)\n- [.get_dport()](IterableRouteAttrs::get_dport)\n- [.get_nh_id()](IterableRouteAttrs::get_nh_id)\n- [.get_flowlabel()](IterableRouteAttrs::get_flowlabel)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetrouteDoRequest<'r> {
+pub struct OpGetrouteDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetrouteDoRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushRtmsg) -> Self {
-        PushOpGetrouteDoRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpGetrouteDo<'r> {
+    pub fn new(mut request: Request<'r>, header: &Rtmsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpGetrouteDoRequest<&mut Vec<u8>> {
-        PushOpGetrouteDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Rtmsg,
+    ) -> PushRouteAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushRouteAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetrouteDoRequest<RequestBuf<'r>> {
-        PushOpGetrouteDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushRouteAttrs<&mut Vec<u8>> {
+        PushRouteAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushRtmsg, IterableOpGetrouteDoRequest<'buf>) {
-        OpGetrouteDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushRouteAttrs<RequestBuf<'r>> {
+        PushRouteAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Rtmsg, IterableRouteAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Rtmsg::len()));
+        (
+            Rtmsg::new_from_slice(header).unwrap_or_default(),
+            IterableRouteAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Rtmsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetrouteDoRequest<'_> {
+impl NetlinkRequest for OpGetrouteDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -5082,1269 +2286,55 @@ impl NetlinkRequest for RequestOpGetrouteDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushRtmsg, IterableOpGetrouteDoReply<'buf>);
+    type ReplyType<'buf> = (Rtmsg, IterableRouteAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetrouteDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetrouteDoRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Create a new route"]
-pub struct PushOpNewrouteDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpNewrouteDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpNewrouteDoRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushRtmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushRtmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_dst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_src(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_iif(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 3u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_oif(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gateway(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 5u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_priority(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 6u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_prefsrc(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 7u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn nested_metrics(mut self) -> PushMetrics<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 8u16);
-        PushMetrics {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_multipath(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 9u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_flow(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 11u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_cacheinfo(mut self, value: PushRtaCacheinfo) -> Self {
-        push_header(self.as_rec_mut(), 12u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_table(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 15u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_mark(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 16u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_mfc_stats(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 17u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_via(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 18u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_newdst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 19u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_pref(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 20u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_encap_type(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 21u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_encap(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 22u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_expires(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 23u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_pad(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 24u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_uid(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 25u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ttl_propagate(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 26u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ip_proto(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 27u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_sport(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 28u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_dport(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 29u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_nh_id(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 30u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_flowlabel(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 31u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpNewrouteDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Create a new route"]
-#[derive(Clone)]
-pub enum OpNewrouteDoRequest<'a> {
-    Dst(&'a [u8]),
-    Src(&'a [u8]),
-    Iif(u32),
-    Oif(u32),
-    Gateway(&'a [u8]),
-    Priority(u32),
-    Prefsrc(&'a [u8]),
-    Metrics(IterableMetrics<'a>),
-    Multipath(&'a [u8]),
-    Flow(u32),
-    Cacheinfo(PushRtaCacheinfo),
-    Table(u32),
-    Mark(u32),
-    MfcStats(&'a [u8]),
-    Via(&'a [u8]),
-    Newdst(&'a [u8]),
-    Pref(u8),
-    EncapType(u16),
-    Encap(&'a [u8]),
-    Expires(u32),
-    Pad(&'a [u8]),
-    Uid(u32),
-    TtlPropagate(u8),
-    IpProto(u8),
-    Sport(u16),
-    Dport(u16),
-    NhId(u32),
-    Flowlabel(u32),
-}
-impl<'a> IterableOpNewrouteDoRequest<'a> {
-    pub fn get_dst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Dst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Dst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_src(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Src(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Src",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_iif(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Iif(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Iif",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_oif(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Oif(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Oif",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gateway(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Gateway(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Gateway",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_priority(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Priority(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Priority",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_prefsrc(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Prefsrc(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Prefsrc",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_metrics(&self) -> Result<IterableMetrics<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Metrics(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Metrics",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_multipath(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Multipath(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Multipath",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_flow(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Flow(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Flow",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_cacheinfo(&self) -> Result<PushRtaCacheinfo, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Cacheinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Cacheinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_table(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Table(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Table",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mark(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Mark(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Mark",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mfc_stats(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::MfcStats(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "MfcStats",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_via(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Via(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Via",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_newdst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Newdst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Newdst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_pref(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Pref(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Pref",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_encap_type(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::EncapType(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "EncapType",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_encap(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Encap(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Encap",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_expires(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Expires(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Expires",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Pad(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Pad",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_uid(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Uid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Uid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ttl_propagate(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::TtlPropagate(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "TtlPropagate",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ip_proto(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::IpProto(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "IpProto",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_sport(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Sport(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Sport",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_dport(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Dport(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Dport",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_nh_id(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::NhId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "NhId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_flowlabel(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewrouteDoRequest::Flowlabel(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewrouteDoRequest",
-            "Flowlabel",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpNewrouteDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushRtmsg, IterableOpNewrouteDoRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushRtmsg::len()));
-        (
-            PushRtmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpNewrouteDoRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        RouteAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpNewrouteDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpNewrouteDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpNewrouteDoRequest<'a> {
-    type Item = Result<OpNewrouteDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpNewrouteDoRequest::Dst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpNewrouteDoRequest::Src({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpNewrouteDoRequest::Iif({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpNewrouteDoRequest::Oif({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpNewrouteDoRequest::Gateway({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpNewrouteDoRequest::Priority({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpNewrouteDoRequest::Prefsrc({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpNewrouteDoRequest::Metrics({
-                    let res = Some(IterableMetrics::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpNewrouteDoRequest::Multipath({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                11u16 => OpNewrouteDoRequest::Flow({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                12u16 => OpNewrouteDoRequest::Cacheinfo({
-                    let res = PushRtaCacheinfo::new_from_slice(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                15u16 => OpNewrouteDoRequest::Table({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                16u16 => OpNewrouteDoRequest::Mark({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                17u16 => OpNewrouteDoRequest::MfcStats({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                18u16 => OpNewrouteDoRequest::Via({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                19u16 => OpNewrouteDoRequest::Newdst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                20u16 => OpNewrouteDoRequest::Pref({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                21u16 => OpNewrouteDoRequest::EncapType({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                22u16 => OpNewrouteDoRequest::Encap({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                23u16 => OpNewrouteDoRequest::Expires({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                24u16 => OpNewrouteDoRequest::Pad({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                25u16 => OpNewrouteDoRequest::Uid({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                26u16 => OpNewrouteDoRequest::TtlPropagate({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                27u16 => OpNewrouteDoRequest::IpProto({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                28u16 => OpNewrouteDoRequest::Sport({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                29u16 => OpNewrouteDoRequest::Dport({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                30u16 => OpNewrouteDoRequest::NhId({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                31u16 => OpNewrouteDoRequest::Flowlabel({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpNewrouteDoRequest",
-            r#type.and_then(|t| OpNewrouteDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpNewrouteDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpNewrouteDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpNewrouteDoRequest::Dst(val) => fmt.field("Dst", &val),
-                OpNewrouteDoRequest::Src(val) => fmt.field("Src", &val),
-                OpNewrouteDoRequest::Iif(val) => fmt.field("Iif", &val),
-                OpNewrouteDoRequest::Oif(val) => fmt.field("Oif", &val),
-                OpNewrouteDoRequest::Gateway(val) => fmt.field("Gateway", &val),
-                OpNewrouteDoRequest::Priority(val) => fmt.field("Priority", &val),
-                OpNewrouteDoRequest::Prefsrc(val) => fmt.field("Prefsrc", &val),
-                OpNewrouteDoRequest::Metrics(val) => fmt.field("Metrics", &val),
-                OpNewrouteDoRequest::Multipath(val) => fmt.field("Multipath", &val),
-                OpNewrouteDoRequest::Flow(val) => fmt.field("Flow", &val),
-                OpNewrouteDoRequest::Cacheinfo(val) => fmt.field("Cacheinfo", &val),
-                OpNewrouteDoRequest::Table(val) => fmt.field("Table", &val),
-                OpNewrouteDoRequest::Mark(val) => fmt.field("Mark", &val),
-                OpNewrouteDoRequest::MfcStats(val) => fmt.field("MfcStats", &val),
-                OpNewrouteDoRequest::Via(val) => fmt.field("Via", &val),
-                OpNewrouteDoRequest::Newdst(val) => fmt.field("Newdst", &val),
-                OpNewrouteDoRequest::Pref(val) => fmt.field("Pref", &val),
-                OpNewrouteDoRequest::EncapType(val) => fmt.field("EncapType", &val),
-                OpNewrouteDoRequest::Encap(val) => fmt.field("Encap", &val),
-                OpNewrouteDoRequest::Expires(val) => fmt.field("Expires", &val),
-                OpNewrouteDoRequest::Pad(val) => fmt.field("Pad", &val),
-                OpNewrouteDoRequest::Uid(val) => fmt.field("Uid", &val),
-                OpNewrouteDoRequest::TtlPropagate(val) => fmt.field("TtlPropagate", &val),
-                OpNewrouteDoRequest::IpProto(val) => fmt.field("IpProto", &val),
-                OpNewrouteDoRequest::Sport(val) => fmt.field("Sport", &val),
-                OpNewrouteDoRequest::Dport(val) => fmt.field("Dport", &val),
-                OpNewrouteDoRequest::NhId(val) => fmt.field("NhId", &val),
-                OpNewrouteDoRequest::Flowlabel(val) => fmt.field("Flowlabel", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpNewrouteDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushRtmsg::len() {
-            stack.push(("OpNewrouteDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpNewrouteDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpNewrouteDoRequest::Dst(val) => {
-                    if last_off == offset {
-                        stack.push(("Dst", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Src(val) => {
-                    if last_off == offset {
-                        stack.push(("Src", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Iif(val) => {
-                    if last_off == offset {
-                        stack.push(("Iif", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Oif(val) => {
-                    if last_off == offset {
-                        stack.push(("Oif", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Gateway(val) => {
-                    if last_off == offset {
-                        stack.push(("Gateway", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Priority(val) => {
-                    if last_off == offset {
-                        stack.push(("Priority", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Prefsrc(val) => {
-                    if last_off == offset {
-                        stack.push(("Prefsrc", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Metrics(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Multipath(val) => {
-                    if last_off == offset {
-                        stack.push(("Multipath", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Flow(val) => {
-                    if last_off == offset {
-                        stack.push(("Flow", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Cacheinfo(val) => {
-                    if last_off == offset {
-                        stack.push(("Cacheinfo", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Table(val) => {
-                    if last_off == offset {
-                        stack.push(("Table", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Mark(val) => {
-                    if last_off == offset {
-                        stack.push(("Mark", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::MfcStats(val) => {
-                    if last_off == offset {
-                        stack.push(("MfcStats", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Via(val) => {
-                    if last_off == offset {
-                        stack.push(("Via", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Newdst(val) => {
-                    if last_off == offset {
-                        stack.push(("Newdst", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Pref(val) => {
-                    if last_off == offset {
-                        stack.push(("Pref", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::EncapType(val) => {
-                    if last_off == offset {
-                        stack.push(("EncapType", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Encap(val) => {
-                    if last_off == offset {
-                        stack.push(("Encap", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Expires(val) => {
-                    if last_off == offset {
-                        stack.push(("Expires", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Pad(val) => {
-                    if last_off == offset {
-                        stack.push(("Pad", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Uid(val) => {
-                    if last_off == offset {
-                        stack.push(("Uid", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::TtlPropagate(val) => {
-                    if last_off == offset {
-                        stack.push(("TtlPropagate", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::IpProto(val) => {
-                    if last_off == offset {
-                        stack.push(("IpProto", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Sport(val) => {
-                    if last_off == offset {
-                        stack.push(("Sport", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Dport(val) => {
-                    if last_off == offset {
-                        stack.push(("Dport", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::NhId(val) => {
-                    if last_off == offset {
-                        stack.push(("NhId", last_off));
-                        break;
-                    }
-                }
-                OpNewrouteDoRequest::Flowlabel(val) => {
-                    if last_off == offset {
-                        stack.push(("Flowlabel", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpNewrouteDoRequest", cur));
-        }
-        (stack, missing)
-    }
-}
-#[doc = "Create a new route"]
-pub struct PushOpNewrouteDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpNewrouteDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpNewrouteDoReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushRtmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushRtmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpNewrouteDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Create a new route"]
-#[derive(Clone)]
-pub enum OpNewrouteDoReply {}
-impl<'a> IterableOpNewrouteDoReply<'a> {}
-impl OpNewrouteDoReply {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushRtmsg, IterableOpNewrouteDoReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushRtmsg::len()));
-        (
-            PushRtmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpNewrouteDoReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        RouteAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpNewrouteDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpNewrouteDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpNewrouteDoReply<'a> {
-    type Item = Result<OpNewrouteDoReply, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpNewrouteDoReply",
-            r#type.and_then(|t| OpNewrouteDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpNewrouteDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpNewrouteDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpNewrouteDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushRtmsg::len() {
-            stack.push(("OpNewrouteDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpNewrouteDoReply::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
+#[doc = "Create a new route\nRequest attributes:\n- [.push_dst()](PushRouteAttrs::push_dst)\n- [.push_src()](PushRouteAttrs::push_src)\n- [.push_iif()](PushRouteAttrs::push_iif)\n- [.push_oif()](PushRouteAttrs::push_oif)\n- [.push_gateway()](PushRouteAttrs::push_gateway)\n- [.push_priority()](PushRouteAttrs::push_priority)\n- [.push_prefsrc()](PushRouteAttrs::push_prefsrc)\n- [.nested_metrics()](PushRouteAttrs::nested_metrics)\n- [.push_multipath()](PushRouteAttrs::push_multipath)\n- [.push_flow()](PushRouteAttrs::push_flow)\n- [.push_cacheinfo()](PushRouteAttrs::push_cacheinfo)\n- [.push_table()](PushRouteAttrs::push_table)\n- [.push_mark()](PushRouteAttrs::push_mark)\n- [.push_mfc_stats()](PushRouteAttrs::push_mfc_stats)\n- [.push_via()](PushRouteAttrs::push_via)\n- [.push_newdst()](PushRouteAttrs::push_newdst)\n- [.push_pref()](PushRouteAttrs::push_pref)\n- [.push_encap_type()](PushRouteAttrs::push_encap_type)\n- [.push_encap()](PushRouteAttrs::push_encap)\n- [.push_expires()](PushRouteAttrs::push_expires)\n- [.push_pad()](PushRouteAttrs::push_pad)\n- [.push_uid()](PushRouteAttrs::push_uid)\n- [.push_ttl_propagate()](PushRouteAttrs::push_ttl_propagate)\n- [.push_ip_proto()](PushRouteAttrs::push_ip_proto)\n- [.push_sport()](PushRouteAttrs::push_sport)\n- [.push_dport()](PushRouteAttrs::push_dport)\n- [.push_nh_id()](PushRouteAttrs::push_nh_id)\n- [.push_flowlabel()](PushRouteAttrs::push_flowlabel)\n"]
 #[derive(Debug)]
-pub struct RequestOpNewrouteDoRequest<'r> {
+pub struct OpNewrouteDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpNewrouteDoRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushRtmsg) -> Self {
-        PushOpNewrouteDoRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpNewrouteDo<'r> {
+    pub fn new(mut request: Request<'r>, header: &Rtmsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpNewrouteDoRequest<&mut Vec<u8>> {
-        PushOpNewrouteDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Rtmsg,
+    ) -> PushRouteAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushRouteAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpNewrouteDoRequest<RequestBuf<'r>> {
-        PushOpNewrouteDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushRouteAttrs<&mut Vec<u8>> {
+        PushRouteAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushRtmsg, IterableOpNewrouteDoRequest<'buf>) {
-        OpNewrouteDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushRouteAttrs<RequestBuf<'r>> {
+        PushRouteAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Rtmsg, IterableRouteAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Rtmsg::len()));
+        (
+            Rtmsg::new_from_slice(header).unwrap_or_default(),
+            IterableRouteAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Rtmsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpNewrouteDoRequest<'_> {
+impl NetlinkRequest for OpNewrouteDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -6357,1269 +2347,55 @@ impl NetlinkRequest for RequestOpNewrouteDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushRtmsg, IterableOpNewrouteDoReply<'buf>);
+    type ReplyType<'buf> = (Rtmsg, IterableRouteAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpNewrouteDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpNewrouteDoRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Delete an existing route"]
-pub struct PushOpDelrouteDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpDelrouteDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpDelrouteDoRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushRtmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushRtmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_dst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_src(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_iif(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 3u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_oif(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gateway(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 5u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_priority(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 6u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_prefsrc(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 7u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn nested_metrics(mut self) -> PushMetrics<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 8u16);
-        PushMetrics {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_multipath(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 9u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_flow(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 11u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_cacheinfo(mut self, value: PushRtaCacheinfo) -> Self {
-        push_header(self.as_rec_mut(), 12u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_table(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 15u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_mark(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 16u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_mfc_stats(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 17u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_via(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 18u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_newdst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 19u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_pref(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 20u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_encap_type(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 21u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_encap(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 22u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_expires(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 23u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_pad(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 24u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_uid(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 25u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ttl_propagate(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 26u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ip_proto(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 27u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_sport(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 28u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_dport(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 29u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_nh_id(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 30u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_flowlabel(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 31u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpDelrouteDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Delete an existing route"]
-#[derive(Clone)]
-pub enum OpDelrouteDoRequest<'a> {
-    Dst(&'a [u8]),
-    Src(&'a [u8]),
-    Iif(u32),
-    Oif(u32),
-    Gateway(&'a [u8]),
-    Priority(u32),
-    Prefsrc(&'a [u8]),
-    Metrics(IterableMetrics<'a>),
-    Multipath(&'a [u8]),
-    Flow(u32),
-    Cacheinfo(PushRtaCacheinfo),
-    Table(u32),
-    Mark(u32),
-    MfcStats(&'a [u8]),
-    Via(&'a [u8]),
-    Newdst(&'a [u8]),
-    Pref(u8),
-    EncapType(u16),
-    Encap(&'a [u8]),
-    Expires(u32),
-    Pad(&'a [u8]),
-    Uid(u32),
-    TtlPropagate(u8),
-    IpProto(u8),
-    Sport(u16),
-    Dport(u16),
-    NhId(u32),
-    Flowlabel(u32),
-}
-impl<'a> IterableOpDelrouteDoRequest<'a> {
-    pub fn get_dst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Dst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Dst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_src(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Src(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Src",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_iif(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Iif(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Iif",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_oif(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Oif(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Oif",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gateway(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Gateway(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Gateway",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_priority(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Priority(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Priority",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_prefsrc(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Prefsrc(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Prefsrc",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_metrics(&self) -> Result<IterableMetrics<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Metrics(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Metrics",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_multipath(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Multipath(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Multipath",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_flow(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Flow(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Flow",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_cacheinfo(&self) -> Result<PushRtaCacheinfo, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Cacheinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Cacheinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_table(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Table(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Table",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mark(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Mark(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Mark",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mfc_stats(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::MfcStats(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "MfcStats",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_via(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Via(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Via",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_newdst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Newdst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Newdst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_pref(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Pref(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Pref",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_encap_type(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::EncapType(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "EncapType",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_encap(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Encap(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Encap",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_expires(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Expires(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Expires",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Pad(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Pad",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_uid(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Uid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Uid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ttl_propagate(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::TtlPropagate(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "TtlPropagate",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ip_proto(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::IpProto(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "IpProto",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_sport(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Sport(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Sport",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_dport(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Dport(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Dport",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_nh_id(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::NhId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "NhId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_flowlabel(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelrouteDoRequest::Flowlabel(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelrouteDoRequest",
-            "Flowlabel",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpDelrouteDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushRtmsg, IterableOpDelrouteDoRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushRtmsg::len()));
-        (
-            PushRtmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpDelrouteDoRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        RouteAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpDelrouteDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpDelrouteDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpDelrouteDoRequest<'a> {
-    type Item = Result<OpDelrouteDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpDelrouteDoRequest::Dst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpDelrouteDoRequest::Src({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpDelrouteDoRequest::Iif({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpDelrouteDoRequest::Oif({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpDelrouteDoRequest::Gateway({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpDelrouteDoRequest::Priority({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpDelrouteDoRequest::Prefsrc({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpDelrouteDoRequest::Metrics({
-                    let res = Some(IterableMetrics::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpDelrouteDoRequest::Multipath({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                11u16 => OpDelrouteDoRequest::Flow({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                12u16 => OpDelrouteDoRequest::Cacheinfo({
-                    let res = PushRtaCacheinfo::new_from_slice(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                15u16 => OpDelrouteDoRequest::Table({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                16u16 => OpDelrouteDoRequest::Mark({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                17u16 => OpDelrouteDoRequest::MfcStats({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                18u16 => OpDelrouteDoRequest::Via({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                19u16 => OpDelrouteDoRequest::Newdst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                20u16 => OpDelrouteDoRequest::Pref({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                21u16 => OpDelrouteDoRequest::EncapType({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                22u16 => OpDelrouteDoRequest::Encap({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                23u16 => OpDelrouteDoRequest::Expires({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                24u16 => OpDelrouteDoRequest::Pad({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                25u16 => OpDelrouteDoRequest::Uid({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                26u16 => OpDelrouteDoRequest::TtlPropagate({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                27u16 => OpDelrouteDoRequest::IpProto({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                28u16 => OpDelrouteDoRequest::Sport({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                29u16 => OpDelrouteDoRequest::Dport({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                30u16 => OpDelrouteDoRequest::NhId({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                31u16 => OpDelrouteDoRequest::Flowlabel({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpDelrouteDoRequest",
-            r#type.and_then(|t| OpDelrouteDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpDelrouteDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpDelrouteDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpDelrouteDoRequest::Dst(val) => fmt.field("Dst", &val),
-                OpDelrouteDoRequest::Src(val) => fmt.field("Src", &val),
-                OpDelrouteDoRequest::Iif(val) => fmt.field("Iif", &val),
-                OpDelrouteDoRequest::Oif(val) => fmt.field("Oif", &val),
-                OpDelrouteDoRequest::Gateway(val) => fmt.field("Gateway", &val),
-                OpDelrouteDoRequest::Priority(val) => fmt.field("Priority", &val),
-                OpDelrouteDoRequest::Prefsrc(val) => fmt.field("Prefsrc", &val),
-                OpDelrouteDoRequest::Metrics(val) => fmt.field("Metrics", &val),
-                OpDelrouteDoRequest::Multipath(val) => fmt.field("Multipath", &val),
-                OpDelrouteDoRequest::Flow(val) => fmt.field("Flow", &val),
-                OpDelrouteDoRequest::Cacheinfo(val) => fmt.field("Cacheinfo", &val),
-                OpDelrouteDoRequest::Table(val) => fmt.field("Table", &val),
-                OpDelrouteDoRequest::Mark(val) => fmt.field("Mark", &val),
-                OpDelrouteDoRequest::MfcStats(val) => fmt.field("MfcStats", &val),
-                OpDelrouteDoRequest::Via(val) => fmt.field("Via", &val),
-                OpDelrouteDoRequest::Newdst(val) => fmt.field("Newdst", &val),
-                OpDelrouteDoRequest::Pref(val) => fmt.field("Pref", &val),
-                OpDelrouteDoRequest::EncapType(val) => fmt.field("EncapType", &val),
-                OpDelrouteDoRequest::Encap(val) => fmt.field("Encap", &val),
-                OpDelrouteDoRequest::Expires(val) => fmt.field("Expires", &val),
-                OpDelrouteDoRequest::Pad(val) => fmt.field("Pad", &val),
-                OpDelrouteDoRequest::Uid(val) => fmt.field("Uid", &val),
-                OpDelrouteDoRequest::TtlPropagate(val) => fmt.field("TtlPropagate", &val),
-                OpDelrouteDoRequest::IpProto(val) => fmt.field("IpProto", &val),
-                OpDelrouteDoRequest::Sport(val) => fmt.field("Sport", &val),
-                OpDelrouteDoRequest::Dport(val) => fmt.field("Dport", &val),
-                OpDelrouteDoRequest::NhId(val) => fmt.field("NhId", &val),
-                OpDelrouteDoRequest::Flowlabel(val) => fmt.field("Flowlabel", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpDelrouteDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushRtmsg::len() {
-            stack.push(("OpDelrouteDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpDelrouteDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpDelrouteDoRequest::Dst(val) => {
-                    if last_off == offset {
-                        stack.push(("Dst", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Src(val) => {
-                    if last_off == offset {
-                        stack.push(("Src", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Iif(val) => {
-                    if last_off == offset {
-                        stack.push(("Iif", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Oif(val) => {
-                    if last_off == offset {
-                        stack.push(("Oif", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Gateway(val) => {
-                    if last_off == offset {
-                        stack.push(("Gateway", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Priority(val) => {
-                    if last_off == offset {
-                        stack.push(("Priority", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Prefsrc(val) => {
-                    if last_off == offset {
-                        stack.push(("Prefsrc", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Metrics(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Multipath(val) => {
-                    if last_off == offset {
-                        stack.push(("Multipath", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Flow(val) => {
-                    if last_off == offset {
-                        stack.push(("Flow", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Cacheinfo(val) => {
-                    if last_off == offset {
-                        stack.push(("Cacheinfo", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Table(val) => {
-                    if last_off == offset {
-                        stack.push(("Table", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Mark(val) => {
-                    if last_off == offset {
-                        stack.push(("Mark", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::MfcStats(val) => {
-                    if last_off == offset {
-                        stack.push(("MfcStats", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Via(val) => {
-                    if last_off == offset {
-                        stack.push(("Via", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Newdst(val) => {
-                    if last_off == offset {
-                        stack.push(("Newdst", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Pref(val) => {
-                    if last_off == offset {
-                        stack.push(("Pref", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::EncapType(val) => {
-                    if last_off == offset {
-                        stack.push(("EncapType", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Encap(val) => {
-                    if last_off == offset {
-                        stack.push(("Encap", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Expires(val) => {
-                    if last_off == offset {
-                        stack.push(("Expires", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Pad(val) => {
-                    if last_off == offset {
-                        stack.push(("Pad", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Uid(val) => {
-                    if last_off == offset {
-                        stack.push(("Uid", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::TtlPropagate(val) => {
-                    if last_off == offset {
-                        stack.push(("TtlPropagate", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::IpProto(val) => {
-                    if last_off == offset {
-                        stack.push(("IpProto", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Sport(val) => {
-                    if last_off == offset {
-                        stack.push(("Sport", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Dport(val) => {
-                    if last_off == offset {
-                        stack.push(("Dport", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::NhId(val) => {
-                    if last_off == offset {
-                        stack.push(("NhId", last_off));
-                        break;
-                    }
-                }
-                OpDelrouteDoRequest::Flowlabel(val) => {
-                    if last_off == offset {
-                        stack.push(("Flowlabel", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpDelrouteDoRequest", cur));
-        }
-        (stack, missing)
-    }
-}
-#[doc = "Delete an existing route"]
-pub struct PushOpDelrouteDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpDelrouteDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpDelrouteDoReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushRtmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushRtmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpDelrouteDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Delete an existing route"]
-#[derive(Clone)]
-pub enum OpDelrouteDoReply {}
-impl<'a> IterableOpDelrouteDoReply<'a> {}
-impl OpDelrouteDoReply {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushRtmsg, IterableOpDelrouteDoReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushRtmsg::len()));
-        (
-            PushRtmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpDelrouteDoReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        RouteAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpDelrouteDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpDelrouteDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpDelrouteDoReply<'a> {
-    type Item = Result<OpDelrouteDoReply, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpDelrouteDoReply",
-            r#type.and_then(|t| OpDelrouteDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpDelrouteDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpDelrouteDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpDelrouteDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushRtmsg::len() {
-            stack.push(("OpDelrouteDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpDelrouteDoReply::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
+#[doc = "Delete an existing route\nRequest attributes:\n- [.push_dst()](PushRouteAttrs::push_dst)\n- [.push_src()](PushRouteAttrs::push_src)\n- [.push_iif()](PushRouteAttrs::push_iif)\n- [.push_oif()](PushRouteAttrs::push_oif)\n- [.push_gateway()](PushRouteAttrs::push_gateway)\n- [.push_priority()](PushRouteAttrs::push_priority)\n- [.push_prefsrc()](PushRouteAttrs::push_prefsrc)\n- [.nested_metrics()](PushRouteAttrs::nested_metrics)\n- [.push_multipath()](PushRouteAttrs::push_multipath)\n- [.push_flow()](PushRouteAttrs::push_flow)\n- [.push_cacheinfo()](PushRouteAttrs::push_cacheinfo)\n- [.push_table()](PushRouteAttrs::push_table)\n- [.push_mark()](PushRouteAttrs::push_mark)\n- [.push_mfc_stats()](PushRouteAttrs::push_mfc_stats)\n- [.push_via()](PushRouteAttrs::push_via)\n- [.push_newdst()](PushRouteAttrs::push_newdst)\n- [.push_pref()](PushRouteAttrs::push_pref)\n- [.push_encap_type()](PushRouteAttrs::push_encap_type)\n- [.push_encap()](PushRouteAttrs::push_encap)\n- [.push_expires()](PushRouteAttrs::push_expires)\n- [.push_pad()](PushRouteAttrs::push_pad)\n- [.push_uid()](PushRouteAttrs::push_uid)\n- [.push_ttl_propagate()](PushRouteAttrs::push_ttl_propagate)\n- [.push_ip_proto()](PushRouteAttrs::push_ip_proto)\n- [.push_sport()](PushRouteAttrs::push_sport)\n- [.push_dport()](PushRouteAttrs::push_dport)\n- [.push_nh_id()](PushRouteAttrs::push_nh_id)\n- [.push_flowlabel()](PushRouteAttrs::push_flowlabel)\n"]
 #[derive(Debug)]
-pub struct RequestOpDelrouteDoRequest<'r> {
+pub struct OpDelrouteDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpDelrouteDoRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushRtmsg) -> Self {
-        PushOpDelrouteDoRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpDelrouteDo<'r> {
+    pub fn new(mut request: Request<'r>, header: &Rtmsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpDelrouteDoRequest<&mut Vec<u8>> {
-        PushOpDelrouteDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Rtmsg,
+    ) -> PushRouteAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushRouteAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpDelrouteDoRequest<RequestBuf<'r>> {
-        PushOpDelrouteDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushRouteAttrs<&mut Vec<u8>> {
+        PushRouteAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushRtmsg, IterableOpDelrouteDoRequest<'buf>) {
-        OpDelrouteDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushRouteAttrs<RequestBuf<'r>> {
+        PushRouteAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Rtmsg, IterableRouteAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Rtmsg::len()));
+        (
+            Rtmsg::new_from_slice(header).unwrap_or_default(),
+            IterableRouteAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Rtmsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpDelrouteDoRequest<'_> {
+impl NetlinkRequest for OpDelrouteDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -7632,16 +2408,16 @@ impl NetlinkRequest for RequestOpDelrouteDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushRtmsg, IterableOpDelrouteDoReply<'buf>);
+    type ReplyType<'buf> = (Rtmsg, IterableRouteAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpDelrouteDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpDelrouteDoRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
@@ -7739,8 +2515,7 @@ impl<'a> Chained<'a> {
     pub fn request(&mut self) -> Request<'_> {
         self.update_header();
         self.last_header_offset = self.buf().len();
-        self.buf_mut()
-            .extend_from_slice(PushNlmsghdr::new().as_slice());
+        self.buf_mut().extend_from_slice(Nlmsghdr::new().as_slice());
         let mut request = Request::new_extend(self.buf.buf_mut());
         self.last_kind = None;
         request.writeback = Some(&mut self.last_kind);
@@ -7761,10 +2536,7 @@ impl<'a> Chained<'a> {
         }) = self.last_kind
         else {
             if !self.buf().is_empty() {
-                assert_eq!(
-                    self.last_header_offset + PushNlmsghdr::len(),
-                    self.buf().len()
-                );
+                assert_eq!(self.last_header_offset + Nlmsghdr::len(), self.buf().len());
                 self.buf.buf_mut().truncate(self.last_header_offset);
             }
             return;
@@ -7779,11 +2551,13 @@ impl<'a> Chained<'a> {
         self.lookups.push((name, lookup));
         let buf = self.buf_mut();
         align(buf);
-        let mut header = PushNlmsghdr::new();
-        header.set_len((buf.len() - header_offset) as u32);
-        header.set_type(request_type);
-        header.set_flags(flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16);
-        header.set_seq(seq);
+        let header = Nlmsghdr {
+            len: (buf.len() - header_offset) as u32,
+            r#type: request_type,
+            flags: flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16,
+            seq,
+            pid: 0,
+        };
         buf[header_offset..(header_offset + 16)].clone_from_slice(header.as_slice());
     }
 }
@@ -7874,48 +2648,110 @@ impl<'buf> Request<'buf> {
         self.flags |= consts::NLM_F_APPEND as u16;
         self
     }
+    #[doc = "Set `self.flags |= flags`"]
+    pub fn set_flags(mut self, flags: u16) -> Self {
+        self.flags |= flags;
+        self
+    }
+    #[doc = "Set `self.flags ^= self.flags & flags`"]
+    pub fn unset_flags(mut self, flags: u16) -> Self {
+        self.flags ^= self.flags & flags;
+        self
+    }
     #[doc = "Set `NLM_F_DUMP` flag"]
     fn set_dump(mut self) -> Self {
         self.flags |= consts::NLM_F_DUMP as u16;
         self
     }
-    pub fn op_getroute_dump_request(
-        self,
-        header: &PushRtmsg,
-    ) -> RequestOpGetrouteDumpRequest<'buf> {
-        let mut res = RequestOpGetrouteDumpRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-getroute-dump-request",
-            RequestOpGetrouteDumpRequest::lookup,
-        );
+    #[doc = "Dump route information\\.\n\nReply attributes:\n- [.get_dst()](IterableRouteAttrs::get_dst)\n- [.get_src()](IterableRouteAttrs::get_src)\n- [.get_iif()](IterableRouteAttrs::get_iif)\n- [.get_oif()](IterableRouteAttrs::get_oif)\n- [.get_gateway()](IterableRouteAttrs::get_gateway)\n- [.get_priority()](IterableRouteAttrs::get_priority)\n- [.get_prefsrc()](IterableRouteAttrs::get_prefsrc)\n- [.get_metrics()](IterableRouteAttrs::get_metrics)\n- [.get_multipath()](IterableRouteAttrs::get_multipath)\n- [.get_flow()](IterableRouteAttrs::get_flow)\n- [.get_cacheinfo()](IterableRouteAttrs::get_cacheinfo)\n- [.get_table()](IterableRouteAttrs::get_table)\n- [.get_mark()](IterableRouteAttrs::get_mark)\n- [.get_mfc_stats()](IterableRouteAttrs::get_mfc_stats)\n- [.get_via()](IterableRouteAttrs::get_via)\n- [.get_newdst()](IterableRouteAttrs::get_newdst)\n- [.get_pref()](IterableRouteAttrs::get_pref)\n- [.get_encap_type()](IterableRouteAttrs::get_encap_type)\n- [.get_encap()](IterableRouteAttrs::get_encap)\n- [.get_expires()](IterableRouteAttrs::get_expires)\n- [.get_pad()](IterableRouteAttrs::get_pad)\n- [.get_uid()](IterableRouteAttrs::get_uid)\n- [.get_ttl_propagate()](IterableRouteAttrs::get_ttl_propagate)\n- [.get_ip_proto()](IterableRouteAttrs::get_ip_proto)\n- [.get_sport()](IterableRouteAttrs::get_sport)\n- [.get_dport()](IterableRouteAttrs::get_dport)\n- [.get_nh_id()](IterableRouteAttrs::get_nh_id)\n- [.get_flowlabel()](IterableRouteAttrs::get_flowlabel)\n"]
+    pub fn op_getroute_dump(self, header: &Rtmsg) -> OpGetrouteDump<'buf> {
+        let mut res = OpGetrouteDump::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-getroute-dump", OpGetrouteDump::lookup);
         res
     }
-    pub fn op_getroute_do_request(self, header: &PushRtmsg) -> RequestOpGetrouteDoRequest<'buf> {
-        let mut res = RequestOpGetrouteDoRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-getroute-do-request",
-            RequestOpGetrouteDoRequest::lookup,
-        );
+    #[doc = "Dump route information\\.\nRequest attributes:\n- [.push_dst()](PushRouteAttrs::push_dst)\n- [.push_src()](PushRouteAttrs::push_src)\n- [.push_iif()](PushRouteAttrs::push_iif)\n- [.push_oif()](PushRouteAttrs::push_oif)\n- [.push_mark()](PushRouteAttrs::push_mark)\n- [.push_uid()](PushRouteAttrs::push_uid)\n- [.push_ip_proto()](PushRouteAttrs::push_ip_proto)\n- [.push_sport()](PushRouteAttrs::push_sport)\n- [.push_dport()](PushRouteAttrs::push_dport)\n- [.push_flowlabel()](PushRouteAttrs::push_flowlabel)\n\nReply attributes:\n- [.get_dst()](IterableRouteAttrs::get_dst)\n- [.get_src()](IterableRouteAttrs::get_src)\n- [.get_iif()](IterableRouteAttrs::get_iif)\n- [.get_oif()](IterableRouteAttrs::get_oif)\n- [.get_gateway()](IterableRouteAttrs::get_gateway)\n- [.get_priority()](IterableRouteAttrs::get_priority)\n- [.get_prefsrc()](IterableRouteAttrs::get_prefsrc)\n- [.get_metrics()](IterableRouteAttrs::get_metrics)\n- [.get_multipath()](IterableRouteAttrs::get_multipath)\n- [.get_flow()](IterableRouteAttrs::get_flow)\n- [.get_cacheinfo()](IterableRouteAttrs::get_cacheinfo)\n- [.get_table()](IterableRouteAttrs::get_table)\n- [.get_mark()](IterableRouteAttrs::get_mark)\n- [.get_mfc_stats()](IterableRouteAttrs::get_mfc_stats)\n- [.get_via()](IterableRouteAttrs::get_via)\n- [.get_newdst()](IterableRouteAttrs::get_newdst)\n- [.get_pref()](IterableRouteAttrs::get_pref)\n- [.get_encap_type()](IterableRouteAttrs::get_encap_type)\n- [.get_encap()](IterableRouteAttrs::get_encap)\n- [.get_expires()](IterableRouteAttrs::get_expires)\n- [.get_pad()](IterableRouteAttrs::get_pad)\n- [.get_uid()](IterableRouteAttrs::get_uid)\n- [.get_ttl_propagate()](IterableRouteAttrs::get_ttl_propagate)\n- [.get_ip_proto()](IterableRouteAttrs::get_ip_proto)\n- [.get_sport()](IterableRouteAttrs::get_sport)\n- [.get_dport()](IterableRouteAttrs::get_dport)\n- [.get_nh_id()](IterableRouteAttrs::get_nh_id)\n- [.get_flowlabel()](IterableRouteAttrs::get_flowlabel)\n"]
+    pub fn op_getroute_do(self, header: &Rtmsg) -> OpGetrouteDo<'buf> {
+        let mut res = OpGetrouteDo::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-getroute-do", OpGetrouteDo::lookup);
         res
     }
-    pub fn op_newroute_do_request(self, header: &PushRtmsg) -> RequestOpNewrouteDoRequest<'buf> {
-        let mut res = RequestOpNewrouteDoRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-newroute-do-request",
-            RequestOpNewrouteDoRequest::lookup,
-        );
+    #[doc = "Create a new route\nRequest attributes:\n- [.push_dst()](PushRouteAttrs::push_dst)\n- [.push_src()](PushRouteAttrs::push_src)\n- [.push_iif()](PushRouteAttrs::push_iif)\n- [.push_oif()](PushRouteAttrs::push_oif)\n- [.push_gateway()](PushRouteAttrs::push_gateway)\n- [.push_priority()](PushRouteAttrs::push_priority)\n- [.push_prefsrc()](PushRouteAttrs::push_prefsrc)\n- [.nested_metrics()](PushRouteAttrs::nested_metrics)\n- [.push_multipath()](PushRouteAttrs::push_multipath)\n- [.push_flow()](PushRouteAttrs::push_flow)\n- [.push_cacheinfo()](PushRouteAttrs::push_cacheinfo)\n- [.push_table()](PushRouteAttrs::push_table)\n- [.push_mark()](PushRouteAttrs::push_mark)\n- [.push_mfc_stats()](PushRouteAttrs::push_mfc_stats)\n- [.push_via()](PushRouteAttrs::push_via)\n- [.push_newdst()](PushRouteAttrs::push_newdst)\n- [.push_pref()](PushRouteAttrs::push_pref)\n- [.push_encap_type()](PushRouteAttrs::push_encap_type)\n- [.push_encap()](PushRouteAttrs::push_encap)\n- [.push_expires()](PushRouteAttrs::push_expires)\n- [.push_pad()](PushRouteAttrs::push_pad)\n- [.push_uid()](PushRouteAttrs::push_uid)\n- [.push_ttl_propagate()](PushRouteAttrs::push_ttl_propagate)\n- [.push_ip_proto()](PushRouteAttrs::push_ip_proto)\n- [.push_sport()](PushRouteAttrs::push_sport)\n- [.push_dport()](PushRouteAttrs::push_dport)\n- [.push_nh_id()](PushRouteAttrs::push_nh_id)\n- [.push_flowlabel()](PushRouteAttrs::push_flowlabel)\n"]
+    pub fn op_newroute_do(self, header: &Rtmsg) -> OpNewrouteDo<'buf> {
+        let mut res = OpNewrouteDo::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-newroute-do", OpNewrouteDo::lookup);
         res
     }
-    pub fn op_delroute_do_request(self, header: &PushRtmsg) -> RequestOpDelrouteDoRequest<'buf> {
-        let mut res = RequestOpDelrouteDoRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-delroute-do-request",
-            RequestOpDelrouteDoRequest::lookup,
-        );
+    #[doc = "Delete an existing route\nRequest attributes:\n- [.push_dst()](PushRouteAttrs::push_dst)\n- [.push_src()](PushRouteAttrs::push_src)\n- [.push_iif()](PushRouteAttrs::push_iif)\n- [.push_oif()](PushRouteAttrs::push_oif)\n- [.push_gateway()](PushRouteAttrs::push_gateway)\n- [.push_priority()](PushRouteAttrs::push_priority)\n- [.push_prefsrc()](PushRouteAttrs::push_prefsrc)\n- [.nested_metrics()](PushRouteAttrs::nested_metrics)\n- [.push_multipath()](PushRouteAttrs::push_multipath)\n- [.push_flow()](PushRouteAttrs::push_flow)\n- [.push_cacheinfo()](PushRouteAttrs::push_cacheinfo)\n- [.push_table()](PushRouteAttrs::push_table)\n- [.push_mark()](PushRouteAttrs::push_mark)\n- [.push_mfc_stats()](PushRouteAttrs::push_mfc_stats)\n- [.push_via()](PushRouteAttrs::push_via)\n- [.push_newdst()](PushRouteAttrs::push_newdst)\n- [.push_pref()](PushRouteAttrs::push_pref)\n- [.push_encap_type()](PushRouteAttrs::push_encap_type)\n- [.push_encap()](PushRouteAttrs::push_encap)\n- [.push_expires()](PushRouteAttrs::push_expires)\n- [.push_pad()](PushRouteAttrs::push_pad)\n- [.push_uid()](PushRouteAttrs::push_uid)\n- [.push_ttl_propagate()](PushRouteAttrs::push_ttl_propagate)\n- [.push_ip_proto()](PushRouteAttrs::push_ip_proto)\n- [.push_sport()](PushRouteAttrs::push_sport)\n- [.push_dport()](PushRouteAttrs::push_dport)\n- [.push_nh_id()](PushRouteAttrs::push_nh_id)\n- [.push_flowlabel()](PushRouteAttrs::push_flowlabel)\n"]
+    pub fn op_delroute_do(self, header: &Rtmsg) -> OpDelrouteDo<'buf> {
+        let mut res = OpDelrouteDo::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-delroute-do", OpDelrouteDo::lookup);
         res
+    }
+}
+#[cfg(test)]
+mod generated_tests {
+    use super::*;
+    #[test]
+    fn tests() {
+        let _ = IterableRouteAttrs::get_cacheinfo;
+        let _ = IterableRouteAttrs::get_dport;
+        let _ = IterableRouteAttrs::get_dst;
+        let _ = IterableRouteAttrs::get_encap;
+        let _ = IterableRouteAttrs::get_encap_type;
+        let _ = IterableRouteAttrs::get_expires;
+        let _ = IterableRouteAttrs::get_flow;
+        let _ = IterableRouteAttrs::get_flowlabel;
+        let _ = IterableRouteAttrs::get_gateway;
+        let _ = IterableRouteAttrs::get_iif;
+        let _ = IterableRouteAttrs::get_ip_proto;
+        let _ = IterableRouteAttrs::get_mark;
+        let _ = IterableRouteAttrs::get_metrics;
+        let _ = IterableRouteAttrs::get_mfc_stats;
+        let _ = IterableRouteAttrs::get_multipath;
+        let _ = IterableRouteAttrs::get_newdst;
+        let _ = IterableRouteAttrs::get_nh_id;
+        let _ = IterableRouteAttrs::get_oif;
+        let _ = IterableRouteAttrs::get_pad;
+        let _ = IterableRouteAttrs::get_pref;
+        let _ = IterableRouteAttrs::get_prefsrc;
+        let _ = IterableRouteAttrs::get_priority;
+        let _ = IterableRouteAttrs::get_sport;
+        let _ = IterableRouteAttrs::get_src;
+        let _ = IterableRouteAttrs::get_table;
+        let _ = IterableRouteAttrs::get_ttl_propagate;
+        let _ = IterableRouteAttrs::get_uid;
+        let _ = IterableRouteAttrs::get_via;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::nested_metrics;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_cacheinfo;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_dport;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_dst;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_encap;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_encap_type;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_expires;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_flow;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_flowlabel;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_gateway;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_iif;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_ip_proto;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_mark;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_mfc_stats;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_multipath;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_newdst;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_nh_id;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_oif;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_pad;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_pref;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_prefsrc;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_priority;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_sport;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_src;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_table;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_ttl_propagate;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_uid;
+        let _ = PushRouteAttrs::<&mut Vec<u8>>::push_via;
     }
 }

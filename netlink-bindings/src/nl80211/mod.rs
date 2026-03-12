@@ -1,4 +1,4 @@
-#![doc = "Netlink API for 802.11 wireless devices"]
+#![doc = "Netlink API for 802\\.11 wireless devices"]
 #![allow(clippy::all)]
 #![allow(unused_imports)]
 #![allow(unused_assignments)]
@@ -7,13 +7,14 @@
 #![allow(irrefutable_let_patterns)]
 #![allow(unreachable_code)]
 #![allow(unreachable_patterns)]
-use crate::builtin::{PushBuiltinBitfield32, PushBuiltinNfgenmsg, PushDummy, PushNlmsghdr};
+use crate::builtin::{BuiltinBitfield32, BuiltinNfgenmsg, Nlmsghdr, PushDummy};
 use crate::{
     consts,
     traits::{NetlinkRequest, Protocol},
     utils::*,
 };
-pub const PROTONAME: &CStr = c"nl80211";
+pub const PROTONAME: &str = "nl80211";
+pub const PROTONAME_CSTR: &CStr = c"nl80211";
 #[doc = "Enum - defines an integer enumeration, with values for each entry incrementing by 1, (e.g. 0, 1, 2, 3)"]
 #[derive(Debug, Clone, Copy)]
 pub enum Commands {
@@ -444,6 +445,73 @@ impl ProtocolFeatures {
         })
     }
 }
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct StaFlagUpdate {
+    pub mask: u32,
+    pub set: u32,
+}
+impl Clone for StaFlagUpdate {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for StaFlagUpdate {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl StaFlagUpdate {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 8usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 8usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<StaFlagUpdate>() == 8usize);
+        8usize
+    }
+}
 #[derive(Clone)]
 pub enum Nl80211Attrs<'a> {
     Wiphy(u32),
@@ -484,7 +552,7 @@ pub enum Nl80211Attrs<'a> {
     BssBasicRates(&'a [u8]),
     WiphyTxqParams(&'a [u8]),
     WiphyFreq(u32),
-    #[doc = "Associated type: \"ChannelType\" (enum)"]
+    #[doc = "Associated type: [`ChannelType`] (enum)"]
     WiphyChannelType(u32),
     KeyDefaultMgmt(()),
     MgmtSubtype(u8),
@@ -496,7 +564,7 @@ pub enum Nl80211Attrs<'a> {
     Bss(&'a [u8]),
     RegInitiator(u8),
     RegType(u8),
-    #[doc = "Associated type: \"Commands\" (enum)"]
+    #[doc = "Associated type: [`Commands`] (enum)"]
     SupportedCommands(IterableArrayU32<'a>),
     Frame(&'a [u8]),
     Ssid(&'a [u8]),
@@ -514,7 +582,7 @@ pub enum Nl80211Attrs<'a> {
     WiphyRtsThreshold(u32),
     TimedOut(()),
     UseMfp(u32),
-    StaFlags2(PushStaFlagUpdate),
+    StaFlags2(StaFlagUpdate),
     ControlPort(()),
     Testdata(&'a [u8]),
     Privacy(()),
@@ -590,7 +658,7 @@ pub enum Nl80211Attrs<'a> {
     TdlsExternalSetup(()),
     DeviceApSme(u32),
     DontWaitForAck(()),
-    #[doc = "Associated type: \"FeatureFlags\" (1 bit per enumeration)"]
+    #[doc = "Associated type: [`FeatureFlags`] (1 bit per enumeration)"]
     FeatureFlags(u32),
     ProbeRespOffload(u32),
     ProbeResp(&'a [u8]),
@@ -621,7 +689,7 @@ pub enum Nl80211Attrs<'a> {
     ExtCapaMask(&'a [u8]),
     StaCapability(u16),
     StaExtCapability(&'a [u8]),
-    #[doc = "Associated type: \"ProtocolFeatures\" (enum)"]
+    #[doc = "Associated type: [`ProtocolFeatures`] (enum)"]
     ProtocolFeatures(u32),
     SplitWiphyDump(()),
     DisableVht(()),
@@ -1355,7 +1423,7 @@ impl<'a> IterableNl80211Attrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Associated type: \"ChannelType\" (enum)"]
+    #[doc = "Associated type: [`ChannelType`] (enum)"]
     pub fn get_wiphy_channel_type(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -1521,7 +1589,7 @@ impl<'a> IterableNl80211Attrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Associated type: \"Commands\" (enum)"]
+    #[doc = "Associated type: [`Commands`] (enum)"]
     pub fn get_supported_commands(
         &self,
     ) -> Result<ArrayIterable<IterableArrayU32<'a>, u32>, ErrorContext> {
@@ -1777,7 +1845,7 @@ impl<'a> IterableNl80211Attrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_sta_flags2(&self) -> Result<PushStaFlagUpdate, ErrorContext> {
+    pub fn get_sta_flags2(&self) -> Result<StaFlagUpdate, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -2925,7 +2993,7 @@ impl<'a> IterableNl80211Attrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Associated type: \"FeatureFlags\" (1 bit per enumeration)"]
+    #[doc = "Associated type: [`FeatureFlags`] (1 bit per enumeration)"]
     pub fn get_feature_flags(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -3376,7 +3444,7 @@ impl<'a> IterableNl80211Attrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Associated type: \"ProtocolFeatures\" (enum)"]
+    #[doc = "Associated type: [`ProtocolFeatures`] (enum)"]
     pub fn get_protocol_features(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -6568,7 +6636,7 @@ impl<'a> Iterator for IterableNl80211Attrs<'a> {
                     val
                 }),
                 67u16 => Nl80211Attrs::StaFlags2({
-                    let res = PushStaFlagUpdate::new_from_slice(next);
+                    let res = Some(StaFlagUpdate::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -7763,7 +7831,7 @@ impl<'a> std::fmt::Debug for IterableNl80211Attrs<'_> {
                 Nl80211Attrs::Ifindex(val) => fmt.field("Ifindex", &val),
                 Nl80211Attrs::Ifname(val) => fmt.field("Ifname", &val),
                 Nl80211Attrs::Iftype(val) => fmt.field("Iftype", &val),
-                Nl80211Attrs::Mac(val) => fmt.field("Mac", &val),
+                Nl80211Attrs::Mac(val) => fmt.field("Mac", &FormatMac(val)),
                 Nl80211Attrs::KeyData(val) => fmt.field("KeyData", &val),
                 Nl80211Attrs::KeyIdx(val) => fmt.field("KeyIdx", &val),
                 Nl80211Attrs::KeyCipher(val) => fmt.field("KeyCipher", &val),
@@ -7783,7 +7851,7 @@ impl<'a> std::fmt::Debug for IterableNl80211Attrs<'_> {
                 Nl80211Attrs::MntrFlags(val) => fmt.field("MntrFlags", &val),
                 Nl80211Attrs::MeshId(val) => fmt.field("MeshId", &val),
                 Nl80211Attrs::StaPlinkAction(val) => fmt.field("StaPlinkAction", &val),
-                Nl80211Attrs::MpathNextHop(val) => fmt.field("MpathNextHop", &val),
+                Nl80211Attrs::MpathNextHop(val) => fmt.field("MpathNextHop", &FormatMac(val)),
                 Nl80211Attrs::MpathInfo(val) => fmt.field("MpathInfo", &val),
                 Nl80211Attrs::BssCtsProt(val) => fmt.field("BssCtsProt", &val),
                 Nl80211Attrs::BssShortPreamble(val) => fmt.field("BssShortPreamble", &val),
@@ -7977,7 +8045,7 @@ impl<'a> std::fmt::Debug for IterableNl80211Attrs<'_> {
                 Nl80211Attrs::VendorData(val) => fmt.field("VendorData", &val),
                 Nl80211Attrs::VendorEvents(val) => fmt.field("VendorEvents", &val),
                 Nl80211Attrs::QosMap(val) => fmt.field("QosMap", &val),
-                Nl80211Attrs::MacHint(val) => fmt.field("MacHint", &val),
+                Nl80211Attrs::MacHint(val) => fmt.field("MacHint", &FormatMac(val)),
                 Nl80211Attrs::WiphyFreqHint(val) => fmt.field("WiphyFreqHint", &val),
                 Nl80211Attrs::MaxApAssocSta(val) => fmt.field("MaxApAssocSta", &val),
                 Nl80211Attrs::TdlsPeerCapability(val) => fmt.field("TdlsPeerCapability", &val),
@@ -7992,7 +8060,7 @@ impl<'a> std::fmt::Debug for IterableNl80211Attrs<'_> {
                 Nl80211Attrs::AdmittedTime(val) => fmt.field("AdmittedTime", &val),
                 Nl80211Attrs::SmpsMode(val) => fmt.field("SmpsMode", &val),
                 Nl80211Attrs::OperClass(val) => fmt.field("OperClass", &val),
-                Nl80211Attrs::MacMask(val) => fmt.field("MacMask", &val),
+                Nl80211Attrs::MacMask(val) => fmt.field("MacMask", &FormatMac(val)),
                 Nl80211Attrs::WiphySelfManagedReg(val) => fmt.field("WiphySelfManagedReg", &val),
                 Nl80211Attrs::ExtFeatures(val) => fmt.field("ExtFeatures", &val),
                 Nl80211Attrs::SurveyRadioStats(val) => fmt.field("SurveyRadioStats", &val),
@@ -8011,7 +8079,9 @@ impl<'a> std::fmt::Debug for IterableNl80211Attrs<'_> {
                 Nl80211Attrs::Pad(val) => fmt.field("Pad", &val),
                 Nl80211Attrs::IftypeExtCapa(val) => fmt.field("IftypeExtCapa", &val),
                 Nl80211Attrs::MuMimoGroupData(val) => fmt.field("MuMimoGroupData", &val),
-                Nl80211Attrs::MuMimoFollowMacAddr(val) => fmt.field("MuMimoFollowMacAddr", &val),
+                Nl80211Attrs::MuMimoFollowMacAddr(val) => {
+                    fmt.field("MuMimoFollowMacAddr", &FormatMac(val))
+                }
                 Nl80211Attrs::ScanStartTimeTsf(val) => fmt.field("ScanStartTimeTsf", &val),
                 Nl80211Attrs::ScanStartTimeTsfBssid(val) => {
                     fmt.field("ScanStartTimeTsfBssid", &val)
@@ -8030,7 +8100,7 @@ impl<'a> std::fmt::Debug for IterableNl80211Attrs<'_> {
                 Nl80211Attrs::MulticastToUnicastEnabled(val) => {
                     fmt.field("MulticastToUnicastEnabled", &val)
                 }
-                Nl80211Attrs::Bssid(val) => fmt.field("Bssid", &val),
+                Nl80211Attrs::Bssid(val) => fmt.field("Bssid", &FormatMac(val)),
                 Nl80211Attrs::SchedScanRelativeRssi(val) => {
                     fmt.field("SchedScanRelativeRssi", &val)
                 }
@@ -8103,7 +8173,7 @@ impl<'a> std::fmt::Debug for IterableNl80211Attrs<'_> {
                 Nl80211Attrs::DisableEht(val) => fmt.field("DisableEht", &val),
                 Nl80211Attrs::MloLinks(val) => fmt.field("MloLinks", &val),
                 Nl80211Attrs::MloLinkId(val) => fmt.field("MloLinkId", &val),
-                Nl80211Attrs::MldAddr(val) => fmt.field("MldAddr", &val),
+                Nl80211Attrs::MldAddr(val) => fmt.field("MldAddr", &FormatMac(val)),
                 Nl80211Attrs::MloSupport(val) => fmt.field("MloSupport", &val),
                 Nl80211Attrs::MaxNumAkmSuites(val) => fmt.field("MaxNumAkmSuites", &val),
                 Nl80211Attrs::EmlCapability(val) => fmt.field("EmlCapability", &val),
@@ -8140,7 +8210,7 @@ impl IterableNl80211Attrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("Nl80211Attrs", offset));
             return (
                 stack,
@@ -10279,7 +10349,7 @@ impl IterableFrameTypeAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("FrameTypeAttrs", offset));
             return (
                 stack,
@@ -10312,18 +10382,18 @@ impl IterableFrameTypeAttrs<'_> {
 }
 #[derive(Clone)]
 pub enum WiphyBands<'a> {
-    #[doc = "2.4 GHz ISM band"]
+    #[doc = "2\\.4 GHz ISM band"]
     _2ghz(IterableBandAttrs<'a>),
-    #[doc = "around 5 GHz band (4.9 - 5.7 GHz)"]
+    #[doc = "around 5 GHz band (4\\.9 \\- 5\\.7 GHz)"]
     _5ghz(IterableBandAttrs<'a>),
-    #[doc = "around 60 GHz band (58.32 - 69.12 GHz)"]
+    #[doc = "around 60 GHz band (58\\.32 \\- 69\\.12 GHz)"]
     _60ghz(IterableBandAttrs<'a>),
     _6ghz(IterableBandAttrs<'a>),
     S1ghz(IterableBandAttrs<'a>),
     Lc(IterableBandAttrs<'a>),
 }
 impl<'a> IterableWiphyBands<'a> {
-    #[doc = "2.4 GHz ISM band"]
+    #[doc = "2\\.4 GHz ISM band"]
     pub fn get_2ghz(&self) -> Result<IterableBandAttrs<'a>, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -10339,7 +10409,7 @@ impl<'a> IterableWiphyBands<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "around 5 GHz band (4.9 - 5.7 GHz)"]
+    #[doc = "around 5 GHz band (4\\.9 \\- 5\\.7 GHz)"]
     pub fn get_5ghz(&self) -> Result<IterableBandAttrs<'a>, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -10355,7 +10425,7 @@ impl<'a> IterableWiphyBands<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "around 60 GHz band (58.32 - 69.12 GHz)"]
+    #[doc = "around 60 GHz band (58\\.32 \\- 69\\.12 GHz)"]
     pub fn get_60ghz(&self) -> Result<IterableBandAttrs<'a>, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -10543,7 +10613,7 @@ impl IterableWiphyBands<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("WiphyBands", offset));
             return (
                 stack,
@@ -11147,7 +11217,7 @@ impl IterableBandAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("BandAttrs", offset));
             return (
                 stack,
@@ -11403,7 +11473,7 @@ impl IterableBitrateAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("BitrateAttrs", offset));
             return (
                 stack,
@@ -12321,7 +12391,7 @@ impl IterableFrequencyAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("FrequencyAttrs", offset));
             return (
                 stack,
@@ -12860,7 +12930,7 @@ impl IterableIfCombinationAttributes<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("IfCombinationAttributes", offset));
             return (
                 stack,
@@ -13070,7 +13140,7 @@ impl IterableIfaceLimitAttributes<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("IfaceLimitAttributes", offset));
             return (
                 stack,
@@ -13450,7 +13520,7 @@ impl IterableIftypeDataAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("IftypeDataAttrs", offset));
             return (
                 stack,
@@ -13929,7 +13999,7 @@ impl IterableIftypeAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("IftypeAttrs", offset));
             return (
                 stack,
@@ -14217,7 +14287,7 @@ impl IterableSarAttributes<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("SarAttributes", offset));
             return (
                 stack,
@@ -14443,7 +14513,7 @@ impl IterableSarSpecs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("SarSpecs", offset));
             return (
                 stack,
@@ -14809,7 +14879,7 @@ impl IterableSupportedIftypes<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("SupportedIftypes", offset));
             return (
                 stack,
@@ -15248,7 +15318,7 @@ impl IterableTxqStatsAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("TxqStatsAttrs", offset));
             return (
                 stack,
@@ -15520,7 +15590,7 @@ impl IterableWmmAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("WmmAttrs", offset));
             return (
                 stack,
@@ -16042,7 +16112,7 @@ impl IterableWowlanTriggersAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("WowlanTriggersAttrs", offset));
             return (
                 stack,
@@ -16518,7 +16588,7 @@ impl<Prev: Rec> PushNl80211Attrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "Associated type: \"ChannelType\" (enum)"]
+    #[doc = "Associated type: [`ChannelType`] (enum)"]
     pub fn push_wiphy_channel_type(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 39u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -16573,7 +16643,7 @@ impl<Prev: Rec> PushNl80211Attrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "Associated type: \"Commands\" (enum)"]
+    #[doc = "Associated type: [`Commands`] (enum)"]
     pub fn array_supported_commands(mut self) -> PushArrayU32<Self> {
         let header_offset = push_nested_header(self.as_rec_mut(), 50u16);
         PushArrayU32 {
@@ -16660,7 +16730,7 @@ impl<Prev: Rec> PushNl80211Attrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    pub fn push_sta_flags2(mut self, value: PushStaFlagUpdate) -> Self {
+    pub fn push_sta_flags2(mut self, value: StaFlagUpdate) -> Self {
         push_header(self.as_rec_mut(), 67u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -17035,7 +17105,7 @@ impl<Prev: Rec> PushNl80211Attrs<Prev> {
         push_header(self.as_rec_mut(), 142u16, 0 as u16);
         self
     }
-    #[doc = "Associated type: \"FeatureFlags\" (1 bit per enumeration)"]
+    #[doc = "Associated type: [`FeatureFlags`] (1 bit per enumeration)"]
     pub fn push_feature_flags(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 143u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -17185,7 +17255,7 @@ impl<Prev: Rec> PushNl80211Attrs<Prev> {
         self.as_rec_mut().extend(value);
         self
     }
-    #[doc = "Associated type: \"ProtocolFeatures\" (enum)"]
+    #[doc = "Associated type: [`ProtocolFeatures`] (enum)"]
     pub fn push_protocol_features(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 173u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -18042,7 +18112,7 @@ impl<Prev: Rec> PushWiphyBands<Prev> {
         }
         prev
     }
-    #[doc = "2.4 GHz ISM band"]
+    #[doc = "2\\.4 GHz ISM band"]
     pub fn nested_2ghz(mut self) -> PushBandAttrs<Self> {
         let header_offset = push_nested_header(self.as_rec_mut(), 0u16);
         PushBandAttrs {
@@ -18050,7 +18120,7 @@ impl<Prev: Rec> PushWiphyBands<Prev> {
             header_offset: Some(header_offset),
         }
     }
-    #[doc = "around 5 GHz band (4.9 - 5.7 GHz)"]
+    #[doc = "around 5 GHz band (4\\.9 \\- 5\\.7 GHz)"]
     pub fn nested_5ghz(mut self) -> PushBandAttrs<Self> {
         let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
         PushBandAttrs {
@@ -18058,7 +18128,7 @@ impl<Prev: Rec> PushWiphyBands<Prev> {
             header_offset: Some(header_offset),
         }
     }
-    #[doc = "around 60 GHz band (58.32 - 69.12 GHz)"]
+    #[doc = "around 60 GHz band (58\\.32 \\- 69\\.12 GHz)"]
     pub fn nested_60ghz(mut self) -> PushBandAttrs<Self> {
         let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
         PushBandAttrs {
@@ -19525,100 +19595,57 @@ impl<Prev: Rec> Drop for PushWowlanTriggersAttrs<Prev> {
         }
     }
 }
-#[derive(Clone)]
-pub struct PushStaFlagUpdate {
-    pub(crate) buf: [u8; 8usize],
+pub struct NotifGroup;
+impl NotifGroup {
+    pub const CONFIG: &str = "config";
+    pub const CONFIG_CSTR: &CStr = c"config";
+    pub const SCAN: &str = "scan";
+    pub const SCAN_CSTR: &CStr = c"scan";
+    pub const REGULATORY: &str = "regulatory";
+    pub const REGULATORY_CSTR: &CStr = c"regulatory";
+    pub const MLME: &str = "mlme";
+    pub const MLME_CSTR: &CStr = c"mlme";
+    pub const VENDOR: &str = "vendor";
+    pub const VENDOR_CSTR: &CStr = c"vendor";
+    pub const NAN: &str = "nan";
+    pub const NAN_CSTR: &CStr = c"nan";
+    pub const TESTMODE: &str = "testmode";
+    pub const TESTMODE_CSTR: &CStr = c"testmode";
 }
-#[doc = "Create zero-initialized struct"]
-impl Default for PushStaFlagUpdate {
-    fn default() -> Self {
-        Self { buf: [0u8; 8usize] }
-    }
-}
-impl PushStaFlagUpdate {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        8usize
-    }
-    pub fn mask(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_mask(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn set(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_set(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushStaFlagUpdate {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("StaFlagUpdate")
-            .field("mask", &self.mask())
-            .field("set", &self.set())
-            .finish()
-    }
-}
+#[doc = "Get information about a wiphy or dump a list of all wiphys\\. Requests to\ndump get\\-wiphy should unconditionally include the split\\-wiphy\\-dump flag\nin the request\\.\n\nRequest attributes:\n- [.push_wiphy()](PushNl80211Attrs::push_wiphy)\n- [.push_ifindex()](PushNl80211Attrs::push_ifindex)\n- [.push_wdev()](PushNl80211Attrs::push_wdev)\n- [.push_split_wiphy_dump()](PushNl80211Attrs::push_split_wiphy_dump)\n\nReply attributes:\n- [.get_wiphy()](IterableNl80211Attrs::get_wiphy)\n- [.get_wiphy_name()](IterableNl80211Attrs::get_wiphy_name)\n- [.get_mac()](IterableNl80211Attrs::get_mac)\n- [.get_wiphy_bands()](IterableNl80211Attrs::get_wiphy_bands)\n- [.get_supported_iftypes()](IterableNl80211Attrs::get_supported_iftypes)\n- [.get_max_num_scan_ssids()](IterableNl80211Attrs::get_max_num_scan_ssids)\n- [.get_generation()](IterableNl80211Attrs::get_generation)\n- [.get_supported_commands()](IterableNl80211Attrs::get_supported_commands)\n- [.get_max_scan_ie_len()](IterableNl80211Attrs::get_max_scan_ie_len)\n- [.get_cipher_suites()](IterableNl80211Attrs::get_cipher_suites)\n- [.get_wiphy_retry_short()](IterableNl80211Attrs::get_wiphy_retry_short)\n- [.get_wiphy_retry_long()](IterableNl80211Attrs::get_wiphy_retry_long)\n- [.get_wiphy_frag_threshold()](IterableNl80211Attrs::get_wiphy_frag_threshold)\n- [.get_wiphy_rts_threshold()](IterableNl80211Attrs::get_wiphy_rts_threshold)\n- [.get_max_num_pmkids()](IterableNl80211Attrs::get_max_num_pmkids)\n- [.get_wiphy_coverage_class()](IterableNl80211Attrs::get_wiphy_coverage_class)\n- [.get_tx_frame_types()](IterableNl80211Attrs::get_tx_frame_types)\n- [.get_rx_frame_types()](IterableNl80211Attrs::get_rx_frame_types)\n- [.get_control_port_ethertype()](IterableNl80211Attrs::get_control_port_ethertype)\n- [.get_wiphy_antenna_tx()](IterableNl80211Attrs::get_wiphy_antenna_tx)\n- [.get_wiphy_antenna_rx()](IterableNl80211Attrs::get_wiphy_antenna_rx)\n- [.get_offchannel_tx_ok()](IterableNl80211Attrs::get_offchannel_tx_ok)\n- [.get_max_remain_on_channel_duration()](IterableNl80211Attrs::get_max_remain_on_channel_duration)\n- [.get_wiphy_antenna_avail_tx()](IterableNl80211Attrs::get_wiphy_antenna_avail_tx)\n- [.get_wiphy_antenna_avail_rx()](IterableNl80211Attrs::get_wiphy_antenna_avail_rx)\n- [.get_wowlan_triggers_supported()](IterableNl80211Attrs::get_wowlan_triggers_supported)\n- [.get_interface_combinations()](IterableNl80211Attrs::get_interface_combinations)\n- [.get_software_iftypes()](IterableNl80211Attrs::get_software_iftypes)\n- [.get_max_num_sched_scan_ssids()](IterableNl80211Attrs::get_max_num_sched_scan_ssids)\n- [.get_max_sched_scan_ie_len()](IterableNl80211Attrs::get_max_sched_scan_ie_len)\n- [.get_support_ap_uapsd()](IterableNl80211Attrs::get_support_ap_uapsd)\n- [.get_max_match_sets()](IterableNl80211Attrs::get_max_match_sets)\n- [.get_tdls_support()](IterableNl80211Attrs::get_tdls_support)\n- [.get_tdls_external_setup()](IterableNl80211Attrs::get_tdls_external_setup)\n- [.get_feature_flags()](IterableNl80211Attrs::get_feature_flags)\n- [.get_ht_capability_mask()](IterableNl80211Attrs::get_ht_capability_mask)\n- [.get_ext_capa()](IterableNl80211Attrs::get_ext_capa)\n- [.get_ext_capa_mask()](IterableNl80211Attrs::get_ext_capa_mask)\n- [.get_vht_capability_mask()](IterableNl80211Attrs::get_vht_capability_mask)\n- [.get_max_csa_counters()](IterableNl80211Attrs::get_max_csa_counters)\n- [.get_ext_features()](IterableNl80211Attrs::get_ext_features)\n- [.get_max_num_sched_scan_plans()](IterableNl80211Attrs::get_max_num_sched_scan_plans)\n- [.get_max_scan_plan_interval()](IterableNl80211Attrs::get_max_scan_plan_interval)\n- [.get_max_scan_plan_iterations()](IterableNl80211Attrs::get_max_scan_plan_iterations)\n- [.get_bands()](IterableNl80211Attrs::get_bands)\n- [.get_sched_scan_max_reqs()](IterableNl80211Attrs::get_sched_scan_max_reqs)\n- [.get_txq_stats()](IterableNl80211Attrs::get_txq_stats)\n- [.get_txq_limit()](IterableNl80211Attrs::get_txq_limit)\n- [.get_txq_memory_limit()](IterableNl80211Attrs::get_txq_memory_limit)\n- [.get_txq_quantum()](IterableNl80211Attrs::get_txq_quantum)\n- [.get_sar_spec()](IterableNl80211Attrs::get_sar_spec)\n- [.get_max_num_akm_suites()](IterableNl80211Attrs::get_max_num_akm_suites)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetWiphyDumpRequest<'r> {
+pub struct OpGetWiphyDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetWiphyDumpRequest<'r> {
+impl<'r> OpGetWiphyDump<'r> {
     pub fn new(mut request: Request<'r>) -> Self {
-        Self::write_header(&mut request.buf_mut());
+        Self::write_header(request.buf_mut());
         Self {
             request: request.set_dump(),
         }
     }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushNl80211Attrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushNl80211Attrs::new(buf)
+    }
     pub fn encode(&mut self) -> PushNl80211Attrs<&mut Vec<u8>> {
         PushNl80211Attrs::new(self.request.buf_mut())
     }
     pub fn into_encoder(self) -> PushNl80211Attrs<RequestBuf<'r>> {
         PushNl80211Attrs::new(self.request.buf)
     }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
     fn write_header<Prev: Rec>(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(1u8);
-        header.set_version(1u8);
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 1u8;
+        header.version = 1u8;
         prev.as_rec_mut().extend(header.as_slice());
     }
-    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
 }
-impl NetlinkRequest for RequestOpGetWiphyDumpRequest<'_> {
+impl NetlinkRequest for OpGetWiphyDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19630,47 +19657,48 @@ impl NetlinkRequest for RequestOpGetWiphyDumpRequest<'_> {
     }
     type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        Self::decode(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        Self::decode(buf).lookup_attr(offset, missing_type)
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
     }
 }
+#[doc = "Get information about a wiphy or dump a list of all wiphys\\. Requests to\ndump get\\-wiphy should unconditionally include the split\\-wiphy\\-dump flag\nin the request\\.\n\nRequest attributes:\n- [.push_wiphy()](PushNl80211Attrs::push_wiphy)\n- [.push_ifindex()](PushNl80211Attrs::push_ifindex)\n- [.push_wdev()](PushNl80211Attrs::push_wdev)\n\nReply attributes:\n- [.get_wiphy()](IterableNl80211Attrs::get_wiphy)\n- [.get_wiphy_name()](IterableNl80211Attrs::get_wiphy_name)\n- [.get_mac()](IterableNl80211Attrs::get_mac)\n- [.get_wiphy_bands()](IterableNl80211Attrs::get_wiphy_bands)\n- [.get_supported_iftypes()](IterableNl80211Attrs::get_supported_iftypes)\n- [.get_max_num_scan_ssids()](IterableNl80211Attrs::get_max_num_scan_ssids)\n- [.get_generation()](IterableNl80211Attrs::get_generation)\n- [.get_supported_commands()](IterableNl80211Attrs::get_supported_commands)\n- [.get_max_scan_ie_len()](IterableNl80211Attrs::get_max_scan_ie_len)\n- [.get_cipher_suites()](IterableNl80211Attrs::get_cipher_suites)\n- [.get_wiphy_retry_short()](IterableNl80211Attrs::get_wiphy_retry_short)\n- [.get_wiphy_retry_long()](IterableNl80211Attrs::get_wiphy_retry_long)\n- [.get_wiphy_frag_threshold()](IterableNl80211Attrs::get_wiphy_frag_threshold)\n- [.get_wiphy_rts_threshold()](IterableNl80211Attrs::get_wiphy_rts_threshold)\n- [.get_max_num_pmkids()](IterableNl80211Attrs::get_max_num_pmkids)\n- [.get_wiphy_coverage_class()](IterableNl80211Attrs::get_wiphy_coverage_class)\n- [.get_tx_frame_types()](IterableNl80211Attrs::get_tx_frame_types)\n- [.get_rx_frame_types()](IterableNl80211Attrs::get_rx_frame_types)\n- [.get_control_port_ethertype()](IterableNl80211Attrs::get_control_port_ethertype)\n- [.get_wiphy_antenna_tx()](IterableNl80211Attrs::get_wiphy_antenna_tx)\n- [.get_wiphy_antenna_rx()](IterableNl80211Attrs::get_wiphy_antenna_rx)\n- [.get_offchannel_tx_ok()](IterableNl80211Attrs::get_offchannel_tx_ok)\n- [.get_max_remain_on_channel_duration()](IterableNl80211Attrs::get_max_remain_on_channel_duration)\n- [.get_wiphy_antenna_avail_tx()](IterableNl80211Attrs::get_wiphy_antenna_avail_tx)\n- [.get_wiphy_antenna_avail_rx()](IterableNl80211Attrs::get_wiphy_antenna_avail_rx)\n- [.get_wowlan_triggers_supported()](IterableNl80211Attrs::get_wowlan_triggers_supported)\n- [.get_interface_combinations()](IterableNl80211Attrs::get_interface_combinations)\n- [.get_software_iftypes()](IterableNl80211Attrs::get_software_iftypes)\n- [.get_max_num_sched_scan_ssids()](IterableNl80211Attrs::get_max_num_sched_scan_ssids)\n- [.get_max_sched_scan_ie_len()](IterableNl80211Attrs::get_max_sched_scan_ie_len)\n- [.get_support_ap_uapsd()](IterableNl80211Attrs::get_support_ap_uapsd)\n- [.get_max_match_sets()](IterableNl80211Attrs::get_max_match_sets)\n- [.get_tdls_support()](IterableNl80211Attrs::get_tdls_support)\n- [.get_tdls_external_setup()](IterableNl80211Attrs::get_tdls_external_setup)\n- [.get_feature_flags()](IterableNl80211Attrs::get_feature_flags)\n- [.get_ht_capability_mask()](IterableNl80211Attrs::get_ht_capability_mask)\n- [.get_ext_capa()](IterableNl80211Attrs::get_ext_capa)\n- [.get_ext_capa_mask()](IterableNl80211Attrs::get_ext_capa_mask)\n- [.get_vht_capability_mask()](IterableNl80211Attrs::get_vht_capability_mask)\n- [.get_max_csa_counters()](IterableNl80211Attrs::get_max_csa_counters)\n- [.get_ext_features()](IterableNl80211Attrs::get_ext_features)\n- [.get_max_num_sched_scan_plans()](IterableNl80211Attrs::get_max_num_sched_scan_plans)\n- [.get_max_scan_plan_interval()](IterableNl80211Attrs::get_max_scan_plan_interval)\n- [.get_max_scan_plan_iterations()](IterableNl80211Attrs::get_max_scan_plan_iterations)\n- [.get_bands()](IterableNl80211Attrs::get_bands)\n- [.get_sched_scan_max_reqs()](IterableNl80211Attrs::get_sched_scan_max_reqs)\n- [.get_txq_stats()](IterableNl80211Attrs::get_txq_stats)\n- [.get_txq_limit()](IterableNl80211Attrs::get_txq_limit)\n- [.get_txq_memory_limit()](IterableNl80211Attrs::get_txq_memory_limit)\n- [.get_txq_quantum()](IterableNl80211Attrs::get_txq_quantum)\n- [.get_sar_spec()](IterableNl80211Attrs::get_sar_spec)\n- [.get_max_num_akm_suites()](IterableNl80211Attrs::get_max_num_akm_suites)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetWiphyDoRequest<'r> {
+pub struct OpGetWiphyDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetWiphyDoRequest<'r> {
+impl<'r> OpGetWiphyDo<'r> {
     pub fn new(mut request: Request<'r>) -> Self {
-        Self::write_header(&mut request.buf_mut());
+        Self::write_header(request.buf_mut());
         Self { request: request }
     }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushNl80211Attrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushNl80211Attrs::new(buf)
+    }
     pub fn encode(&mut self) -> PushNl80211Attrs<&mut Vec<u8>> {
         PushNl80211Attrs::new(self.request.buf_mut())
     }
     pub fn into_encoder(self) -> PushNl80211Attrs<RequestBuf<'r>> {
         PushNl80211Attrs::new(self.request.buf)
     }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
     fn write_header<Prev: Rec>(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(1u8);
-        header.set_version(1u8);
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 1u8;
+        header.version = 1u8;
         prev.as_rec_mut().extend(header.as_slice());
     }
-    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
 }
-impl NetlinkRequest for RequestOpGetWiphyDoRequest<'_> {
+impl NetlinkRequest for OpGetWiphyDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19682,49 +19710,50 @@ impl NetlinkRequest for RequestOpGetWiphyDoRequest<'_> {
     }
     type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        Self::decode(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        Self::decode(buf).lookup_attr(offset, missing_type)
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
     }
 }
+#[doc = "Get information about an interface or dump a list of all interfaces\nRequest attributes:\n- [.push_ifname()](PushNl80211Attrs::push_ifname)\n\nReply attributes:\n- [.get_wiphy()](IterableNl80211Attrs::get_wiphy)\n- [.get_ifindex()](IterableNl80211Attrs::get_ifindex)\n- [.get_ifname()](IterableNl80211Attrs::get_ifname)\n- [.get_iftype()](IterableNl80211Attrs::get_iftype)\n- [.get_mac()](IterableNl80211Attrs::get_mac)\n- [.get_generation()](IterableNl80211Attrs::get_generation)\n- [.get_4addr()](IterableNl80211Attrs::get_4addr)\n- [.get_wdev()](IterableNl80211Attrs::get_wdev)\n- [.get_txq_stats()](IterableNl80211Attrs::get_txq_stats)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetInterfaceDumpRequest<'r> {
+pub struct OpGetInterfaceDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetInterfaceDumpRequest<'r> {
+impl<'r> OpGetInterfaceDump<'r> {
     pub fn new(mut request: Request<'r>) -> Self {
-        Self::write_header(&mut request.buf_mut());
+        Self::write_header(request.buf_mut());
         Self {
             request: request.set_dump(),
         }
     }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushNl80211Attrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushNl80211Attrs::new(buf)
+    }
     pub fn encode(&mut self) -> PushNl80211Attrs<&mut Vec<u8>> {
         PushNl80211Attrs::new(self.request.buf_mut())
     }
     pub fn into_encoder(self) -> PushNl80211Attrs<RequestBuf<'r>> {
         PushNl80211Attrs::new(self.request.buf)
     }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
     fn write_header<Prev: Rec>(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(5u8);
-        header.set_version(1u8);
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 5u8;
+        header.version = 1u8;
         prev.as_rec_mut().extend(header.as_slice());
     }
-    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
 }
-impl NetlinkRequest for RequestOpGetInterfaceDumpRequest<'_> {
+impl NetlinkRequest for OpGetInterfaceDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19736,47 +19765,48 @@ impl NetlinkRequest for RequestOpGetInterfaceDumpRequest<'_> {
     }
     type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        Self::decode(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        Self::decode(buf).lookup_attr(offset, missing_type)
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
     }
 }
+#[doc = "Get information about an interface or dump a list of all interfaces\nRequest attributes:\n- [.push_ifname()](PushNl80211Attrs::push_ifname)\n\nReply attributes:\n- [.get_wiphy()](IterableNl80211Attrs::get_wiphy)\n- [.get_ifindex()](IterableNl80211Attrs::get_ifindex)\n- [.get_ifname()](IterableNl80211Attrs::get_ifname)\n- [.get_iftype()](IterableNl80211Attrs::get_iftype)\n- [.get_mac()](IterableNl80211Attrs::get_mac)\n- [.get_generation()](IterableNl80211Attrs::get_generation)\n- [.get_4addr()](IterableNl80211Attrs::get_4addr)\n- [.get_wdev()](IterableNl80211Attrs::get_wdev)\n- [.get_txq_stats()](IterableNl80211Attrs::get_txq_stats)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetInterfaceDoRequest<'r> {
+pub struct OpGetInterfaceDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetInterfaceDoRequest<'r> {
+impl<'r> OpGetInterfaceDo<'r> {
     pub fn new(mut request: Request<'r>) -> Self {
-        Self::write_header(&mut request.buf_mut());
+        Self::write_header(request.buf_mut());
         Self { request: request }
     }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushNl80211Attrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushNl80211Attrs::new(buf)
+    }
     pub fn encode(&mut self) -> PushNl80211Attrs<&mut Vec<u8>> {
         PushNl80211Attrs::new(self.request.buf_mut())
     }
     pub fn into_encoder(self) -> PushNl80211Attrs<RequestBuf<'r>> {
         PushNl80211Attrs::new(self.request.buf)
     }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
     fn write_header<Prev: Rec>(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(5u8);
-        header.set_version(1u8);
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 5u8;
+        header.version = 1u8;
         prev.as_rec_mut().extend(header.as_slice());
     }
-    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
 }
-impl NetlinkRequest for RequestOpGetInterfaceDoRequest<'_> {
+impl NetlinkRequest for OpGetInterfaceDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19788,47 +19818,48 @@ impl NetlinkRequest for RequestOpGetInterfaceDoRequest<'_> {
     }
     type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        Self::decode(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        Self::decode(buf).lookup_attr(offset, missing_type)
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
     }
 }
+#[doc = "Get information about supported protocol features\nRequest attributes:\n- [.push_protocol_features()](PushNl80211Attrs::push_protocol_features)\n\nReply attributes:\n- [.get_protocol_features()](IterableNl80211Attrs::get_protocol_features)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetProtocolFeaturesDoRequest<'r> {
+pub struct OpGetProtocolFeaturesDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetProtocolFeaturesDoRequest<'r> {
+impl<'r> OpGetProtocolFeaturesDo<'r> {
     pub fn new(mut request: Request<'r>) -> Self {
-        Self::write_header(&mut request.buf_mut());
+        Self::write_header(request.buf_mut());
         Self { request: request }
     }
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushNl80211Attrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushNl80211Attrs::new(buf)
+    }
     pub fn encode(&mut self) -> PushNl80211Attrs<&mut Vec<u8>> {
         PushNl80211Attrs::new(self.request.buf_mut())
     }
     pub fn into_encoder(self) -> PushNl80211Attrs<RequestBuf<'r>> {
         PushNl80211Attrs::new(self.request.buf)
     }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
     fn write_header<Prev: Rec>(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(95u8);
-        header.set_version(1u8);
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 95u8;
+        header.version = 1u8;
         prev.as_rec_mut().extend(header.as_slice());
     }
-    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
 }
-impl NetlinkRequest for RequestOpGetProtocolFeaturesDoRequest<'_> {
+impl NetlinkRequest for OpGetProtocolFeaturesDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19840,49 +19871,53 @@ impl NetlinkRequest for RequestOpGetProtocolFeaturesDoRequest<'_> {
     }
     type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        Self::decode(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        Self::decode(buf).lookup_attr(offset, missing_type)
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
     }
 }
+#[doc = ""]
 #[derive(Debug)]
-pub struct RequestOpDumpRequest<'r> {
+pub struct OpDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpDumpRequest<'r> {
+impl<'r> OpDump<'r> {
     pub fn new(mut request: Request<'r>, request_type: u8) -> Self {
-        Self::write_header(&mut request.buf_mut(), request_type);
+        Self::write_header(request.buf_mut(), request_type);
         Self {
             request: request.set_dump(),
         }
+    }
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        request_type: u8,
+    ) -> PushNl80211Attrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, request_type);
+        PushNl80211Attrs::new(buf)
     }
     pub fn encode(&mut self) -> PushNl80211Attrs<&mut Vec<u8>> {
         PushNl80211Attrs::new(self.request.buf_mut())
     }
     pub fn into_encoder(self) -> PushNl80211Attrs<RequestBuf<'r>> {
         PushNl80211Attrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
     }
     fn write_header<Prev: Rec>(prev: &mut Prev, request_type: u8) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(request_type);
-        header.set_version(1u8);
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = request_type;
+        header.version = 1u8;
         prev.as_rec_mut().extend(header.as_slice());
     }
-    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
 }
-impl NetlinkRequest for RequestOpDumpRequest<'_> {
+impl NetlinkRequest for OpDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19894,24 +19929,32 @@ impl NetlinkRequest for RequestOpDumpRequest<'_> {
     }
     type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        Self::decode(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        Self::decode(buf).lookup_attr(offset, missing_type)
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
     }
 }
+#[doc = ""]
 #[derive(Debug)]
-pub struct RequestOpDoRequest<'r> {
+pub struct OpDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpDoRequest<'r> {
+impl<'r> OpDo<'r> {
     pub fn new(mut request: Request<'r>, request_type: u8) -> Self {
-        Self::write_header(&mut request.buf_mut(), request_type);
+        Self::write_header(request.buf_mut(), request_type);
         Self { request: request }
+    }
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        request_type: u8,
+    ) -> PushNl80211Attrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, request_type);
+        PushNl80211Attrs::new(buf)
     }
     pub fn encode(&mut self) -> PushNl80211Attrs<&mut Vec<u8>> {
         PushNl80211Attrs::new(self.request.buf_mut())
@@ -19919,22 +19962,18 @@ impl<'r> RequestOpDoRequest<'r> {
     pub fn into_encoder(self) -> PushNl80211Attrs<RequestBuf<'r>> {
         PushNl80211Attrs::new(self.request.buf)
     }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
     fn write_header<Prev: Rec>(prev: &mut Prev, request_type: u8) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(request_type);
-        header.set_version(1u8);
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = request_type;
+        header.version = 1u8;
         prev.as_rec_mut().extend(header.as_slice());
     }
-    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn decode<'a>(buf: &'a [u8]) -> IterableNl80211Attrs<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableNl80211Attrs::with_loc(attrs, buf.as_ptr() as usize)
-    }
 }
-impl NetlinkRequest for RequestOpDoRequest<'_> {
+impl NetlinkRequest for OpDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Generic("nl80211".as_bytes())
     }
@@ -19946,14 +19985,14 @@ impl NetlinkRequest for RequestOpDoRequest<'_> {
     }
     type ReplyType<'buf> = IterableNl80211Attrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        Self::decode(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        Self::decode(buf).lookup_attr(offset, missing_type)
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
     }
 }
 use crate::traits::LookupFn;
@@ -20043,71 +20082,148 @@ impl<'buf> Request<'buf> {
         self.flags |= consts::NLM_F_APPEND as u16;
         self
     }
+    #[doc = "Set `self.flags |= flags`"]
+    pub fn set_flags(mut self, flags: u16) -> Self {
+        self.flags |= flags;
+        self
+    }
+    #[doc = "Set `self.flags ^= self.flags & flags`"]
+    pub fn unset_flags(mut self, flags: u16) -> Self {
+        self.flags ^= self.flags & flags;
+        self
+    }
     #[doc = "Set `NLM_F_DUMP` flag"]
     fn set_dump(mut self) -> Self {
         self.flags |= consts::NLM_F_DUMP as u16;
         self
     }
-    pub fn op_get_wiphy_dump_request(self) -> RequestOpGetWiphyDumpRequest<'buf> {
-        let mut res = RequestOpGetWiphyDumpRequest::new(self);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-get-wiphy-dump-request",
-            RequestOpGetWiphyDumpRequest::lookup,
-        );
-        res
-    }
-    pub fn op_get_wiphy_do_request(self) -> RequestOpGetWiphyDoRequest<'buf> {
-        let mut res = RequestOpGetWiphyDoRequest::new(self);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-get-wiphy-do-request",
-            RequestOpGetWiphyDoRequest::lookup,
-        );
-        res
-    }
-    pub fn op_get_interface_dump_request(self) -> RequestOpGetInterfaceDumpRequest<'buf> {
-        let mut res = RequestOpGetInterfaceDumpRequest::new(self);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-get-interface-dump-request",
-            RequestOpGetInterfaceDumpRequest::lookup,
-        );
-        res
-    }
-    pub fn op_get_interface_do_request(self) -> RequestOpGetInterfaceDoRequest<'buf> {
-        let mut res = RequestOpGetInterfaceDoRequest::new(self);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-get-interface-do-request",
-            RequestOpGetInterfaceDoRequest::lookup,
-        );
-        res
-    }
-    pub fn op_get_protocol_features_do_request(
-        self,
-    ) -> RequestOpGetProtocolFeaturesDoRequest<'buf> {
-        let mut res = RequestOpGetProtocolFeaturesDoRequest::new(self);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-get-protocol-features-do-request",
-            RequestOpGetProtocolFeaturesDoRequest::lookup,
-        );
-        res
-    }
-    pub fn op_dump_request(self, request_type: u8) -> RequestOpDumpRequest<'buf> {
-        let mut res = RequestOpDumpRequest::new(self, request_type);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-dump-request",
-            RequestOpDumpRequest::lookup,
-        );
-        res
-    }
-    pub fn op_do_request(self, request_type: u8) -> RequestOpDoRequest<'buf> {
-        let mut res = RequestOpDoRequest::new(self, request_type);
+    #[doc = "Get information about a wiphy or dump a list of all wiphys\\. Requests to\ndump get\\-wiphy should unconditionally include the split\\-wiphy\\-dump flag\nin the request\\.\n\nRequest attributes:\n- [.push_wiphy()](PushNl80211Attrs::push_wiphy)\n- [.push_ifindex()](PushNl80211Attrs::push_ifindex)\n- [.push_wdev()](PushNl80211Attrs::push_wdev)\n- [.push_split_wiphy_dump()](PushNl80211Attrs::push_split_wiphy_dump)\n\nReply attributes:\n- [.get_wiphy()](IterableNl80211Attrs::get_wiphy)\n- [.get_wiphy_name()](IterableNl80211Attrs::get_wiphy_name)\n- [.get_mac()](IterableNl80211Attrs::get_mac)\n- [.get_wiphy_bands()](IterableNl80211Attrs::get_wiphy_bands)\n- [.get_supported_iftypes()](IterableNl80211Attrs::get_supported_iftypes)\n- [.get_max_num_scan_ssids()](IterableNl80211Attrs::get_max_num_scan_ssids)\n- [.get_generation()](IterableNl80211Attrs::get_generation)\n- [.get_supported_commands()](IterableNl80211Attrs::get_supported_commands)\n- [.get_max_scan_ie_len()](IterableNl80211Attrs::get_max_scan_ie_len)\n- [.get_cipher_suites()](IterableNl80211Attrs::get_cipher_suites)\n- [.get_wiphy_retry_short()](IterableNl80211Attrs::get_wiphy_retry_short)\n- [.get_wiphy_retry_long()](IterableNl80211Attrs::get_wiphy_retry_long)\n- [.get_wiphy_frag_threshold()](IterableNl80211Attrs::get_wiphy_frag_threshold)\n- [.get_wiphy_rts_threshold()](IterableNl80211Attrs::get_wiphy_rts_threshold)\n- [.get_max_num_pmkids()](IterableNl80211Attrs::get_max_num_pmkids)\n- [.get_wiphy_coverage_class()](IterableNl80211Attrs::get_wiphy_coverage_class)\n- [.get_tx_frame_types()](IterableNl80211Attrs::get_tx_frame_types)\n- [.get_rx_frame_types()](IterableNl80211Attrs::get_rx_frame_types)\n- [.get_control_port_ethertype()](IterableNl80211Attrs::get_control_port_ethertype)\n- [.get_wiphy_antenna_tx()](IterableNl80211Attrs::get_wiphy_antenna_tx)\n- [.get_wiphy_antenna_rx()](IterableNl80211Attrs::get_wiphy_antenna_rx)\n- [.get_offchannel_tx_ok()](IterableNl80211Attrs::get_offchannel_tx_ok)\n- [.get_max_remain_on_channel_duration()](IterableNl80211Attrs::get_max_remain_on_channel_duration)\n- [.get_wiphy_antenna_avail_tx()](IterableNl80211Attrs::get_wiphy_antenna_avail_tx)\n- [.get_wiphy_antenna_avail_rx()](IterableNl80211Attrs::get_wiphy_antenna_avail_rx)\n- [.get_wowlan_triggers_supported()](IterableNl80211Attrs::get_wowlan_triggers_supported)\n- [.get_interface_combinations()](IterableNl80211Attrs::get_interface_combinations)\n- [.get_software_iftypes()](IterableNl80211Attrs::get_software_iftypes)\n- [.get_max_num_sched_scan_ssids()](IterableNl80211Attrs::get_max_num_sched_scan_ssids)\n- [.get_max_sched_scan_ie_len()](IterableNl80211Attrs::get_max_sched_scan_ie_len)\n- [.get_support_ap_uapsd()](IterableNl80211Attrs::get_support_ap_uapsd)\n- [.get_max_match_sets()](IterableNl80211Attrs::get_max_match_sets)\n- [.get_tdls_support()](IterableNl80211Attrs::get_tdls_support)\n- [.get_tdls_external_setup()](IterableNl80211Attrs::get_tdls_external_setup)\n- [.get_feature_flags()](IterableNl80211Attrs::get_feature_flags)\n- [.get_ht_capability_mask()](IterableNl80211Attrs::get_ht_capability_mask)\n- [.get_ext_capa()](IterableNl80211Attrs::get_ext_capa)\n- [.get_ext_capa_mask()](IterableNl80211Attrs::get_ext_capa_mask)\n- [.get_vht_capability_mask()](IterableNl80211Attrs::get_vht_capability_mask)\n- [.get_max_csa_counters()](IterableNl80211Attrs::get_max_csa_counters)\n- [.get_ext_features()](IterableNl80211Attrs::get_ext_features)\n- [.get_max_num_sched_scan_plans()](IterableNl80211Attrs::get_max_num_sched_scan_plans)\n- [.get_max_scan_plan_interval()](IterableNl80211Attrs::get_max_scan_plan_interval)\n- [.get_max_scan_plan_iterations()](IterableNl80211Attrs::get_max_scan_plan_iterations)\n- [.get_bands()](IterableNl80211Attrs::get_bands)\n- [.get_sched_scan_max_reqs()](IterableNl80211Attrs::get_sched_scan_max_reqs)\n- [.get_txq_stats()](IterableNl80211Attrs::get_txq_stats)\n- [.get_txq_limit()](IterableNl80211Attrs::get_txq_limit)\n- [.get_txq_memory_limit()](IterableNl80211Attrs::get_txq_memory_limit)\n- [.get_txq_quantum()](IterableNl80211Attrs::get_txq_quantum)\n- [.get_sar_spec()](IterableNl80211Attrs::get_sar_spec)\n- [.get_max_num_akm_suites()](IterableNl80211Attrs::get_max_num_akm_suites)\n"]
+    pub fn op_get_wiphy_dump(self) -> OpGetWiphyDump<'buf> {
+        let mut res = OpGetWiphyDump::new(self);
         res.request
-            .do_writeback(res.protocol(), "op-do-request", RequestOpDoRequest::lookup);
+            .do_writeback(res.protocol(), "op-get-wiphy-dump", OpGetWiphyDump::lookup);
         res
+    }
+    #[doc = "Get information about a wiphy or dump a list of all wiphys\\. Requests to\ndump get\\-wiphy should unconditionally include the split\\-wiphy\\-dump flag\nin the request\\.\n\nRequest attributes:\n- [.push_wiphy()](PushNl80211Attrs::push_wiphy)\n- [.push_ifindex()](PushNl80211Attrs::push_ifindex)\n- [.push_wdev()](PushNl80211Attrs::push_wdev)\n\nReply attributes:\n- [.get_wiphy()](IterableNl80211Attrs::get_wiphy)\n- [.get_wiphy_name()](IterableNl80211Attrs::get_wiphy_name)\n- [.get_mac()](IterableNl80211Attrs::get_mac)\n- [.get_wiphy_bands()](IterableNl80211Attrs::get_wiphy_bands)\n- [.get_supported_iftypes()](IterableNl80211Attrs::get_supported_iftypes)\n- [.get_max_num_scan_ssids()](IterableNl80211Attrs::get_max_num_scan_ssids)\n- [.get_generation()](IterableNl80211Attrs::get_generation)\n- [.get_supported_commands()](IterableNl80211Attrs::get_supported_commands)\n- [.get_max_scan_ie_len()](IterableNl80211Attrs::get_max_scan_ie_len)\n- [.get_cipher_suites()](IterableNl80211Attrs::get_cipher_suites)\n- [.get_wiphy_retry_short()](IterableNl80211Attrs::get_wiphy_retry_short)\n- [.get_wiphy_retry_long()](IterableNl80211Attrs::get_wiphy_retry_long)\n- [.get_wiphy_frag_threshold()](IterableNl80211Attrs::get_wiphy_frag_threshold)\n- [.get_wiphy_rts_threshold()](IterableNl80211Attrs::get_wiphy_rts_threshold)\n- [.get_max_num_pmkids()](IterableNl80211Attrs::get_max_num_pmkids)\n- [.get_wiphy_coverage_class()](IterableNl80211Attrs::get_wiphy_coverage_class)\n- [.get_tx_frame_types()](IterableNl80211Attrs::get_tx_frame_types)\n- [.get_rx_frame_types()](IterableNl80211Attrs::get_rx_frame_types)\n- [.get_control_port_ethertype()](IterableNl80211Attrs::get_control_port_ethertype)\n- [.get_wiphy_antenna_tx()](IterableNl80211Attrs::get_wiphy_antenna_tx)\n- [.get_wiphy_antenna_rx()](IterableNl80211Attrs::get_wiphy_antenna_rx)\n- [.get_offchannel_tx_ok()](IterableNl80211Attrs::get_offchannel_tx_ok)\n- [.get_max_remain_on_channel_duration()](IterableNl80211Attrs::get_max_remain_on_channel_duration)\n- [.get_wiphy_antenna_avail_tx()](IterableNl80211Attrs::get_wiphy_antenna_avail_tx)\n- [.get_wiphy_antenna_avail_rx()](IterableNl80211Attrs::get_wiphy_antenna_avail_rx)\n- [.get_wowlan_triggers_supported()](IterableNl80211Attrs::get_wowlan_triggers_supported)\n- [.get_interface_combinations()](IterableNl80211Attrs::get_interface_combinations)\n- [.get_software_iftypes()](IterableNl80211Attrs::get_software_iftypes)\n- [.get_max_num_sched_scan_ssids()](IterableNl80211Attrs::get_max_num_sched_scan_ssids)\n- [.get_max_sched_scan_ie_len()](IterableNl80211Attrs::get_max_sched_scan_ie_len)\n- [.get_support_ap_uapsd()](IterableNl80211Attrs::get_support_ap_uapsd)\n- [.get_max_match_sets()](IterableNl80211Attrs::get_max_match_sets)\n- [.get_tdls_support()](IterableNl80211Attrs::get_tdls_support)\n- [.get_tdls_external_setup()](IterableNl80211Attrs::get_tdls_external_setup)\n- [.get_feature_flags()](IterableNl80211Attrs::get_feature_flags)\n- [.get_ht_capability_mask()](IterableNl80211Attrs::get_ht_capability_mask)\n- [.get_ext_capa()](IterableNl80211Attrs::get_ext_capa)\n- [.get_ext_capa_mask()](IterableNl80211Attrs::get_ext_capa_mask)\n- [.get_vht_capability_mask()](IterableNl80211Attrs::get_vht_capability_mask)\n- [.get_max_csa_counters()](IterableNl80211Attrs::get_max_csa_counters)\n- [.get_ext_features()](IterableNl80211Attrs::get_ext_features)\n- [.get_max_num_sched_scan_plans()](IterableNl80211Attrs::get_max_num_sched_scan_plans)\n- [.get_max_scan_plan_interval()](IterableNl80211Attrs::get_max_scan_plan_interval)\n- [.get_max_scan_plan_iterations()](IterableNl80211Attrs::get_max_scan_plan_iterations)\n- [.get_bands()](IterableNl80211Attrs::get_bands)\n- [.get_sched_scan_max_reqs()](IterableNl80211Attrs::get_sched_scan_max_reqs)\n- [.get_txq_stats()](IterableNl80211Attrs::get_txq_stats)\n- [.get_txq_limit()](IterableNl80211Attrs::get_txq_limit)\n- [.get_txq_memory_limit()](IterableNl80211Attrs::get_txq_memory_limit)\n- [.get_txq_quantum()](IterableNl80211Attrs::get_txq_quantum)\n- [.get_sar_spec()](IterableNl80211Attrs::get_sar_spec)\n- [.get_max_num_akm_suites()](IterableNl80211Attrs::get_max_num_akm_suites)\n"]
+    pub fn op_get_wiphy_do(self) -> OpGetWiphyDo<'buf> {
+        let mut res = OpGetWiphyDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-get-wiphy-do", OpGetWiphyDo::lookup);
+        res
+    }
+    #[doc = "Get information about an interface or dump a list of all interfaces\nRequest attributes:\n- [.push_ifname()](PushNl80211Attrs::push_ifname)\n\nReply attributes:\n- [.get_wiphy()](IterableNl80211Attrs::get_wiphy)\n- [.get_ifindex()](IterableNl80211Attrs::get_ifindex)\n- [.get_ifname()](IterableNl80211Attrs::get_ifname)\n- [.get_iftype()](IterableNl80211Attrs::get_iftype)\n- [.get_mac()](IterableNl80211Attrs::get_mac)\n- [.get_generation()](IterableNl80211Attrs::get_generation)\n- [.get_4addr()](IterableNl80211Attrs::get_4addr)\n- [.get_wdev()](IterableNl80211Attrs::get_wdev)\n- [.get_txq_stats()](IterableNl80211Attrs::get_txq_stats)\n"]
+    pub fn op_get_interface_dump(self) -> OpGetInterfaceDump<'buf> {
+        let mut res = OpGetInterfaceDump::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-get-interface-dump",
+            OpGetInterfaceDump::lookup,
+        );
+        res
+    }
+    #[doc = "Get information about an interface or dump a list of all interfaces\nRequest attributes:\n- [.push_ifname()](PushNl80211Attrs::push_ifname)\n\nReply attributes:\n- [.get_wiphy()](IterableNl80211Attrs::get_wiphy)\n- [.get_ifindex()](IterableNl80211Attrs::get_ifindex)\n- [.get_ifname()](IterableNl80211Attrs::get_ifname)\n- [.get_iftype()](IterableNl80211Attrs::get_iftype)\n- [.get_mac()](IterableNl80211Attrs::get_mac)\n- [.get_generation()](IterableNl80211Attrs::get_generation)\n- [.get_4addr()](IterableNl80211Attrs::get_4addr)\n- [.get_wdev()](IterableNl80211Attrs::get_wdev)\n- [.get_txq_stats()](IterableNl80211Attrs::get_txq_stats)\n"]
+    pub fn op_get_interface_do(self) -> OpGetInterfaceDo<'buf> {
+        let mut res = OpGetInterfaceDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-get-interface-do",
+            OpGetInterfaceDo::lookup,
+        );
+        res
+    }
+    #[doc = "Get information about supported protocol features\nRequest attributes:\n- [.push_protocol_features()](PushNl80211Attrs::push_protocol_features)\n\nReply attributes:\n- [.get_protocol_features()](IterableNl80211Attrs::get_protocol_features)\n"]
+    pub fn op_get_protocol_features_do(self) -> OpGetProtocolFeaturesDo<'buf> {
+        let mut res = OpGetProtocolFeaturesDo::new(self);
+        res.request.do_writeback(
+            res.protocol(),
+            "op-get-protocol-features-do",
+            OpGetProtocolFeaturesDo::lookup,
+        );
+        res
+    }
+    #[doc = ""]
+    pub fn op_dump(self, request_type: u8) -> OpDump<'buf> {
+        let mut res = OpDump::new(self, request_type);
+        res.request
+            .do_writeback(res.protocol(), "op-dump", OpDump::lookup);
+        res
+    }
+    #[doc = ""]
+    pub fn op_do(self, request_type: u8) -> OpDo<'buf> {
+        let mut res = OpDo::new(self, request_type);
+        res.request
+            .do_writeback(res.protocol(), "op-do", OpDo::lookup);
+        res
+    }
+}
+#[cfg(test)]
+mod generated_tests {
+    use super::*;
+    #[test]
+    fn tests() {
+        let _ = IterableNl80211Attrs::get_4addr;
+        let _ = IterableNl80211Attrs::get_bands;
+        let _ = IterableNl80211Attrs::get_cipher_suites;
+        let _ = IterableNl80211Attrs::get_control_port_ethertype;
+        let _ = IterableNl80211Attrs::get_ext_capa;
+        let _ = IterableNl80211Attrs::get_ext_capa_mask;
+        let _ = IterableNl80211Attrs::get_ext_features;
+        let _ = IterableNl80211Attrs::get_feature_flags;
+        let _ = IterableNl80211Attrs::get_generation;
+        let _ = IterableNl80211Attrs::get_ht_capability_mask;
+        let _ = IterableNl80211Attrs::get_ifindex;
+        let _ = IterableNl80211Attrs::get_ifname;
+        let _ = IterableNl80211Attrs::get_iftype;
+        let _ = IterableNl80211Attrs::get_interface_combinations;
+        let _ = IterableNl80211Attrs::get_mac;
+        let _ = IterableNl80211Attrs::get_max_csa_counters;
+        let _ = IterableNl80211Attrs::get_max_match_sets;
+        let _ = IterableNl80211Attrs::get_max_num_akm_suites;
+        let _ = IterableNl80211Attrs::get_max_num_pmkids;
+        let _ = IterableNl80211Attrs::get_max_num_scan_ssids;
+        let _ = IterableNl80211Attrs::get_max_num_sched_scan_plans;
+        let _ = IterableNl80211Attrs::get_max_num_sched_scan_ssids;
+        let _ = IterableNl80211Attrs::get_max_remain_on_channel_duration;
+        let _ = IterableNl80211Attrs::get_max_scan_ie_len;
+        let _ = IterableNl80211Attrs::get_max_scan_plan_interval;
+        let _ = IterableNl80211Attrs::get_max_scan_plan_iterations;
+        let _ = IterableNl80211Attrs::get_max_sched_scan_ie_len;
+        let _ = IterableNl80211Attrs::get_offchannel_tx_ok;
+        let _ = IterableNl80211Attrs::get_protocol_features;
+        let _ = IterableNl80211Attrs::get_rx_frame_types;
+        let _ = IterableNl80211Attrs::get_sar_spec;
+        let _ = IterableNl80211Attrs::get_sched_scan_max_reqs;
+        let _ = IterableNl80211Attrs::get_software_iftypes;
+        let _ = IterableNl80211Attrs::get_support_ap_uapsd;
+        let _ = IterableNl80211Attrs::get_supported_commands;
+        let _ = IterableNl80211Attrs::get_supported_iftypes;
+        let _ = IterableNl80211Attrs::get_tdls_external_setup;
+        let _ = IterableNl80211Attrs::get_tdls_support;
+        let _ = IterableNl80211Attrs::get_tx_frame_types;
+        let _ = IterableNl80211Attrs::get_txq_limit;
+        let _ = IterableNl80211Attrs::get_txq_memory_limit;
+        let _ = IterableNl80211Attrs::get_txq_quantum;
+        let _ = IterableNl80211Attrs::get_txq_stats;
+        let _ = IterableNl80211Attrs::get_vht_capability_mask;
+        let _ = IterableNl80211Attrs::get_wdev;
+        let _ = IterableNl80211Attrs::get_wiphy;
+        let _ = IterableNl80211Attrs::get_wiphy_antenna_avail_rx;
+        let _ = IterableNl80211Attrs::get_wiphy_antenna_avail_tx;
+        let _ = IterableNl80211Attrs::get_wiphy_antenna_rx;
+        let _ = IterableNl80211Attrs::get_wiphy_antenna_tx;
+        let _ = IterableNl80211Attrs::get_wiphy_bands;
+        let _ = IterableNl80211Attrs::get_wiphy_coverage_class;
+        let _ = IterableNl80211Attrs::get_wiphy_frag_threshold;
+        let _ = IterableNl80211Attrs::get_wiphy_name;
+        let _ = IterableNl80211Attrs::get_wiphy_retry_long;
+        let _ = IterableNl80211Attrs::get_wiphy_retry_short;
+        let _ = IterableNl80211Attrs::get_wiphy_rts_threshold;
+        let _ = IterableNl80211Attrs::get_wowlan_triggers_supported;
+        let _ = PushNl80211Attrs::<&mut Vec<u8>>::push_ifindex;
+        let _ = PushNl80211Attrs::<&mut Vec<u8>>::push_ifname;
+        let _ = PushNl80211Attrs::<&mut Vec<u8>>::push_protocol_features;
+        let _ = PushNl80211Attrs::<&mut Vec<u8>>::push_split_wiphy_dump;
+        let _ = PushNl80211Attrs::<&mut Vec<u8>>::push_wdev;
+        let _ = PushNl80211Attrs::<&mut Vec<u8>>::push_wiphy;
     }
 }

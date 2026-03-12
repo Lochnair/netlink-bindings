@@ -1,4 +1,4 @@
-#![doc = "Netlink protocol to control WireGuard network devices.\n\nThe below enums and macros are for interfacing with WireGuard, using generic\nnetlink, with family WG_GENL_NAME and version WG_GENL_VERSION. It defines two\ncommands: get and set. Note that while they share many common attributes,\nthese two commands actually accept a slightly different set of inputs and\noutputs. These differences are noted under the individual attributes.\n"]
+#![doc = "\\*\\*Netlink protocol to control WireGuard network devices\\.\\*\\*\n\nThe below enums and macros are for interfacing with WireGuard, using generic\nnetlink, with family \\`\\`WG\\_GENL\\_NAME\\`\\` and version \\`\\`WG\\_GENL\\_VERSION\\`\\`\\. It\ndefines two commands: get and set\\. Note that while they share many common\nattributes, these two commands actually accept a slightly different set of\ninputs and outputs\\. These differences are noted under the individual\nattributes\\.\n"]
 #![allow(clippy::all)]
 #![allow(unused_imports)]
 #![allow(unused_assignments)]
@@ -9,13 +9,14 @@
 #![allow(unreachable_patterns)]
 #[cfg(test)]
 mod tests;
-use crate::builtin::{PushBuiltinBitfield32, PushBuiltinNfgenmsg, PushDummy, PushNlmsghdr};
+use crate::builtin::{BuiltinBitfield32, BuiltinNfgenmsg, Nlmsghdr, PushDummy};
 use crate::{
     consts,
     traits::{NetlinkRequest, Protocol},
     utils::*,
 };
-pub const PROTONAME: &CStr = c"wireguard";
+pub const PROTONAME: &str = "wireguard";
+pub const PROTONAME_CSTR: &CStr = c"wireguard";
 pub const KEY_LEN: u64 = 32u64;
 #[doc = "Flags - defines an integer enumeration, with values for each entry occupying a bit, starting from bit 0, (e.g. 1, 2, 4, 8)"]
 #[derive(Debug, Clone, Copy)]
@@ -60,19 +61,96 @@ impl WgallowedipFlags {
         })
     }
 }
+#[repr(C, packed(4))]
+pub struct KernelTimespec {
+    #[doc = "Number of seconds, since UNIX epoch\\."]
+    pub sec: u64,
+    #[doc = "Number of nanoseconds, after the second began\\."]
+    pub nsec: u64,
+}
+impl Clone for KernelTimespec {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for KernelTimespec {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl KernelTimespec {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 16usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 16usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<KernelTimespec>() == 16usize);
+        16usize
+    }
+}
+impl std::fmt::Debug for KernelTimespec {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("KernelTimespec")
+            .field("sec", &{ self.sec })
+            .field("nsec", &{ self.nsec })
+            .finish()
+    }
+}
 #[derive(Clone)]
 pub enum Wgdevice<'a> {
     Ifindex(u32),
     Ifname(&'a CStr),
-    #[doc = "Set to all zeros to remove."]
+    #[doc = "Set to all zeros to remove\\."]
     PrivateKey(&'a [u8]),
     PublicKey(&'a [u8]),
-    #[doc = "0 or WGDEVICE_F_REPLACE_PEERS if all current peers\nshould be removed prior to adding the list below.\n\nAssociated type: \"WgdeviceFlags\" (enum)"]
+    #[doc = "\\`\\`0\\`\\` or \\`\\`WGDEVICE\\_F\\_REPLACE\\_PEERS\\`\\` if all current peers should be\nremoved prior to adding the list below\\.\n\nAssociated type: [`WgdeviceFlags`] (enum)"]
     Flags(u32),
-    #[doc = "Set as 0 to choose randomly."]
+    #[doc = "Set as \\`\\`0\\`\\` to choose randomly\\."]
     ListenPort(u16),
-    #[doc = "Set as 0 to disable."]
+    #[doc = "Set as \\`\\`0\\`\\` to disable\\."]
     Fwmark(u32),
+    #[doc = "The index/type parameter is unused on \\`\\`SET\\_DEVICE\\`\\` operations and is\nzero on \\`\\`GET\\_DEVICE\\`\\` operations\\.\n"]
     Peers(IterableArrayWgpeer<'a>),
 }
 impl<'a> IterableWgdevice<'a> {
@@ -106,7 +184,7 @@ impl<'a> IterableWgdevice<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Set to all zeros to remove."]
+    #[doc = "Set to all zeros to remove\\."]
     pub fn get_private_key(&self) -> Result<&'a [u8], ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -137,7 +215,7 @@ impl<'a> IterableWgdevice<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "0 or WGDEVICE_F_REPLACE_PEERS if all current peers\nshould be removed prior to adding the list below.\n\nAssociated type: \"WgdeviceFlags\" (enum)"]
+    #[doc = "\\`\\`0\\`\\` or \\`\\`WGDEVICE\\_F\\_REPLACE\\_PEERS\\`\\` if all current peers should be\nremoved prior to adding the list below\\.\n\nAssociated type: [`WgdeviceFlags`] (enum)"]
     pub fn get_flags(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -153,7 +231,7 @@ impl<'a> IterableWgdevice<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Set as 0 to choose randomly."]
+    #[doc = "Set as \\`\\`0\\`\\` to choose randomly\\."]
     pub fn get_listen_port(&self) -> Result<u16, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -169,7 +247,7 @@ impl<'a> IterableWgdevice<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Set as 0 to disable."]
+    #[doc = "Set as \\`\\`0\\`\\` to disable\\."]
     pub fn get_fwmark(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -185,6 +263,7 @@ impl<'a> IterableWgdevice<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
+    #[doc = "The index/type parameter is unused on \\`\\`SET\\_DEVICE\\`\\` operations and is\nzero on \\`\\`GET\\_DEVICE\\`\\` operations\\.\n"]
     pub fn get_peers(
         &self,
     ) -> Result<ArrayIterable<IterableArrayWgpeer<'a>, IterableWgpeer<'a>>, ErrorContext> {
@@ -393,7 +472,7 @@ impl IterableWgdevice<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("Wgdevice", offset));
             return (
                 stack,
@@ -477,19 +556,20 @@ impl IterableWgdevice<'_> {
 #[derive(Clone)]
 pub enum Wgpeer<'a> {
     PublicKey(&'a [u8]),
-    #[doc = "Set as all zeros to remove."]
+    #[doc = "Set as all zeros to remove\\."]
     PresharedKey(&'a [u8]),
-    #[doc = "0 and/or WGPEER_F_REMOVE_ME if the specified peer should not\nexist at the end of the operation, rather than added/updated\nand/or WGPEER_F_REPLACE_ALLOWEDIPS if all current allowed IPs\nof this peer should be removed prior to adding the list below\nand/or WGPEER_F_UPDATE_ONLY if the peer should only be set if\nit already exists.\n\nAssociated type: \"WgpeerFlags\" (enum)"]
+    #[doc = "\\`\\`0\\`\\` and/or \\`\\`WGPEER\\_F\\_REMOVE\\_ME\\`\\` if the specified peer should not\nexist at the end of the operation, rather than added/updated and/or\n\\`\\`WGPEER\\_F\\_REPLACE\\_ALLOWEDIPS\\`\\` if all current allowed IPs of this\npeer should be removed prior to adding the list below and/or\n\\`\\`WGPEER\\_F\\_UPDATE\\_ONLY\\`\\` if the peer should only be set if it already\nexists\\.\n\nAssociated type: [`WgpeerFlags`] (enum)"]
     Flags(u32),
-    #[doc = "struct sockaddr_in or struct sockaddr_in6"]
+    #[doc = "struct sockaddr\\_in or struct sockaddr\\_in6"]
     Endpoint(std::net::SocketAddr),
-    #[doc = "Set as 0 to disable."]
+    #[doc = "Set as \\`\\`0\\`\\` to disable\\."]
     PersistentKeepaliveInterval(u16),
-    LastHandshakeTime(PushKernelTimespec),
+    LastHandshakeTime(KernelTimespec),
     RxBytes(u64),
     TxBytes(u64),
+    #[doc = "The index/type parameter is unused on \\`\\`SET\\_DEVICE\\`\\` operations and is\nzero on \\`\\`GET\\_DEVICE\\`\\` operations\\.\n"]
     Allowedips(IterableArrayWgallowedip<'a>),
-    #[doc = "should not be set or used at all by most users of this API,\nas the most recent protocol will be used when this is unset.\nOtherwise, must be set to 1.\n"]
+    #[doc = "Should not be set or used at all by most users of this API, as the\nmost recent protocol will be used when this is unset\\. Otherwise,\nmust be set to \\`\\`1\\`\\`\\.\n"]
     ProtocolVersion(u32),
 }
 impl<'a> IterableWgpeer<'a> {
@@ -508,7 +588,7 @@ impl<'a> IterableWgpeer<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Set as all zeros to remove."]
+    #[doc = "Set as all zeros to remove\\."]
     pub fn get_preshared_key(&self) -> Result<&'a [u8], ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -524,7 +604,7 @@ impl<'a> IterableWgpeer<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "0 and/or WGPEER_F_REMOVE_ME if the specified peer should not\nexist at the end of the operation, rather than added/updated\nand/or WGPEER_F_REPLACE_ALLOWEDIPS if all current allowed IPs\nof this peer should be removed prior to adding the list below\nand/or WGPEER_F_UPDATE_ONLY if the peer should only be set if\nit already exists.\n\nAssociated type: \"WgpeerFlags\" (enum)"]
+    #[doc = "\\`\\`0\\`\\` and/or \\`\\`WGPEER\\_F\\_REMOVE\\_ME\\`\\` if the specified peer should not\nexist at the end of the operation, rather than added/updated and/or\n\\`\\`WGPEER\\_F\\_REPLACE\\_ALLOWEDIPS\\`\\` if all current allowed IPs of this\npeer should be removed prior to adding the list below and/or\n\\`\\`WGPEER\\_F\\_UPDATE\\_ONLY\\`\\` if the peer should only be set if it already\nexists\\.\n\nAssociated type: [`WgpeerFlags`] (enum)"]
     pub fn get_flags(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -540,7 +620,7 @@ impl<'a> IterableWgpeer<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "struct sockaddr_in or struct sockaddr_in6"]
+    #[doc = "struct sockaddr\\_in or struct sockaddr\\_in6"]
     pub fn get_endpoint(&self) -> Result<std::net::SocketAddr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -556,7 +636,7 @@ impl<'a> IterableWgpeer<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Set as 0 to disable."]
+    #[doc = "Set as \\`\\`0\\`\\` to disable\\."]
     pub fn get_persistent_keepalive_interval(&self) -> Result<u16, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -572,7 +652,7 @@ impl<'a> IterableWgpeer<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_last_handshake_time(&self) -> Result<PushKernelTimespec, ErrorContext> {
+    pub fn get_last_handshake_time(&self) -> Result<KernelTimespec, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -617,6 +697,7 @@ impl<'a> IterableWgpeer<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
+    #[doc = "The index/type parameter is unused on \\`\\`SET\\_DEVICE\\`\\` operations and is\nzero on \\`\\`GET\\_DEVICE\\`\\` operations\\.\n"]
     pub fn get_allowedips(
         &self,
     ) -> Result<ArrayIterable<IterableArrayWgallowedip<'a>, IterableWgallowedip<'a>>, ErrorContext>
@@ -633,7 +714,7 @@ impl<'a> IterableWgpeer<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "should not be set or used at all by most users of this API,\nas the most recent protocol will be used when this is unset.\nOtherwise, must be set to 1.\n"]
+    #[doc = "Should not be set or used at all by most users of this API, as the\nmost recent protocol will be used when this is unset\\. Otherwise,\nmust be set to \\`\\`1\\`\\`\\.\n"]
     pub fn get_protocol_version(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -773,7 +854,7 @@ impl<'a> Iterator for IterableWgpeer<'a> {
                     val
                 }),
                 6u16 => Wgpeer::LastHandshakeTime({
-                    let res = PushKernelTimespec::new_from_slice(next);
+                    let res = Some(KernelTimespec::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -858,7 +939,7 @@ impl IterableWgpeer<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("Wgpeer", offset));
             return (stack, missing_type.and_then(|t| Wgpeer::attr_from_type(t)));
         }
@@ -950,14 +1031,16 @@ impl IterableWgpeer<'_> {
 }
 #[derive(Clone)]
 pub enum Wgallowedip {
+    #[doc = "IP family, either \\`\\`AF\\_INET\\`\\` or \\`\\`AF\\_INET6\\`\\`\\."]
     Family(u16),
-    #[doc = "struct in_addr or struct in6_add"]
+    #[doc = "Either \\`\\`struct in\\_addr\\`\\` or \\`\\`struct in6\\_addr\\`\\`\\."]
     Ipaddr(std::net::IpAddr),
     CidrMask(u8),
-    #[doc = "WGALLOWEDIP_F_REMOVE_ME if the specified IP should be removed;\notherwise, this IP will be added if it is not already present.\n\nAssociated type: \"WgallowedipFlags\" (enum)"]
+    #[doc = "\\`\\`WGALLOWEDIP\\_F\\_REMOVE\\_ME\\`\\` if the specified IP should be removed;\notherwise, this IP will be added if it is not already present\\.\n\nAssociated type: [`WgallowedipFlags`] (enum)"]
     Flags(u32),
 }
 impl<'a> IterableWgallowedip<'a> {
+    #[doc = "IP family, either \\`\\`AF\\_INET\\`\\` or \\`\\`AF\\_INET6\\`\\`\\."]
     pub fn get_family(&self) -> Result<u16, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -973,7 +1056,7 @@ impl<'a> IterableWgallowedip<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "struct in_addr or struct in6_add"]
+    #[doc = "Either \\`\\`struct in\\_addr\\`\\` or \\`\\`struct in6\\_addr\\`\\`\\."]
     pub fn get_ipaddr(&self) -> Result<std::net::IpAddr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -1004,7 +1087,7 @@ impl<'a> IterableWgallowedip<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "WGALLOWEDIP_F_REMOVE_ME if the specified IP should be removed;\notherwise, this IP will be added if it is not already present.\n\nAssociated type: \"WgallowedipFlags\" (enum)"]
+    #[doc = "\\`\\`WGALLOWEDIP\\_F\\_REMOVE\\_ME\\`\\` if the specified IP should be removed;\notherwise, this IP will be added if it is not already present\\.\n\nAssociated type: [`WgallowedipFlags`] (enum)"]
     pub fn get_flags(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -1137,7 +1220,7 @@ impl IterableWgallowedip<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("Wgallowedip", offset));
             return (
                 stack,
@@ -1279,7 +1362,7 @@ impl<Prev: Rec> PushWgdevice<Prev> {
         self.as_rec_mut().push(0);
         self
     }
-    #[doc = "Set to all zeros to remove."]
+    #[doc = "Set to all zeros to remove\\."]
     pub fn push_private_key(mut self, value: &[u8]) -> Self {
         push_header(self.as_rec_mut(), 3u16, value.len() as u16);
         self.as_rec_mut().extend(value);
@@ -1290,24 +1373,25 @@ impl<Prev: Rec> PushWgdevice<Prev> {
         self.as_rec_mut().extend(value);
         self
     }
-    #[doc = "0 or WGDEVICE_F_REPLACE_PEERS if all current peers\nshould be removed prior to adding the list below.\n\nAssociated type: \"WgdeviceFlags\" (enum)"]
+    #[doc = "\\`\\`0\\`\\` or \\`\\`WGDEVICE\\_F\\_REPLACE\\_PEERS\\`\\` if all current peers should be\nremoved prior to adding the list below\\.\n\nAssociated type: [`WgdeviceFlags`] (enum)"]
     pub fn push_flags(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 5u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "Set as 0 to choose randomly."]
+    #[doc = "Set as \\`\\`0\\`\\` to choose randomly\\."]
     pub fn push_listen_port(mut self, value: u16) -> Self {
         push_header(self.as_rec_mut(), 6u16, 2 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "Set as 0 to disable."]
+    #[doc = "Set as \\`\\`0\\`\\` to disable\\."]
     pub fn push_fwmark(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 7u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
+    #[doc = "The index/type parameter is unused on \\`\\`SET\\_DEVICE\\`\\` operations and is\nzero on \\`\\`GET\\_DEVICE\\`\\` operations\\.\n"]
     pub fn array_peers(mut self) -> PushArrayWgpeer<Self> {
         let header_offset = push_nested_header(self.as_rec_mut(), 8u16);
         PushArrayWgpeer {
@@ -1404,19 +1488,19 @@ impl<Prev: Rec> PushWgpeer<Prev> {
         self.as_rec_mut().extend(value);
         self
     }
-    #[doc = "Set as all zeros to remove."]
+    #[doc = "Set as all zeros to remove\\."]
     pub fn push_preshared_key(mut self, value: &[u8]) -> Self {
         push_header(self.as_rec_mut(), 2u16, value.len() as u16);
         self.as_rec_mut().extend(value);
         self
     }
-    #[doc = "0 and/or WGPEER_F_REMOVE_ME if the specified peer should not\nexist at the end of the operation, rather than added/updated\nand/or WGPEER_F_REPLACE_ALLOWEDIPS if all current allowed IPs\nof this peer should be removed prior to adding the list below\nand/or WGPEER_F_UPDATE_ONLY if the peer should only be set if\nit already exists.\n\nAssociated type: \"WgpeerFlags\" (enum)"]
+    #[doc = "\\`\\`0\\`\\` and/or \\`\\`WGPEER\\_F\\_REMOVE\\_ME\\`\\` if the specified peer should not\nexist at the end of the operation, rather than added/updated and/or\n\\`\\`WGPEER\\_F\\_REPLACE\\_ALLOWEDIPS\\`\\` if all current allowed IPs of this\npeer should be removed prior to adding the list below and/or\n\\`\\`WGPEER\\_F\\_UPDATE\\_ONLY\\`\\` if the peer should only be set if it already\nexists\\.\n\nAssociated type: [`WgpeerFlags`] (enum)"]
     pub fn push_flags(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 3u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "struct sockaddr_in or struct sockaddr_in6"]
+    #[doc = "struct sockaddr\\_in or struct sockaddr\\_in6"]
     pub fn push_endpoint(mut self, value: std::net::SocketAddr) -> Self {
         push_header(self.as_rec_mut(), 4u16, {
             match &value {
@@ -1427,13 +1511,13 @@ impl<Prev: Rec> PushWgpeer<Prev> {
         encode_sockaddr(self.as_rec_mut(), value);
         self
     }
-    #[doc = "Set as 0 to disable."]
+    #[doc = "Set as \\`\\`0\\`\\` to disable\\."]
     pub fn push_persistent_keepalive_interval(mut self, value: u16) -> Self {
         push_header(self.as_rec_mut(), 5u16, 2 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    pub fn push_last_handshake_time(mut self, value: PushKernelTimespec) -> Self {
+    pub fn push_last_handshake_time(mut self, value: KernelTimespec) -> Self {
         push_header(self.as_rec_mut(), 6u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -1448,6 +1532,7 @@ impl<Prev: Rec> PushWgpeer<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
+    #[doc = "The index/type parameter is unused on \\`\\`SET\\_DEVICE\\`\\` operations and is\nzero on \\`\\`GET\\_DEVICE\\`\\` operations\\.\n"]
     pub fn array_allowedips(mut self) -> PushArrayWgallowedip<Self> {
         let header_offset = push_nested_header(self.as_rec_mut(), 9u16);
         PushArrayWgallowedip {
@@ -1456,7 +1541,7 @@ impl<Prev: Rec> PushWgpeer<Prev> {
             counter: 0,
         }
     }
-    #[doc = "should not be set or used at all by most users of this API,\nas the most recent protocol will be used when this is unset.\nOtherwise, must be set to 1.\n"]
+    #[doc = "Should not be set or used at all by most users of this API, as the\nmost recent protocol will be used when this is unset\\. Otherwise,\nmust be set to \\`\\`1\\`\\`\\.\n"]
     pub fn push_protocol_version(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 10u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -1498,12 +1583,13 @@ impl<Prev: Rec> PushWgallowedip<Prev> {
         }
         prev
     }
+    #[doc = "IP family, either \\`\\`AF\\_INET\\`\\` or \\`\\`AF\\_INET6\\`\\`\\."]
     pub fn push_family(mut self, value: u16) -> Self {
         push_header(self.as_rec_mut(), 1u16, 2 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "struct in_addr or struct in6_add"]
+    #[doc = "Either \\`\\`struct in\\_addr\\`\\` or \\`\\`struct in6\\_addr\\`\\`\\."]
     pub fn push_ipaddr(mut self, value: std::net::IpAddr) -> Self {
         push_header(self.as_rec_mut(), 2u16, {
             match &value {
@@ -1519,7 +1605,7 @@ impl<Prev: Rec> PushWgallowedip<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "WGALLOWEDIP_F_REMOVE_ME if the specified IP should be removed;\notherwise, this IP will be added if it is not already present.\n\nAssociated type: \"WgallowedipFlags\" (enum)"]
+    #[doc = "\\`\\`WGALLOWEDIP\\_F\\_REMOVE\\_ME\\`\\` if the specified IP should be removed;\notherwise, this IP will be added if it is not already present\\.\n\nAssociated type: [`WgallowedipFlags`] (enum)"]
     pub fn push_flags(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 4u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -1535,1013 +1621,40 @@ impl<Prev: Rec> Drop for PushWgallowedip<Prev> {
         }
     }
 }
-#[derive(Clone)]
-pub struct PushKernelTimespec {
-    pub(crate) buf: [u8; 16usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushKernelTimespec {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 16usize],
-        }
-    }
-}
-impl PushKernelTimespec {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        16usize
-    }
-    #[doc = "Number of seconds, since UNIX epoch."]
-    pub fn sec(&self) -> u64 {
-        parse_u64(&self.buf[0usize..8usize]).unwrap()
-    }
-    #[doc = "Number of seconds, since UNIX epoch."]
-    pub fn set_sec(&mut self, value: u64) {
-        self.buf[0usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    #[doc = "Number of nanoseconds, after the second began."]
-    pub fn nsec(&self) -> u64 {
-        parse_u64(&self.buf[8usize..16usize]).unwrap()
-    }
-    #[doc = "Number of nanoseconds, after the second began."]
-    pub fn set_nsec(&mut self, value: u64) {
-        self.buf[8usize..16usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushKernelTimespec {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("KernelTimespec")
-            .field("sec", &self.sec())
-            .field("nsec", &self.nsec())
-            .finish()
-    }
-}
-#[doc = "Retrieve WireGuard device.\n\nThe command should be called with one but not both of:\n* WGDEVICE_A_IFINDEX\n* WGDEVICE_A_IFNAME\n\nThe kernel will then return several messages (NLM_F_MULTI).\nIt is possible that all of the allowed IPs of a single peer will not\nfit within a single netlink message. In that case, the same peer will\nbe written in the following message, except it will only contain\nWGPEER_A_PUBLIC_KEY and WGPEER_A_ALLOWEDIPS. This may occur several\ntimes in a row for the same peer. It is then up to the receiver to\ncoalesce adjacent peers. Likewise, it is possible that all peers will\nnot fit within a single message. So, subsequent peers will be sent\nin following messages, except those will only contain\nWGDEVICE_A_IFNAME and WGDEVICE_A_PEERS. It is then up to the receiver\nto coalesce these messages to form the complete list of peers.\n\nSince this is an NLA_F_DUMP command, the final message will always be\nNLMSG_DONE, even if an error occurs. However, this NLMSG_DONE message\ncontains an integer error code. It is either zero or a negative error\ncode corresponding to the errno.\n"]
-pub struct PushOpGetDeviceDumpRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetDeviceDumpRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetDeviceDumpRequest<Prev> {
-    pub fn new(mut prev: Prev) -> Self {
-        Self::write_header(&mut prev);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(0u8);
-        header.set_version(1u8);
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_ifindex(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 1u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ifname(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            2u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_ifname_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    #[doc = "Set to all zeros to remove."]
-    pub fn push_private_key(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 3u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_public_key(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 4u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    #[doc = "0 or WGDEVICE_F_REPLACE_PEERS if all current peers\nshould be removed prior to adding the list below.\n\nAssociated type: \"WgdeviceFlags\" (enum)"]
-    pub fn push_flags(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 5u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    #[doc = "Set as 0 to choose randomly."]
-    pub fn push_listen_port(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 6u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    #[doc = "Set as 0 to disable."]
-    pub fn push_fwmark(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 7u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn array_peers(mut self) -> PushArrayWgpeer<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 8u16);
-        PushArrayWgpeer {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-            counter: 0,
-        }
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetDeviceDumpRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Retrieve WireGuard device.\n\nThe command should be called with one but not both of:\n* WGDEVICE_A_IFINDEX\n* WGDEVICE_A_IFNAME\n\nThe kernel will then return several messages (NLM_F_MULTI).\nIt is possible that all of the allowed IPs of a single peer will not\nfit within a single netlink message. In that case, the same peer will\nbe written in the following message, except it will only contain\nWGPEER_A_PUBLIC_KEY and WGPEER_A_ALLOWEDIPS. This may occur several\ntimes in a row for the same peer. It is then up to the receiver to\ncoalesce adjacent peers. Likewise, it is possible that all peers will\nnot fit within a single message. So, subsequent peers will be sent\nin following messages, except those will only contain\nWGDEVICE_A_IFNAME and WGDEVICE_A_PEERS. It is then up to the receiver\nto coalesce these messages to form the complete list of peers.\n\nSince this is an NLA_F_DUMP command, the final message will always be\nNLMSG_DONE, even if an error occurs. However, this NLMSG_DONE message\ncontains an integer error code. It is either zero or a negative error\ncode corresponding to the errno.\n"]
-#[derive(Clone)]
-pub enum OpGetDeviceDumpRequest<'a> {
-    Ifindex(u32),
-    Ifname(&'a CStr),
-    #[doc = "Set to all zeros to remove."]
-    PrivateKey(&'a [u8]),
-    PublicKey(&'a [u8]),
-    #[doc = "0 or WGDEVICE_F_REPLACE_PEERS if all current peers\nshould be removed prior to adding the list below.\n\nAssociated type: \"WgdeviceFlags\" (enum)"]
-    Flags(u32),
-    #[doc = "Set as 0 to choose randomly."]
-    ListenPort(u16),
-    #[doc = "Set as 0 to disable."]
-    Fwmark(u32),
-    Peers(IterableArrayWgpeer<'a>),
-}
-impl<'a> IterableOpGetDeviceDumpRequest<'a> {
-    pub fn get_ifindex(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpRequest::Ifindex(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpRequest",
-            "Ifindex",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifname(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpRequest::Ifname(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpRequest",
-            "Ifname",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Set to all zeros to remove."]
-    pub fn get_private_key(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpRequest::PrivateKey(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpRequest",
-            "PrivateKey",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_public_key(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpRequest::PublicKey(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpRequest",
-            "PublicKey",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "0 or WGDEVICE_F_REPLACE_PEERS if all current peers\nshould be removed prior to adding the list below.\n\nAssociated type: \"WgdeviceFlags\" (enum)"]
-    pub fn get_flags(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpRequest::Flags(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpRequest",
-            "Flags",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Set as 0 to choose randomly."]
-    pub fn get_listen_port(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpRequest::ListenPort(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpRequest",
-            "ListenPort",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Set as 0 to disable."]
-    pub fn get_fwmark(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpRequest::Fwmark(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpRequest",
-            "Fwmark",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_peers(
-        &self,
-    ) -> Result<ArrayIterable<IterableArrayWgpeer<'a>, IterableWgpeer<'a>>, ErrorContext> {
-        for attr in self.clone() {
-            if let OpGetDeviceDumpRequest::Peers(val) = attr? {
-                return Ok(ArrayIterable::new(val));
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpRequest",
-            "Peers",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetDeviceDumpRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> IterableOpGetDeviceDumpRequest<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableOpGetDeviceDumpRequest::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        Wgdevice::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetDeviceDumpRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetDeviceDumpRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetDeviceDumpRequest<'a> {
-    type Item = Result<OpGetDeviceDumpRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetDeviceDumpRequest::Ifindex({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetDeviceDumpRequest::Ifname({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetDeviceDumpRequest::PrivateKey({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetDeviceDumpRequest::PublicKey({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetDeviceDumpRequest::Flags({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpGetDeviceDumpRequest::ListenPort({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpGetDeviceDumpRequest::Fwmark({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetDeviceDumpRequest::Peers({
-                    let res = Some(IterableArrayWgpeer::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetDeviceDumpRequest",
-            r#type.and_then(|t| OpGetDeviceDumpRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetDeviceDumpRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetDeviceDumpRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetDeviceDumpRequest::Ifindex(val) => fmt.field("Ifindex", &val),
-                OpGetDeviceDumpRequest::Ifname(val) => fmt.field("Ifname", &val),
-                OpGetDeviceDumpRequest::PrivateKey(val) => fmt.field("PrivateKey", &FormatHex(val)),
-                OpGetDeviceDumpRequest::PublicKey(val) => fmt.field("PublicKey", &FormatHex(val)),
-                OpGetDeviceDumpRequest::Flags(val) => {
-                    fmt.field("Flags", &FormatFlags(val.into(), WgdeviceFlags::from_value))
-                }
-                OpGetDeviceDumpRequest::ListenPort(val) => fmt.field("ListenPort", &val),
-                OpGetDeviceDumpRequest::Fwmark(val) => fmt.field("Fwmark", &val),
-                OpGetDeviceDumpRequest::Peers(val) => fmt.field("Peers", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetDeviceDumpRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushBuiltinNfgenmsg::len() {
-            stack.push(("OpGetDeviceDumpRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetDeviceDumpRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetDeviceDumpRequest::Ifindex(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifindex", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpRequest::Ifname(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifname", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpRequest::PrivateKey(val) => {
-                    if last_off == offset {
-                        stack.push(("PrivateKey", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpRequest::PublicKey(val) => {
-                    if last_off == offset {
-                        stack.push(("PublicKey", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpRequest::Flags(val) => {
-                    if last_off == offset {
-                        stack.push(("Flags", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpRequest::ListenPort(val) => {
-                    if last_off == offset {
-                        stack.push(("ListenPort", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpRequest::Fwmark(val) => {
-                    if last_off == offset {
-                        stack.push(("Fwmark", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpRequest::Peers(val) => {
-                    for entry in val {
-                        let Ok(attr) = entry else { break };
-                        (stack, missing) = attr.lookup_attr(offset, missing_type);
-                        if !stack.is_empty() {
-                            break;
-                        }
-                    }
-                    if !stack.is_empty() {
-                        stack.push(("Peers", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetDeviceDumpRequest", cur));
-        }
-        (stack, missing)
-    }
-}
-#[doc = "Retrieve WireGuard device.\n\nThe command should be called with one but not both of:\n* WGDEVICE_A_IFINDEX\n* WGDEVICE_A_IFNAME\n\nThe kernel will then return several messages (NLM_F_MULTI).\nIt is possible that all of the allowed IPs of a single peer will not\nfit within a single netlink message. In that case, the same peer will\nbe written in the following message, except it will only contain\nWGPEER_A_PUBLIC_KEY and WGPEER_A_ALLOWEDIPS. This may occur several\ntimes in a row for the same peer. It is then up to the receiver to\ncoalesce adjacent peers. Likewise, it is possible that all peers will\nnot fit within a single message. So, subsequent peers will be sent\nin following messages, except those will only contain\nWGDEVICE_A_IFNAME and WGDEVICE_A_PEERS. It is then up to the receiver\nto coalesce these messages to form the complete list of peers.\n\nSince this is an NLA_F_DUMP command, the final message will always be\nNLMSG_DONE, even if an error occurs. However, this NLMSG_DONE message\ncontains an integer error code. It is either zero or a negative error\ncode corresponding to the errno.\n"]
-pub struct PushOpGetDeviceDumpReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetDeviceDumpReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetDeviceDumpReply<Prev> {
-    pub fn new(mut prev: Prev) -> Self {
-        Self::write_header(&mut prev);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(0u8);
-        header.set_version(1u8);
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_ifindex(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 1u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ifname(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            2u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_ifname_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    #[doc = "Set to all zeros to remove."]
-    pub fn push_private_key(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 3u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_public_key(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 4u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    #[doc = "0 or WGDEVICE_F_REPLACE_PEERS if all current peers\nshould be removed prior to adding the list below.\n\nAssociated type: \"WgdeviceFlags\" (enum)"]
-    pub fn push_flags(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 5u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    #[doc = "Set as 0 to choose randomly."]
-    pub fn push_listen_port(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 6u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    #[doc = "Set as 0 to disable."]
-    pub fn push_fwmark(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 7u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn array_peers(mut self) -> PushArrayWgpeer<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 8u16);
-        PushArrayWgpeer {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-            counter: 0,
-        }
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetDeviceDumpReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Retrieve WireGuard device.\n\nThe command should be called with one but not both of:\n* WGDEVICE_A_IFINDEX\n* WGDEVICE_A_IFNAME\n\nThe kernel will then return several messages (NLM_F_MULTI).\nIt is possible that all of the allowed IPs of a single peer will not\nfit within a single netlink message. In that case, the same peer will\nbe written in the following message, except it will only contain\nWGPEER_A_PUBLIC_KEY and WGPEER_A_ALLOWEDIPS. This may occur several\ntimes in a row for the same peer. It is then up to the receiver to\ncoalesce adjacent peers. Likewise, it is possible that all peers will\nnot fit within a single message. So, subsequent peers will be sent\nin following messages, except those will only contain\nWGDEVICE_A_IFNAME and WGDEVICE_A_PEERS. It is then up to the receiver\nto coalesce these messages to form the complete list of peers.\n\nSince this is an NLA_F_DUMP command, the final message will always be\nNLMSG_DONE, even if an error occurs. However, this NLMSG_DONE message\ncontains an integer error code. It is either zero or a negative error\ncode corresponding to the errno.\n"]
-#[derive(Clone)]
-pub enum OpGetDeviceDumpReply<'a> {
-    Ifindex(u32),
-    Ifname(&'a CStr),
-    #[doc = "Set to all zeros to remove."]
-    PrivateKey(&'a [u8]),
-    PublicKey(&'a [u8]),
-    #[doc = "0 or WGDEVICE_F_REPLACE_PEERS if all current peers\nshould be removed prior to adding the list below.\n\nAssociated type: \"WgdeviceFlags\" (enum)"]
-    Flags(u32),
-    #[doc = "Set as 0 to choose randomly."]
-    ListenPort(u16),
-    #[doc = "Set as 0 to disable."]
-    Fwmark(u32),
-    Peers(IterableArrayWgpeer<'a>),
-}
-impl<'a> IterableOpGetDeviceDumpReply<'a> {
-    pub fn get_ifindex(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpReply::Ifindex(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpReply",
-            "Ifindex",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifname(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpReply::Ifname(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpReply",
-            "Ifname",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Set to all zeros to remove."]
-    pub fn get_private_key(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpReply::PrivateKey(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpReply",
-            "PrivateKey",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_public_key(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpReply::PublicKey(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpReply",
-            "PublicKey",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "0 or WGDEVICE_F_REPLACE_PEERS if all current peers\nshould be removed prior to adding the list below.\n\nAssociated type: \"WgdeviceFlags\" (enum)"]
-    pub fn get_flags(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpReply::Flags(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpReply",
-            "Flags",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Set as 0 to choose randomly."]
-    pub fn get_listen_port(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpReply::ListenPort(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpReply",
-            "ListenPort",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Set as 0 to disable."]
-    pub fn get_fwmark(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDeviceDumpReply::Fwmark(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpReply",
-            "Fwmark",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_peers(
-        &self,
-    ) -> Result<ArrayIterable<IterableArrayWgpeer<'a>, IterableWgpeer<'a>>, ErrorContext> {
-        for attr in self.clone() {
-            if let OpGetDeviceDumpReply::Peers(val) = attr? {
-                return Ok(ArrayIterable::new(val));
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDeviceDumpReply",
-            "Peers",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetDeviceDumpReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> IterableOpGetDeviceDumpReply<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableOpGetDeviceDumpReply::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        Wgdevice::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetDeviceDumpReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetDeviceDumpReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetDeviceDumpReply<'a> {
-    type Item = Result<OpGetDeviceDumpReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetDeviceDumpReply::Ifindex({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetDeviceDumpReply::Ifname({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetDeviceDumpReply::PrivateKey({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetDeviceDumpReply::PublicKey({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetDeviceDumpReply::Flags({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpGetDeviceDumpReply::ListenPort({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpGetDeviceDumpReply::Fwmark({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetDeviceDumpReply::Peers({
-                    let res = Some(IterableArrayWgpeer::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetDeviceDumpReply",
-            r#type.and_then(|t| OpGetDeviceDumpReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetDeviceDumpReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetDeviceDumpReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetDeviceDumpReply::Ifindex(val) => fmt.field("Ifindex", &val),
-                OpGetDeviceDumpReply::Ifname(val) => fmt.field("Ifname", &val),
-                OpGetDeviceDumpReply::PrivateKey(val) => fmt.field("PrivateKey", &FormatHex(val)),
-                OpGetDeviceDumpReply::PublicKey(val) => fmt.field("PublicKey", &FormatHex(val)),
-                OpGetDeviceDumpReply::Flags(val) => {
-                    fmt.field("Flags", &FormatFlags(val.into(), WgdeviceFlags::from_value))
-                }
-                OpGetDeviceDumpReply::ListenPort(val) => fmt.field("ListenPort", &val),
-                OpGetDeviceDumpReply::Fwmark(val) => fmt.field("Fwmark", &val),
-                OpGetDeviceDumpReply::Peers(val) => fmt.field("Peers", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetDeviceDumpReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushBuiltinNfgenmsg::len() {
-            stack.push(("OpGetDeviceDumpReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetDeviceDumpReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetDeviceDumpReply::Ifindex(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifindex", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpReply::Ifname(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifname", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpReply::PrivateKey(val) => {
-                    if last_off == offset {
-                        stack.push(("PrivateKey", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpReply::PublicKey(val) => {
-                    if last_off == offset {
-                        stack.push(("PublicKey", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpReply::Flags(val) => {
-                    if last_off == offset {
-                        stack.push(("Flags", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpReply::ListenPort(val) => {
-                    if last_off == offset {
-                        stack.push(("ListenPort", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpReply::Fwmark(val) => {
-                    if last_off == offset {
-                        stack.push(("Fwmark", last_off));
-                        break;
-                    }
-                }
-                OpGetDeviceDumpReply::Peers(val) => {
-                    for entry in val {
-                        let Ok(attr) = entry else { break };
-                        (stack, missing) = attr.lookup_attr(offset, missing_type);
-                        if !stack.is_empty() {
-                            break;
-                        }
-                    }
-                    if !stack.is_empty() {
-                        stack.push(("Peers", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetDeviceDumpReply", cur));
-        }
-        (stack, missing)
-    }
-}
+#[doc = "Retrieve WireGuard device\n\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\n\nThe command should be called with one but not both of:\n\n\\- \\`\\`WGDEVICE\\_A\\_IFINDEX\\`\\`\n\\- \\`\\`WGDEVICE\\_A\\_IFNAME\\`\\`\n\nThe kernel will then return several messages (\\`\\`NLM\\_F\\_MULTI\\`\\`)\\. It is\npossible that all of the allowed IPs of a single peer will not fit\nwithin a single netlink message\\. In that case, the same peer will be\nwritten in the following message, except it will only contain\n\\`\\`WGPEER\\_A\\_PUBLIC\\_KEY\\`\\` and \\`\\`WGPEER\\_A\\_ALLOWEDIPS\\`\\`\\. This may occur\nseveral times in a row for the same peer\\. It is then up to the receiver\nto coalesce adjacent peers\\. Likewise, it is possible that all peers will\nnot fit within a single message\\. So, subsequent peers will be sent in\nfollowing messages, except those will only contain \\`\\`WGDEVICE\\_A\\_IFNAME\\`\\`\nand \\`\\`WGDEVICE\\_A\\_PEERS\\`\\`\\. It is then up to the receiver to coalesce\nthese messages to form the complete list of peers\\.\n\nSince this is an \\`\\`NLA\\_F\\_DUMP\\`\\` command, the final message will always\nbe \\`\\`NLMSG\\_DONE\\`\\`, even if an error occurs\\. However, this \\`\\`NLMSG\\_DONE\\`\\`\nmessage contains an integer error code\\. It is either zero or a negative\nerror code corresponding to the errno\\.\n\nFlags: uns-admin-perm\nRequest attributes:\n- [.push_ifindex()](PushWgdevice::push_ifindex)\n- [.push_ifname()](PushWgdevice::push_ifname)\n\nReply attributes:\n- [.get_ifindex()](IterableWgdevice::get_ifindex)\n- [.get_ifname()](IterableWgdevice::get_ifname)\n- [.get_private_key()](IterableWgdevice::get_private_key)\n- [.get_public_key()](IterableWgdevice::get_public_key)\n- [.get_flags()](IterableWgdevice::get_flags)\n- [.get_listen_port()](IterableWgdevice::get_listen_port)\n- [.get_fwmark()](IterableWgdevice::get_fwmark)\n- [.get_peers()](IterableWgdevice::get_peers)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetDeviceDumpRequest<'r> {
+pub struct OpGetDeviceDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetDeviceDumpRequest<'r> {
+impl<'r> OpGetDeviceDump<'r> {
     pub fn new(mut request: Request<'r>) -> Self {
-        PushOpGetDeviceDumpRequest::write_header(&mut request.buf_mut());
+        Self::write_header(request.buf_mut());
         Self {
             request: request.set_dump(),
         }
     }
-    pub fn encode(&mut self) -> PushOpGetDeviceDumpRequest<&mut Vec<u8>> {
-        PushOpGetDeviceDumpRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushWgdevice<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushWgdevice::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetDeviceDumpRequest<RequestBuf<'r>> {
-        PushOpGetDeviceDumpRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushWgdevice<&mut Vec<u8>> {
+        PushWgdevice::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpGetDeviceDumpRequest<'buf> {
-        OpGetDeviceDumpRequest::new(buf)
+    pub fn into_encoder(self) -> PushWgdevice<RequestBuf<'r>> {
+        PushWgdevice::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableWgdevice<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableWgdevice::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 0u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetDeviceDumpRequest<'_> {
+impl NetlinkRequest for OpGetDeviceDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Generic("wireguard".as_bytes())
     }
@@ -2551,639 +1664,50 @@ impl NetlinkRequest for RequestOpGetDeviceDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = IterableOpGetDeviceDumpReply<'buf>;
+    type ReplyType<'buf> = IterableWgdevice<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetDeviceDumpReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetDeviceDumpRequest::new(buf).lookup_attr(offset, missing_type)
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Set WireGuard device.\n\nThis command should be called with a wgdevice set, containing one but\nnot both of WGDEVICE_A_IFINDEX and WGDEVICE_A_IFNAME.\n\nIt is possible that the amount of configuration data exceeds that of\nthe maximum message length accepted by the kernel. In that case,\nseveral messages should be sent one after another, with each\nsuccessive one filling in information not contained in the prior.\nNote that if WGDEVICE_F_REPLACE_PEERS is specified in the first\nmessage, it probably should not be specified in fragments that come\nafter, so that the list of peers is only cleared the first time but\nappended after.\nLikewise for peers, if WGPEER_F_REPLACE_ALLOWEDIPS is specified in\nthe first message of a peer, it likely should not be specified in\nsubsequent fragments.\n\nIf an error occurs, NLMSG_ERROR will reply containing an errno.\n"]
-pub struct PushOpSetDeviceDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpSetDeviceDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpSetDeviceDoRequest<Prev> {
-    pub fn new(mut prev: Prev) -> Self {
-        Self::write_header(&mut prev);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(1u8);
-        header.set_version(1u8);
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_ifindex(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 1u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ifname(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            2u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_ifname_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    #[doc = "Set to all zeros to remove."]
-    pub fn push_private_key(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 3u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_public_key(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 4u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    #[doc = "0 or WGDEVICE_F_REPLACE_PEERS if all current peers\nshould be removed prior to adding the list below.\n\nAssociated type: \"WgdeviceFlags\" (enum)"]
-    pub fn push_flags(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 5u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    #[doc = "Set as 0 to choose randomly."]
-    pub fn push_listen_port(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 6u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    #[doc = "Set as 0 to disable."]
-    pub fn push_fwmark(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 7u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn array_peers(mut self) -> PushArrayWgpeer<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 8u16);
-        PushArrayWgpeer {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-            counter: 0,
-        }
-    }
-}
-impl<Prev: Rec> Drop for PushOpSetDeviceDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Set WireGuard device.\n\nThis command should be called with a wgdevice set, containing one but\nnot both of WGDEVICE_A_IFINDEX and WGDEVICE_A_IFNAME.\n\nIt is possible that the amount of configuration data exceeds that of\nthe maximum message length accepted by the kernel. In that case,\nseveral messages should be sent one after another, with each\nsuccessive one filling in information not contained in the prior.\nNote that if WGDEVICE_F_REPLACE_PEERS is specified in the first\nmessage, it probably should not be specified in fragments that come\nafter, so that the list of peers is only cleared the first time but\nappended after.\nLikewise for peers, if WGPEER_F_REPLACE_ALLOWEDIPS is specified in\nthe first message of a peer, it likely should not be specified in\nsubsequent fragments.\n\nIf an error occurs, NLMSG_ERROR will reply containing an errno.\n"]
-#[derive(Clone)]
-pub enum OpSetDeviceDoRequest<'a> {
-    Ifindex(u32),
-    Ifname(&'a CStr),
-    #[doc = "Set to all zeros to remove."]
-    PrivateKey(&'a [u8]),
-    PublicKey(&'a [u8]),
-    #[doc = "0 or WGDEVICE_F_REPLACE_PEERS if all current peers\nshould be removed prior to adding the list below.\n\nAssociated type: \"WgdeviceFlags\" (enum)"]
-    Flags(u32),
-    #[doc = "Set as 0 to choose randomly."]
-    ListenPort(u16),
-    #[doc = "Set as 0 to disable."]
-    Fwmark(u32),
-    Peers(IterableArrayWgpeer<'a>),
-}
-impl<'a> IterableOpSetDeviceDoRequest<'a> {
-    pub fn get_ifindex(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetDeviceDoRequest::Ifindex(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetDeviceDoRequest",
-            "Ifindex",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifname(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetDeviceDoRequest::Ifname(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetDeviceDoRequest",
-            "Ifname",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Set to all zeros to remove."]
-    pub fn get_private_key(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetDeviceDoRequest::PrivateKey(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetDeviceDoRequest",
-            "PrivateKey",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_public_key(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetDeviceDoRequest::PublicKey(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetDeviceDoRequest",
-            "PublicKey",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "0 or WGDEVICE_F_REPLACE_PEERS if all current peers\nshould be removed prior to adding the list below.\n\nAssociated type: \"WgdeviceFlags\" (enum)"]
-    pub fn get_flags(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetDeviceDoRequest::Flags(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetDeviceDoRequest",
-            "Flags",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Set as 0 to choose randomly."]
-    pub fn get_listen_port(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetDeviceDoRequest::ListenPort(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetDeviceDoRequest",
-            "ListenPort",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Set as 0 to disable."]
-    pub fn get_fwmark(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetDeviceDoRequest::Fwmark(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetDeviceDoRequest",
-            "Fwmark",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_peers(
-        &self,
-    ) -> Result<ArrayIterable<IterableArrayWgpeer<'a>, IterableWgpeer<'a>>, ErrorContext> {
-        for attr in self.clone() {
-            if let OpSetDeviceDoRequest::Peers(val) = attr? {
-                return Ok(ArrayIterable::new(val));
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetDeviceDoRequest",
-            "Peers",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpSetDeviceDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> IterableOpSetDeviceDoRequest<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableOpSetDeviceDoRequest::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        Wgdevice::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpSetDeviceDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpSetDeviceDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpSetDeviceDoRequest<'a> {
-    type Item = Result<OpSetDeviceDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpSetDeviceDoRequest::Ifindex({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpSetDeviceDoRequest::Ifname({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpSetDeviceDoRequest::PrivateKey({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpSetDeviceDoRequest::PublicKey({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpSetDeviceDoRequest::Flags({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpSetDeviceDoRequest::ListenPort({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpSetDeviceDoRequest::Fwmark({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpSetDeviceDoRequest::Peers({
-                    let res = Some(IterableArrayWgpeer::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpSetDeviceDoRequest",
-            r#type.and_then(|t| OpSetDeviceDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpSetDeviceDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpSetDeviceDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpSetDeviceDoRequest::Ifindex(val) => fmt.field("Ifindex", &val),
-                OpSetDeviceDoRequest::Ifname(val) => fmt.field("Ifname", &val),
-                OpSetDeviceDoRequest::PrivateKey(val) => fmt.field("PrivateKey", &FormatHex(val)),
-                OpSetDeviceDoRequest::PublicKey(val) => fmt.field("PublicKey", &FormatHex(val)),
-                OpSetDeviceDoRequest::Flags(val) => {
-                    fmt.field("Flags", &FormatFlags(val.into(), WgdeviceFlags::from_value))
-                }
-                OpSetDeviceDoRequest::ListenPort(val) => fmt.field("ListenPort", &val),
-                OpSetDeviceDoRequest::Fwmark(val) => fmt.field("Fwmark", &val),
-                OpSetDeviceDoRequest::Peers(val) => fmt.field("Peers", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpSetDeviceDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushBuiltinNfgenmsg::len() {
-            stack.push(("OpSetDeviceDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpSetDeviceDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpSetDeviceDoRequest::Ifindex(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifindex", last_off));
-                        break;
-                    }
-                }
-                OpSetDeviceDoRequest::Ifname(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifname", last_off));
-                        break;
-                    }
-                }
-                OpSetDeviceDoRequest::PrivateKey(val) => {
-                    if last_off == offset {
-                        stack.push(("PrivateKey", last_off));
-                        break;
-                    }
-                }
-                OpSetDeviceDoRequest::PublicKey(val) => {
-                    if last_off == offset {
-                        stack.push(("PublicKey", last_off));
-                        break;
-                    }
-                }
-                OpSetDeviceDoRequest::Flags(val) => {
-                    if last_off == offset {
-                        stack.push(("Flags", last_off));
-                        break;
-                    }
-                }
-                OpSetDeviceDoRequest::ListenPort(val) => {
-                    if last_off == offset {
-                        stack.push(("ListenPort", last_off));
-                        break;
-                    }
-                }
-                OpSetDeviceDoRequest::Fwmark(val) => {
-                    if last_off == offset {
-                        stack.push(("Fwmark", last_off));
-                        break;
-                    }
-                }
-                OpSetDeviceDoRequest::Peers(val) => {
-                    for entry in val {
-                        let Ok(attr) = entry else { break };
-                        (stack, missing) = attr.lookup_attr(offset, missing_type);
-                        if !stack.is_empty() {
-                            break;
-                        }
-                    }
-                    if !stack.is_empty() {
-                        stack.push(("Peers", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpSetDeviceDoRequest", cur));
-        }
-        (stack, missing)
-    }
-}
-#[doc = "Set WireGuard device.\n\nThis command should be called with a wgdevice set, containing one but\nnot both of WGDEVICE_A_IFINDEX and WGDEVICE_A_IFNAME.\n\nIt is possible that the amount of configuration data exceeds that of\nthe maximum message length accepted by the kernel. In that case,\nseveral messages should be sent one after another, with each\nsuccessive one filling in information not contained in the prior.\nNote that if WGDEVICE_F_REPLACE_PEERS is specified in the first\nmessage, it probably should not be specified in fragments that come\nafter, so that the list of peers is only cleared the first time but\nappended after.\nLikewise for peers, if WGPEER_F_REPLACE_ALLOWEDIPS is specified in\nthe first message of a peer, it likely should not be specified in\nsubsequent fragments.\n\nIf an error occurs, NLMSG_ERROR will reply containing an errno.\n"]
-pub struct PushOpSetDeviceDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpSetDeviceDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpSetDeviceDoReply<Prev> {
-    pub fn new(mut prev: Prev) -> Self {
-        Self::write_header(&mut prev);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(1u8);
-        header.set_version(1u8);
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpSetDeviceDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Set WireGuard device.\n\nThis command should be called with a wgdevice set, containing one but\nnot both of WGDEVICE_A_IFINDEX and WGDEVICE_A_IFNAME.\n\nIt is possible that the amount of configuration data exceeds that of\nthe maximum message length accepted by the kernel. In that case,\nseveral messages should be sent one after another, with each\nsuccessive one filling in information not contained in the prior.\nNote that if WGDEVICE_F_REPLACE_PEERS is specified in the first\nmessage, it probably should not be specified in fragments that come\nafter, so that the list of peers is only cleared the first time but\nappended after.\nLikewise for peers, if WGPEER_F_REPLACE_ALLOWEDIPS is specified in\nthe first message of a peer, it likely should not be specified in\nsubsequent fragments.\n\nIf an error occurs, NLMSG_ERROR will reply containing an errno.\n"]
-#[derive(Clone)]
-pub enum OpSetDeviceDoReply {}
-impl<'a> IterableOpSetDeviceDoReply<'a> {}
-impl OpSetDeviceDoReply {
-    pub fn new<'a>(buf: &'a [u8]) -> IterableOpSetDeviceDoReply<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableOpSetDeviceDoReply::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        Wgdevice::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpSetDeviceDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpSetDeviceDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpSetDeviceDoReply<'a> {
-    type Item = Result<OpSetDeviceDoReply, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpSetDeviceDoReply",
-            r#type.and_then(|t| OpSetDeviceDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpSetDeviceDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpSetDeviceDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpSetDeviceDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushBuiltinNfgenmsg::len() {
-            stack.push(("OpSetDeviceDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpSetDeviceDoReply::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
+#[doc = "Set WireGuard device\n\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\n\nThis command should be called with a wgdevice set, containing one but\nnot both of \\`\\`WGDEVICE\\_A\\_IFINDEX\\`\\` and \\`\\`WGDEVICE\\_A\\_IFNAME\\`\\`\\.\n\nIt is possible that the amount of configuration data exceeds that of the\nmaximum message length accepted by the kernel\\. In that case, several\nmessages should be sent one after another, with each successive one\nfilling in information not contained in the prior\\. Note that if\n\\`\\`WGDEVICE\\_F\\_REPLACE\\_PEERS\\`\\` is specified in the first message, it\nprobably should not be specified in fragments that come after, so that\nthe list of peers is only cleared the first time but appended after\\.\nLikewise for peers, if \\`\\`WGPEER\\_F\\_REPLACE\\_ALLOWEDIPS\\`\\` is specified in\nthe first message of a peer, it likely should not be specified in\nsubsequent fragments\\.\n\nIf an error occurs, \\`\\`NLMSG\\_ERROR\\`\\` will reply containing an errno\\.\n\nFlags: uns-admin-perm\nRequest attributes:\n- [.push_ifindex()](PushWgdevice::push_ifindex)\n- [.push_ifname()](PushWgdevice::push_ifname)\n- [.push_private_key()](PushWgdevice::push_private_key)\n- [.push_public_key()](PushWgdevice::push_public_key)\n- [.push_flags()](PushWgdevice::push_flags)\n- [.push_listen_port()](PushWgdevice::push_listen_port)\n- [.push_fwmark()](PushWgdevice::push_fwmark)\n- [.array_peers()](PushWgdevice::array_peers)\n"]
 #[derive(Debug)]
-pub struct RequestOpSetDeviceDoRequest<'r> {
+pub struct OpSetDeviceDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpSetDeviceDoRequest<'r> {
+impl<'r> OpSetDeviceDo<'r> {
     pub fn new(mut request: Request<'r>) -> Self {
-        PushOpSetDeviceDoRequest::write_header(&mut request.buf_mut());
+        Self::write_header(request.buf_mut());
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpSetDeviceDoRequest<&mut Vec<u8>> {
-        PushOpSetDeviceDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushWgdevice<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushWgdevice::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpSetDeviceDoRequest<RequestBuf<'r>> {
-        PushOpSetDeviceDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushWgdevice<&mut Vec<u8>> {
+        PushWgdevice::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpSetDeviceDoRequest<'buf> {
-        OpSetDeviceDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushWgdevice<RequestBuf<'r>> {
+        PushWgdevice::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableWgdevice<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableWgdevice::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 1u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpSetDeviceDoRequest<'_> {
+impl NetlinkRequest for OpSetDeviceDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Generic("wireguard".as_bytes())
     }
@@ -3193,16 +1717,16 @@ impl NetlinkRequest for RequestOpSetDeviceDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = IterableOpSetDeviceDoReply<'buf>;
+    type ReplyType<'buf> = IterableWgdevice<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpSetDeviceDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpSetDeviceDoRequest::new(buf).lookup_attr(offset, missing_type)
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
     }
 }
 use crate::traits::LookupFn;
@@ -3292,27 +1816,59 @@ impl<'buf> Request<'buf> {
         self.flags |= consts::NLM_F_APPEND as u16;
         self
     }
+    #[doc = "Set `self.flags |= flags`"]
+    pub fn set_flags(mut self, flags: u16) -> Self {
+        self.flags |= flags;
+        self
+    }
+    #[doc = "Set `self.flags ^= self.flags & flags`"]
+    pub fn unset_flags(mut self, flags: u16) -> Self {
+        self.flags ^= self.flags & flags;
+        self
+    }
     #[doc = "Set `NLM_F_DUMP` flag"]
     fn set_dump(mut self) -> Self {
         self.flags |= consts::NLM_F_DUMP as u16;
         self
     }
-    pub fn op_get_device_dump_request(self) -> RequestOpGetDeviceDumpRequest<'buf> {
-        let mut res = RequestOpGetDeviceDumpRequest::new(self);
+    #[doc = "Retrieve WireGuard device\n\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\n\nThe command should be called with one but not both of:\n\n\\- \\`\\`WGDEVICE\\_A\\_IFINDEX\\`\\`\n\\- \\`\\`WGDEVICE\\_A\\_IFNAME\\`\\`\n\nThe kernel will then return several messages (\\`\\`NLM\\_F\\_MULTI\\`\\`)\\. It is\npossible that all of the allowed IPs of a single peer will not fit\nwithin a single netlink message\\. In that case, the same peer will be\nwritten in the following message, except it will only contain\n\\`\\`WGPEER\\_A\\_PUBLIC\\_KEY\\`\\` and \\`\\`WGPEER\\_A\\_ALLOWEDIPS\\`\\`\\. This may occur\nseveral times in a row for the same peer\\. It is then up to the receiver\nto coalesce adjacent peers\\. Likewise, it is possible that all peers will\nnot fit within a single message\\. So, subsequent peers will be sent in\nfollowing messages, except those will only contain \\`\\`WGDEVICE\\_A\\_IFNAME\\`\\`\nand \\`\\`WGDEVICE\\_A\\_PEERS\\`\\`\\. It is then up to the receiver to coalesce\nthese messages to form the complete list of peers\\.\n\nSince this is an \\`\\`NLA\\_F\\_DUMP\\`\\` command, the final message will always\nbe \\`\\`NLMSG\\_DONE\\`\\`, even if an error occurs\\. However, this \\`\\`NLMSG\\_DONE\\`\\`\nmessage contains an integer error code\\. It is either zero or a negative\nerror code corresponding to the errno\\.\n\nFlags: uns-admin-perm\nRequest attributes:\n- [.push_ifindex()](PushWgdevice::push_ifindex)\n- [.push_ifname()](PushWgdevice::push_ifname)\n\nReply attributes:\n- [.get_ifindex()](IterableWgdevice::get_ifindex)\n- [.get_ifname()](IterableWgdevice::get_ifname)\n- [.get_private_key()](IterableWgdevice::get_private_key)\n- [.get_public_key()](IterableWgdevice::get_public_key)\n- [.get_flags()](IterableWgdevice::get_flags)\n- [.get_listen_port()](IterableWgdevice::get_listen_port)\n- [.get_fwmark()](IterableWgdevice::get_fwmark)\n- [.get_peers()](IterableWgdevice::get_peers)\n"]
+    pub fn op_get_device_dump(self) -> OpGetDeviceDump<'buf> {
+        let mut res = OpGetDeviceDump::new(self);
         res.request.do_writeback(
             res.protocol(),
-            "op-get-device-dump-request",
-            RequestOpGetDeviceDumpRequest::lookup,
+            "op-get-device-dump",
+            OpGetDeviceDump::lookup,
         );
         res
     }
-    pub fn op_set_device_do_request(self) -> RequestOpSetDeviceDoRequest<'buf> {
-        let mut res = RequestOpSetDeviceDoRequest::new(self);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-set-device-do-request",
-            RequestOpSetDeviceDoRequest::lookup,
-        );
+    #[doc = "Set WireGuard device\n\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~\n\nThis command should be called with a wgdevice set, containing one but\nnot both of \\`\\`WGDEVICE\\_A\\_IFINDEX\\`\\` and \\`\\`WGDEVICE\\_A\\_IFNAME\\`\\`\\.\n\nIt is possible that the amount of configuration data exceeds that of the\nmaximum message length accepted by the kernel\\. In that case, several\nmessages should be sent one after another, with each successive one\nfilling in information not contained in the prior\\. Note that if\n\\`\\`WGDEVICE\\_F\\_REPLACE\\_PEERS\\`\\` is specified in the first message, it\nprobably should not be specified in fragments that come after, so that\nthe list of peers is only cleared the first time but appended after\\.\nLikewise for peers, if \\`\\`WGPEER\\_F\\_REPLACE\\_ALLOWEDIPS\\`\\` is specified in\nthe first message of a peer, it likely should not be specified in\nsubsequent fragments\\.\n\nIf an error occurs, \\`\\`NLMSG\\_ERROR\\`\\` will reply containing an errno\\.\n\nFlags: uns-admin-perm\nRequest attributes:\n- [.push_ifindex()](PushWgdevice::push_ifindex)\n- [.push_ifname()](PushWgdevice::push_ifname)\n- [.push_private_key()](PushWgdevice::push_private_key)\n- [.push_public_key()](PushWgdevice::push_public_key)\n- [.push_flags()](PushWgdevice::push_flags)\n- [.push_listen_port()](PushWgdevice::push_listen_port)\n- [.push_fwmark()](PushWgdevice::push_fwmark)\n- [.array_peers()](PushWgdevice::array_peers)\n"]
+    pub fn op_set_device_do(self) -> OpSetDeviceDo<'buf> {
+        let mut res = OpSetDeviceDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-set-device-do", OpSetDeviceDo::lookup);
         res
+    }
+}
+#[cfg(test)]
+mod generated_tests {
+    use super::*;
+    #[test]
+    fn tests() {
+        let _ = IterableWgdevice::get_flags;
+        let _ = IterableWgdevice::get_fwmark;
+        let _ = IterableWgdevice::get_ifindex;
+        let _ = IterableWgdevice::get_ifname;
+        let _ = IterableWgdevice::get_listen_port;
+        let _ = IterableWgdevice::get_peers;
+        let _ = IterableWgdevice::get_private_key;
+        let _ = IterableWgdevice::get_public_key;
+        let _ = PushWgdevice::<&mut Vec<u8>>::array_peers;
+        let _ = PushWgdevice::<&mut Vec<u8>>::push_flags;
+        let _ = PushWgdevice::<&mut Vec<u8>>::push_fwmark;
+        let _ = PushWgdevice::<&mut Vec<u8>>::push_ifindex;
+        let _ = PushWgdevice::<&mut Vec<u8>>::push_ifname;
+        let _ = PushWgdevice::<&mut Vec<u8>>::push_listen_port;
+        let _ = PushWgdevice::<&mut Vec<u8>>::push_private_key;
+        let _ = PushWgdevice::<&mut Vec<u8>>::push_public_key;
     }
 }

@@ -14,10 +14,216 @@ use crate::{
     traits::{NetlinkRequest, Protocol},
     utils::*,
 };
-pub const PROTONAME: &CStr = c"builtin";
+pub const PROTONAME: &str = "builtin";
+pub const PROTONAME_CSTR: &CStr = c"builtin";
 #[doc = "Generic family header"]
 #[doc = "Wrapper for bitfield32 type"]
 #[doc = "Header of a Netlink message"]
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct BuiltinNfgenmsg {
+    pub cmd: u8,
+    pub version: u8,
+    pub reserved: u16,
+}
+impl Clone for BuiltinNfgenmsg {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for BuiltinNfgenmsg {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl BuiltinNfgenmsg {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 4usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 4usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 4usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 4usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<BuiltinNfgenmsg>() == 4usize);
+        4usize
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct BuiltinBitfield32 {
+    pub value: u32,
+    pub selector: u32,
+}
+impl Clone for BuiltinBitfield32 {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for BuiltinBitfield32 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl BuiltinBitfield32 {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 8usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 8usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<BuiltinBitfield32>() == 8usize);
+        8usize
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct Nlmsghdr {
+    pub len: u32,
+    pub r#type: u16,
+    pub flags: u16,
+    pub seq: u32,
+    pub pid: u32,
+}
+impl Clone for Nlmsghdr {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for Nlmsghdr {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl Nlmsghdr {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 16usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 16usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<Nlmsghdr>() == 16usize);
+        16usize
+    }
+}
 #[derive(Clone)]
 pub enum Dummy {}
 impl<'a> IterableDummy<'a> {}
@@ -101,7 +307,7 @@ impl IterableDummy<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("Dummy", offset));
             return (stack, missing_type.and_then(|t| Dummy::attr_from_type(t)));
         }
@@ -114,11 +320,11 @@ pub enum NlmsgerrAttrs<'a> {
     Msg(&'a CStr),
     #[doc = "offset of the invalid attribute in the original message, counting from the beginning of the header (u32)"]
     Offset(u32),
-    #[doc = "arbitrary subsystem specific cookie to be used - in the success case - to identify a created object or operation or similar (binary)"]
+    #[doc = "arbitrary subsystem specific cookie to be used \\- in the success case \\- to identify a created object or operation or similar (binary)"]
     Cookie(&'a [u8]),
     #[doc = "policy for a rejected attribute"]
     Policy(IterablePolicyTypeAttrs<'a>),
-    #[doc = "type of a missing required attribute, NLMSGERR_ATTR_MISS_NEST will not be present if the attribute was missing at the message level"]
+    #[doc = "type of a missing required attribute, NLMSGERR\\_ATTR\\_MISS\\_NEST will not be present if the attribute was missing at the message level"]
     MissingType(u16),
     #[doc = "offset of the nest where attribute was missing"]
     MissingNest(u32),
@@ -156,7 +362,7 @@ impl<'a> IterableNlmsgerrAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "arbitrary subsystem specific cookie to be used - in the success case - to identify a created object or operation or similar (binary)"]
+    #[doc = "arbitrary subsystem specific cookie to be used \\- in the success case \\- to identify a created object or operation or similar (binary)"]
     pub fn get_cookie(&self) -> Result<&'a [u8], ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -188,7 +394,7 @@ impl<'a> IterableNlmsgerrAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "type of a missing required attribute, NLMSGERR_ATTR_MISS_NEST will not be present if the attribute was missing at the message level"]
+    #[doc = "type of a missing required attribute, NLMSGERR\\_ATTR\\_MISS\\_NEST will not be present if the attribute was missing at the message level"]
     pub fn get_missing_type(&self) -> Result<u16, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -348,7 +554,7 @@ impl IterableNlmsgerrAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("NlmsgerrAttrs", offset));
             return (
                 stack,
@@ -412,7 +618,7 @@ impl IterableNlmsgerrAttrs<'_> {
 }
 #[derive(Clone)]
 pub enum PolicyTypeAttrs<'a> {
-    #[doc = "type of the attribute, enum netlink_attribute_type (U32)"]
+    #[doc = "type of the attribute, enum netlink\\_attribute\\_type (U32)"]
     Type(u32),
     #[doc = "minimum value for signed integers (S64)"]
     MinValueSigned(i64),
@@ -432,13 +638,13 @@ pub enum PolicyTypeAttrs<'a> {
     PolicyMaxtype(u32),
     #[doc = "valid mask for the bitfield32 type (U32)"]
     Bitfield32Mask(u32),
-    #[doc = "pad attribute for 64-bit alignment"]
+    #[doc = "pad attribute for 64\\-bit alignment"]
     Pad(&'a [u8]),
     #[doc = "mask of valid bits for unsigned integers (U64)"]
     Mask(u64),
 }
 impl<'a> IterablePolicyTypeAttrs<'a> {
-    #[doc = "type of the attribute, enum netlink_attribute_type (U32)"]
+    #[doc = "type of the attribute, enum netlink\\_attribute\\_type (U32)"]
     pub fn get_type(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -598,7 +804,7 @@ impl<'a> IterablePolicyTypeAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "pad attribute for 64-bit alignment"]
+    #[doc = "pad attribute for 64\\-bit alignment"]
     pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -800,7 +1006,7 @@ impl IterablePolicyTypeAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("PolicyTypeAttrs", offset));
             return (
                 stack,
@@ -982,7 +1188,7 @@ impl<Prev: Rec> PushNlmsgerrAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "arbitrary subsystem specific cookie to be used - in the success case - to identify a created object or operation or similar (binary)"]
+    #[doc = "arbitrary subsystem specific cookie to be used \\- in the success case \\- to identify a created object or operation or similar (binary)"]
     pub fn push_cookie(mut self, value: &[u8]) -> Self {
         push_header(self.as_rec_mut(), 3u16, value.len() as u16);
         self.as_rec_mut().extend(value);
@@ -996,7 +1202,7 @@ impl<Prev: Rec> PushNlmsgerrAttrs<Prev> {
             header_offset: Some(header_offset),
         }
     }
-    #[doc = "type of a missing required attribute, NLMSGERR_ATTR_MISS_NEST will not be present if the attribute was missing at the message level"]
+    #[doc = "type of a missing required attribute, NLMSGERR\\_ATTR\\_MISS\\_NEST will not be present if the attribute was missing at the message level"]
     pub fn push_missing_type(mut self, value: u16) -> Self {
         push_header(self.as_rec_mut(), 5u16, 2 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -1044,7 +1250,7 @@ impl<Prev: Rec> PushPolicyTypeAttrs<Prev> {
         }
         prev
     }
-    #[doc = "type of the attribute, enum netlink_attribute_type (U32)"]
+    #[doc = "type of the attribute, enum netlink\\_attribute\\_type (U32)"]
     pub fn push_type(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 1u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -1104,7 +1310,7 @@ impl<Prev: Rec> PushPolicyTypeAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "pad attribute for 64-bit alignment"]
+    #[doc = "pad attribute for 64\\-bit alignment"]
     pub fn push_pad(mut self, value: &[u8]) -> Self {
         push_header(self.as_rec_mut(), 11u16, value.len() as u16);
         self.as_rec_mut().extend(value);
@@ -1124,218 +1330,5 @@ impl<Prev: Rec> Drop for PushPolicyTypeAttrs<Prev> {
                 finalize_nested_header(prev.as_rec_mut(), *header_offset);
             }
         }
-    }
-}
-#[derive(Clone)]
-pub struct PushBuiltinNfgenmsg {
-    pub(crate) buf: [u8; 4usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushBuiltinNfgenmsg {
-    fn default() -> Self {
-        Self { buf: [0u8; 4usize] }
-    }
-}
-impl PushBuiltinNfgenmsg {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        4usize
-    }
-    pub fn cmd(&self) -> u8 {
-        parse_u8(&self.buf[0usize..1usize]).unwrap()
-    }
-    pub fn set_cmd(&mut self, value: u8) {
-        self.buf[0usize..1usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn version(&self) -> u8 {
-        parse_u8(&self.buf[1usize..2usize]).unwrap()
-    }
-    pub fn set_version(&mut self, value: u8) {
-        self.buf[1usize..2usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn reserved(&self) -> u16 {
-        parse_u16(&self.buf[2usize..4usize]).unwrap()
-    }
-    pub fn set_reserved(&mut self, value: u16) {
-        self.buf[2usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushBuiltinNfgenmsg {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("BuiltinNfgenmsg")
-            .field("cmd", &self.cmd())
-            .field("version", &self.version())
-            .field("reserved", &self.reserved())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushBuiltinBitfield32 {
-    pub(crate) buf: [u8; 8usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushBuiltinBitfield32 {
-    fn default() -> Self {
-        Self { buf: [0u8; 8usize] }
-    }
-}
-impl PushBuiltinBitfield32 {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        8usize
-    }
-    pub fn value(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_value(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn selector(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_selector(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushBuiltinBitfield32 {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("BuiltinBitfield32")
-            .field("value", &self.value())
-            .field("selector", &self.selector())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushNlmsghdr {
-    pub(crate) buf: [u8; 16usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushNlmsghdr {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 16usize],
-        }
-    }
-}
-impl PushNlmsghdr {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        16usize
-    }
-    pub fn get_len(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_len(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn get_type(&self) -> u16 {
-        parse_u16(&self.buf[4usize..6usize]).unwrap()
-    }
-    pub fn set_type(&mut self, value: u16) {
-        self.buf[4usize..6usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn flags(&self) -> u16 {
-        parse_u16(&self.buf[6usize..8usize]).unwrap()
-    }
-    pub fn set_flags(&mut self, value: u16) {
-        self.buf[6usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn seq(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
-    }
-    pub fn set_seq(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn pid(&self) -> u32 {
-        parse_u32(&self.buf[12usize..16usize]).unwrap()
-    }
-    pub fn set_pid(&mut self, value: u32) {
-        self.buf[12usize..16usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushNlmsghdr {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("Nlmsghdr")
-            .field("len", &self.get_len())
-            .field("type", &self.get_type())
-            .field("flags", &self.flags())
-            .field("seq", &self.seq())
-            .field("pid", &self.pid())
-            .finish()
     }
 }

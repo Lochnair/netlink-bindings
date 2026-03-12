@@ -1,4 +1,4 @@
-#![doc = "IP neighbour management over rtnetlink."]
+#![doc = "IP neighbour management over rtnetlink\\."]
 #![allow(clippy::all)]
 #![allow(unused_imports)]
 #![allow(unused_assignments)]
@@ -7,13 +7,14 @@
 #![allow(irrefutable_let_patterns)]
 #![allow(unreachable_code)]
 #![allow(unreachable_patterns)]
-use crate::builtin::{PushBuiltinBitfield32, PushBuiltinNfgenmsg, PushDummy, PushNlmsghdr};
+use crate::builtin::{BuiltinBitfield32, BuiltinNfgenmsg, Nlmsghdr, PushDummy};
 use crate::{
     consts,
     traits::{NetlinkRequest, Protocol},
     utils::*,
 };
-pub const PROTONAME: &CStr = c"rt-neigh";
+pub const PROTONAME: &str = "rt-neigh";
+pub const PROTONAME_CSTR: &CStr = c"rt-neigh";
 pub const PROTONUM: u16 = 0u16;
 #[doc = "Flags - defines an integer enumeration, with values for each entry occupying a bit, starting from bit 0, (e.g. 1, 2, 4, 8)"]
 #[derive(Debug, Clone, Copy)]
@@ -121,12 +122,413 @@ impl RtmType {
         })
     }
 }
+#[repr(C, packed(4))]
+pub struct Ndmsg {
+    pub ndm_family: u8,
+    pub _ndm_pad: [u8; 3usize],
+    pub ndm_ifindex: i32,
+    #[doc = "Associated type: [`NudState`] (enum)"]
+    pub ndm_state: u16,
+    #[doc = "Associated type: [`NtfFlags`] (enum)"]
+    pub ndm_flags: u8,
+    #[doc = "Associated type: [`RtmType`] (enum)"]
+    pub ndm_type: u8,
+}
+impl Clone for Ndmsg {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for Ndmsg {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl Ndmsg {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 12usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 12usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 12usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 12usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<Ndmsg>() == 12usize);
+        12usize
+    }
+}
+impl std::fmt::Debug for Ndmsg {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("Ndmsg")
+            .field("ndm_family", &self.ndm_family)
+            .field("ndm_ifindex", &self.ndm_ifindex)
+            .field(
+                "ndm_state",
+                &FormatFlags(self.ndm_state.into(), NudState::from_value),
+            )
+            .field(
+                "ndm_flags",
+                &FormatFlags(self.ndm_flags.into(), NtfFlags::from_value),
+            )
+            .field(
+                "ndm_type",
+                &FormatEnum(self.ndm_type.into(), RtmType::from_value),
+            )
+            .finish()
+    }
+}
+#[repr(C, packed(4))]
+pub struct Ndtmsg {
+    pub family: u8,
+    pub _pad: [u8; 3usize],
+}
+impl Clone for Ndtmsg {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for Ndtmsg {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl Ndtmsg {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 4usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 4usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 4usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 4usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<Ndtmsg>() == 4usize);
+        4usize
+    }
+}
+impl std::fmt::Debug for Ndtmsg {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("Ndtmsg")
+            .field("family", &self.family)
+            .finish()
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct NdaCacheinfo {
+    pub confirmed: u32,
+    pub used: u32,
+    pub updated: u32,
+    pub refcnt: u32,
+}
+impl Clone for NdaCacheinfo {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for NdaCacheinfo {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl NdaCacheinfo {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 16usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 16usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<NdaCacheinfo>() == 16usize);
+        16usize
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct NdtConfig {
+    pub key_len: u16,
+    pub entry_size: u16,
+    pub entries: u32,
+    pub last_flush: u32,
+    pub last_rand: u32,
+    pub hash_rnd: u32,
+    pub hash_mask: u32,
+    pub hash_chain_gc: u32,
+    pub proxy_qlen: u32,
+}
+impl Clone for NdtConfig {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for NdtConfig {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl NdtConfig {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 32usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 32usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 32usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 32usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<NdtConfig>() == 32usize);
+        32usize
+    }
+}
+#[repr(C, packed(4))]
+pub struct NdtStats {
+    pub allocs: u64,
+    pub destroys: u64,
+    pub hash_grows: u64,
+    pub res_failed: u64,
+    pub lookups: u64,
+    pub hits: u64,
+    pub rcv_probes_mcast: u64,
+    pub rcv_probes_ucast: u64,
+    pub periodic_gc_runs: u64,
+    pub forced_gc_runs: u64,
+    pub table_fulls: u64,
+}
+impl Clone for NdtStats {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for NdtStats {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl NdtStats {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 88usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 88usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 88usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 88usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<NdtStats>() == 88usize);
+        88usize
+    }
+}
+impl std::fmt::Debug for NdtStats {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("NdtStats")
+            .field("allocs", &{ self.allocs })
+            .field("destroys", &{ self.destroys })
+            .field("hash_grows", &{ self.hash_grows })
+            .field("res_failed", &{ self.res_failed })
+            .field("lookups", &{ self.lookups })
+            .field("hits", &{ self.hits })
+            .field("rcv_probes_mcast", &{ self.rcv_probes_mcast })
+            .field("rcv_probes_ucast", &{ self.rcv_probes_ucast })
+            .field("periodic_gc_runs", &{ self.periodic_gc_runs })
+            .field("forced_gc_runs", &{ self.forced_gc_runs })
+            .field("table_fulls", &{ self.table_fulls })
+            .finish()
+    }
+}
 #[derive(Clone)]
 pub enum NeighbourAttrs<'a> {
     Unspec(&'a [u8]),
-    Dst(&'a [u8]),
+    Dst(std::net::IpAddr),
     Lladdr(&'a [u8]),
-    Cacheinfo(PushNdaCacheinfo),
+    Cacheinfo(NdaCacheinfo),
     Probes(u32),
     Vlan(u16),
     Port(u16),
@@ -138,7 +540,7 @@ pub enum NeighbourAttrs<'a> {
     Protocol(u8),
     NhId(u32),
     FdbExtAttrs(&'a [u8]),
-    #[doc = "Associated type: \"NtfExtFlags\" (enum)"]
+    #[doc = "Associated type: [`NtfExtFlags`] (enum)"]
     FlagsExt(u32),
     NdmStateMask(u16),
     NdmFlagsMask(u8),
@@ -159,7 +561,7 @@ impl<'a> IterableNeighbourAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_dst(&self) -> Result<&'a [u8], ErrorContext> {
+    pub fn get_dst(&self) -> Result<std::net::IpAddr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -189,7 +591,7 @@ impl<'a> IterableNeighbourAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_cacheinfo(&self) -> Result<PushNdaCacheinfo, ErrorContext> {
+    pub fn get_cacheinfo(&self) -> Result<NdaCacheinfo, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -369,7 +771,7 @@ impl<'a> IterableNeighbourAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Associated type: \"NtfExtFlags\" (enum)"]
+    #[doc = "Associated type: [`NtfExtFlags`] (enum)"]
     pub fn get_flags_ext(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -484,7 +886,7 @@ impl<'a> Iterator for IterableNeighbourAttrs<'a> {
                     val
                 }),
                 1u16 => NeighbourAttrs::Dst({
-                    let res = Some(next);
+                    let res = parse_ip(next);
                     let Some(val) = res else { break };
                     val
                 }),
@@ -494,7 +896,7 @@ impl<'a> Iterator for IterableNeighbourAttrs<'a> {
                     val
                 }),
                 3u16 => NeighbourAttrs::Cacheinfo({
-                    let res = PushNdaCacheinfo::new_from_slice(next);
+                    let res = Some(NdaCacheinfo::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -597,7 +999,7 @@ impl<'a> std::fmt::Debug for IterableNeighbourAttrs<'_> {
             match attr {
                 NeighbourAttrs::Unspec(val) => fmt.field("Unspec", &val),
                 NeighbourAttrs::Dst(val) => fmt.field("Dst", &val),
-                NeighbourAttrs::Lladdr(val) => fmt.field("Lladdr", &val),
+                NeighbourAttrs::Lladdr(val) => fmt.field("Lladdr", &FormatMac(val)),
                 NeighbourAttrs::Cacheinfo(val) => fmt.field("Cacheinfo", &val),
                 NeighbourAttrs::Probes(val) => fmt.field("Probes", &val),
                 NeighbourAttrs::Vlan(val) => fmt.field("Vlan", &val),
@@ -629,7 +1031,7 @@ impl IterableNeighbourAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("NeighbourAttrs", offset));
             return (
                 stack,
@@ -768,9 +1170,9 @@ pub enum NdtAttrs<'a> {
     Thresh1(u32),
     Thresh2(u32),
     Thresh3(u32),
-    Config(PushNdtConfig),
+    Config(NdtConfig),
     Parms(IterableNdtpaAttrs<'a>),
-    Stats(PushNdtStats),
+    Stats(NdtStats),
     GcInterval(u64),
     Pad(&'a [u8]),
 }
@@ -835,7 +1237,7 @@ impl<'a> IterableNdtAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_config(&self) -> Result<PushNdtConfig, ErrorContext> {
+    pub fn get_config(&self) -> Result<NdtConfig, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -865,7 +1267,7 @@ impl<'a> IterableNdtAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_stats(&self) -> Result<PushNdtStats, ErrorContext> {
+    pub fn get_stats(&self) -> Result<NdtStats, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -985,7 +1387,7 @@ impl<'a> Iterator for IterableNdtAttrs<'a> {
                     val
                 }),
                 5u16 => NdtAttrs::Config({
-                    let res = PushNdtConfig::new_from_slice(next);
+                    let res = Some(NdtConfig::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -995,7 +1397,7 @@ impl<'a> Iterator for IterableNdtAttrs<'a> {
                     val
                 }),
                 7u16 => NdtAttrs::Stats({
-                    let res = PushNdtStats::new_from_slice(next);
+                    let res = Some(NdtStats::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -1058,7 +1460,7 @@ impl IterableNdtAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("NdtAttrs", offset));
             return (
                 stack,
@@ -1664,7 +2066,7 @@ impl IterableNdtpaAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("NdtpaAttrs", offset));
             return (
                 stack,
@@ -1834,9 +2236,14 @@ impl<Prev: Rec> PushNeighbourAttrs<Prev> {
         self.as_rec_mut().extend(value);
         self
     }
-    pub fn push_dst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
+    pub fn push_dst(mut self, value: std::net::IpAddr) -> Self {
+        push_header(self.as_rec_mut(), 1u16, {
+            match &value {
+                IpAddr::V4(_) => 4,
+                IpAddr::V6(_) => 16,
+            }
+        } as u16);
+        encode_ip(self.as_rec_mut(), value);
         self
     }
     pub fn push_lladdr(mut self, value: &[u8]) -> Self {
@@ -1844,7 +2251,7 @@ impl<Prev: Rec> PushNeighbourAttrs<Prev> {
         self.as_rec_mut().extend(value);
         self
     }
-    pub fn push_cacheinfo(mut self, value: PushNdaCacheinfo) -> Self {
+    pub fn push_cacheinfo(mut self, value: NdaCacheinfo) -> Self {
         push_header(self.as_rec_mut(), 3u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -1904,7 +2311,7 @@ impl<Prev: Rec> PushNeighbourAttrs<Prev> {
         self.as_rec_mut().extend(value);
         self
     }
-    #[doc = "Associated type: \"NtfExtFlags\" (enum)"]
+    #[doc = "Associated type: [`NtfExtFlags`] (enum)"]
     pub fn push_flags_ext(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 15u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -1986,7 +2393,7 @@ impl<Prev: Rec> PushNdtAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    pub fn push_config(mut self, value: PushNdtConfig) -> Self {
+    pub fn push_config(mut self, value: NdtConfig) -> Self {
         push_header(self.as_rec_mut(), 5u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -1998,7 +2405,7 @@ impl<Prev: Rec> PushNdtAttrs<Prev> {
             header_offset: Some(header_offset),
         }
     }
-    pub fn push_stats(mut self, value: PushNdtStats) -> Self {
+    pub fn push_stats(mut self, value: NdtStats) -> Self {
         push_header(self.as_rec_mut(), 7u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -2154,1198 +2561,41 @@ impl<Prev: Rec> Drop for PushNdtpaAttrs<Prev> {
         }
     }
 }
-#[derive(Clone)]
-pub struct PushNdmsg {
-    pub(crate) buf: [u8; 12usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushNdmsg {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 12usize],
-        }
-    }
-}
-impl PushNdmsg {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        12usize
-    }
-    pub fn ndm_family(&self) -> u8 {
-        parse_u8(&self.buf[0usize..1usize]).unwrap()
-    }
-    pub fn set_ndm_family(&mut self, value: u8) {
-        self.buf[0usize..1usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn ndm_ifindex(&self) -> i32 {
-        parse_i32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_ndm_ifindex(&mut self, value: i32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    #[doc = "Associated type: \"NudState\" (enum)"]
-    pub fn ndm_state(&self) -> u16 {
-        parse_u16(&self.buf[8usize..10usize]).unwrap()
-    }
-    #[doc = "Associated type: \"NudState\" (enum)"]
-    pub fn set_ndm_state(&mut self, value: u16) {
-        self.buf[8usize..10usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    #[doc = "Associated type: \"NtfFlags\" (enum)"]
-    pub fn ndm_flags(&self) -> u8 {
-        parse_u8(&self.buf[10usize..11usize]).unwrap()
-    }
-    #[doc = "Associated type: \"NtfFlags\" (enum)"]
-    pub fn set_ndm_flags(&mut self, value: u8) {
-        self.buf[10usize..11usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    #[doc = "Associated type: \"RtmType\" (enum)"]
-    pub fn ndm_type(&self) -> u8 {
-        parse_u8(&self.buf[11usize..12usize]).unwrap()
-    }
-    #[doc = "Associated type: \"RtmType\" (enum)"]
-    pub fn set_ndm_type(&mut self, value: u8) {
-        self.buf[11usize..12usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushNdmsg {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("Ndmsg")
-            .field("ndm_family", &self.ndm_family())
-            .field("ndm_ifindex", &self.ndm_ifindex())
-            .field(
-                "ndm_state",
-                &FormatFlags(self.ndm_state().into(), NudState::from_value),
-            )
-            .field(
-                "ndm_flags",
-                &FormatFlags(self.ndm_flags().into(), NtfFlags::from_value),
-            )
-            .field(
-                "ndm_type",
-                &FormatEnum(self.ndm_type().into(), RtmType::from_value),
-            )
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushNdtmsg {
-    pub(crate) buf: [u8; 4usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushNdtmsg {
-    fn default() -> Self {
-        Self { buf: [0u8; 4usize] }
-    }
-}
-impl PushNdtmsg {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        4usize
-    }
-    pub fn family(&self) -> u8 {
-        parse_u8(&self.buf[0usize..1usize]).unwrap()
-    }
-    pub fn set_family(&mut self, value: u8) {
-        self.buf[0usize..1usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushNdtmsg {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("Ndtmsg")
-            .field("family", &self.family())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushNdaCacheinfo {
-    pub(crate) buf: [u8; 16usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushNdaCacheinfo {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 16usize],
-        }
-    }
-}
-impl PushNdaCacheinfo {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        16usize
-    }
-    pub fn confirmed(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_confirmed(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn used(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_used(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn updated(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
-    }
-    pub fn set_updated(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn refcnt(&self) -> u32 {
-        parse_u32(&self.buf[12usize..16usize]).unwrap()
-    }
-    pub fn set_refcnt(&mut self, value: u32) {
-        self.buf[12usize..16usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushNdaCacheinfo {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("NdaCacheinfo")
-            .field("confirmed", &self.confirmed())
-            .field("used", &self.used())
-            .field("updated", &self.updated())
-            .field("refcnt", &self.refcnt())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushNdtConfig {
-    pub(crate) buf: [u8; 32usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushNdtConfig {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 32usize],
-        }
-    }
-}
-impl PushNdtConfig {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        32usize
-    }
-    pub fn key_len(&self) -> u16 {
-        parse_u16(&self.buf[0usize..2usize]).unwrap()
-    }
-    pub fn set_key_len(&mut self, value: u16) {
-        self.buf[0usize..2usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn entry_size(&self) -> u16 {
-        parse_u16(&self.buf[2usize..4usize]).unwrap()
-    }
-    pub fn set_entry_size(&mut self, value: u16) {
-        self.buf[2usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn entries(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_entries(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn last_flush(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
-    }
-    pub fn set_last_flush(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn last_rand(&self) -> u32 {
-        parse_u32(&self.buf[12usize..16usize]).unwrap()
-    }
-    pub fn set_last_rand(&mut self, value: u32) {
-        self.buf[12usize..16usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn hash_rnd(&self) -> u32 {
-        parse_u32(&self.buf[16usize..20usize]).unwrap()
-    }
-    pub fn set_hash_rnd(&mut self, value: u32) {
-        self.buf[16usize..20usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn hash_mask(&self) -> u32 {
-        parse_u32(&self.buf[20usize..24usize]).unwrap()
-    }
-    pub fn set_hash_mask(&mut self, value: u32) {
-        self.buf[20usize..24usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn hash_chain_gc(&self) -> u32 {
-        parse_u32(&self.buf[24usize..28usize]).unwrap()
-    }
-    pub fn set_hash_chain_gc(&mut self, value: u32) {
-        self.buf[24usize..28usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn proxy_qlen(&self) -> u32 {
-        parse_u32(&self.buf[28usize..32usize]).unwrap()
-    }
-    pub fn set_proxy_qlen(&mut self, value: u32) {
-        self.buf[28usize..32usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushNdtConfig {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("NdtConfig")
-            .field("key_len", &self.key_len())
-            .field("entry_size", &self.entry_size())
-            .field("entries", &self.entries())
-            .field("last_flush", &self.last_flush())
-            .field("last_rand", &self.last_rand())
-            .field("hash_rnd", &self.hash_rnd())
-            .field("hash_mask", &self.hash_mask())
-            .field("hash_chain_gc", &self.hash_chain_gc())
-            .field("proxy_qlen", &self.proxy_qlen())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushNdtStats {
-    pub(crate) buf: [u8; 88usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushNdtStats {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 88usize],
-        }
-    }
-}
-impl PushNdtStats {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        88usize
-    }
-    pub fn allocs(&self) -> u64 {
-        parse_u64(&self.buf[0usize..8usize]).unwrap()
-    }
-    pub fn set_allocs(&mut self, value: u64) {
-        self.buf[0usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn destroys(&self) -> u64 {
-        parse_u64(&self.buf[8usize..16usize]).unwrap()
-    }
-    pub fn set_destroys(&mut self, value: u64) {
-        self.buf[8usize..16usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn hash_grows(&self) -> u64 {
-        parse_u64(&self.buf[16usize..24usize]).unwrap()
-    }
-    pub fn set_hash_grows(&mut self, value: u64) {
-        self.buf[16usize..24usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn res_failed(&self) -> u64 {
-        parse_u64(&self.buf[24usize..32usize]).unwrap()
-    }
-    pub fn set_res_failed(&mut self, value: u64) {
-        self.buf[24usize..32usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn lookups(&self) -> u64 {
-        parse_u64(&self.buf[32usize..40usize]).unwrap()
-    }
-    pub fn set_lookups(&mut self, value: u64) {
-        self.buf[32usize..40usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn hits(&self) -> u64 {
-        parse_u64(&self.buf[40usize..48usize]).unwrap()
-    }
-    pub fn set_hits(&mut self, value: u64) {
-        self.buf[40usize..48usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rcv_probes_mcast(&self) -> u64 {
-        parse_u64(&self.buf[48usize..56usize]).unwrap()
-    }
-    pub fn set_rcv_probes_mcast(&mut self, value: u64) {
-        self.buf[48usize..56usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rcv_probes_ucast(&self) -> u64 {
-        parse_u64(&self.buf[56usize..64usize]).unwrap()
-    }
-    pub fn set_rcv_probes_ucast(&mut self, value: u64) {
-        self.buf[56usize..64usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn periodic_gc_runs(&self) -> u64 {
-        parse_u64(&self.buf[64usize..72usize]).unwrap()
-    }
-    pub fn set_periodic_gc_runs(&mut self, value: u64) {
-        self.buf[64usize..72usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn forced_gc_runs(&self) -> u64 {
-        parse_u64(&self.buf[72usize..80usize]).unwrap()
-    }
-    pub fn set_forced_gc_runs(&mut self, value: u64) {
-        self.buf[72usize..80usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn table_fulls(&self) -> u64 {
-        parse_u64(&self.buf[80usize..88usize]).unwrap()
-    }
-    pub fn set_table_fulls(&mut self, value: u64) {
-        self.buf[80usize..88usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushNdtStats {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("NdtStats")
-            .field("allocs", &self.allocs())
-            .field("destroys", &self.destroys())
-            .field("hash_grows", &self.hash_grows())
-            .field("res_failed", &self.res_failed())
-            .field("lookups", &self.lookups())
-            .field("hits", &self.hits())
-            .field("rcv_probes_mcast", &self.rcv_probes_mcast())
-            .field("rcv_probes_ucast", &self.rcv_probes_ucast())
-            .field("periodic_gc_runs", &self.periodic_gc_runs())
-            .field("forced_gc_runs", &self.forced_gc_runs())
-            .field("table_fulls", &self.table_fulls())
-            .finish()
-    }
-}
-#[doc = "Add new neighbour entry"]
-pub struct PushOpNewneighDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpNewneighDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpNewneighDoRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNdmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNdmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_dst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_lladdr(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_probes(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_vlan(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 5u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_port(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 6u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_vni(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 7u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ifindex(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 8u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_master(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 9u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_protocol(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 12u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_nh_id(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 13u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_fdb_ext_attrs(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 14u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    #[doc = "Associated type: \"NtfExtFlags\" (enum)"]
-    pub fn push_flags_ext(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 15u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpNewneighDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Add new neighbour entry"]
-#[derive(Clone)]
-pub enum OpNewneighDoRequest<'a> {
-    Dst(&'a [u8]),
-    Lladdr(&'a [u8]),
-    Probes(u32),
-    Vlan(u16),
-    Port(u16),
-    Vni(u32),
-    Ifindex(u32),
-    Master(u32),
-    Protocol(u8),
-    NhId(u32),
-    FdbExtAttrs(&'a [u8]),
-    #[doc = "Associated type: \"NtfExtFlags\" (enum)"]
-    FlagsExt(u32),
-}
-impl<'a> IterableOpNewneighDoRequest<'a> {
-    pub fn get_dst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewneighDoRequest::Dst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewneighDoRequest",
-            "Dst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_lladdr(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewneighDoRequest::Lladdr(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewneighDoRequest",
-            "Lladdr",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_probes(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewneighDoRequest::Probes(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewneighDoRequest",
-            "Probes",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_vlan(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewneighDoRequest::Vlan(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewneighDoRequest",
-            "Vlan",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_port(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewneighDoRequest::Port(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewneighDoRequest",
-            "Port",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_vni(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewneighDoRequest::Vni(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewneighDoRequest",
-            "Vni",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifindex(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewneighDoRequest::Ifindex(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewneighDoRequest",
-            "Ifindex",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_master(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewneighDoRequest::Master(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewneighDoRequest",
-            "Master",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_protocol(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewneighDoRequest::Protocol(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewneighDoRequest",
-            "Protocol",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_nh_id(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewneighDoRequest::NhId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewneighDoRequest",
-            "NhId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_fdb_ext_attrs(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewneighDoRequest::FdbExtAttrs(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewneighDoRequest",
-            "FdbExtAttrs",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Associated type: \"NtfExtFlags\" (enum)"]
-    pub fn get_flags_ext(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewneighDoRequest::FlagsExt(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewneighDoRequest",
-            "FlagsExt",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpNewneighDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNdmsg, IterableOpNewneighDoRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNdmsg::len()));
-        (
-            PushNdmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpNewneighDoRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        NeighbourAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpNewneighDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpNewneighDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpNewneighDoRequest<'a> {
-    type Item = Result<OpNewneighDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpNewneighDoRequest::Dst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpNewneighDoRequest::Lladdr({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpNewneighDoRequest::Probes({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpNewneighDoRequest::Vlan({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpNewneighDoRequest::Port({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpNewneighDoRequest::Vni({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpNewneighDoRequest::Ifindex({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpNewneighDoRequest::Master({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                12u16 => OpNewneighDoRequest::Protocol({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                13u16 => OpNewneighDoRequest::NhId({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                14u16 => OpNewneighDoRequest::FdbExtAttrs({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                15u16 => OpNewneighDoRequest::FlagsExt({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpNewneighDoRequest",
-            r#type.and_then(|t| OpNewneighDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpNewneighDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpNewneighDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpNewneighDoRequest::Dst(val) => fmt.field("Dst", &val),
-                OpNewneighDoRequest::Lladdr(val) => fmt.field("Lladdr", &val),
-                OpNewneighDoRequest::Probes(val) => fmt.field("Probes", &val),
-                OpNewneighDoRequest::Vlan(val) => fmt.field("Vlan", &val),
-                OpNewneighDoRequest::Port(val) => fmt.field("Port", &val),
-                OpNewneighDoRequest::Vni(val) => fmt.field("Vni", &val),
-                OpNewneighDoRequest::Ifindex(val) => fmt.field("Ifindex", &val),
-                OpNewneighDoRequest::Master(val) => fmt.field("Master", &val),
-                OpNewneighDoRequest::Protocol(val) => fmt.field("Protocol", &val),
-                OpNewneighDoRequest::NhId(val) => fmt.field("NhId", &val),
-                OpNewneighDoRequest::FdbExtAttrs(val) => fmt.field("FdbExtAttrs", &val),
-                OpNewneighDoRequest::FlagsExt(val) => fmt.field(
-                    "FlagsExt",
-                    &FormatFlags(val.into(), NtfExtFlags::from_value),
-                ),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpNewneighDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNdmsg::len() {
-            stack.push(("OpNewneighDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpNewneighDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpNewneighDoRequest::Dst(val) => {
-                    if last_off == offset {
-                        stack.push(("Dst", last_off));
-                        break;
-                    }
-                }
-                OpNewneighDoRequest::Lladdr(val) => {
-                    if last_off == offset {
-                        stack.push(("Lladdr", last_off));
-                        break;
-                    }
-                }
-                OpNewneighDoRequest::Probes(val) => {
-                    if last_off == offset {
-                        stack.push(("Probes", last_off));
-                        break;
-                    }
-                }
-                OpNewneighDoRequest::Vlan(val) => {
-                    if last_off == offset {
-                        stack.push(("Vlan", last_off));
-                        break;
-                    }
-                }
-                OpNewneighDoRequest::Port(val) => {
-                    if last_off == offset {
-                        stack.push(("Port", last_off));
-                        break;
-                    }
-                }
-                OpNewneighDoRequest::Vni(val) => {
-                    if last_off == offset {
-                        stack.push(("Vni", last_off));
-                        break;
-                    }
-                }
-                OpNewneighDoRequest::Ifindex(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifindex", last_off));
-                        break;
-                    }
-                }
-                OpNewneighDoRequest::Master(val) => {
-                    if last_off == offset {
-                        stack.push(("Master", last_off));
-                        break;
-                    }
-                }
-                OpNewneighDoRequest::Protocol(val) => {
-                    if last_off == offset {
-                        stack.push(("Protocol", last_off));
-                        break;
-                    }
-                }
-                OpNewneighDoRequest::NhId(val) => {
-                    if last_off == offset {
-                        stack.push(("NhId", last_off));
-                        break;
-                    }
-                }
-                OpNewneighDoRequest::FdbExtAttrs(val) => {
-                    if last_off == offset {
-                        stack.push(("FdbExtAttrs", last_off));
-                        break;
-                    }
-                }
-                OpNewneighDoRequest::FlagsExt(val) => {
-                    if last_off == offset {
-                        stack.push(("FlagsExt", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpNewneighDoRequest", cur));
-        }
-        (stack, None)
-    }
-}
-#[doc = "Add new neighbour entry"]
-pub struct PushOpNewneighDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpNewneighDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpNewneighDoReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNdmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNdmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpNewneighDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Add new neighbour entry"]
-#[derive(Clone)]
-pub enum OpNewneighDoReply {}
-impl<'a> IterableOpNewneighDoReply<'a> {}
-impl OpNewneighDoReply {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNdmsg, IterableOpNewneighDoReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNdmsg::len()));
-        (
-            PushNdmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpNewneighDoReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        NeighbourAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpNewneighDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpNewneighDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpNewneighDoReply<'a> {
-    type Item = Result<OpNewneighDoReply, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpNewneighDoReply",
-            r#type.and_then(|t| OpNewneighDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpNewneighDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpNewneighDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpNewneighDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNdmsg::len() {
-            stack.push(("OpNewneighDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpNewneighDoReply::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
+#[doc = "Add new neighbour entry\nRequest attributes:\n- [.push_dst()](PushNeighbourAttrs::push_dst)\n- [.push_lladdr()](PushNeighbourAttrs::push_lladdr)\n- [.push_probes()](PushNeighbourAttrs::push_probes)\n- [.push_vlan()](PushNeighbourAttrs::push_vlan)\n- [.push_port()](PushNeighbourAttrs::push_port)\n- [.push_vni()](PushNeighbourAttrs::push_vni)\n- [.push_ifindex()](PushNeighbourAttrs::push_ifindex)\n- [.push_master()](PushNeighbourAttrs::push_master)\n- [.push_protocol()](PushNeighbourAttrs::push_protocol)\n- [.push_nh_id()](PushNeighbourAttrs::push_nh_id)\n- [.push_fdb_ext_attrs()](PushNeighbourAttrs::push_fdb_ext_attrs)\n- [.push_flags_ext()](PushNeighbourAttrs::push_flags_ext)\n"]
 #[derive(Debug)]
-pub struct RequestOpNewneighDoRequest<'r> {
+pub struct OpNewneighDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpNewneighDoRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushNdmsg) -> Self {
-        PushOpNewneighDoRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpNewneighDo<'r> {
+    pub fn new(mut request: Request<'r>, header: &Ndmsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpNewneighDoRequest<&mut Vec<u8>> {
-        PushOpNewneighDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Ndmsg,
+    ) -> PushNeighbourAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushNeighbourAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpNewneighDoRequest<RequestBuf<'r>> {
-        PushOpNewneighDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushNeighbourAttrs<&mut Vec<u8>> {
+        PushNeighbourAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushNdmsg, IterableOpNewneighDoRequest<'buf>) {
-        OpNewneighDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushNeighbourAttrs<RequestBuf<'r>> {
+        PushNeighbourAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Ndmsg, IterableNeighbourAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Ndmsg::len()));
+        (
+            Ndmsg::new_from_slice(header).unwrap_or_default(),
+            IterableNeighbourAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Ndmsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpNewneighDoRequest<'_> {
+impl NetlinkRequest for OpNewneighDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -3358,408 +2608,55 @@ impl NetlinkRequest for RequestOpNewneighDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushNdmsg, IterableOpNewneighDoReply<'buf>);
+    type ReplyType<'buf> = (Ndmsg, IterableNeighbourAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpNewneighDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpNewneighDoRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Remove an existing neighbour entry"]
-pub struct PushOpDelneighDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpDelneighDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpDelneighDoRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNdmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNdmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_dst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_ifindex(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 8u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpDelneighDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Remove an existing neighbour entry"]
-#[derive(Clone)]
-pub enum OpDelneighDoRequest<'a> {
-    Dst(&'a [u8]),
-    Ifindex(u32),
-}
-impl<'a> IterableOpDelneighDoRequest<'a> {
-    pub fn get_dst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelneighDoRequest::Dst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelneighDoRequest",
-            "Dst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifindex(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDelneighDoRequest::Ifindex(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDelneighDoRequest",
-            "Ifindex",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpDelneighDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNdmsg, IterableOpDelneighDoRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNdmsg::len()));
-        (
-            PushNdmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpDelneighDoRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        NeighbourAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpDelneighDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpDelneighDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpDelneighDoRequest<'a> {
-    type Item = Result<OpDelneighDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpDelneighDoRequest::Dst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpDelneighDoRequest::Ifindex({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpDelneighDoRequest",
-            r#type.and_then(|t| OpDelneighDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpDelneighDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpDelneighDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpDelneighDoRequest::Dst(val) => fmt.field("Dst", &val),
-                OpDelneighDoRequest::Ifindex(val) => fmt.field("Ifindex", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpDelneighDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNdmsg::len() {
-            stack.push(("OpDelneighDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpDelneighDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpDelneighDoRequest::Dst(val) => {
-                    if last_off == offset {
-                        stack.push(("Dst", last_off));
-                        break;
-                    }
-                }
-                OpDelneighDoRequest::Ifindex(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifindex", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpDelneighDoRequest", cur));
-        }
-        (stack, None)
-    }
-}
-#[doc = "Remove an existing neighbour entry"]
-pub struct PushOpDelneighDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpDelneighDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpDelneighDoReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNdmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNdmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpDelneighDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Remove an existing neighbour entry"]
-#[derive(Clone)]
-pub enum OpDelneighDoReply {}
-impl<'a> IterableOpDelneighDoReply<'a> {}
-impl OpDelneighDoReply {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNdmsg, IterableOpDelneighDoReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNdmsg::len()));
-        (
-            PushNdmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpDelneighDoReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        NeighbourAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpDelneighDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpDelneighDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpDelneighDoReply<'a> {
-    type Item = Result<OpDelneighDoReply, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpDelneighDoReply",
-            r#type.and_then(|t| OpDelneighDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpDelneighDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpDelneighDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpDelneighDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNdmsg::len() {
-            stack.push(("OpDelneighDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpDelneighDoReply::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
+#[doc = "Remove an existing neighbour entry\nRequest attributes:\n- [.push_dst()](PushNeighbourAttrs::push_dst)\n- [.push_ifindex()](PushNeighbourAttrs::push_ifindex)\n"]
 #[derive(Debug)]
-pub struct RequestOpDelneighDoRequest<'r> {
+pub struct OpDelneighDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpDelneighDoRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushNdmsg) -> Self {
-        PushOpDelneighDoRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpDelneighDo<'r> {
+    pub fn new(mut request: Request<'r>, header: &Ndmsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpDelneighDoRequest<&mut Vec<u8>> {
-        PushOpDelneighDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Ndmsg,
+    ) -> PushNeighbourAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushNeighbourAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpDelneighDoRequest<RequestBuf<'r>> {
-        PushOpDelneighDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushNeighbourAttrs<&mut Vec<u8>> {
+        PushNeighbourAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushNdmsg, IterableOpDelneighDoRequest<'buf>) {
-        OpDelneighDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushNeighbourAttrs<RequestBuf<'r>> {
+        PushNeighbourAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Ndmsg, IterableNeighbourAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Ndmsg::len()));
+        (
+            Ndmsg::new_from_slice(header).unwrap_or_default(),
+            IterableNeighbourAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Ndmsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpDelneighDoRequest<'_> {
+impl NetlinkRequest for OpDelneighDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -3772,832 +2669,57 @@ impl NetlinkRequest for RequestOpDelneighDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushNdmsg, IterableOpDelneighDoReply<'buf>);
+    type ReplyType<'buf> = (Ndmsg, IterableNeighbourAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpDelneighDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpDelneighDoRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Get or dump neighbour entries"]
-pub struct PushOpGetneighDumpRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetneighDumpRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetneighDumpRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNdmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNdmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_ifindex(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 8u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_master(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 9u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetneighDumpRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get or dump neighbour entries"]
-#[derive(Clone)]
-pub enum OpGetneighDumpRequest {
-    Ifindex(u32),
-    Master(u32),
-}
-impl<'a> IterableOpGetneighDumpRequest<'a> {
-    pub fn get_ifindex(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpRequest::Ifindex(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpRequest",
-            "Ifindex",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_master(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpRequest::Master(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpRequest",
-            "Master",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetneighDumpRequest {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNdmsg, IterableOpGetneighDumpRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNdmsg::len()));
-        (
-            PushNdmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetneighDumpRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        NeighbourAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetneighDumpRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetneighDumpRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetneighDumpRequest<'a> {
-    type Item = Result<OpGetneighDumpRequest, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                8u16 => OpGetneighDumpRequest::Ifindex({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpGetneighDumpRequest::Master({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetneighDumpRequest",
-            r#type.and_then(|t| OpGetneighDumpRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpGetneighDumpRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetneighDumpRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetneighDumpRequest::Ifindex(val) => fmt.field("Ifindex", &val),
-                OpGetneighDumpRequest::Master(val) => fmt.field("Master", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetneighDumpRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNdmsg::len() {
-            stack.push(("OpGetneighDumpRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetneighDumpRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetneighDumpRequest::Ifindex(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifindex", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDumpRequest::Master(val) => {
-                    if last_off == offset {
-                        stack.push(("Master", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetneighDumpRequest", cur));
-        }
-        (stack, None)
-    }
-}
-#[doc = "Get or dump neighbour entries"]
-pub struct PushOpGetneighDumpReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetneighDumpReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetneighDumpReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNdmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNdmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_dst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_lladdr(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_probes(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_vlan(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 5u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_port(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 6u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_vni(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 7u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ifindex(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 8u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_master(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 9u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_protocol(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 12u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_nh_id(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 13u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_fdb_ext_attrs(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 14u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    #[doc = "Associated type: \"NtfExtFlags\" (enum)"]
-    pub fn push_flags_ext(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 15u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetneighDumpReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get or dump neighbour entries"]
-#[derive(Clone)]
-pub enum OpGetneighDumpReply<'a> {
-    Dst(&'a [u8]),
-    Lladdr(&'a [u8]),
-    Probes(u32),
-    Vlan(u16),
-    Port(u16),
-    Vni(u32),
-    Ifindex(u32),
-    Master(u32),
-    Protocol(u8),
-    NhId(u32),
-    FdbExtAttrs(&'a [u8]),
-    #[doc = "Associated type: \"NtfExtFlags\" (enum)"]
-    FlagsExt(u32),
-}
-impl<'a> IterableOpGetneighDumpReply<'a> {
-    pub fn get_dst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpReply::Dst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpReply",
-            "Dst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_lladdr(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpReply::Lladdr(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpReply",
-            "Lladdr",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_probes(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpReply::Probes(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpReply",
-            "Probes",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_vlan(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpReply::Vlan(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpReply",
-            "Vlan",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_port(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpReply::Port(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpReply",
-            "Port",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_vni(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpReply::Vni(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpReply",
-            "Vni",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifindex(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpReply::Ifindex(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpReply",
-            "Ifindex",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_master(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpReply::Master(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpReply",
-            "Master",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_protocol(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpReply::Protocol(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpReply",
-            "Protocol",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_nh_id(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpReply::NhId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpReply",
-            "NhId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_fdb_ext_attrs(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpReply::FdbExtAttrs(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpReply",
-            "FdbExtAttrs",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Associated type: \"NtfExtFlags\" (enum)"]
-    pub fn get_flags_ext(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDumpReply::FlagsExt(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDumpReply",
-            "FlagsExt",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetneighDumpReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNdmsg, IterableOpGetneighDumpReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNdmsg::len()));
-        (
-            PushNdmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetneighDumpReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        NeighbourAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetneighDumpReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetneighDumpReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetneighDumpReply<'a> {
-    type Item = Result<OpGetneighDumpReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetneighDumpReply::Dst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetneighDumpReply::Lladdr({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetneighDumpReply::Probes({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetneighDumpReply::Vlan({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpGetneighDumpReply::Port({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpGetneighDumpReply::Vni({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetneighDumpReply::Ifindex({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpGetneighDumpReply::Master({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                12u16 => OpGetneighDumpReply::Protocol({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                13u16 => OpGetneighDumpReply::NhId({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                14u16 => OpGetneighDumpReply::FdbExtAttrs({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                15u16 => OpGetneighDumpReply::FlagsExt({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetneighDumpReply",
-            r#type.and_then(|t| OpGetneighDumpReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetneighDumpReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetneighDumpReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetneighDumpReply::Dst(val) => fmt.field("Dst", &val),
-                OpGetneighDumpReply::Lladdr(val) => fmt.field("Lladdr", &val),
-                OpGetneighDumpReply::Probes(val) => fmt.field("Probes", &val),
-                OpGetneighDumpReply::Vlan(val) => fmt.field("Vlan", &val),
-                OpGetneighDumpReply::Port(val) => fmt.field("Port", &val),
-                OpGetneighDumpReply::Vni(val) => fmt.field("Vni", &val),
-                OpGetneighDumpReply::Ifindex(val) => fmt.field("Ifindex", &val),
-                OpGetneighDumpReply::Master(val) => fmt.field("Master", &val),
-                OpGetneighDumpReply::Protocol(val) => fmt.field("Protocol", &val),
-                OpGetneighDumpReply::NhId(val) => fmt.field("NhId", &val),
-                OpGetneighDumpReply::FdbExtAttrs(val) => fmt.field("FdbExtAttrs", &val),
-                OpGetneighDumpReply::FlagsExt(val) => fmt.field(
-                    "FlagsExt",
-                    &FormatFlags(val.into(), NtfExtFlags::from_value),
-                ),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetneighDumpReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNdmsg::len() {
-            stack.push(("OpGetneighDumpReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetneighDumpReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetneighDumpReply::Dst(val) => {
-                    if last_off == offset {
-                        stack.push(("Dst", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDumpReply::Lladdr(val) => {
-                    if last_off == offset {
-                        stack.push(("Lladdr", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDumpReply::Probes(val) => {
-                    if last_off == offset {
-                        stack.push(("Probes", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDumpReply::Vlan(val) => {
-                    if last_off == offset {
-                        stack.push(("Vlan", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDumpReply::Port(val) => {
-                    if last_off == offset {
-                        stack.push(("Port", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDumpReply::Vni(val) => {
-                    if last_off == offset {
-                        stack.push(("Vni", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDumpReply::Ifindex(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifindex", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDumpReply::Master(val) => {
-                    if last_off == offset {
-                        stack.push(("Master", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDumpReply::Protocol(val) => {
-                    if last_off == offset {
-                        stack.push(("Protocol", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDumpReply::NhId(val) => {
-                    if last_off == offset {
-                        stack.push(("NhId", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDumpReply::FdbExtAttrs(val) => {
-                    if last_off == offset {
-                        stack.push(("FdbExtAttrs", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDumpReply::FlagsExt(val) => {
-                    if last_off == offset {
-                        stack.push(("FlagsExt", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetneighDumpReply", cur));
-        }
-        (stack, None)
-    }
-}
+#[doc = "Get or dump neighbour entries\nRequest attributes:\n- [.push_ifindex()](PushNeighbourAttrs::push_ifindex)\n- [.push_master()](PushNeighbourAttrs::push_master)\n\nReply attributes:\n- [.get_dst()](IterableNeighbourAttrs::get_dst)\n- [.get_lladdr()](IterableNeighbourAttrs::get_lladdr)\n- [.get_probes()](IterableNeighbourAttrs::get_probes)\n- [.get_vlan()](IterableNeighbourAttrs::get_vlan)\n- [.get_port()](IterableNeighbourAttrs::get_port)\n- [.get_vni()](IterableNeighbourAttrs::get_vni)\n- [.get_ifindex()](IterableNeighbourAttrs::get_ifindex)\n- [.get_master()](IterableNeighbourAttrs::get_master)\n- [.get_protocol()](IterableNeighbourAttrs::get_protocol)\n- [.get_nh_id()](IterableNeighbourAttrs::get_nh_id)\n- [.get_fdb_ext_attrs()](IterableNeighbourAttrs::get_fdb_ext_attrs)\n- [.get_flags_ext()](IterableNeighbourAttrs::get_flags_ext)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetneighDumpRequest<'r> {
+pub struct OpGetneighDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetneighDumpRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushNdmsg) -> Self {
-        PushOpGetneighDumpRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpGetneighDump<'r> {
+    pub fn new(mut request: Request<'r>, header: &Ndmsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self {
             request: request.set_dump(),
         }
     }
-    pub fn encode(&mut self) -> PushOpGetneighDumpRequest<&mut Vec<u8>> {
-        PushOpGetneighDumpRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Ndmsg,
+    ) -> PushNeighbourAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushNeighbourAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetneighDumpRequest<RequestBuf<'r>> {
-        PushOpGetneighDumpRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushNeighbourAttrs<&mut Vec<u8>> {
+        PushNeighbourAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(
-        buf: &'buf [u8],
-    ) -> (PushNdmsg, IterableOpGetneighDumpRequest<'buf>) {
-        OpGetneighDumpRequest::new(buf)
+    pub fn into_encoder(self) -> PushNeighbourAttrs<RequestBuf<'r>> {
+        PushNeighbourAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Ndmsg, IterableNeighbourAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Ndmsg::len()));
+        (
+            Ndmsg::new_from_slice(header).unwrap_or_default(),
+            IterableNeighbourAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Ndmsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetneighDumpRequest<'_> {
+impl NetlinkRequest for OpGetneighDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -4610,795 +2732,55 @@ impl NetlinkRequest for RequestOpGetneighDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushNdmsg, IterableOpGetneighDumpReply<'buf>);
+    type ReplyType<'buf> = (Ndmsg, IterableNeighbourAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetneighDumpReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetneighDumpRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Get or dump neighbour entries"]
-pub struct PushOpGetneighDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetneighDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetneighDoRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNdmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNdmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_dst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetneighDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get or dump neighbour entries"]
-#[derive(Clone)]
-pub enum OpGetneighDoRequest<'a> {
-    Dst(&'a [u8]),
-}
-impl<'a> IterableOpGetneighDoRequest<'a> {
-    pub fn get_dst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDoRequest::Dst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDoRequest",
-            "Dst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetneighDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNdmsg, IterableOpGetneighDoRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNdmsg::len()));
-        (
-            PushNdmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetneighDoRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        NeighbourAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetneighDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetneighDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetneighDoRequest<'a> {
-    type Item = Result<OpGetneighDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetneighDoRequest::Dst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetneighDoRequest",
-            r#type.and_then(|t| OpGetneighDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetneighDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetneighDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetneighDoRequest::Dst(val) => fmt.field("Dst", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetneighDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNdmsg::len() {
-            stack.push(("OpGetneighDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetneighDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetneighDoRequest::Dst(val) => {
-                    if last_off == offset {
-                        stack.push(("Dst", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetneighDoRequest", cur));
-        }
-        (stack, None)
-    }
-}
-#[doc = "Get or dump neighbour entries"]
-pub struct PushOpGetneighDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetneighDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetneighDoReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNdmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNdmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_dst(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_lladdr(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_probes(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_vlan(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 5u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_port(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 6u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_vni(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 7u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ifindex(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 8u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_master(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 9u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_protocol(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 12u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_nh_id(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 13u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_fdb_ext_attrs(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 14u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    #[doc = "Associated type: \"NtfExtFlags\" (enum)"]
-    pub fn push_flags_ext(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 15u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetneighDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get or dump neighbour entries"]
-#[derive(Clone)]
-pub enum OpGetneighDoReply<'a> {
-    Dst(&'a [u8]),
-    Lladdr(&'a [u8]),
-    Probes(u32),
-    Vlan(u16),
-    Port(u16),
-    Vni(u32),
-    Ifindex(u32),
-    Master(u32),
-    Protocol(u8),
-    NhId(u32),
-    FdbExtAttrs(&'a [u8]),
-    #[doc = "Associated type: \"NtfExtFlags\" (enum)"]
-    FlagsExt(u32),
-}
-impl<'a> IterableOpGetneighDoReply<'a> {
-    pub fn get_dst(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDoReply::Dst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDoReply",
-            "Dst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_lladdr(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDoReply::Lladdr(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDoReply",
-            "Lladdr",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_probes(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDoReply::Probes(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDoReply",
-            "Probes",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_vlan(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDoReply::Vlan(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDoReply",
-            "Vlan",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_port(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDoReply::Port(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDoReply",
-            "Port",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_vni(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDoReply::Vni(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDoReply",
-            "Vni",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifindex(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDoReply::Ifindex(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDoReply",
-            "Ifindex",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_master(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDoReply::Master(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDoReply",
-            "Master",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_protocol(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDoReply::Protocol(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDoReply",
-            "Protocol",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_nh_id(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDoReply::NhId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDoReply",
-            "NhId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_fdb_ext_attrs(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDoReply::FdbExtAttrs(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDoReply",
-            "FdbExtAttrs",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Associated type: \"NtfExtFlags\" (enum)"]
-    pub fn get_flags_ext(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneighDoReply::FlagsExt(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneighDoReply",
-            "FlagsExt",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetneighDoReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNdmsg, IterableOpGetneighDoReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNdmsg::len()));
-        (
-            PushNdmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetneighDoReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        NeighbourAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetneighDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetneighDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetneighDoReply<'a> {
-    type Item = Result<OpGetneighDoReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetneighDoReply::Dst({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetneighDoReply::Lladdr({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetneighDoReply::Probes({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetneighDoReply::Vlan({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpGetneighDoReply::Port({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpGetneighDoReply::Vni({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetneighDoReply::Ifindex({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpGetneighDoReply::Master({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                12u16 => OpGetneighDoReply::Protocol({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                13u16 => OpGetneighDoReply::NhId({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                14u16 => OpGetneighDoReply::FdbExtAttrs({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                15u16 => OpGetneighDoReply::FlagsExt({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetneighDoReply",
-            r#type.and_then(|t| OpGetneighDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetneighDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetneighDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetneighDoReply::Dst(val) => fmt.field("Dst", &val),
-                OpGetneighDoReply::Lladdr(val) => fmt.field("Lladdr", &val),
-                OpGetneighDoReply::Probes(val) => fmt.field("Probes", &val),
-                OpGetneighDoReply::Vlan(val) => fmt.field("Vlan", &val),
-                OpGetneighDoReply::Port(val) => fmt.field("Port", &val),
-                OpGetneighDoReply::Vni(val) => fmt.field("Vni", &val),
-                OpGetneighDoReply::Ifindex(val) => fmt.field("Ifindex", &val),
-                OpGetneighDoReply::Master(val) => fmt.field("Master", &val),
-                OpGetneighDoReply::Protocol(val) => fmt.field("Protocol", &val),
-                OpGetneighDoReply::NhId(val) => fmt.field("NhId", &val),
-                OpGetneighDoReply::FdbExtAttrs(val) => fmt.field("FdbExtAttrs", &val),
-                OpGetneighDoReply::FlagsExt(val) => fmt.field(
-                    "FlagsExt",
-                    &FormatFlags(val.into(), NtfExtFlags::from_value),
-                ),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetneighDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNdmsg::len() {
-            stack.push(("OpGetneighDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetneighDoReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetneighDoReply::Dst(val) => {
-                    if last_off == offset {
-                        stack.push(("Dst", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDoReply::Lladdr(val) => {
-                    if last_off == offset {
-                        stack.push(("Lladdr", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDoReply::Probes(val) => {
-                    if last_off == offset {
-                        stack.push(("Probes", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDoReply::Vlan(val) => {
-                    if last_off == offset {
-                        stack.push(("Vlan", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDoReply::Port(val) => {
-                    if last_off == offset {
-                        stack.push(("Port", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDoReply::Vni(val) => {
-                    if last_off == offset {
-                        stack.push(("Vni", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDoReply::Ifindex(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifindex", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDoReply::Master(val) => {
-                    if last_off == offset {
-                        stack.push(("Master", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDoReply::Protocol(val) => {
-                    if last_off == offset {
-                        stack.push(("Protocol", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDoReply::NhId(val) => {
-                    if last_off == offset {
-                        stack.push(("NhId", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDoReply::FdbExtAttrs(val) => {
-                    if last_off == offset {
-                        stack.push(("FdbExtAttrs", last_off));
-                        break;
-                    }
-                }
-                OpGetneighDoReply::FlagsExt(val) => {
-                    if last_off == offset {
-                        stack.push(("FlagsExt", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetneighDoReply", cur));
-        }
-        (stack, None)
-    }
-}
+#[doc = "Get or dump neighbour entries\nRequest attributes:\n- [.push_dst()](PushNeighbourAttrs::push_dst)\n\nReply attributes:\n- [.get_dst()](IterableNeighbourAttrs::get_dst)\n- [.get_lladdr()](IterableNeighbourAttrs::get_lladdr)\n- [.get_probes()](IterableNeighbourAttrs::get_probes)\n- [.get_vlan()](IterableNeighbourAttrs::get_vlan)\n- [.get_port()](IterableNeighbourAttrs::get_port)\n- [.get_vni()](IterableNeighbourAttrs::get_vni)\n- [.get_ifindex()](IterableNeighbourAttrs::get_ifindex)\n- [.get_master()](IterableNeighbourAttrs::get_master)\n- [.get_protocol()](IterableNeighbourAttrs::get_protocol)\n- [.get_nh_id()](IterableNeighbourAttrs::get_nh_id)\n- [.get_fdb_ext_attrs()](IterableNeighbourAttrs::get_fdb_ext_attrs)\n- [.get_flags_ext()](IterableNeighbourAttrs::get_flags_ext)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetneighDoRequest<'r> {
+pub struct OpGetneighDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetneighDoRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushNdmsg) -> Self {
-        PushOpGetneighDoRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpGetneighDo<'r> {
+    pub fn new(mut request: Request<'r>, header: &Ndmsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpGetneighDoRequest<&mut Vec<u8>> {
-        PushOpGetneighDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Ndmsg,
+    ) -> PushNeighbourAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushNeighbourAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetneighDoRequest<RequestBuf<'r>> {
-        PushOpGetneighDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushNeighbourAttrs<&mut Vec<u8>> {
+        PushNeighbourAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushNdmsg, IterableOpGetneighDoRequest<'buf>) {
-        OpGetneighDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushNeighbourAttrs<RequestBuf<'r>> {
+        PushNeighbourAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Ndmsg, IterableNeighbourAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Ndmsg::len()));
+        (
+            Ndmsg::new_from_slice(header).unwrap_or_default(),
+            IterableNeighbourAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Ndmsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetneighDoRequest<'_> {
+impl NetlinkRequest for OpGetneighDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -5411,623 +2793,57 @@ impl NetlinkRequest for RequestOpGetneighDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushNdmsg, IterableOpGetneighDoReply<'buf>);
+    type ReplyType<'buf> = (Ndmsg, IterableNeighbourAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetneighDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetneighDoRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Get or dump neighbour tables"]
-pub struct PushOpGetneightblDumpRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetneightblDumpRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetneightblDumpRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNdtmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNdtmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetneightblDumpRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get or dump neighbour tables"]
-#[derive(Clone)]
-pub enum OpGetneightblDumpRequest {}
-impl<'a> IterableOpGetneightblDumpRequest<'a> {}
-impl OpGetneightblDumpRequest {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNdtmsg, IterableOpGetneightblDumpRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNdtmsg::len()));
-        (
-            PushNdtmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetneightblDumpRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        NdtAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetneightblDumpRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetneightblDumpRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetneightblDumpRequest<'a> {
-    type Item = Result<OpGetneightblDumpRequest, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetneightblDumpRequest",
-            r#type.and_then(|t| OpGetneightblDumpRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpGetneightblDumpRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetneightblDumpRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetneightblDumpRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNdtmsg::len() {
-            stack.push(("OpGetneightblDumpRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetneightblDumpRequest::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
-#[doc = "Get or dump neighbour tables"]
-pub struct PushOpGetneightblDumpReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetneightblDumpReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetneightblDumpReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNdtmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNdtmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            1u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_thresh1(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 2u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_thresh2(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 3u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_thresh3(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_config(mut self, value: PushNdtConfig) -> Self {
-        push_header(self.as_rec_mut(), 5u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn nested_parms(mut self) -> PushNdtpaAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 6u16);
-        PushNdtpaAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_stats(mut self, value: PushNdtStats) -> Self {
-        push_header(self.as_rec_mut(), 7u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_gc_interval(mut self, value: u64) -> Self {
-        push_header(self.as_rec_mut(), 8u16, 8 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetneightblDumpReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get or dump neighbour tables"]
-#[derive(Clone)]
-pub enum OpGetneightblDumpReply<'a> {
-    Name(&'a CStr),
-    Thresh1(u32),
-    Thresh2(u32),
-    Thresh3(u32),
-    Config(PushNdtConfig),
-    Parms(IterableNdtpaAttrs<'a>),
-    Stats(PushNdtStats),
-    GcInterval(u64),
-}
-impl<'a> IterableOpGetneightblDumpReply<'a> {
-    pub fn get_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneightblDumpReply::Name(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneightblDumpReply",
-            "Name",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_thresh1(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneightblDumpReply::Thresh1(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneightblDumpReply",
-            "Thresh1",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_thresh2(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneightblDumpReply::Thresh2(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneightblDumpReply",
-            "Thresh2",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_thresh3(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneightblDumpReply::Thresh3(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneightblDumpReply",
-            "Thresh3",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_config(&self) -> Result<PushNdtConfig, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneightblDumpReply::Config(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneightblDumpReply",
-            "Config",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_parms(&self) -> Result<IterableNdtpaAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneightblDumpReply::Parms(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneightblDumpReply",
-            "Parms",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_stats(&self) -> Result<PushNdtStats, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneightblDumpReply::Stats(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneightblDumpReply",
-            "Stats",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gc_interval(&self) -> Result<u64, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetneightblDumpReply::GcInterval(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetneightblDumpReply",
-            "GcInterval",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetneightblDumpReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNdtmsg, IterableOpGetneightblDumpReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNdtmsg::len()));
-        (
-            PushNdtmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetneightblDumpReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        NdtAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetneightblDumpReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetneightblDumpReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetneightblDumpReply<'a> {
-    type Item = Result<OpGetneightblDumpReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetneightblDumpReply::Name({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetneightblDumpReply::Thresh1({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetneightblDumpReply::Thresh2({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetneightblDumpReply::Thresh3({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetneightblDumpReply::Config({
-                    let res = PushNdtConfig::new_from_slice(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpGetneightblDumpReply::Parms({
-                    let res = Some(IterableNdtpaAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpGetneightblDumpReply::Stats({
-                    let res = PushNdtStats::new_from_slice(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetneightblDumpReply::GcInterval({
-                    let res = parse_u64(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetneightblDumpReply",
-            r#type.and_then(|t| OpGetneightblDumpReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetneightblDumpReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetneightblDumpReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetneightblDumpReply::Name(val) => fmt.field("Name", &val),
-                OpGetneightblDumpReply::Thresh1(val) => fmt.field("Thresh1", &val),
-                OpGetneightblDumpReply::Thresh2(val) => fmt.field("Thresh2", &val),
-                OpGetneightblDumpReply::Thresh3(val) => fmt.field("Thresh3", &val),
-                OpGetneightblDumpReply::Config(val) => fmt.field("Config", &val),
-                OpGetneightblDumpReply::Parms(val) => fmt.field("Parms", &val),
-                OpGetneightblDumpReply::Stats(val) => fmt.field("Stats", &val),
-                OpGetneightblDumpReply::GcInterval(val) => fmt.field("GcInterval", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetneightblDumpReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNdtmsg::len() {
-            stack.push(("OpGetneightblDumpReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetneightblDumpReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetneightblDumpReply::Name(val) => {
-                    if last_off == offset {
-                        stack.push(("Name", last_off));
-                        break;
-                    }
-                }
-                OpGetneightblDumpReply::Thresh1(val) => {
-                    if last_off == offset {
-                        stack.push(("Thresh1", last_off));
-                        break;
-                    }
-                }
-                OpGetneightblDumpReply::Thresh2(val) => {
-                    if last_off == offset {
-                        stack.push(("Thresh2", last_off));
-                        break;
-                    }
-                }
-                OpGetneightblDumpReply::Thresh3(val) => {
-                    if last_off == offset {
-                        stack.push(("Thresh3", last_off));
-                        break;
-                    }
-                }
-                OpGetneightblDumpReply::Config(val) => {
-                    if last_off == offset {
-                        stack.push(("Config", last_off));
-                        break;
-                    }
-                }
-                OpGetneightblDumpReply::Parms(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetneightblDumpReply::Stats(val) => {
-                    if last_off == offset {
-                        stack.push(("Stats", last_off));
-                        break;
-                    }
-                }
-                OpGetneightblDumpReply::GcInterval(val) => {
-                    if last_off == offset {
-                        stack.push(("GcInterval", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetneightblDumpReply", cur));
-        }
-        (stack, missing)
-    }
-}
+#[doc = "Get or dump neighbour tables\n\nReply attributes:\n- [.get_name()](IterableNdtAttrs::get_name)\n- [.get_thresh1()](IterableNdtAttrs::get_thresh1)\n- [.get_thresh2()](IterableNdtAttrs::get_thresh2)\n- [.get_thresh3()](IterableNdtAttrs::get_thresh3)\n- [.get_config()](IterableNdtAttrs::get_config)\n- [.get_parms()](IterableNdtAttrs::get_parms)\n- [.get_stats()](IterableNdtAttrs::get_stats)\n- [.get_gc_interval()](IterableNdtAttrs::get_gc_interval)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetneightblDumpRequest<'r> {
+pub struct OpGetneightblDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetneightblDumpRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushNdtmsg) -> Self {
-        PushOpGetneightblDumpRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpGetneightblDump<'r> {
+    pub fn new(mut request: Request<'r>, header: &Ndtmsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self {
             request: request.set_dump(),
         }
     }
-    pub fn encode(&mut self) -> PushOpGetneightblDumpRequest<&mut Vec<u8>> {
-        PushOpGetneightblDumpRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Ndtmsg,
+    ) -> PushNdtAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushNdtAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetneightblDumpRequest<RequestBuf<'r>> {
-        PushOpGetneightblDumpRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushNdtAttrs<&mut Vec<u8>> {
+        PushNdtAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(
-        buf: &'buf [u8],
-    ) -> (PushNdtmsg, IterableOpGetneightblDumpRequest<'buf>) {
-        OpGetneightblDumpRequest::new(buf)
+    pub fn into_encoder(self) -> PushNdtAttrs<RequestBuf<'r>> {
+        PushNdtAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Ndtmsg, IterableNdtAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Ndtmsg::len()));
+        (
+            Ndtmsg::new_from_slice(header).unwrap_or_default(),
+            IterableNdtAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Ndtmsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetneightblDumpRequest<'_> {
+impl NetlinkRequest for OpGetneightblDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -6040,555 +2856,55 @@ impl NetlinkRequest for RequestOpGetneightblDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushNdtmsg, IterableOpGetneightblDumpReply<'buf>);
+    type ReplyType<'buf> = (Ndtmsg, IterableNdtAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetneightblDumpReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetneightblDumpRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Set neighbour tables"]
-pub struct PushOpSetneightblDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpSetneightblDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpSetneightblDoRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNdtmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNdtmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            1u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_thresh1(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 2u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_thresh2(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 3u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_thresh3(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_parms(mut self) -> PushNdtpaAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 6u16);
-        PushNdtpaAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_gc_interval(mut self, value: u64) -> Self {
-        push_header(self.as_rec_mut(), 8u16, 8 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpSetneightblDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Set neighbour tables"]
-#[derive(Clone)]
-pub enum OpSetneightblDoRequest<'a> {
-    Name(&'a CStr),
-    Thresh1(u32),
-    Thresh2(u32),
-    Thresh3(u32),
-    Parms(IterableNdtpaAttrs<'a>),
-    GcInterval(u64),
-}
-impl<'a> IterableOpSetneightblDoRequest<'a> {
-    pub fn get_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetneightblDoRequest::Name(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetneightblDoRequest",
-            "Name",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_thresh1(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetneightblDoRequest::Thresh1(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetneightblDoRequest",
-            "Thresh1",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_thresh2(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetneightblDoRequest::Thresh2(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetneightblDoRequest",
-            "Thresh2",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_thresh3(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetneightblDoRequest::Thresh3(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetneightblDoRequest",
-            "Thresh3",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_parms(&self) -> Result<IterableNdtpaAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetneightblDoRequest::Parms(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetneightblDoRequest",
-            "Parms",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gc_interval(&self) -> Result<u64, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetneightblDoRequest::GcInterval(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetneightblDoRequest",
-            "GcInterval",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpSetneightblDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNdtmsg, IterableOpSetneightblDoRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNdtmsg::len()));
-        (
-            PushNdtmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpSetneightblDoRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        NdtAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpSetneightblDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpSetneightblDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpSetneightblDoRequest<'a> {
-    type Item = Result<OpSetneightblDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpSetneightblDoRequest::Name({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpSetneightblDoRequest::Thresh1({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpSetneightblDoRequest::Thresh2({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpSetneightblDoRequest::Thresh3({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpSetneightblDoRequest::Parms({
-                    let res = Some(IterableNdtpaAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpSetneightblDoRequest::GcInterval({
-                    let res = parse_u64(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpSetneightblDoRequest",
-            r#type.and_then(|t| OpSetneightblDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpSetneightblDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpSetneightblDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpSetneightblDoRequest::Name(val) => fmt.field("Name", &val),
-                OpSetneightblDoRequest::Thresh1(val) => fmt.field("Thresh1", &val),
-                OpSetneightblDoRequest::Thresh2(val) => fmt.field("Thresh2", &val),
-                OpSetneightblDoRequest::Thresh3(val) => fmt.field("Thresh3", &val),
-                OpSetneightblDoRequest::Parms(val) => fmt.field("Parms", &val),
-                OpSetneightblDoRequest::GcInterval(val) => fmt.field("GcInterval", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpSetneightblDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNdtmsg::len() {
-            stack.push(("OpSetneightblDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpSetneightblDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpSetneightblDoRequest::Name(val) => {
-                    if last_off == offset {
-                        stack.push(("Name", last_off));
-                        break;
-                    }
-                }
-                OpSetneightblDoRequest::Thresh1(val) => {
-                    if last_off == offset {
-                        stack.push(("Thresh1", last_off));
-                        break;
-                    }
-                }
-                OpSetneightblDoRequest::Thresh2(val) => {
-                    if last_off == offset {
-                        stack.push(("Thresh2", last_off));
-                        break;
-                    }
-                }
-                OpSetneightblDoRequest::Thresh3(val) => {
-                    if last_off == offset {
-                        stack.push(("Thresh3", last_off));
-                        break;
-                    }
-                }
-                OpSetneightblDoRequest::Parms(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpSetneightblDoRequest::GcInterval(val) => {
-                    if last_off == offset {
-                        stack.push(("GcInterval", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpSetneightblDoRequest", cur));
-        }
-        (stack, missing)
-    }
-}
-#[doc = "Set neighbour tables"]
-pub struct PushOpSetneightblDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpSetneightblDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpSetneightblDoReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNdtmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNdtmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpSetneightblDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Set neighbour tables"]
-#[derive(Clone)]
-pub enum OpSetneightblDoReply {}
-impl<'a> IterableOpSetneightblDoReply<'a> {}
-impl OpSetneightblDoReply {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNdtmsg, IterableOpSetneightblDoReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNdtmsg::len()));
-        (
-            PushNdtmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpSetneightblDoReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        NdtAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpSetneightblDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpSetneightblDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpSetneightblDoReply<'a> {
-    type Item = Result<OpSetneightblDoReply, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpSetneightblDoReply",
-            r#type.and_then(|t| OpSetneightblDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpSetneightblDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpSetneightblDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpSetneightblDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNdtmsg::len() {
-            stack.push(("OpSetneightblDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpSetneightblDoReply::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
+#[doc = "Set neighbour tables\nRequest attributes:\n- [.push_name()](PushNdtAttrs::push_name)\n- [.push_thresh1()](PushNdtAttrs::push_thresh1)\n- [.push_thresh2()](PushNdtAttrs::push_thresh2)\n- [.push_thresh3()](PushNdtAttrs::push_thresh3)\n- [.nested_parms()](PushNdtAttrs::nested_parms)\n- [.push_gc_interval()](PushNdtAttrs::push_gc_interval)\n"]
 #[derive(Debug)]
-pub struct RequestOpSetneightblDoRequest<'r> {
+pub struct OpSetneightblDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpSetneightblDoRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushNdtmsg) -> Self {
-        PushOpSetneightblDoRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpSetneightblDo<'r> {
+    pub fn new(mut request: Request<'r>, header: &Ndtmsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpSetneightblDoRequest<&mut Vec<u8>> {
-        PushOpSetneightblDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Ndtmsg,
+    ) -> PushNdtAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushNdtAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpSetneightblDoRequest<RequestBuf<'r>> {
-        PushOpSetneightblDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushNdtAttrs<&mut Vec<u8>> {
+        PushNdtAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(
-        buf: &'buf [u8],
-    ) -> (PushNdtmsg, IterableOpSetneightblDoRequest<'buf>) {
-        OpSetneightblDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushNdtAttrs<RequestBuf<'r>> {
+        PushNdtAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Ndtmsg, IterableNdtAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Ndtmsg::len()));
+        (
+            Ndtmsg::new_from_slice(header).unwrap_or_default(),
+            IterableNdtAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Ndtmsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpSetneightblDoRequest<'_> {
+impl NetlinkRequest for OpSetneightblDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -6601,16 +2917,16 @@ impl NetlinkRequest for RequestOpSetneightblDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushNdtmsg, IterableOpSetneightblDoReply<'buf>);
+    type ReplyType<'buf> = (Ndtmsg, IterableNdtAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpSetneightblDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpSetneightblDoRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
@@ -6708,8 +3024,7 @@ impl<'a> Chained<'a> {
     pub fn request(&mut self) -> Request<'_> {
         self.update_header();
         self.last_header_offset = self.buf().len();
-        self.buf_mut()
-            .extend_from_slice(PushNlmsghdr::new().as_slice());
+        self.buf_mut().extend_from_slice(Nlmsghdr::new().as_slice());
         let mut request = Request::new_extend(self.buf.buf_mut());
         self.last_kind = None;
         request.writeback = Some(&mut self.last_kind);
@@ -6730,10 +3045,7 @@ impl<'a> Chained<'a> {
         }) = self.last_kind
         else {
             if !self.buf().is_empty() {
-                assert_eq!(
-                    self.last_header_offset + PushNlmsghdr::len(),
-                    self.buf().len()
-                );
+                assert_eq!(self.last_header_offset + Nlmsghdr::len(), self.buf().len());
                 self.buf.buf_mut().truncate(self.last_header_offset);
             }
             return;
@@ -6748,11 +3060,13 @@ impl<'a> Chained<'a> {
         self.lookups.push((name, lookup));
         let buf = self.buf_mut();
         align(buf);
-        let mut header = PushNlmsghdr::new();
-        header.set_len((buf.len() - header_offset) as u32);
-        header.set_type(request_type);
-        header.set_flags(flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16);
-        header.set_seq(seq);
+        let header = Nlmsghdr {
+            len: (buf.len() - header_offset) as u32,
+            r#type: request_type,
+            flags: flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16,
+            seq,
+            pid: 0,
+        };
         buf[header_offset..(header_offset + 16)].clone_from_slice(header.as_slice());
     }
 }
@@ -6843,72 +3157,109 @@ impl<'buf> Request<'buf> {
         self.flags |= consts::NLM_F_APPEND as u16;
         self
     }
+    #[doc = "Set `self.flags |= flags`"]
+    pub fn set_flags(mut self, flags: u16) -> Self {
+        self.flags |= flags;
+        self
+    }
+    #[doc = "Set `self.flags ^= self.flags & flags`"]
+    pub fn unset_flags(mut self, flags: u16) -> Self {
+        self.flags ^= self.flags & flags;
+        self
+    }
     #[doc = "Set `NLM_F_DUMP` flag"]
     fn set_dump(mut self) -> Self {
         self.flags |= consts::NLM_F_DUMP as u16;
         self
     }
-    pub fn op_newneigh_do_request(self, header: &PushNdmsg) -> RequestOpNewneighDoRequest<'buf> {
-        let mut res = RequestOpNewneighDoRequest::new(self, header);
+    #[doc = "Add new neighbour entry\nRequest attributes:\n- [.push_dst()](PushNeighbourAttrs::push_dst)\n- [.push_lladdr()](PushNeighbourAttrs::push_lladdr)\n- [.push_probes()](PushNeighbourAttrs::push_probes)\n- [.push_vlan()](PushNeighbourAttrs::push_vlan)\n- [.push_port()](PushNeighbourAttrs::push_port)\n- [.push_vni()](PushNeighbourAttrs::push_vni)\n- [.push_ifindex()](PushNeighbourAttrs::push_ifindex)\n- [.push_master()](PushNeighbourAttrs::push_master)\n- [.push_protocol()](PushNeighbourAttrs::push_protocol)\n- [.push_nh_id()](PushNeighbourAttrs::push_nh_id)\n- [.push_fdb_ext_attrs()](PushNeighbourAttrs::push_fdb_ext_attrs)\n- [.push_flags_ext()](PushNeighbourAttrs::push_flags_ext)\n"]
+    pub fn op_newneigh_do(self, header: &Ndmsg) -> OpNewneighDo<'buf> {
+        let mut res = OpNewneighDo::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-newneigh-do", OpNewneighDo::lookup);
+        res
+    }
+    #[doc = "Remove an existing neighbour entry\nRequest attributes:\n- [.push_dst()](PushNeighbourAttrs::push_dst)\n- [.push_ifindex()](PushNeighbourAttrs::push_ifindex)\n"]
+    pub fn op_delneigh_do(self, header: &Ndmsg) -> OpDelneighDo<'buf> {
+        let mut res = OpDelneighDo::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-delneigh-do", OpDelneighDo::lookup);
+        res
+    }
+    #[doc = "Get or dump neighbour entries\nRequest attributes:\n- [.push_ifindex()](PushNeighbourAttrs::push_ifindex)\n- [.push_master()](PushNeighbourAttrs::push_master)\n\nReply attributes:\n- [.get_dst()](IterableNeighbourAttrs::get_dst)\n- [.get_lladdr()](IterableNeighbourAttrs::get_lladdr)\n- [.get_probes()](IterableNeighbourAttrs::get_probes)\n- [.get_vlan()](IterableNeighbourAttrs::get_vlan)\n- [.get_port()](IterableNeighbourAttrs::get_port)\n- [.get_vni()](IterableNeighbourAttrs::get_vni)\n- [.get_ifindex()](IterableNeighbourAttrs::get_ifindex)\n- [.get_master()](IterableNeighbourAttrs::get_master)\n- [.get_protocol()](IterableNeighbourAttrs::get_protocol)\n- [.get_nh_id()](IterableNeighbourAttrs::get_nh_id)\n- [.get_fdb_ext_attrs()](IterableNeighbourAttrs::get_fdb_ext_attrs)\n- [.get_flags_ext()](IterableNeighbourAttrs::get_flags_ext)\n"]
+    pub fn op_getneigh_dump(self, header: &Ndmsg) -> OpGetneighDump<'buf> {
+        let mut res = OpGetneighDump::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-getneigh-dump", OpGetneighDump::lookup);
+        res
+    }
+    #[doc = "Get or dump neighbour entries\nRequest attributes:\n- [.push_dst()](PushNeighbourAttrs::push_dst)\n\nReply attributes:\n- [.get_dst()](IterableNeighbourAttrs::get_dst)\n- [.get_lladdr()](IterableNeighbourAttrs::get_lladdr)\n- [.get_probes()](IterableNeighbourAttrs::get_probes)\n- [.get_vlan()](IterableNeighbourAttrs::get_vlan)\n- [.get_port()](IterableNeighbourAttrs::get_port)\n- [.get_vni()](IterableNeighbourAttrs::get_vni)\n- [.get_ifindex()](IterableNeighbourAttrs::get_ifindex)\n- [.get_master()](IterableNeighbourAttrs::get_master)\n- [.get_protocol()](IterableNeighbourAttrs::get_protocol)\n- [.get_nh_id()](IterableNeighbourAttrs::get_nh_id)\n- [.get_fdb_ext_attrs()](IterableNeighbourAttrs::get_fdb_ext_attrs)\n- [.get_flags_ext()](IterableNeighbourAttrs::get_flags_ext)\n"]
+    pub fn op_getneigh_do(self, header: &Ndmsg) -> OpGetneighDo<'buf> {
+        let mut res = OpGetneighDo::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-getneigh-do", OpGetneighDo::lookup);
+        res
+    }
+    #[doc = "Get or dump neighbour tables\n\nReply attributes:\n- [.get_name()](IterableNdtAttrs::get_name)\n- [.get_thresh1()](IterableNdtAttrs::get_thresh1)\n- [.get_thresh2()](IterableNdtAttrs::get_thresh2)\n- [.get_thresh3()](IterableNdtAttrs::get_thresh3)\n- [.get_config()](IterableNdtAttrs::get_config)\n- [.get_parms()](IterableNdtAttrs::get_parms)\n- [.get_stats()](IterableNdtAttrs::get_stats)\n- [.get_gc_interval()](IterableNdtAttrs::get_gc_interval)\n"]
+    pub fn op_getneightbl_dump(self, header: &Ndtmsg) -> OpGetneightblDump<'buf> {
+        let mut res = OpGetneightblDump::new(self, header);
         res.request.do_writeback(
             res.protocol(),
-            "op-newneigh-do-request",
-            RequestOpNewneighDoRequest::lookup,
+            "op-getneightbl-dump",
+            OpGetneightblDump::lookup,
         );
         res
     }
-    pub fn op_delneigh_do_request(self, header: &PushNdmsg) -> RequestOpDelneighDoRequest<'buf> {
-        let mut res = RequestOpDelneighDoRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-delneigh-do-request",
-            RequestOpDelneighDoRequest::lookup,
-        );
+    #[doc = "Set neighbour tables\nRequest attributes:\n- [.push_name()](PushNdtAttrs::push_name)\n- [.push_thresh1()](PushNdtAttrs::push_thresh1)\n- [.push_thresh2()](PushNdtAttrs::push_thresh2)\n- [.push_thresh3()](PushNdtAttrs::push_thresh3)\n- [.nested_parms()](PushNdtAttrs::nested_parms)\n- [.push_gc_interval()](PushNdtAttrs::push_gc_interval)\n"]
+    pub fn op_setneightbl_do(self, header: &Ndtmsg) -> OpSetneightblDo<'buf> {
+        let mut res = OpSetneightblDo::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-setneightbl-do", OpSetneightblDo::lookup);
         res
     }
-    pub fn op_getneigh_dump_request(
-        self,
-        header: &PushNdmsg,
-    ) -> RequestOpGetneighDumpRequest<'buf> {
-        let mut res = RequestOpGetneighDumpRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-getneigh-dump-request",
-            RequestOpGetneighDumpRequest::lookup,
-        );
-        res
-    }
-    pub fn op_getneigh_do_request(self, header: &PushNdmsg) -> RequestOpGetneighDoRequest<'buf> {
-        let mut res = RequestOpGetneighDoRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-getneigh-do-request",
-            RequestOpGetneighDoRequest::lookup,
-        );
-        res
-    }
-    pub fn op_getneightbl_dump_request(
-        self,
-        header: &PushNdtmsg,
-    ) -> RequestOpGetneightblDumpRequest<'buf> {
-        let mut res = RequestOpGetneightblDumpRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-getneightbl-dump-request",
-            RequestOpGetneightblDumpRequest::lookup,
-        );
-        res
-    }
-    pub fn op_setneightbl_do_request(
-        self,
-        header: &PushNdtmsg,
-    ) -> RequestOpSetneightblDoRequest<'buf> {
-        let mut res = RequestOpSetneightblDoRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-setneightbl-do-request",
-            RequestOpSetneightblDoRequest::lookup,
-        );
-        res
+}
+#[cfg(test)]
+mod generated_tests {
+    use super::*;
+    #[test]
+    fn tests() {
+        let _ = IterableNdtAttrs::get_config;
+        let _ = IterableNdtAttrs::get_gc_interval;
+        let _ = IterableNdtAttrs::get_name;
+        let _ = IterableNdtAttrs::get_parms;
+        let _ = IterableNdtAttrs::get_stats;
+        let _ = IterableNdtAttrs::get_thresh1;
+        let _ = IterableNdtAttrs::get_thresh2;
+        let _ = IterableNdtAttrs::get_thresh3;
+        let _ = IterableNeighbourAttrs::get_dst;
+        let _ = IterableNeighbourAttrs::get_fdb_ext_attrs;
+        let _ = IterableNeighbourAttrs::get_flags_ext;
+        let _ = IterableNeighbourAttrs::get_ifindex;
+        let _ = IterableNeighbourAttrs::get_lladdr;
+        let _ = IterableNeighbourAttrs::get_master;
+        let _ = IterableNeighbourAttrs::get_nh_id;
+        let _ = IterableNeighbourAttrs::get_port;
+        let _ = IterableNeighbourAttrs::get_probes;
+        let _ = IterableNeighbourAttrs::get_protocol;
+        let _ = IterableNeighbourAttrs::get_vlan;
+        let _ = IterableNeighbourAttrs::get_vni;
+        let _ = PushNdtAttrs::<&mut Vec<u8>>::nested_parms;
+        let _ = PushNdtAttrs::<&mut Vec<u8>>::push_gc_interval;
+        let _ = PushNdtAttrs::<&mut Vec<u8>>::push_name;
+        let _ = PushNdtAttrs::<&mut Vec<u8>>::push_thresh1;
+        let _ = PushNdtAttrs::<&mut Vec<u8>>::push_thresh2;
+        let _ = PushNdtAttrs::<&mut Vec<u8>>::push_thresh3;
+        let _ = PushNeighbourAttrs::<&mut Vec<u8>>::push_dst;
+        let _ = PushNeighbourAttrs::<&mut Vec<u8>>::push_fdb_ext_attrs;
+        let _ = PushNeighbourAttrs::<&mut Vec<u8>>::push_flags_ext;
+        let _ = PushNeighbourAttrs::<&mut Vec<u8>>::push_ifindex;
+        let _ = PushNeighbourAttrs::<&mut Vec<u8>>::push_lladdr;
+        let _ = PushNeighbourAttrs::<&mut Vec<u8>>::push_master;
+        let _ = PushNeighbourAttrs::<&mut Vec<u8>>::push_nh_id;
+        let _ = PushNeighbourAttrs::<&mut Vec<u8>>::push_port;
+        let _ = PushNeighbourAttrs::<&mut Vec<u8>>::push_probes;
+        let _ = PushNeighbourAttrs::<&mut Vec<u8>>::push_protocol;
+        let _ = PushNeighbourAttrs::<&mut Vec<u8>>::push_vlan;
+        let _ = PushNeighbourAttrs::<&mut Vec<u8>>::push_vni;
     }
 }

@@ -7,13 +7,14 @@
 #![allow(irrefutable_let_patterns)]
 #![allow(unreachable_code)]
 #![allow(unreachable_patterns)]
-use crate::builtin::{PushBuiltinBitfield32, PushBuiltinNfgenmsg, PushDummy, PushNlmsghdr};
+use crate::builtin::{BuiltinBitfield32, BuiltinNfgenmsg, Nlmsghdr, PushDummy};
 use crate::{
     consts,
     traits::{NetlinkRequest, Protocol},
     utils::*,
 };
-pub const PROTONAME: &CStr = c"conntrack";
+pub const PROTONAME: &str = "conntrack";
+pub const PROTONAME_CSTR: &CStr = c"conntrack";
 pub const PROTONUM: u16 = 12u16;
 #[doc = "Flags - defines an integer enumeration, with values for each entry occupying a bit, starting from bit 0, (e.g. 1, 2, 4, 8)"]
 #[derive(Debug, Clone, Copy)]
@@ -153,6 +154,170 @@ impl NfCtStatus {
             n if n == 1 << 15 => Self::HwOffload,
             _ => return None,
         })
+    }
+}
+#[repr(C, packed(4))]
+pub struct Nfgenmsg {
+    pub nfgen_family: u8,
+    pub version: u8,
+    pub _res_id_be: u16,
+}
+impl Clone for Nfgenmsg {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for Nfgenmsg {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl Nfgenmsg {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 4usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 4usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 4usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 4usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<Nfgenmsg>() == 4usize);
+        4usize
+    }
+    pub fn res_id(&self) -> u16 {
+        u16::from_be(self._res_id_be)
+    }
+    pub fn set_res_id(&mut self, value: u16) {
+        self._res_id_be = value.to_be();
+    }
+}
+impl std::fmt::Debug for Nfgenmsg {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("Nfgenmsg")
+            .field("nfgen_family", &self.nfgen_family)
+            .field("version", &self.version)
+            .field("res_id", &self.res_id())
+            .finish()
+    }
+}
+#[repr(C, packed(4))]
+pub struct NfCtTcpFlagsMask {
+    #[doc = "Associated type: [`NfCtTcpFlags`] (1 bit per enumeration)"]
+    pub flags: u8,
+    #[doc = "Associated type: [`NfCtTcpFlags`] (1 bit per enumeration)"]
+    pub mask: u8,
+}
+impl Clone for NfCtTcpFlagsMask {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for NfCtTcpFlagsMask {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl NfCtTcpFlagsMask {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 2usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 2usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 2usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 2usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<NfCtTcpFlagsMask>() == 2usize);
+        2usize
+    }
+}
+impl std::fmt::Debug for NfCtTcpFlagsMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("NfCtTcpFlagsMask")
+            .field(
+                "flags",
+                &FormatFlags(self.flags.into(), NfCtTcpFlags::from_value),
+            )
+            .field(
+                "mask",
+                &FormatFlags(self.mask.into(), NfCtTcpFlags::from_value),
+            )
+            .finish()
     }
 }
 #[derive(Clone)]
@@ -359,7 +524,7 @@ impl IterableCounterAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("CounterAttrs", offset));
             return (
                 stack,
@@ -720,7 +885,7 @@ impl IterableTupleProtoAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("TupleProtoAttrs", offset));
             return (
                 stack,
@@ -988,7 +1153,7 @@ impl IterableTupleIpAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("TupleIpAttrs", offset));
             return (
                 stack,
@@ -1201,7 +1366,7 @@ impl IterableTupleAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("TupleAttrs", offset));
             return (
                 stack,
@@ -1247,17 +1412,17 @@ impl IterableTupleAttrs<'_> {
 }
 #[derive(Clone)]
 pub enum ProtoinfoTcpAttrs {
-    #[doc = "tcp connection state\nAssociated type: \"NfCtTcpState\" (enum)"]
+    #[doc = "tcp connection state\nAssociated type: [`NfCtTcpState`] (enum)"]
     TcpState(u8),
     #[doc = "window scaling factor in original direction"]
     TcpWscaleOriginal(u8),
     #[doc = "window scaling factor in reply direction"]
     TcpWscaleReply(u8),
-    TcpFlagsOriginal(PushNfCtTcpFlagsMask),
-    TcpFlagsReply(PushNfCtTcpFlagsMask),
+    TcpFlagsOriginal(NfCtTcpFlagsMask),
+    TcpFlagsReply(NfCtTcpFlagsMask),
 }
 impl<'a> IterableProtoinfoTcpAttrs<'a> {
-    #[doc = "tcp connection state\nAssociated type: \"NfCtTcpState\" (enum)"]
+    #[doc = "tcp connection state\nAssociated type: [`NfCtTcpState`] (enum)"]
     pub fn get_tcp_state(&self) -> Result<u8, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -1305,7 +1470,7 @@ impl<'a> IterableProtoinfoTcpAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_tcp_flags_original(&self) -> Result<PushNfCtTcpFlagsMask, ErrorContext> {
+    pub fn get_tcp_flags_original(&self) -> Result<NfCtTcpFlagsMask, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -1320,7 +1485,7 @@ impl<'a> IterableProtoinfoTcpAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_tcp_flags_reply(&self) -> Result<PushNfCtTcpFlagsMask, ErrorContext> {
+    pub fn get_tcp_flags_reply(&self) -> Result<NfCtTcpFlagsMask, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -1401,12 +1566,12 @@ impl<'a> Iterator for IterableProtoinfoTcpAttrs<'a> {
                     val
                 }),
                 4u16 => ProtoinfoTcpAttrs::TcpFlagsOriginal({
-                    let res = PushNfCtTcpFlagsMask::new_from_slice(next);
+                    let res = Some(NfCtTcpFlagsMask::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
                 5u16 => ProtoinfoTcpAttrs::TcpFlagsReply({
-                    let res = PushNfCtTcpFlagsMask::new_from_slice(next);
+                    let res = Some(NfCtTcpFlagsMask::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -1458,7 +1623,7 @@ impl IterableProtoinfoTcpAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("ProtoinfoTcpAttrs", offset));
             return (
                 stack,
@@ -1696,7 +1861,7 @@ impl IterableProtoinfoDccpAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("ProtoinfoDccpAttrs", offset));
             return (
                 stack,
@@ -1747,13 +1912,13 @@ impl IterableProtoinfoDccpAttrs<'_> {
 }
 #[derive(Clone)]
 pub enum ProtoinfoSctpAttrs {
-    #[doc = "sctp connection state\nAssociated type: \"NfCtSctpState\" (enum)"]
+    #[doc = "sctp connection state\nAssociated type: [`NfCtSctpState`] (enum)"]
     SctpState(u8),
     VtagOriginal(u32),
     VtagReply(u32),
 }
 impl<'a> IterableProtoinfoSctpAttrs<'a> {
-    #[doc = "sctp connection state\nAssociated type: \"NfCtSctpState\" (enum)"]
+    #[doc = "sctp connection state\nAssociated type: [`NfCtSctpState`] (enum)"]
     pub fn get_sctp_state(&self) -> Result<u8, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -1908,7 +2073,7 @@ impl IterableProtoinfoSctpAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("ProtoinfoSctpAttrs", offset));
             return (
                 stack,
@@ -2115,7 +2280,7 @@ impl IterableProtoinfoAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("ProtoinfoAttrs", offset));
             return (
                 stack,
@@ -2273,7 +2438,7 @@ impl IterableHelpAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("HelpAttrs", offset));
             return (
                 stack,
@@ -2439,7 +2604,7 @@ impl IterableNatProtoAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("NatProtoAttrs", offset));
             return (
                 stack,
@@ -2680,7 +2845,7 @@ impl IterableNatAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("NatAttrs", offset));
             return (
                 stack,
@@ -2894,7 +3059,7 @@ impl IterableSeqadjAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("SeqadjAttrs", offset));
             return (
                 stack,
@@ -3049,7 +3214,7 @@ impl IterableSecctxAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("SecctxAttrs", offset));
             return (
                 stack,
@@ -3238,7 +3403,7 @@ impl IterableSynproxyAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("SynproxyAttrs", offset));
             return (
                 stack,
@@ -3283,11 +3448,11 @@ impl IterableSynproxyAttrs<'_> {
 }
 #[derive(Clone)]
 pub enum ConntrackAttrs<'a> {
-    #[doc = "conntrack l3+l4 protocol information, original direction"]
+    #[doc = "conntrack l3\\+l4 protocol information, original direction"]
     TupleOrig(IterableTupleAttrs<'a>),
-    #[doc = "conntrack l3+l4 protocol information, reply direction"]
+    #[doc = "conntrack l3\\+l4 protocol information, reply direction"]
     TupleReply(IterableTupleAttrs<'a>),
-    #[doc = "conntrack flag bits\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
+    #[doc = "conntrack flag bits\nAssociated type: [`NfCtStatus`] (1 bit per enumeration)"]
     Status(u32),
     Protoinfo(IterableProtoinfoAttrs<'a>),
     Help(IterableHelpAttrs<'a>),
@@ -3313,12 +3478,12 @@ pub enum ConntrackAttrs<'a> {
     LabelsMask(&'a [u8]),
     Synproxy(IterableSynproxyAttrs<'a>),
     Filter(IterableTupleAttrs<'a>),
-    #[doc = "conntrack flag bits to change\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
+    #[doc = "conntrack flag bits to change\nAssociated type: [`NfCtStatus`] (1 bit per enumeration)"]
     StatusMask(u32),
     TimestampEvent(u64),
 }
 impl<'a> IterableConntrackAttrs<'a> {
-    #[doc = "conntrack l3+l4 protocol information, original direction"]
+    #[doc = "conntrack l3\\+l4 protocol information, original direction"]
     pub fn get_tuple_orig(&self) -> Result<IterableTupleAttrs<'a>, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -3334,7 +3499,7 @@ impl<'a> IterableConntrackAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "conntrack l3+l4 protocol information, reply direction"]
+    #[doc = "conntrack l3\\+l4 protocol information, reply direction"]
     pub fn get_tuple_reply(&self) -> Result<IterableTupleAttrs<'a>, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -3350,7 +3515,7 @@ impl<'a> IterableConntrackAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "conntrack flag bits\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
+    #[doc = "conntrack flag bits\nAssociated type: [`NfCtStatus`] (1 bit per enumeration)"]
     pub fn get_status(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -3698,7 +3863,7 @@ impl<'a> IterableConntrackAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "conntrack flag bits to change\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
+    #[doc = "conntrack flag bits to change\nAssociated type: [`NfCtStatus`] (1 bit per enumeration)"]
     pub fn get_status_mask(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -4008,7 +4173,7 @@ impl IterableConntrackAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("ConntrackAttrs", offset));
             return (
                 stack,
@@ -4642,7 +4807,7 @@ impl IterableConntrackStatsAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("ConntrackStatsAttrs", offset));
             return (
                 stack,
@@ -5048,7 +5213,7 @@ impl<Prev: Rec> PushProtoinfoTcpAttrs<Prev> {
         }
         prev
     }
-    #[doc = "tcp connection state\nAssociated type: \"NfCtTcpState\" (enum)"]
+    #[doc = "tcp connection state\nAssociated type: [`NfCtTcpState`] (enum)"]
     pub fn push_tcp_state(mut self, value: u8) -> Self {
         push_header(self.as_rec_mut(), 1u16, 1 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -5066,12 +5231,12 @@ impl<Prev: Rec> PushProtoinfoTcpAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    pub fn push_tcp_flags_original(mut self, value: PushNfCtTcpFlagsMask) -> Self {
+    pub fn push_tcp_flags_original(mut self, value: NfCtTcpFlagsMask) -> Self {
         push_header(self.as_rec_mut(), 4u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
     }
-    pub fn push_tcp_flags_reply(mut self, value: PushNfCtTcpFlagsMask) -> Self {
+    pub fn push_tcp_flags_reply(mut self, value: NfCtTcpFlagsMask) -> Self {
         push_header(self.as_rec_mut(), 5u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -5169,7 +5334,7 @@ impl<Prev: Rec> PushProtoinfoSctpAttrs<Prev> {
         }
         prev
     }
-    #[doc = "sctp connection state\nAssociated type: \"NfCtSctpState\" (enum)"]
+    #[doc = "sctp connection state\nAssociated type: [`NfCtSctpState`] (enum)"]
     pub fn push_sctp_state(mut self, value: u8) -> Self {
         push_header(self.as_rec_mut(), 1u16, 1 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -5596,7 +5761,7 @@ impl<Prev: Rec> PushConntrackAttrs<Prev> {
         }
         prev
     }
-    #[doc = "conntrack l3+l4 protocol information, original direction"]
+    #[doc = "conntrack l3\\+l4 protocol information, original direction"]
     pub fn nested_tuple_orig(mut self) -> PushTupleAttrs<Self> {
         let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
         PushTupleAttrs {
@@ -5604,7 +5769,7 @@ impl<Prev: Rec> PushConntrackAttrs<Prev> {
             header_offset: Some(header_offset),
         }
     }
-    #[doc = "conntrack l3+l4 protocol information, reply direction"]
+    #[doc = "conntrack l3\\+l4 protocol information, reply direction"]
     pub fn nested_tuple_reply(mut self) -> PushTupleAttrs<Self> {
         let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
         PushTupleAttrs {
@@ -5612,7 +5777,7 @@ impl<Prev: Rec> PushConntrackAttrs<Prev> {
             header_offset: Some(header_offset),
         }
     }
-    #[doc = "conntrack flag bits\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
+    #[doc = "conntrack flag bits\nAssociated type: [`NfCtStatus`] (1 bit per enumeration)"]
     pub fn push_status(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 3u16, 4 as u16);
         self.as_rec_mut().extend(value.to_be_bytes());
@@ -5754,7 +5919,7 @@ impl<Prev: Rec> PushConntrackAttrs<Prev> {
             header_offset: Some(header_offset),
         }
     }
-    #[doc = "conntrack flag bits to change\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
+    #[doc = "conntrack flag bits to change\nAssociated type: [`NfCtStatus`] (1 bit per enumeration)"]
     pub fn push_status_mask(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 26u16, 4 as u16);
         self.as_rec_mut().extend(value.to_be_bytes());
@@ -5892,1331 +6057,43 @@ impl<Prev: Rec> Drop for PushConntrackStatsAttrs<Prev> {
         }
     }
 }
-#[derive(Clone)]
-pub struct PushNfgenmsg {
-    pub(crate) buf: [u8; 4usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushNfgenmsg {
-    fn default() -> Self {
-        Self { buf: [0u8; 4usize] }
-    }
-}
-impl PushNfgenmsg {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        4usize
-    }
-    pub fn nfgen_family(&self) -> u8 {
-        parse_u8(&self.buf[0usize..1usize]).unwrap()
-    }
-    pub fn set_nfgen_family(&mut self, value: u8) {
-        self.buf[0usize..1usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn version(&self) -> u8 {
-        parse_u8(&self.buf[1usize..2usize]).unwrap()
-    }
-    pub fn set_version(&mut self, value: u8) {
-        self.buf[1usize..2usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn res_id(&self) -> u16 {
-        parse_be_u16(&self.buf[2usize..4usize]).unwrap()
-    }
-    pub fn set_res_id(&mut self, value: u16) {
-        self.buf[2usize..4usize].copy_from_slice(&value.to_be_bytes())
-    }
-}
-impl std::fmt::Debug for PushNfgenmsg {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("Nfgenmsg")
-            .field("nfgen_family", &self.nfgen_family())
-            .field("version", &self.version())
-            .field("res_id", &self.res_id())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushNfCtTcpFlagsMask {
-    pub(crate) buf: [u8; 2usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushNfCtTcpFlagsMask {
-    fn default() -> Self {
-        Self { buf: [0u8; 2usize] }
-    }
-}
-impl PushNfCtTcpFlagsMask {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        2usize
-    }
-    #[doc = "Associated type: \"NfCtTcpFlags\" (1 bit per enumeration)"]
-    pub fn flags(&self) -> u8 {
-        parse_u8(&self.buf[0usize..1usize]).unwrap()
-    }
-    #[doc = "Associated type: \"NfCtTcpFlags\" (1 bit per enumeration)"]
-    pub fn set_flags(&mut self, value: u8) {
-        self.buf[0usize..1usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    #[doc = "Associated type: \"NfCtTcpFlags\" (1 bit per enumeration)"]
-    pub fn mask(&self) -> u8 {
-        parse_u8(&self.buf[1usize..2usize]).unwrap()
-    }
-    #[doc = "Associated type: \"NfCtTcpFlags\" (1 bit per enumeration)"]
-    pub fn set_mask(&mut self, value: u8) {
-        self.buf[1usize..2usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushNfCtTcpFlagsMask {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("NfCtTcpFlagsMask")
-            .field(
-                "flags",
-                &FormatFlags(self.flags().into(), NfCtTcpFlags::from_value),
-            )
-            .field(
-                "mask",
-                &FormatFlags(self.mask().into(), NfCtTcpFlags::from_value),
-            )
-            .finish()
-    }
-}
-#[doc = "get / dump entries"]
-pub struct PushOpGetDumpRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetDumpRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetDumpRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNfgenmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNfgenmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    #[doc = "conntrack flag bits\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
-    pub fn push_status(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 3u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_mark(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 8u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    #[doc = "conntrack zone id"]
-    pub fn push_zone(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 18u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn nested_filter(mut self) -> PushTupleAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 25u16);
-        PushTupleAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetDumpRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "get / dump entries"]
-#[derive(Clone)]
-pub enum OpGetDumpRequest<'a> {
-    #[doc = "conntrack flag bits\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
-    Status(u32),
-    Mark(u32),
-    #[doc = "conntrack zone id"]
-    Zone(u16),
-    Filter(IterableTupleAttrs<'a>),
-}
-impl<'a> IterableOpGetDumpRequest<'a> {
-    #[doc = "conntrack flag bits\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
-    pub fn get_status(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpRequest::Status(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpRequest",
-            "Status",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mark(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpRequest::Mark(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpRequest",
-            "Mark",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "conntrack zone id"]
-    pub fn get_zone(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpRequest::Zone(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpRequest",
-            "Zone",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_filter(&self) -> Result<IterableTupleAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpRequest::Filter(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpRequest",
-            "Filter",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetDumpRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNfgenmsg, IterableOpGetDumpRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNfgenmsg::len()));
-        (
-            PushNfgenmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetDumpRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        ConntrackAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetDumpRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetDumpRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetDumpRequest<'a> {
-    type Item = Result<OpGetDumpRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                3u16 => OpGetDumpRequest::Status({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetDumpRequest::Mark({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                18u16 => OpGetDumpRequest::Zone({
-                    let res = parse_be_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                25u16 => OpGetDumpRequest::Filter({
-                    let res = Some(IterableTupleAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetDumpRequest",
-            r#type.and_then(|t| OpGetDumpRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetDumpRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetDumpRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetDumpRequest::Status(val) => {
-                    fmt.field("Status", &FormatFlags(val.into(), NfCtStatus::from_value))
-                }
-                OpGetDumpRequest::Mark(val) => fmt.field("Mark", &val),
-                OpGetDumpRequest::Zone(val) => fmt.field("Zone", &val),
-                OpGetDumpRequest::Filter(val) => fmt.field("Filter", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetDumpRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNfgenmsg::len() {
-            stack.push(("OpGetDumpRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetDumpRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetDumpRequest::Status(val) => {
-                    if last_off == offset {
-                        stack.push(("Status", last_off));
-                        break;
-                    }
-                }
-                OpGetDumpRequest::Mark(val) => {
-                    if last_off == offset {
-                        stack.push(("Mark", last_off));
-                        break;
-                    }
-                }
-                OpGetDumpRequest::Zone(val) => {
-                    if last_off == offset {
-                        stack.push(("Zone", last_off));
-                        break;
-                    }
-                }
-                OpGetDumpRequest::Filter(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetDumpRequest", cur));
-        }
-        (stack, missing)
-    }
-}
-#[doc = "get / dump entries"]
-pub struct PushOpGetDumpReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetDumpReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetDumpReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNfgenmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNfgenmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    #[doc = "conntrack l3+l4 protocol information, original direction"]
-    pub fn nested_tuple_orig(mut self) -> PushTupleAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
-        PushTupleAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    #[doc = "conntrack l3+l4 protocol information, reply direction"]
-    pub fn nested_tuple_reply(mut self) -> PushTupleAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
-        PushTupleAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    #[doc = "conntrack flag bits\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
-    pub fn push_status(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 3u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn nested_protoinfo(mut self) -> PushProtoinfoAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 4u16);
-        PushProtoinfoAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_help(mut self) -> PushHelpAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 5u16);
-        PushHelpAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_nat_src(mut self) -> PushNatAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 6u16);
-        PushNatAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_timeout(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 7u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_mark(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 8u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn nested_counters_orig(mut self) -> PushCounterAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 9u16);
-        PushCounterAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_counters_reply(mut self) -> PushCounterAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 10u16);
-        PushCounterAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_use(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 11u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_id(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 12u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn nested_nat_dst(mut self) -> PushNatAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 13u16);
-        PushNatAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_tuple_master(mut self) -> PushTupleAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 14u16);
-        PushTupleAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_seq_adj_orig(mut self) -> PushSeqadjAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 15u16);
-        PushSeqadjAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_seq_adj_reply(mut self) -> PushSeqadjAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 16u16);
-        PushSeqadjAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    #[doc = "conntrack zone id"]
-    pub fn push_zone(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 18u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn nested_secctx(mut self) -> PushSecctxAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 19u16);
-        PushSecctxAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_labels(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 22u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn nested_synproxy(mut self) -> PushSynproxyAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 24u16);
-        PushSynproxyAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetDumpReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "get / dump entries"]
-#[derive(Clone)]
-pub enum OpGetDumpReply<'a> {
-    #[doc = "conntrack l3+l4 protocol information, original direction"]
-    TupleOrig(IterableTupleAttrs<'a>),
-    #[doc = "conntrack l3+l4 protocol information, reply direction"]
-    TupleReply(IterableTupleAttrs<'a>),
-    #[doc = "conntrack flag bits\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
-    Status(u32),
-    Protoinfo(IterableProtoinfoAttrs<'a>),
-    Help(IterableHelpAttrs<'a>),
-    NatSrc(IterableNatAttrs<'a>),
-    Timeout(u32),
-    Mark(u32),
-    CountersOrig(IterableCounterAttrs<'a>),
-    CountersReply(IterableCounterAttrs<'a>),
-    Use(u32),
-    Id(u32),
-    NatDst(IterableNatAttrs<'a>),
-    TupleMaster(IterableTupleAttrs<'a>),
-    SeqAdjOrig(IterableSeqadjAttrs<'a>),
-    SeqAdjReply(IterableSeqadjAttrs<'a>),
-    #[doc = "conntrack zone id"]
-    Zone(u16),
-    Secctx(IterableSecctxAttrs<'a>),
-    Labels(&'a [u8]),
-    Synproxy(IterableSynproxyAttrs<'a>),
-}
-impl<'a> IterableOpGetDumpReply<'a> {
-    #[doc = "conntrack l3+l4 protocol information, original direction"]
-    pub fn get_tuple_orig(&self) -> Result<IterableTupleAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::TupleOrig(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "TupleOrig",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "conntrack l3+l4 protocol information, reply direction"]
-    pub fn get_tuple_reply(&self) -> Result<IterableTupleAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::TupleReply(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "TupleReply",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "conntrack flag bits\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
-    pub fn get_status(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::Status(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "Status",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_protoinfo(&self) -> Result<IterableProtoinfoAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::Protoinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "Protoinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_help(&self) -> Result<IterableHelpAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::Help(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "Help",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_nat_src(&self) -> Result<IterableNatAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::NatSrc(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "NatSrc",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_timeout(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::Timeout(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "Timeout",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mark(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::Mark(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "Mark",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_counters_orig(&self) -> Result<IterableCounterAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::CountersOrig(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "CountersOrig",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_counters_reply(&self) -> Result<IterableCounterAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::CountersReply(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "CountersReply",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_use(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::Use(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "Use",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_id(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::Id(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "Id",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_nat_dst(&self) -> Result<IterableNatAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::NatDst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "NatDst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_tuple_master(&self) -> Result<IterableTupleAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::TupleMaster(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "TupleMaster",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_seq_adj_orig(&self) -> Result<IterableSeqadjAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::SeqAdjOrig(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "SeqAdjOrig",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_seq_adj_reply(&self) -> Result<IterableSeqadjAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::SeqAdjReply(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "SeqAdjReply",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "conntrack zone id"]
-    pub fn get_zone(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::Zone(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "Zone",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_secctx(&self) -> Result<IterableSecctxAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::Secctx(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "Secctx",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_labels(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::Labels(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "Labels",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_synproxy(&self) -> Result<IterableSynproxyAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDumpReply::Synproxy(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDumpReply",
-            "Synproxy",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetDumpReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNfgenmsg, IterableOpGetDumpReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNfgenmsg::len()));
-        (
-            PushNfgenmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetDumpReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        ConntrackAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetDumpReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetDumpReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetDumpReply<'a> {
-    type Item = Result<OpGetDumpReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetDumpReply::TupleOrig({
-                    let res = Some(IterableTupleAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetDumpReply::TupleReply({
-                    let res = Some(IterableTupleAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetDumpReply::Status({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetDumpReply::Protoinfo({
-                    let res = Some(IterableProtoinfoAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetDumpReply::Help({
-                    let res = Some(IterableHelpAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpGetDumpReply::NatSrc({
-                    let res = Some(IterableNatAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpGetDumpReply::Timeout({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetDumpReply::Mark({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpGetDumpReply::CountersOrig({
-                    let res = Some(IterableCounterAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                10u16 => OpGetDumpReply::CountersReply({
-                    let res = Some(IterableCounterAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                11u16 => OpGetDumpReply::Use({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                12u16 => OpGetDumpReply::Id({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                13u16 => OpGetDumpReply::NatDst({
-                    let res = Some(IterableNatAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                14u16 => OpGetDumpReply::TupleMaster({
-                    let res = Some(IterableTupleAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                15u16 => OpGetDumpReply::SeqAdjOrig({
-                    let res = Some(IterableSeqadjAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                16u16 => OpGetDumpReply::SeqAdjReply({
-                    let res = Some(IterableSeqadjAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                18u16 => OpGetDumpReply::Zone({
-                    let res = parse_be_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                19u16 => OpGetDumpReply::Secctx({
-                    let res = Some(IterableSecctxAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                22u16 => OpGetDumpReply::Labels({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                24u16 => OpGetDumpReply::Synproxy({
-                    let res = Some(IterableSynproxyAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetDumpReply",
-            r#type.and_then(|t| OpGetDumpReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetDumpReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetDumpReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetDumpReply::TupleOrig(val) => fmt.field("TupleOrig", &val),
-                OpGetDumpReply::TupleReply(val) => fmt.field("TupleReply", &val),
-                OpGetDumpReply::Status(val) => {
-                    fmt.field("Status", &FormatFlags(val.into(), NfCtStatus::from_value))
-                }
-                OpGetDumpReply::Protoinfo(val) => fmt.field("Protoinfo", &val),
-                OpGetDumpReply::Help(val) => fmt.field("Help", &val),
-                OpGetDumpReply::NatSrc(val) => fmt.field("NatSrc", &val),
-                OpGetDumpReply::Timeout(val) => fmt.field("Timeout", &val),
-                OpGetDumpReply::Mark(val) => fmt.field("Mark", &val),
-                OpGetDumpReply::CountersOrig(val) => fmt.field("CountersOrig", &val),
-                OpGetDumpReply::CountersReply(val) => fmt.field("CountersReply", &val),
-                OpGetDumpReply::Use(val) => fmt.field("Use", &val),
-                OpGetDumpReply::Id(val) => fmt.field("Id", &val),
-                OpGetDumpReply::NatDst(val) => fmt.field("NatDst", &val),
-                OpGetDumpReply::TupleMaster(val) => fmt.field("TupleMaster", &val),
-                OpGetDumpReply::SeqAdjOrig(val) => fmt.field("SeqAdjOrig", &val),
-                OpGetDumpReply::SeqAdjReply(val) => fmt.field("SeqAdjReply", &val),
-                OpGetDumpReply::Zone(val) => fmt.field("Zone", &val),
-                OpGetDumpReply::Secctx(val) => fmt.field("Secctx", &val),
-                OpGetDumpReply::Labels(val) => fmt.field("Labels", &val),
-                OpGetDumpReply::Synproxy(val) => fmt.field("Synproxy", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetDumpReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNfgenmsg::len() {
-            stack.push(("OpGetDumpReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetDumpReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetDumpReply::TupleOrig(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDumpReply::TupleReply(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDumpReply::Status(val) => {
-                    if last_off == offset {
-                        stack.push(("Status", last_off));
-                        break;
-                    }
-                }
-                OpGetDumpReply::Protoinfo(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDumpReply::Help(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDumpReply::NatSrc(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDumpReply::Timeout(val) => {
-                    if last_off == offset {
-                        stack.push(("Timeout", last_off));
-                        break;
-                    }
-                }
-                OpGetDumpReply::Mark(val) => {
-                    if last_off == offset {
-                        stack.push(("Mark", last_off));
-                        break;
-                    }
-                }
-                OpGetDumpReply::CountersOrig(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDumpReply::CountersReply(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDumpReply::Use(val) => {
-                    if last_off == offset {
-                        stack.push(("Use", last_off));
-                        break;
-                    }
-                }
-                OpGetDumpReply::Id(val) => {
-                    if last_off == offset {
-                        stack.push(("Id", last_off));
-                        break;
-                    }
-                }
-                OpGetDumpReply::NatDst(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDumpReply::TupleMaster(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDumpReply::SeqAdjOrig(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDumpReply::SeqAdjReply(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDumpReply::Zone(val) => {
-                    if last_off == offset {
-                        stack.push(("Zone", last_off));
-                        break;
-                    }
-                }
-                OpGetDumpReply::Secctx(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDumpReply::Labels(val) => {
-                    if last_off == offset {
-                        stack.push(("Labels", last_off));
-                        break;
-                    }
-                }
-                OpGetDumpReply::Synproxy(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetDumpReply", cur));
-        }
-        (stack, missing)
-    }
-}
+#[doc = "get / dump entries\nRequest attributes:\n- [.push_status()](PushConntrackAttrs::push_status)\n- [.push_mark()](PushConntrackAttrs::push_mark)\n- [.push_zone()](PushConntrackAttrs::push_zone)\n- [.nested_filter()](PushConntrackAttrs::nested_filter)\n\nReply attributes:\n- [.get_tuple_orig()](IterableConntrackAttrs::get_tuple_orig)\n- [.get_tuple_reply()](IterableConntrackAttrs::get_tuple_reply)\n- [.get_status()](IterableConntrackAttrs::get_status)\n- [.get_protoinfo()](IterableConntrackAttrs::get_protoinfo)\n- [.get_help()](IterableConntrackAttrs::get_help)\n- [.get_nat_src()](IterableConntrackAttrs::get_nat_src)\n- [.get_timeout()](IterableConntrackAttrs::get_timeout)\n- [.get_mark()](IterableConntrackAttrs::get_mark)\n- [.get_counters_orig()](IterableConntrackAttrs::get_counters_orig)\n- [.get_counters_reply()](IterableConntrackAttrs::get_counters_reply)\n- [.get_use()](IterableConntrackAttrs::get_use)\n- [.get_id()](IterableConntrackAttrs::get_id)\n- [.get_nat_dst()](IterableConntrackAttrs::get_nat_dst)\n- [.get_tuple_master()](IterableConntrackAttrs::get_tuple_master)\n- [.get_seq_adj_orig()](IterableConntrackAttrs::get_seq_adj_orig)\n- [.get_seq_adj_reply()](IterableConntrackAttrs::get_seq_adj_reply)\n- [.get_zone()](IterableConntrackAttrs::get_zone)\n- [.get_secctx()](IterableConntrackAttrs::get_secctx)\n- [.get_labels()](IterableConntrackAttrs::get_labels)\n- [.get_synproxy()](IterableConntrackAttrs::get_synproxy)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetDumpRequest<'r> {
+pub struct OpGetDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetDumpRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushNfgenmsg) -> Self {
-        PushOpGetDumpRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpGetDump<'r> {
+    pub fn new(mut request: Request<'r>, header: &Nfgenmsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self {
             request: request.set_dump(),
         }
     }
-    pub fn encode(&mut self) -> PushOpGetDumpRequest<&mut Vec<u8>> {
-        PushOpGetDumpRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Nfgenmsg,
+    ) -> PushConntrackAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushConntrackAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetDumpRequest<RequestBuf<'r>> {
-        PushOpGetDumpRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushConntrackAttrs<&mut Vec<u8>> {
+        PushConntrackAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushNfgenmsg, IterableOpGetDumpRequest<'buf>) {
-        OpGetDumpRequest::new(buf)
+    pub fn into_encoder(self) -> PushConntrackAttrs<RequestBuf<'r>> {
+        PushConntrackAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Nfgenmsg, IterableConntrackAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Nfgenmsg::len()));
+        (
+            Nfgenmsg::new_from_slice(header).unwrap_or_default(),
+            IterableConntrackAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Nfgenmsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetDumpRequest<'_> {
+impl NetlinkRequest for OpGetDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 12u16,
@@ -7229,1174 +6106,55 @@ impl NetlinkRequest for RequestOpGetDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushNfgenmsg, IterableOpGetDumpReply<'buf>);
+    type ReplyType<'buf> = (Nfgenmsg, IterableConntrackAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetDumpReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetDumpRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "get / dump entries"]
-pub struct PushOpGetDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetDoRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNfgenmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNfgenmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    #[doc = "conntrack l3+l4 protocol information, original direction"]
-    pub fn nested_tuple_orig(mut self) -> PushTupleAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
-        PushTupleAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    #[doc = "conntrack l3+l4 protocol information, reply direction"]
-    pub fn nested_tuple_reply(mut self) -> PushTupleAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
-        PushTupleAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    #[doc = "conntrack zone id"]
-    pub fn push_zone(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 18u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "get / dump entries"]
-#[derive(Clone)]
-pub enum OpGetDoRequest<'a> {
-    #[doc = "conntrack l3+l4 protocol information, original direction"]
-    TupleOrig(IterableTupleAttrs<'a>),
-    #[doc = "conntrack l3+l4 protocol information, reply direction"]
-    TupleReply(IterableTupleAttrs<'a>),
-    #[doc = "conntrack zone id"]
-    Zone(u16),
-}
-impl<'a> IterableOpGetDoRequest<'a> {
-    #[doc = "conntrack l3+l4 protocol information, original direction"]
-    pub fn get_tuple_orig(&self) -> Result<IterableTupleAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoRequest::TupleOrig(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoRequest",
-            "TupleOrig",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "conntrack l3+l4 protocol information, reply direction"]
-    pub fn get_tuple_reply(&self) -> Result<IterableTupleAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoRequest::TupleReply(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoRequest",
-            "TupleReply",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "conntrack zone id"]
-    pub fn get_zone(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoRequest::Zone(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoRequest",
-            "Zone",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNfgenmsg, IterableOpGetDoRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNfgenmsg::len()));
-        (
-            PushNfgenmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetDoRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        ConntrackAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetDoRequest<'a> {
-    type Item = Result<OpGetDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetDoRequest::TupleOrig({
-                    let res = Some(IterableTupleAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetDoRequest::TupleReply({
-                    let res = Some(IterableTupleAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                18u16 => OpGetDoRequest::Zone({
-                    let res = parse_be_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetDoRequest",
-            r#type.and_then(|t| OpGetDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetDoRequest::TupleOrig(val) => fmt.field("TupleOrig", &val),
-                OpGetDoRequest::TupleReply(val) => fmt.field("TupleReply", &val),
-                OpGetDoRequest::Zone(val) => fmt.field("Zone", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNfgenmsg::len() {
-            stack.push(("OpGetDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetDoRequest::TupleOrig(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoRequest::TupleReply(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoRequest::Zone(val) => {
-                    if last_off == offset {
-                        stack.push(("Zone", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetDoRequest", cur));
-        }
-        (stack, missing)
-    }
-}
-#[doc = "get / dump entries"]
-pub struct PushOpGetDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetDoReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNfgenmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNfgenmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    #[doc = "conntrack l3+l4 protocol information, original direction"]
-    pub fn nested_tuple_orig(mut self) -> PushTupleAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 1u16);
-        PushTupleAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    #[doc = "conntrack l3+l4 protocol information, reply direction"]
-    pub fn nested_tuple_reply(mut self) -> PushTupleAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 2u16);
-        PushTupleAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    #[doc = "conntrack flag bits\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
-    pub fn push_status(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 3u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn nested_protoinfo(mut self) -> PushProtoinfoAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 4u16);
-        PushProtoinfoAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_help(mut self) -> PushHelpAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 5u16);
-        PushHelpAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_nat_src(mut self) -> PushNatAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 6u16);
-        PushNatAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_timeout(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 7u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_mark(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 8u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn nested_counters_orig(mut self) -> PushCounterAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 9u16);
-        PushCounterAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_counters_reply(mut self) -> PushCounterAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 10u16);
-        PushCounterAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_use(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 11u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_id(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 12u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn nested_nat_dst(mut self) -> PushNatAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 13u16);
-        PushNatAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_tuple_master(mut self) -> PushTupleAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 14u16);
-        PushTupleAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_seq_adj_orig(mut self) -> PushSeqadjAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 15u16);
-        PushSeqadjAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_seq_adj_reply(mut self) -> PushSeqadjAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 16u16);
-        PushSeqadjAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    #[doc = "conntrack zone id"]
-    pub fn push_zone(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 18u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn nested_secctx(mut self) -> PushSecctxAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 19u16);
-        PushSecctxAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_labels(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 22u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn nested_synproxy(mut self) -> PushSynproxyAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 24u16);
-        PushSynproxyAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "get / dump entries"]
-#[derive(Clone)]
-pub enum OpGetDoReply<'a> {
-    #[doc = "conntrack l3+l4 protocol information, original direction"]
-    TupleOrig(IterableTupleAttrs<'a>),
-    #[doc = "conntrack l3+l4 protocol information, reply direction"]
-    TupleReply(IterableTupleAttrs<'a>),
-    #[doc = "conntrack flag bits\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
-    Status(u32),
-    Protoinfo(IterableProtoinfoAttrs<'a>),
-    Help(IterableHelpAttrs<'a>),
-    NatSrc(IterableNatAttrs<'a>),
-    Timeout(u32),
-    Mark(u32),
-    CountersOrig(IterableCounterAttrs<'a>),
-    CountersReply(IterableCounterAttrs<'a>),
-    Use(u32),
-    Id(u32),
-    NatDst(IterableNatAttrs<'a>),
-    TupleMaster(IterableTupleAttrs<'a>),
-    SeqAdjOrig(IterableSeqadjAttrs<'a>),
-    SeqAdjReply(IterableSeqadjAttrs<'a>),
-    #[doc = "conntrack zone id"]
-    Zone(u16),
-    Secctx(IterableSecctxAttrs<'a>),
-    Labels(&'a [u8]),
-    Synproxy(IterableSynproxyAttrs<'a>),
-}
-impl<'a> IterableOpGetDoReply<'a> {
-    #[doc = "conntrack l3+l4 protocol information, original direction"]
-    pub fn get_tuple_orig(&self) -> Result<IterableTupleAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::TupleOrig(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "TupleOrig",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "conntrack l3+l4 protocol information, reply direction"]
-    pub fn get_tuple_reply(&self) -> Result<IterableTupleAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::TupleReply(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "TupleReply",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "conntrack flag bits\nAssociated type: \"NfCtStatus\" (1 bit per enumeration)"]
-    pub fn get_status(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::Status(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "Status",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_protoinfo(&self) -> Result<IterableProtoinfoAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::Protoinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "Protoinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_help(&self) -> Result<IterableHelpAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::Help(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "Help",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_nat_src(&self) -> Result<IterableNatAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::NatSrc(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "NatSrc",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_timeout(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::Timeout(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "Timeout",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mark(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::Mark(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "Mark",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_counters_orig(&self) -> Result<IterableCounterAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::CountersOrig(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "CountersOrig",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_counters_reply(&self) -> Result<IterableCounterAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::CountersReply(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "CountersReply",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_use(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::Use(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "Use",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_id(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::Id(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "Id",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_nat_dst(&self) -> Result<IterableNatAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::NatDst(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "NatDst",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_tuple_master(&self) -> Result<IterableTupleAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::TupleMaster(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "TupleMaster",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_seq_adj_orig(&self) -> Result<IterableSeqadjAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::SeqAdjOrig(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "SeqAdjOrig",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_seq_adj_reply(&self) -> Result<IterableSeqadjAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::SeqAdjReply(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "SeqAdjReply",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "conntrack zone id"]
-    pub fn get_zone(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::Zone(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "Zone",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_secctx(&self) -> Result<IterableSecctxAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::Secctx(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "Secctx",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_labels(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::Labels(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "Labels",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_synproxy(&self) -> Result<IterableSynproxyAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetDoReply::Synproxy(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetDoReply",
-            "Synproxy",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetDoReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNfgenmsg, IterableOpGetDoReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNfgenmsg::len()));
-        (
-            PushNfgenmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetDoReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        ConntrackAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetDoReply<'a> {
-    type Item = Result<OpGetDoReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetDoReply::TupleOrig({
-                    let res = Some(IterableTupleAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetDoReply::TupleReply({
-                    let res = Some(IterableTupleAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetDoReply::Status({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetDoReply::Protoinfo({
-                    let res = Some(IterableProtoinfoAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetDoReply::Help({
-                    let res = Some(IterableHelpAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpGetDoReply::NatSrc({
-                    let res = Some(IterableNatAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpGetDoReply::Timeout({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetDoReply::Mark({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpGetDoReply::CountersOrig({
-                    let res = Some(IterableCounterAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                10u16 => OpGetDoReply::CountersReply({
-                    let res = Some(IterableCounterAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                11u16 => OpGetDoReply::Use({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                12u16 => OpGetDoReply::Id({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                13u16 => OpGetDoReply::NatDst({
-                    let res = Some(IterableNatAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                14u16 => OpGetDoReply::TupleMaster({
-                    let res = Some(IterableTupleAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                15u16 => OpGetDoReply::SeqAdjOrig({
-                    let res = Some(IterableSeqadjAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                16u16 => OpGetDoReply::SeqAdjReply({
-                    let res = Some(IterableSeqadjAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                18u16 => OpGetDoReply::Zone({
-                    let res = parse_be_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                19u16 => OpGetDoReply::Secctx({
-                    let res = Some(IterableSecctxAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                22u16 => OpGetDoReply::Labels({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                24u16 => OpGetDoReply::Synproxy({
-                    let res = Some(IterableSynproxyAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetDoReply",
-            r#type.and_then(|t| OpGetDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetDoReply::TupleOrig(val) => fmt.field("TupleOrig", &val),
-                OpGetDoReply::TupleReply(val) => fmt.field("TupleReply", &val),
-                OpGetDoReply::Status(val) => {
-                    fmt.field("Status", &FormatFlags(val.into(), NfCtStatus::from_value))
-                }
-                OpGetDoReply::Protoinfo(val) => fmt.field("Protoinfo", &val),
-                OpGetDoReply::Help(val) => fmt.field("Help", &val),
-                OpGetDoReply::NatSrc(val) => fmt.field("NatSrc", &val),
-                OpGetDoReply::Timeout(val) => fmt.field("Timeout", &val),
-                OpGetDoReply::Mark(val) => fmt.field("Mark", &val),
-                OpGetDoReply::CountersOrig(val) => fmt.field("CountersOrig", &val),
-                OpGetDoReply::CountersReply(val) => fmt.field("CountersReply", &val),
-                OpGetDoReply::Use(val) => fmt.field("Use", &val),
-                OpGetDoReply::Id(val) => fmt.field("Id", &val),
-                OpGetDoReply::NatDst(val) => fmt.field("NatDst", &val),
-                OpGetDoReply::TupleMaster(val) => fmt.field("TupleMaster", &val),
-                OpGetDoReply::SeqAdjOrig(val) => fmt.field("SeqAdjOrig", &val),
-                OpGetDoReply::SeqAdjReply(val) => fmt.field("SeqAdjReply", &val),
-                OpGetDoReply::Zone(val) => fmt.field("Zone", &val),
-                OpGetDoReply::Secctx(val) => fmt.field("Secctx", &val),
-                OpGetDoReply::Labels(val) => fmt.field("Labels", &val),
-                OpGetDoReply::Synproxy(val) => fmt.field("Synproxy", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNfgenmsg::len() {
-            stack.push(("OpGetDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetDoReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetDoReply::TupleOrig(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoReply::TupleReply(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoReply::Status(val) => {
-                    if last_off == offset {
-                        stack.push(("Status", last_off));
-                        break;
-                    }
-                }
-                OpGetDoReply::Protoinfo(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoReply::Help(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoReply::NatSrc(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoReply::Timeout(val) => {
-                    if last_off == offset {
-                        stack.push(("Timeout", last_off));
-                        break;
-                    }
-                }
-                OpGetDoReply::Mark(val) => {
-                    if last_off == offset {
-                        stack.push(("Mark", last_off));
-                        break;
-                    }
-                }
-                OpGetDoReply::CountersOrig(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoReply::CountersReply(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoReply::Use(val) => {
-                    if last_off == offset {
-                        stack.push(("Use", last_off));
-                        break;
-                    }
-                }
-                OpGetDoReply::Id(val) => {
-                    if last_off == offset {
-                        stack.push(("Id", last_off));
-                        break;
-                    }
-                }
-                OpGetDoReply::NatDst(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoReply::TupleMaster(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoReply::SeqAdjOrig(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoReply::SeqAdjReply(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoReply::Zone(val) => {
-                    if last_off == offset {
-                        stack.push(("Zone", last_off));
-                        break;
-                    }
-                }
-                OpGetDoReply::Secctx(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetDoReply::Labels(val) => {
-                    if last_off == offset {
-                        stack.push(("Labels", last_off));
-                        break;
-                    }
-                }
-                OpGetDoReply::Synproxy(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetDoReply", cur));
-        }
-        (stack, missing)
-    }
-}
+#[doc = "get / dump entries\nRequest attributes:\n- [.nested_tuple_orig()](PushConntrackAttrs::nested_tuple_orig)\n- [.nested_tuple_reply()](PushConntrackAttrs::nested_tuple_reply)\n- [.push_zone()](PushConntrackAttrs::push_zone)\n\nReply attributes:\n- [.get_tuple_orig()](IterableConntrackAttrs::get_tuple_orig)\n- [.get_tuple_reply()](IterableConntrackAttrs::get_tuple_reply)\n- [.get_status()](IterableConntrackAttrs::get_status)\n- [.get_protoinfo()](IterableConntrackAttrs::get_protoinfo)\n- [.get_help()](IterableConntrackAttrs::get_help)\n- [.get_nat_src()](IterableConntrackAttrs::get_nat_src)\n- [.get_timeout()](IterableConntrackAttrs::get_timeout)\n- [.get_mark()](IterableConntrackAttrs::get_mark)\n- [.get_counters_orig()](IterableConntrackAttrs::get_counters_orig)\n- [.get_counters_reply()](IterableConntrackAttrs::get_counters_reply)\n- [.get_use()](IterableConntrackAttrs::get_use)\n- [.get_id()](IterableConntrackAttrs::get_id)\n- [.get_nat_dst()](IterableConntrackAttrs::get_nat_dst)\n- [.get_tuple_master()](IterableConntrackAttrs::get_tuple_master)\n- [.get_seq_adj_orig()](IterableConntrackAttrs::get_seq_adj_orig)\n- [.get_seq_adj_reply()](IterableConntrackAttrs::get_seq_adj_reply)\n- [.get_zone()](IterableConntrackAttrs::get_zone)\n- [.get_secctx()](IterableConntrackAttrs::get_secctx)\n- [.get_labels()](IterableConntrackAttrs::get_labels)\n- [.get_synproxy()](IterableConntrackAttrs::get_synproxy)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetDoRequest<'r> {
+pub struct OpGetDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetDoRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushNfgenmsg) -> Self {
-        PushOpGetDoRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpGetDo<'r> {
+    pub fn new(mut request: Request<'r>, header: &Nfgenmsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpGetDoRequest<&mut Vec<u8>> {
-        PushOpGetDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Nfgenmsg,
+    ) -> PushConntrackAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushConntrackAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetDoRequest<RequestBuf<'r>> {
-        PushOpGetDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushConntrackAttrs<&mut Vec<u8>> {
+        PushConntrackAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(buf: &'buf [u8]) -> (PushNfgenmsg, IterableOpGetDoRequest<'buf>) {
-        OpGetDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushConntrackAttrs<RequestBuf<'r>> {
+        PushConntrackAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Nfgenmsg, IterableConntrackAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Nfgenmsg::len()));
+        (
+            Nfgenmsg::new_from_slice(header).unwrap_or_default(),
+            IterableConntrackAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Nfgenmsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetDoRequest<'_> {
+impl NetlinkRequest for OpGetDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 12u16,
@@ -8409,677 +6167,57 @@ impl NetlinkRequest for RequestOpGetDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushNfgenmsg, IterableOpGetDoReply<'buf>);
+    type ReplyType<'buf> = (Nfgenmsg, IterableConntrackAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetDoRequest::new(buf).1.lookup_attr(offset, missing_type)
+        Self::decode_request(buf)
+            .1
+            .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "dump pcpu conntrack stats"]
-pub struct PushOpGetStatsDumpRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetStatsDumpRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetStatsDumpRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNfgenmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNfgenmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetStatsDumpRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "dump pcpu conntrack stats"]
-#[derive(Clone)]
-pub enum OpGetStatsDumpRequest {}
-impl<'a> IterableOpGetStatsDumpRequest<'a> {}
-impl OpGetStatsDumpRequest {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNfgenmsg, IterableOpGetStatsDumpRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNfgenmsg::len()));
-        (
-            PushNfgenmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetStatsDumpRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        ConntrackStatsAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetStatsDumpRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetStatsDumpRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetStatsDumpRequest<'a> {
-    type Item = Result<OpGetStatsDumpRequest, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetStatsDumpRequest",
-            r#type.and_then(|t| OpGetStatsDumpRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpGetStatsDumpRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetStatsDumpRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetStatsDumpRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNfgenmsg::len() {
-            stack.push(("OpGetStatsDumpRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetStatsDumpRequest::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
-#[doc = "dump pcpu conntrack stats"]
-pub struct PushOpGetStatsDumpReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetStatsDumpReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetStatsDumpReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushNfgenmsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushNfgenmsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    #[doc = "obsolete"]
-    pub fn push_searched(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 1u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_found(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 2u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_insert(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 8u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_insert_failed(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 9u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_drop(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 10u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_early_drop(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 11u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_error(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 12u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_search_restart(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 13u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_clash_resolve(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 14u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-    pub fn push_chain_toolong(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 15u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_be_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetStatsDumpReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "dump pcpu conntrack stats"]
-#[derive(Clone)]
-pub enum OpGetStatsDumpReply {
-    #[doc = "obsolete"]
-    Searched(u32),
-    Found(u32),
-    Insert(u32),
-    InsertFailed(u32),
-    Drop(u32),
-    EarlyDrop(u32),
-    Error(u32),
-    SearchRestart(u32),
-    ClashResolve(u32),
-    ChainToolong(u32),
-}
-impl<'a> IterableOpGetStatsDumpReply<'a> {
-    #[doc = "obsolete"]
-    pub fn get_searched(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetStatsDumpReply::Searched(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetStatsDumpReply",
-            "Searched",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_found(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetStatsDumpReply::Found(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetStatsDumpReply",
-            "Found",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_insert(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetStatsDumpReply::Insert(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetStatsDumpReply",
-            "Insert",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_insert_failed(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetStatsDumpReply::InsertFailed(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetStatsDumpReply",
-            "InsertFailed",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_drop(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetStatsDumpReply::Drop(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetStatsDumpReply",
-            "Drop",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_early_drop(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetStatsDumpReply::EarlyDrop(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetStatsDumpReply",
-            "EarlyDrop",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_error(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetStatsDumpReply::Error(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetStatsDumpReply",
-            "Error",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_search_restart(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetStatsDumpReply::SearchRestart(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetStatsDumpReply",
-            "SearchRestart",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_clash_resolve(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetStatsDumpReply::ClashResolve(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetStatsDumpReply",
-            "ClashResolve",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_chain_toolong(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetStatsDumpReply::ChainToolong(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetStatsDumpReply",
-            "ChainToolong",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetStatsDumpReply {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushNfgenmsg, IterableOpGetStatsDumpReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushNfgenmsg::len()));
-        (
-            PushNfgenmsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetStatsDumpReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        ConntrackStatsAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetStatsDumpReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetStatsDumpReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetStatsDumpReply<'a> {
-    type Item = Result<OpGetStatsDumpReply, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetStatsDumpReply::Searched({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetStatsDumpReply::Found({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetStatsDumpReply::Insert({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpGetStatsDumpReply::InsertFailed({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                10u16 => OpGetStatsDumpReply::Drop({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                11u16 => OpGetStatsDumpReply::EarlyDrop({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                12u16 => OpGetStatsDumpReply::Error({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                13u16 => OpGetStatsDumpReply::SearchRestart({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                14u16 => OpGetStatsDumpReply::ClashResolve({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                15u16 => OpGetStatsDumpReply::ChainToolong({
-                    let res = parse_be_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetStatsDumpReply",
-            r#type.and_then(|t| OpGetStatsDumpReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpGetStatsDumpReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetStatsDumpReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetStatsDumpReply::Searched(val) => fmt.field("Searched", &val),
-                OpGetStatsDumpReply::Found(val) => fmt.field("Found", &val),
-                OpGetStatsDumpReply::Insert(val) => fmt.field("Insert", &val),
-                OpGetStatsDumpReply::InsertFailed(val) => fmt.field("InsertFailed", &val),
-                OpGetStatsDumpReply::Drop(val) => fmt.field("Drop", &val),
-                OpGetStatsDumpReply::EarlyDrop(val) => fmt.field("EarlyDrop", &val),
-                OpGetStatsDumpReply::Error(val) => fmt.field("Error", &val),
-                OpGetStatsDumpReply::SearchRestart(val) => fmt.field("SearchRestart", &val),
-                OpGetStatsDumpReply::ClashResolve(val) => fmt.field("ClashResolve", &val),
-                OpGetStatsDumpReply::ChainToolong(val) => fmt.field("ChainToolong", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetStatsDumpReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushNfgenmsg::len() {
-            stack.push(("OpGetStatsDumpReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetStatsDumpReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetStatsDumpReply::Searched(val) => {
-                    if last_off == offset {
-                        stack.push(("Searched", last_off));
-                        break;
-                    }
-                }
-                OpGetStatsDumpReply::Found(val) => {
-                    if last_off == offset {
-                        stack.push(("Found", last_off));
-                        break;
-                    }
-                }
-                OpGetStatsDumpReply::Insert(val) => {
-                    if last_off == offset {
-                        stack.push(("Insert", last_off));
-                        break;
-                    }
-                }
-                OpGetStatsDumpReply::InsertFailed(val) => {
-                    if last_off == offset {
-                        stack.push(("InsertFailed", last_off));
-                        break;
-                    }
-                }
-                OpGetStatsDumpReply::Drop(val) => {
-                    if last_off == offset {
-                        stack.push(("Drop", last_off));
-                        break;
-                    }
-                }
-                OpGetStatsDumpReply::EarlyDrop(val) => {
-                    if last_off == offset {
-                        stack.push(("EarlyDrop", last_off));
-                        break;
-                    }
-                }
-                OpGetStatsDumpReply::Error(val) => {
-                    if last_off == offset {
-                        stack.push(("Error", last_off));
-                        break;
-                    }
-                }
-                OpGetStatsDumpReply::SearchRestart(val) => {
-                    if last_off == offset {
-                        stack.push(("SearchRestart", last_off));
-                        break;
-                    }
-                }
-                OpGetStatsDumpReply::ClashResolve(val) => {
-                    if last_off == offset {
-                        stack.push(("ClashResolve", last_off));
-                        break;
-                    }
-                }
-                OpGetStatsDumpReply::ChainToolong(val) => {
-                    if last_off == offset {
-                        stack.push(("ChainToolong", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetStatsDumpReply", cur));
-        }
-        (stack, None)
-    }
-}
+#[doc = "dump pcpu conntrack stats\n\nReply attributes:\n- [.get_searched()](IterableConntrackStatsAttrs::get_searched)\n- [.get_found()](IterableConntrackStatsAttrs::get_found)\n- [.get_insert()](IterableConntrackStatsAttrs::get_insert)\n- [.get_insert_failed()](IterableConntrackStatsAttrs::get_insert_failed)\n- [.get_drop()](IterableConntrackStatsAttrs::get_drop)\n- [.get_early_drop()](IterableConntrackStatsAttrs::get_early_drop)\n- [.get_error()](IterableConntrackStatsAttrs::get_error)\n- [.get_search_restart()](IterableConntrackStatsAttrs::get_search_restart)\n- [.get_clash_resolve()](IterableConntrackStatsAttrs::get_clash_resolve)\n- [.get_chain_toolong()](IterableConntrackStatsAttrs::get_chain_toolong)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetStatsDumpRequest<'r> {
+pub struct OpGetStatsDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetStatsDumpRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushNfgenmsg) -> Self {
-        PushOpGetStatsDumpRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpGetStatsDump<'r> {
+    pub fn new(mut request: Request<'r>, header: &Nfgenmsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self {
             request: request.set_dump(),
         }
     }
-    pub fn encode(&mut self) -> PushOpGetStatsDumpRequest<&mut Vec<u8>> {
-        PushOpGetStatsDumpRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Nfgenmsg,
+    ) -> PushConntrackStatsAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushConntrackStatsAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetStatsDumpRequest<RequestBuf<'r>> {
-        PushOpGetStatsDumpRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushConntrackStatsAttrs<&mut Vec<u8>> {
+        PushConntrackStatsAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(
-        buf: &'buf [u8],
-    ) -> (PushNfgenmsg, IterableOpGetStatsDumpRequest<'buf>) {
-        OpGetStatsDumpRequest::new(buf)
+    pub fn into_encoder(self) -> PushConntrackStatsAttrs<RequestBuf<'r>> {
+        PushConntrackStatsAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Nfgenmsg, IterableConntrackStatsAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Nfgenmsg::len()));
+        (
+            Nfgenmsg::new_from_slice(header).unwrap_or_default(),
+            IterableConntrackStatsAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Nfgenmsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetStatsDumpRequest<'_> {
+impl NetlinkRequest for OpGetStatsDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 12u16,
@@ -9092,16 +6230,16 @@ impl NetlinkRequest for RequestOpGetStatsDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushNfgenmsg, IterableOpGetStatsDumpReply<'buf>);
+    type ReplyType<'buf> = (Nfgenmsg, IterableConntrackStatsAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetStatsDumpReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetStatsDumpRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
@@ -9199,8 +6337,7 @@ impl<'a> Chained<'a> {
     pub fn request(&mut self) -> Request<'_> {
         self.update_header();
         self.last_header_offset = self.buf().len();
-        self.buf_mut()
-            .extend_from_slice(PushNlmsghdr::new().as_slice());
+        self.buf_mut().extend_from_slice(Nlmsghdr::new().as_slice());
         let mut request = Request::new_extend(self.buf.buf_mut());
         self.last_kind = None;
         request.writeback = Some(&mut self.last_kind);
@@ -9221,10 +6358,7 @@ impl<'a> Chained<'a> {
         }) = self.last_kind
         else {
             if !self.buf().is_empty() {
-                assert_eq!(
-                    self.last_header_offset + PushNlmsghdr::len(),
-                    self.buf().len()
-                );
+                assert_eq!(self.last_header_offset + Nlmsghdr::len(), self.buf().len());
                 self.buf.buf_mut().truncate(self.last_header_offset);
             }
             return;
@@ -9239,11 +6373,13 @@ impl<'a> Chained<'a> {
         self.lookups.push((name, lookup));
         let buf = self.buf_mut();
         align(buf);
-        let mut header = PushNlmsghdr::new();
-        header.set_len((buf.len() - header_offset) as u32);
-        header.set_type(request_type);
-        header.set_flags(flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16);
-        header.set_seq(seq);
+        let header = Nlmsghdr {
+            len: (buf.len() - header_offset) as u32,
+            r#type: request_type,
+            flags: flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16,
+            seq,
+            pid: 0,
+        };
         buf[header_offset..(header_offset + 16)].clone_from_slice(header.as_slice());
     }
 }
@@ -9334,39 +6470,83 @@ impl<'buf> Request<'buf> {
         self.flags |= consts::NLM_F_APPEND as u16;
         self
     }
+    #[doc = "Set `self.flags |= flags`"]
+    pub fn set_flags(mut self, flags: u16) -> Self {
+        self.flags |= flags;
+        self
+    }
+    #[doc = "Set `self.flags ^= self.flags & flags`"]
+    pub fn unset_flags(mut self, flags: u16) -> Self {
+        self.flags ^= self.flags & flags;
+        self
+    }
     #[doc = "Set `NLM_F_DUMP` flag"]
     fn set_dump(mut self) -> Self {
         self.flags |= consts::NLM_F_DUMP as u16;
         self
     }
-    pub fn op_get_dump_request(self, header: &PushNfgenmsg) -> RequestOpGetDumpRequest<'buf> {
-        let mut res = RequestOpGetDumpRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-get-dump-request",
-            RequestOpGetDumpRequest::lookup,
-        );
+    #[doc = "get / dump entries\nRequest attributes:\n- [.push_status()](PushConntrackAttrs::push_status)\n- [.push_mark()](PushConntrackAttrs::push_mark)\n- [.push_zone()](PushConntrackAttrs::push_zone)\n- [.nested_filter()](PushConntrackAttrs::nested_filter)\n\nReply attributes:\n- [.get_tuple_orig()](IterableConntrackAttrs::get_tuple_orig)\n- [.get_tuple_reply()](IterableConntrackAttrs::get_tuple_reply)\n- [.get_status()](IterableConntrackAttrs::get_status)\n- [.get_protoinfo()](IterableConntrackAttrs::get_protoinfo)\n- [.get_help()](IterableConntrackAttrs::get_help)\n- [.get_nat_src()](IterableConntrackAttrs::get_nat_src)\n- [.get_timeout()](IterableConntrackAttrs::get_timeout)\n- [.get_mark()](IterableConntrackAttrs::get_mark)\n- [.get_counters_orig()](IterableConntrackAttrs::get_counters_orig)\n- [.get_counters_reply()](IterableConntrackAttrs::get_counters_reply)\n- [.get_use()](IterableConntrackAttrs::get_use)\n- [.get_id()](IterableConntrackAttrs::get_id)\n- [.get_nat_dst()](IterableConntrackAttrs::get_nat_dst)\n- [.get_tuple_master()](IterableConntrackAttrs::get_tuple_master)\n- [.get_seq_adj_orig()](IterableConntrackAttrs::get_seq_adj_orig)\n- [.get_seq_adj_reply()](IterableConntrackAttrs::get_seq_adj_reply)\n- [.get_zone()](IterableConntrackAttrs::get_zone)\n- [.get_secctx()](IterableConntrackAttrs::get_secctx)\n- [.get_labels()](IterableConntrackAttrs::get_labels)\n- [.get_synproxy()](IterableConntrackAttrs::get_synproxy)\n"]
+    pub fn op_get_dump(self, header: &Nfgenmsg) -> OpGetDump<'buf> {
+        let mut res = OpGetDump::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-get-dump", OpGetDump::lookup);
         res
     }
-    pub fn op_get_do_request(self, header: &PushNfgenmsg) -> RequestOpGetDoRequest<'buf> {
-        let mut res = RequestOpGetDoRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-get-do-request",
-            RequestOpGetDoRequest::lookup,
-        );
+    #[doc = "get / dump entries\nRequest attributes:\n- [.nested_tuple_orig()](PushConntrackAttrs::nested_tuple_orig)\n- [.nested_tuple_reply()](PushConntrackAttrs::nested_tuple_reply)\n- [.push_zone()](PushConntrackAttrs::push_zone)\n\nReply attributes:\n- [.get_tuple_orig()](IterableConntrackAttrs::get_tuple_orig)\n- [.get_tuple_reply()](IterableConntrackAttrs::get_tuple_reply)\n- [.get_status()](IterableConntrackAttrs::get_status)\n- [.get_protoinfo()](IterableConntrackAttrs::get_protoinfo)\n- [.get_help()](IterableConntrackAttrs::get_help)\n- [.get_nat_src()](IterableConntrackAttrs::get_nat_src)\n- [.get_timeout()](IterableConntrackAttrs::get_timeout)\n- [.get_mark()](IterableConntrackAttrs::get_mark)\n- [.get_counters_orig()](IterableConntrackAttrs::get_counters_orig)\n- [.get_counters_reply()](IterableConntrackAttrs::get_counters_reply)\n- [.get_use()](IterableConntrackAttrs::get_use)\n- [.get_id()](IterableConntrackAttrs::get_id)\n- [.get_nat_dst()](IterableConntrackAttrs::get_nat_dst)\n- [.get_tuple_master()](IterableConntrackAttrs::get_tuple_master)\n- [.get_seq_adj_orig()](IterableConntrackAttrs::get_seq_adj_orig)\n- [.get_seq_adj_reply()](IterableConntrackAttrs::get_seq_adj_reply)\n- [.get_zone()](IterableConntrackAttrs::get_zone)\n- [.get_secctx()](IterableConntrackAttrs::get_secctx)\n- [.get_labels()](IterableConntrackAttrs::get_labels)\n- [.get_synproxy()](IterableConntrackAttrs::get_synproxy)\n"]
+    pub fn op_get_do(self, header: &Nfgenmsg) -> OpGetDo<'buf> {
+        let mut res = OpGetDo::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-get-do", OpGetDo::lookup);
         res
     }
-    pub fn op_get_stats_dump_request(
-        self,
-        header: &PushNfgenmsg,
-    ) -> RequestOpGetStatsDumpRequest<'buf> {
-        let mut res = RequestOpGetStatsDumpRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-get-stats-dump-request",
-            RequestOpGetStatsDumpRequest::lookup,
-        );
+    #[doc = "dump pcpu conntrack stats\n\nReply attributes:\n- [.get_searched()](IterableConntrackStatsAttrs::get_searched)\n- [.get_found()](IterableConntrackStatsAttrs::get_found)\n- [.get_insert()](IterableConntrackStatsAttrs::get_insert)\n- [.get_insert_failed()](IterableConntrackStatsAttrs::get_insert_failed)\n- [.get_drop()](IterableConntrackStatsAttrs::get_drop)\n- [.get_early_drop()](IterableConntrackStatsAttrs::get_early_drop)\n- [.get_error()](IterableConntrackStatsAttrs::get_error)\n- [.get_search_restart()](IterableConntrackStatsAttrs::get_search_restart)\n- [.get_clash_resolve()](IterableConntrackStatsAttrs::get_clash_resolve)\n- [.get_chain_toolong()](IterableConntrackStatsAttrs::get_chain_toolong)\n"]
+    pub fn op_get_stats_dump(self, header: &Nfgenmsg) -> OpGetStatsDump<'buf> {
+        let mut res = OpGetStatsDump::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-get-stats-dump", OpGetStatsDump::lookup);
         res
+    }
+}
+#[cfg(test)]
+mod generated_tests {
+    use super::*;
+    #[test]
+    fn tests() {
+        let _ = IterableConntrackAttrs::get_counters_orig;
+        let _ = IterableConntrackAttrs::get_counters_reply;
+        let _ = IterableConntrackAttrs::get_help;
+        let _ = IterableConntrackAttrs::get_id;
+        let _ = IterableConntrackAttrs::get_labels;
+        let _ = IterableConntrackAttrs::get_mark;
+        let _ = IterableConntrackAttrs::get_nat_dst;
+        let _ = IterableConntrackAttrs::get_nat_src;
+        let _ = IterableConntrackAttrs::get_protoinfo;
+        let _ = IterableConntrackAttrs::get_secctx;
+        let _ = IterableConntrackAttrs::get_seq_adj_orig;
+        let _ = IterableConntrackAttrs::get_seq_adj_reply;
+        let _ = IterableConntrackAttrs::get_status;
+        let _ = IterableConntrackAttrs::get_synproxy;
+        let _ = IterableConntrackAttrs::get_timeout;
+        let _ = IterableConntrackAttrs::get_tuple_master;
+        let _ = IterableConntrackAttrs::get_tuple_orig;
+        let _ = IterableConntrackAttrs::get_tuple_reply;
+        let _ = IterableConntrackAttrs::get_use;
+        let _ = IterableConntrackAttrs::get_zone;
+        let _ = IterableConntrackStatsAttrs::get_chain_toolong;
+        let _ = IterableConntrackStatsAttrs::get_clash_resolve;
+        let _ = IterableConntrackStatsAttrs::get_drop;
+        let _ = IterableConntrackStatsAttrs::get_early_drop;
+        let _ = IterableConntrackStatsAttrs::get_error;
+        let _ = IterableConntrackStatsAttrs::get_found;
+        let _ = IterableConntrackStatsAttrs::get_insert;
+        let _ = IterableConntrackStatsAttrs::get_insert_failed;
+        let _ = IterableConntrackStatsAttrs::get_search_restart;
+        let _ = IterableConntrackStatsAttrs::get_searched;
+        let _ = PushConntrackAttrs::<&mut Vec<u8>>::nested_filter;
+        let _ = PushConntrackAttrs::<&mut Vec<u8>>::nested_tuple_orig;
+        let _ = PushConntrackAttrs::<&mut Vec<u8>>::nested_tuple_reply;
+        let _ = PushConntrackAttrs::<&mut Vec<u8>>::push_mark;
+        let _ = PushConntrackAttrs::<&mut Vec<u8>>::push_status;
+        let _ = PushConntrackAttrs::<&mut Vec<u8>>::push_zone;
     }
 }

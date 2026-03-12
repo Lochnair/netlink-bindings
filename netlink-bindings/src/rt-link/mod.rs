@@ -1,4 +1,4 @@
-#![doc = "Link configuration over rtnetlink."]
+#![doc = "Link configuration over rtnetlink\\."]
 #![allow(clippy::all)]
 #![allow(unused_imports)]
 #![allow(unused_assignments)]
@@ -7,13 +7,14 @@
 #![allow(irrefutable_let_patterns)]
 #![allow(unreachable_code)]
 #![allow(unreachable_patterns)]
-use crate::builtin::{PushBuiltinBitfield32, PushBuiltinNfgenmsg, PushDummy, PushNlmsghdr};
+use crate::builtin::{BuiltinBitfield32, BuiltinNfgenmsg, Nlmsghdr, PushDummy};
 use crate::{
     consts,
     traits::{NetlinkRequest, Protocol},
     utils::*,
 };
-pub const PROTONAME: &CStr = c"rt-link";
+pub const PROTONAME: &str = "rt-link";
+pub const PROTONAME_CSTR: &CStr = c"rt-link";
 pub const PROTONUM: u16 = 0u16;
 #[doc = "Flags - defines an integer enumeration, with values for each entry occupying a bit, starting from bit 0, (e.g. 1, 2, 4, 8)"]
 #[derive(Debug, Clone, Copy)]
@@ -518,6 +519,1653 @@ impl OvpnMode {
         })
     }
 }
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct Rtgenmsg {
+    pub family: u8,
+}
+impl Clone for Rtgenmsg {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for Rtgenmsg {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl Rtgenmsg {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 1usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 1usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 1usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 1usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<Rtgenmsg>() == 1usize);
+        1usize
+    }
+}
+#[repr(C, packed(4))]
+pub struct Ifinfomsg {
+    pub ifi_family: u8,
+    pub _pad: [u8; 1usize],
+    pub ifi_type: u16,
+    pub ifi_index: i32,
+    #[doc = "Associated type: [`IfinfoFlags`] (1 bit per enumeration)"]
+    pub ifi_flags: u32,
+    pub ifi_change: u32,
+}
+impl Clone for Ifinfomsg {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for Ifinfomsg {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl Ifinfomsg {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 16usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 16usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<Ifinfomsg>() == 16usize);
+        16usize
+    }
+}
+impl std::fmt::Debug for Ifinfomsg {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("Ifinfomsg")
+            .field("ifi_family", &self.ifi_family)
+            .field("ifi_type", &self.ifi_type)
+            .field("ifi_index", &self.ifi_index)
+            .field(
+                "ifi_flags",
+                &FormatFlags(self.ifi_flags.into(), IfinfoFlags::from_value),
+            )
+            .field("ifi_change", &self.ifi_change)
+            .finish()
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct IflaBridgeId {
+    pub prio: u16,
+    pub addr: [u8; 6usize],
+}
+impl Clone for IflaBridgeId {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaBridgeId {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaBridgeId {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 8usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 8usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaBridgeId>() == 8usize);
+        8usize
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct IflaCacheinfo {
+    pub max_reasm_len: u32,
+    pub tstamp: u32,
+    pub reachable_time: i32,
+    pub retrans_time: u32,
+}
+impl Clone for IflaCacheinfo {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaCacheinfo {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaCacheinfo {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 16usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 16usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaCacheinfo>() == 16usize);
+        16usize
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct RtnlLinkStats {
+    pub rx_packets: u32,
+    pub tx_packets: u32,
+    pub rx_bytes: u32,
+    pub tx_bytes: u32,
+    pub rx_errors: u32,
+    pub tx_errors: u32,
+    pub rx_dropped: u32,
+    pub tx_dropped: u32,
+    pub multicast: u32,
+    pub collisions: u32,
+    pub rx_length_errors: u32,
+    pub rx_over_errors: u32,
+    pub rx_crc_errors: u32,
+    pub rx_frame_errors: u32,
+    pub rx_fifo_errors: u32,
+    pub rx_missed_errors: u32,
+    pub tx_aborted_errors: u32,
+    pub tx_carrier_errors: u32,
+    pub tx_fifo_errors: u32,
+    pub tx_heartbeat_errors: u32,
+    pub tx_window_errors: u32,
+    pub rx_compressed: u32,
+    pub tx_compressed: u32,
+    pub rx_nohandler: u32,
+}
+impl Clone for RtnlLinkStats {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for RtnlLinkStats {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl RtnlLinkStats {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 96usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 96usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 96usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 96usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<RtnlLinkStats>() == 96usize);
+        96usize
+    }
+}
+#[repr(C, packed(4))]
+pub struct RtnlLinkStats64 {
+    pub rx_packets: u64,
+    pub tx_packets: u64,
+    pub rx_bytes: u64,
+    pub tx_bytes: u64,
+    pub rx_errors: u64,
+    pub tx_errors: u64,
+    pub rx_dropped: u64,
+    pub tx_dropped: u64,
+    pub multicast: u64,
+    pub collisions: u64,
+    pub rx_length_errors: u64,
+    pub rx_over_errors: u64,
+    pub rx_crc_errors: u64,
+    pub rx_frame_errors: u64,
+    pub rx_fifo_errors: u64,
+    pub rx_missed_errors: u64,
+    pub tx_aborted_errors: u64,
+    pub tx_carrier_errors: u64,
+    pub tx_fifo_errors: u64,
+    pub tx_heartbeat_errors: u64,
+    pub tx_window_errors: u64,
+    pub rx_compressed: u64,
+    pub tx_compressed: u64,
+    pub rx_nohandler: u64,
+    pub rx_otherhost_dropped: u64,
+}
+impl Clone for RtnlLinkStats64 {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for RtnlLinkStats64 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl RtnlLinkStats64 {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 200usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 200usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 200usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 200usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<RtnlLinkStats64>() == 200usize);
+        200usize
+    }
+}
+impl std::fmt::Debug for RtnlLinkStats64 {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("RtnlLinkStats64")
+            .field("rx_packets", &{ self.rx_packets })
+            .field("tx_packets", &{ self.tx_packets })
+            .field("rx_bytes", &{ self.rx_bytes })
+            .field("tx_bytes", &{ self.tx_bytes })
+            .field("rx_errors", &{ self.rx_errors })
+            .field("tx_errors", &{ self.tx_errors })
+            .field("rx_dropped", &{ self.rx_dropped })
+            .field("tx_dropped", &{ self.tx_dropped })
+            .field("multicast", &{ self.multicast })
+            .field("collisions", &{ self.collisions })
+            .field("rx_length_errors", &{ self.rx_length_errors })
+            .field("rx_over_errors", &{ self.rx_over_errors })
+            .field("rx_crc_errors", &{ self.rx_crc_errors })
+            .field("rx_frame_errors", &{ self.rx_frame_errors })
+            .field("rx_fifo_errors", &{ self.rx_fifo_errors })
+            .field("rx_missed_errors", &{ self.rx_missed_errors })
+            .field("tx_aborted_errors", &{ self.tx_aborted_errors })
+            .field("tx_carrier_errors", &{ self.tx_carrier_errors })
+            .field("tx_fifo_errors", &{ self.tx_fifo_errors })
+            .field("tx_heartbeat_errors", &{ self.tx_heartbeat_errors })
+            .field("tx_window_errors", &{ self.tx_window_errors })
+            .field("rx_compressed", &{ self.rx_compressed })
+            .field("tx_compressed", &{ self.tx_compressed })
+            .field("rx_nohandler", &{ self.rx_nohandler })
+            .field("rx_otherhost_dropped", &{ self.rx_otherhost_dropped })
+            .finish()
+    }
+}
+#[repr(C, packed(4))]
+pub struct RtnlLinkIfmap {
+    pub mem_start: u64,
+    pub mem_end: u64,
+    pub base_addr: u64,
+    pub irq: u16,
+    pub dma: u8,
+    pub port: u8,
+    pub _pad_28: [u8; 4usize],
+}
+impl Clone for RtnlLinkIfmap {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for RtnlLinkIfmap {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl RtnlLinkIfmap {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 32usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 32usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 32usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 32usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<RtnlLinkIfmap>() == 32usize);
+        32usize
+    }
+}
+impl std::fmt::Debug for RtnlLinkIfmap {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("RtnlLinkIfmap")
+            .field("mem_start", &{ self.mem_start })
+            .field("mem_end", &{ self.mem_end })
+            .field("base_addr", &{ self.base_addr })
+            .field("irq", &self.irq)
+            .field("dma", &self.dma)
+            .field("port", &self.port)
+            .finish()
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct BrBooloptMulti {
+    pub optval: u32,
+    pub optmask: u32,
+}
+impl Clone for BrBooloptMulti {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for BrBooloptMulti {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl BrBooloptMulti {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 8usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 8usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<BrBooloptMulti>() == 8usize);
+        8usize
+    }
+}
+#[repr(C, packed(4))]
+pub struct IfStatsMsg {
+    pub family: u8,
+    pub _pad: [u8; 3usize],
+    pub ifindex: u32,
+    pub filter_mask: u32,
+}
+impl Clone for IfStatsMsg {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IfStatsMsg {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IfStatsMsg {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 12usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 12usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 12usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 12usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IfStatsMsg>() == 12usize);
+        12usize
+    }
+}
+impl std::fmt::Debug for IfStatsMsg {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("IfStatsMsg")
+            .field("family", &self.family)
+            .field("ifindex", &self.ifindex)
+            .field("filter_mask", &self.filter_mask)
+            .finish()
+    }
+}
+#[repr(C, packed(4))]
+pub struct IflaVlanFlags {
+    #[doc = "Associated type: [`VlanFlags`] (1 bit per enumeration)"]
+    pub flags: u32,
+    pub mask: u32,
+}
+impl Clone for IflaVlanFlags {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaVlanFlags {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaVlanFlags {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 8usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 8usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaVlanFlags>() == 8usize);
+        8usize
+    }
+}
+impl std::fmt::Debug for IflaVlanFlags {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("IflaVlanFlags")
+            .field(
+                "flags",
+                &FormatFlags(self.flags.into(), VlanFlags::from_value),
+            )
+            .field("mask", &FormatHex(self.mask.to_ne_bytes()))
+            .finish()
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct IflaVlanQosMapping {
+    pub from: u32,
+    pub to: u32,
+}
+impl Clone for IflaVlanQosMapping {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaVlanQosMapping {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaVlanQosMapping {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 8usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 8usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaVlanQosMapping>() == 8usize);
+        8usize
+    }
+}
+#[repr(C, packed(4))]
+pub struct IflaGenevePortRange {
+    pub _low_be: u16,
+    pub _high_be: u16,
+}
+impl Clone for IflaGenevePortRange {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaGenevePortRange {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaGenevePortRange {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 4usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 4usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 4usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 4usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaGenevePortRange>() == 4usize);
+        4usize
+    }
+    pub fn low(&self) -> u16 {
+        u16::from_be(self._low_be)
+    }
+    pub fn set_low(&mut self, value: u16) {
+        self._low_be = value.to_be();
+    }
+    pub fn high(&self) -> u16 {
+        u16::from_be(self._high_be)
+    }
+    pub fn set_high(&mut self, value: u16) {
+        self._high_be = value.to_be();
+    }
+}
+impl std::fmt::Debug for IflaGenevePortRange {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("IflaGenevePortRange")
+            .field("low", &self.low())
+            .field("high", &self.high())
+            .finish()
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct IflaVfMac {
+    pub vf: u32,
+    pub mac: [u8; 32usize],
+}
+impl Clone for IflaVfMac {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaVfMac {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaVfMac {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 36usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 36usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 36usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 36usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaVfMac>() == 36usize);
+        36usize
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct IflaVfVlan {
+    pub vf: u32,
+    pub vlan: u32,
+    pub qos: u32,
+}
+impl Clone for IflaVfVlan {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaVfVlan {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaVfVlan {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 12usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 12usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 12usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 12usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaVfVlan>() == 12usize);
+        12usize
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct IflaVfTxRate {
+    pub vf: u32,
+    pub rate: u32,
+}
+impl Clone for IflaVfTxRate {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaVfTxRate {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaVfTxRate {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 8usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 8usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaVfTxRate>() == 8usize);
+        8usize
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct IflaVfSpoofchk {
+    pub vf: u32,
+    pub setting: u32,
+}
+impl Clone for IflaVfSpoofchk {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaVfSpoofchk {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaVfSpoofchk {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 8usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 8usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaVfSpoofchk>() == 8usize);
+        8usize
+    }
+}
+#[repr(C, packed(4))]
+pub struct IflaVfLinkState {
+    pub vf: u32,
+    #[doc = "Associated type: [`IflaVfLinkStateEnum`] (enum)"]
+    pub link_state: u32,
+}
+impl Clone for IflaVfLinkState {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaVfLinkState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaVfLinkState {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 8usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 8usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaVfLinkState>() == 8usize);
+        8usize
+    }
+}
+impl std::fmt::Debug for IflaVfLinkState {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("IflaVfLinkState")
+            .field("vf", &self.vf)
+            .field(
+                "link_state",
+                &FormatEnum(self.link_state.into(), IflaVfLinkStateEnum::from_value),
+            )
+            .finish()
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct IflaVfRate {
+    pub vf: u32,
+    pub min_tx_rate: u32,
+    pub max_tx_rate: u32,
+}
+impl Clone for IflaVfRate {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaVfRate {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaVfRate {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 12usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 12usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 12usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 12usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaVfRate>() == 12usize);
+        12usize
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct IflaVfRssQueryEn {
+    pub vf: u32,
+    pub setting: u32,
+}
+impl Clone for IflaVfRssQueryEn {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaVfRssQueryEn {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaVfRssQueryEn {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 8usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 8usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaVfRssQueryEn>() == 8usize);
+        8usize
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct IflaVfTrust {
+    pub vf: u32,
+    pub setting: u32,
+}
+impl Clone for IflaVfTrust {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaVfTrust {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaVfTrust {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 8usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 8usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 8usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaVfTrust>() == 8usize);
+        8usize
+    }
+}
+#[repr(C, packed(4))]
+pub struct IflaVfGuid {
+    pub vf: u32,
+    pub _pad_4: [u8; 4usize],
+    pub guid: u64,
+}
+impl Clone for IflaVfGuid {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaVfGuid {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaVfGuid {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 16usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 16usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaVfGuid>() == 16usize);
+        16usize
+    }
+}
+impl std::fmt::Debug for IflaVfGuid {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("IflaVfGuid")
+            .field("vf", &self.vf)
+            .field("guid", &{ self.guid })
+            .finish()
+    }
+}
+#[derive(Debug)]
+#[repr(C, packed(4))]
+pub struct IflaVfVlanInfo {
+    pub vf: u32,
+    pub vlan: u32,
+    pub qos: u32,
+    pub vlan_proto: u32,
+}
+impl Clone for IflaVfVlanInfo {
+    fn clone(&self) -> Self {
+        Self::new_from_array(*self.as_array())
+    }
+}
+#[doc = "Create zero-initialized struct"]
+impl Default for IflaVfVlanInfo {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl IflaVfVlanInfo {
+    #[doc = "Create zero-initialized struct"]
+    pub fn new() -> Self {
+        Self::new_from_array([0u8; Self::len()])
+    }
+    #[doc = "Copy from contents from slice"]
+    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
+        if other.len() != Self::len() {
+            return None;
+        }
+        let mut buf = [0u8; Self::len()];
+        buf.clone_from_slice(other);
+        Some(Self::new_from_array(buf))
+    }
+    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
+    pub fn new_from_zeroed(other: &[u8]) -> Self {
+        let mut buf = [0u8; Self::len()];
+        let len = buf.len().min(other.len());
+        buf[..len].clone_from_slice(&other[..len]);
+        Self::new_from_array(buf)
+    }
+    pub fn new_from_array(buf: [u8; 16usize]) -> Self {
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe {
+            let ptr: *const u8 = std::mem::transmute(self as *const Self);
+            std::slice::from_raw_parts(ptr, Self::len())
+        }
+    }
+    pub fn from_slice(buf: &[u8]) -> &Self {
+        assert!(buf.len() >= Self::len());
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf.as_ptr()) }
+    }
+    pub fn as_array(&self) -> &[u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub fn from_array(buf: &[u8; 16usize]) -> &Self {
+        assert!(buf.as_ptr() as usize % std::mem::align_of::<Self>() == 0);
+        unsafe { std::mem::transmute(buf) }
+    }
+    pub fn into_array(self) -> [u8; 16usize] {
+        unsafe { std::mem::transmute(self) }
+    }
+    pub const fn len() -> usize {
+        const _: () = assert!(std::mem::size_of::<IflaVfVlanInfo>() == 16usize);
+        16usize
+    }
+}
 #[derive(Clone)]
 pub enum LinkAttrs<'a> {
     Address(&'a [u8]),
@@ -526,14 +2174,14 @@ pub enum LinkAttrs<'a> {
     Mtu(u32),
     Link(u32),
     Qdisc(&'a CStr),
-    Stats(PushRtnlLinkStats),
+    Stats(RtnlLinkStats),
     Cost(&'a CStr),
     Priority(&'a CStr),
     Master(u32),
     Wireless(&'a CStr),
     Protinfo(&'a CStr),
     Txqlen(u32),
-    Map(PushRtnlLinkIfmap),
+    Map(RtnlLinkIfmap),
     Weight(u32),
     Operstate(u8),
     Linkmode(u8),
@@ -542,13 +2190,13 @@ pub enum LinkAttrs<'a> {
     Ifalias(&'a CStr),
     NumVf(u32),
     VfinfoList(IterableVfinfoListAttrs<'a>),
-    Stats64(PushRtnlLinkStats64),
+    Stats64(RtnlLinkStats64),
     VfPorts(IterableVfPortsAttrs<'a>),
     PortSelf(IterablePortSelfAttrs<'a>),
     AfSpec(IterableAfSpecAttrs<'a>),
     Group(u32),
     NetNsFd(u32),
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
+    #[doc = "Associated type: [`RtextFilter`] (1 bit per enumeration)"]
     ExtMask(u32),
     Promiscuity(u32),
     NumTxQueues(u32),
@@ -586,9 +2234,11 @@ pub enum LinkAttrs<'a> {
     GsoIpv4MaxSize(u32),
     GroIpv4MaxSize(u32),
     DpllPin(IterableLinkDpllPinAttrs<'a>),
-    #[doc = "EDT offload horizon supported by the device (in nsec)."]
+    #[doc = "EDT offload horizon supported by the device (in nsec)\\."]
     MaxPacingOffloadHorizon(u32),
     NetnsImmutable(u8),
+    Headroom(u16),
+    Tailroom(u16),
 }
 impl<'a> IterableLinkAttrs<'a> {
     pub fn get_address(&self) -> Result<&'a [u8], ErrorContext> {
@@ -681,7 +2331,7 @@ impl<'a> IterableLinkAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_stats(&self) -> Result<PushRtnlLinkStats, ErrorContext> {
+    pub fn get_stats(&self) -> Result<RtnlLinkStats, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -786,7 +2436,7 @@ impl<'a> IterableLinkAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_map(&self) -> Result<PushRtnlLinkIfmap, ErrorContext> {
+    pub fn get_map(&self) -> Result<RtnlLinkIfmap, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -921,7 +2571,7 @@ impl<'a> IterableLinkAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_stats64(&self) -> Result<PushRtnlLinkStats64, ErrorContext> {
+    pub fn get_stats64(&self) -> Result<RtnlLinkStats64, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -1011,7 +2661,7 @@ impl<'a> IterableLinkAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
+    #[doc = "Associated type: [`RtextFilter`] (1 bit per enumeration)"]
     pub fn get_ext_mask(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -1567,7 +3217,7 @@ impl<'a> IterableLinkAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "EDT offload horizon supported by the device (in nsec)."]
+    #[doc = "EDT offload horizon supported by the device (in nsec)\\."]
     pub fn get_max_pacing_offload_horizon(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -1594,6 +3244,36 @@ impl<'a> IterableLinkAttrs<'a> {
         Err(ErrorContext::new_missing(
             "LinkAttrs",
             "NetnsImmutable",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_headroom(&self) -> Result<u16, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let LinkAttrs::Headroom(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "LinkAttrs",
+            "Headroom",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_tailroom(&self) -> Result<u16, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let LinkAttrs::Tailroom(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "LinkAttrs",
+            "Tailroom",
             self.orig_loc,
             self.buf.as_ptr() as usize,
         ))
@@ -1672,6 +3352,8 @@ impl LinkAttrs<'_> {
             65u16 => "DpllPin",
             66u16 => "MaxPacingOffloadHorizon",
             67u16 => "NetnsImmutable",
+            68u16 => "Headroom",
+            69u16 => "Tailroom",
             _ => return None,
         };
         Some(res)
@@ -1741,7 +3423,7 @@ impl<'a> Iterator for IterableLinkAttrs<'a> {
                     val
                 }),
                 7u16 => LinkAttrs::Stats({
-                    let res = Some(PushRtnlLinkStats::new_from_zeroed(next));
+                    let res = Some(RtnlLinkStats::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -1776,7 +3458,7 @@ impl<'a> Iterator for IterableLinkAttrs<'a> {
                     val
                 }),
                 14u16 => LinkAttrs::Map({
-                    let res = PushRtnlLinkIfmap::new_from_slice(next);
+                    let res = Some(RtnlLinkIfmap::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -1821,7 +3503,7 @@ impl<'a> Iterator for IterableLinkAttrs<'a> {
                     val
                 }),
                 23u16 => LinkAttrs::Stats64({
-                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
+                    let res = Some(RtnlLinkStats64::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -2045,6 +3727,16 @@ impl<'a> Iterator for IterableLinkAttrs<'a> {
                     let Some(val) = res else { break };
                     val
                 }),
+                68u16 => LinkAttrs::Headroom({
+                    let res = parse_u16(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                69u16 => LinkAttrs::Tailroom({
+                    let res = parse_u16(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
                 n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
                 n => continue,
             };
@@ -2072,8 +3764,8 @@ impl<'a> std::fmt::Debug for IterableLinkAttrs<'_> {
                 }
             };
             match attr {
-                LinkAttrs::Address(val) => fmt.field("Address", &val),
-                LinkAttrs::Broadcast(val) => fmt.field("Broadcast", &val),
+                LinkAttrs::Address(val) => fmt.field("Address", &FormatMac(val)),
+                LinkAttrs::Broadcast(val) => fmt.field("Broadcast", &FormatMac(val)),
                 LinkAttrs::Ifname(val) => fmt.field("Ifname", &val),
                 LinkAttrs::Mtu(val) => fmt.field("Mtu", &val),
                 LinkAttrs::Link(val) => fmt.field("Link", &val),
@@ -2127,7 +3819,7 @@ impl<'a> std::fmt::Debug for IterableLinkAttrs<'_> {
                 LinkAttrs::MaxMtu(val) => fmt.field("MaxMtu", &val),
                 LinkAttrs::PropList(val) => fmt.field("PropList", &val),
                 LinkAttrs::AltIfname(val) => fmt.field("AltIfname", &val),
-                LinkAttrs::PermAddress(val) => fmt.field("PermAddress", &val),
+                LinkAttrs::PermAddress(val) => fmt.field("PermAddress", &FormatMac(val)),
                 LinkAttrs::ProtoDownReason(val) => fmt.field("ProtoDownReason", &val),
                 LinkAttrs::ParentDevName(val) => fmt.field("ParentDevName", &val),
                 LinkAttrs::ParentDevBusName(val) => fmt.field("ParentDevBusName", &val),
@@ -2143,6 +3835,8 @@ impl<'a> std::fmt::Debug for IterableLinkAttrs<'_> {
                     fmt.field("MaxPacingOffloadHorizon", &val)
                 }
                 LinkAttrs::NetnsImmutable(val) => fmt.field("NetnsImmutable", &val),
+                LinkAttrs::Headroom(val) => fmt.field("Headroom", &val),
+                LinkAttrs::Tailroom(val) => fmt.field("Tailroom", &val),
             };
         }
         fmt.finish()
@@ -2156,7 +3850,7 @@ impl IterableLinkAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkAttrs", offset));
             return (
                 stack,
@@ -2574,6 +4268,18 @@ impl IterableLinkAttrs<'_> {
                         break;
                     }
                 }
+                LinkAttrs::Headroom(val) => {
+                    if last_off == offset {
+                        stack.push(("Headroom", last_off));
+                        break;
+                    }
+                }
+                LinkAttrs::Tailroom(val) => {
+                    if last_off == offset {
+                        stack.push(("Tailroom", last_off));
+                        break;
+                    }
+                }
                 _ => {}
             };
             last_off = cur + attrs.pos;
@@ -2688,7 +4394,7 @@ impl IterablePropListLinkAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("PropListLinkAttrs", offset));
             return (
                 stack,
@@ -2877,7 +4583,7 @@ impl IterableAfSpecAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("AfSpecAttrs", offset));
             return (
                 stack,
@@ -3031,7 +4737,7 @@ impl IterableVfinfoListAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("VfinfoListAttrs", offset));
             return (
                 stack,
@@ -3065,22 +4771,22 @@ impl IterableVfinfoListAttrs<'_> {
 }
 #[derive(Clone)]
 pub enum VfinfoAttrs<'a> {
-    Mac(PushIflaVfMac),
-    Vlan(PushIflaVfVlan),
-    TxRate(PushIflaVfTxRate),
-    Spoofchk(PushIflaVfSpoofchk),
-    LinkState(PushIflaVfLinkState),
-    Rate(PushIflaVfRate),
-    RssQueryEn(PushIflaVfRssQueryEn),
+    Mac(IflaVfMac),
+    Vlan(IflaVfVlan),
+    TxRate(IflaVfTxRate),
+    Spoofchk(IflaVfSpoofchk),
+    LinkState(IflaVfLinkState),
+    Rate(IflaVfRate),
+    RssQueryEn(IflaVfRssQueryEn),
     Stats(IterableVfStatsAttrs<'a>),
-    Trust(PushIflaVfTrust),
-    IbNodeGuid(PushIflaVfGuid),
-    IbPortGuid(PushIflaVfGuid),
+    Trust(IflaVfTrust),
+    IbNodeGuid(IflaVfGuid),
+    IbPortGuid(IflaVfGuid),
     VlanList(IterableVfVlanAttrs<'a>),
     Broadcast(&'a [u8]),
 }
 impl<'a> IterableVfinfoAttrs<'a> {
-    pub fn get_mac(&self) -> Result<PushIflaVfMac, ErrorContext> {
+    pub fn get_mac(&self) -> Result<IflaVfMac, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -3095,7 +4801,7 @@ impl<'a> IterableVfinfoAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_vlan(&self) -> Result<PushIflaVfVlan, ErrorContext> {
+    pub fn get_vlan(&self) -> Result<IflaVfVlan, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -3110,7 +4816,7 @@ impl<'a> IterableVfinfoAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_tx_rate(&self) -> Result<PushIflaVfTxRate, ErrorContext> {
+    pub fn get_tx_rate(&self) -> Result<IflaVfTxRate, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -3125,7 +4831,7 @@ impl<'a> IterableVfinfoAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_spoofchk(&self) -> Result<PushIflaVfSpoofchk, ErrorContext> {
+    pub fn get_spoofchk(&self) -> Result<IflaVfSpoofchk, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -3140,7 +4846,7 @@ impl<'a> IterableVfinfoAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_link_state(&self) -> Result<PushIflaVfLinkState, ErrorContext> {
+    pub fn get_link_state(&self) -> Result<IflaVfLinkState, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -3155,7 +4861,7 @@ impl<'a> IterableVfinfoAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_rate(&self) -> Result<PushIflaVfRate, ErrorContext> {
+    pub fn get_rate(&self) -> Result<IflaVfRate, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -3170,7 +4876,7 @@ impl<'a> IterableVfinfoAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_rss_query_en(&self) -> Result<PushIflaVfRssQueryEn, ErrorContext> {
+    pub fn get_rss_query_en(&self) -> Result<IflaVfRssQueryEn, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -3200,7 +4906,7 @@ impl<'a> IterableVfinfoAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_trust(&self) -> Result<PushIflaVfTrust, ErrorContext> {
+    pub fn get_trust(&self) -> Result<IflaVfTrust, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -3215,7 +4921,7 @@ impl<'a> IterableVfinfoAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_ib_node_guid(&self) -> Result<PushIflaVfGuid, ErrorContext> {
+    pub fn get_ib_node_guid(&self) -> Result<IflaVfGuid, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -3230,7 +4936,7 @@ impl<'a> IterableVfinfoAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_ib_port_guid(&self) -> Result<PushIflaVfGuid, ErrorContext> {
+    pub fn get_ib_port_guid(&self) -> Result<IflaVfGuid, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -3334,37 +5040,37 @@ impl<'a> Iterator for IterableVfinfoAttrs<'a> {
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => VfinfoAttrs::Mac({
-                    let res = PushIflaVfMac::new_from_slice(next);
+                    let res = Some(IflaVfMac::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
                 2u16 => VfinfoAttrs::Vlan({
-                    let res = PushIflaVfVlan::new_from_slice(next);
+                    let res = Some(IflaVfVlan::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
                 3u16 => VfinfoAttrs::TxRate({
-                    let res = PushIflaVfTxRate::new_from_slice(next);
+                    let res = Some(IflaVfTxRate::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
                 4u16 => VfinfoAttrs::Spoofchk({
-                    let res = PushIflaVfSpoofchk::new_from_slice(next);
+                    let res = Some(IflaVfSpoofchk::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
                 5u16 => VfinfoAttrs::LinkState({
-                    let res = PushIflaVfLinkState::new_from_slice(next);
+                    let res = Some(IflaVfLinkState::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
                 6u16 => VfinfoAttrs::Rate({
-                    let res = PushIflaVfRate::new_from_slice(next);
+                    let res = Some(IflaVfRate::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
                 7u16 => VfinfoAttrs::RssQueryEn({
-                    let res = PushIflaVfRssQueryEn::new_from_slice(next);
+                    let res = Some(IflaVfRssQueryEn::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -3374,17 +5080,17 @@ impl<'a> Iterator for IterableVfinfoAttrs<'a> {
                     val
                 }),
                 9u16 => VfinfoAttrs::Trust({
-                    let res = PushIflaVfTrust::new_from_slice(next);
+                    let res = Some(IflaVfTrust::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
                 10u16 => VfinfoAttrs::IbNodeGuid({
-                    let res = PushIflaVfGuid::new_from_slice(next);
+                    let res = Some(IflaVfGuid::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
                 11u16 => VfinfoAttrs::IbPortGuid({
-                    let res = PushIflaVfGuid::new_from_slice(next);
+                    let res = Some(IflaVfGuid::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -3451,7 +5157,7 @@ impl IterableVfinfoAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("VfinfoAttrs", offset));
             return (
                 stack,
@@ -3851,7 +5557,7 @@ impl IterableVfStatsAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("VfStatsAttrs", offset));
             return (
                 stack,
@@ -3933,11 +5639,11 @@ impl IterableVfStatsAttrs<'_> {
 #[derive(Clone)]
 pub enum VfVlanAttrs {
     #[doc = "Attribute may repeat multiple times (treat it as array)"]
-    Info(PushIflaVfVlanInfo),
+    Info(IflaVfVlanInfo),
 }
 impl<'a> IterableVfVlanAttrs<'a> {
     #[doc = "Attribute may repeat multiple times (treat it as array)"]
-    pub fn get_info(&self) -> MultiAttrIterable<Self, VfVlanAttrs, PushIflaVfVlanInfo> {
+    pub fn get_info(&self) -> MultiAttrIterable<Self, VfVlanAttrs, IflaVfVlanInfo> {
         MultiAttrIterable::new(self.clone(), |variant| {
             if let VfVlanAttrs::Info(val) = variant {
                 Some(val)
@@ -3993,7 +5699,7 @@ impl<'a> Iterator for IterableVfVlanAttrs<'a> {
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => VfVlanAttrs::Info({
-                    let res = PushIflaVfVlanInfo::new_from_slice(next);
+                    let res = Some(IflaVfVlanInfo::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -4038,7 +5744,7 @@ impl IterableVfVlanAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("VfVlanAttrs", offset));
             return (
                 stack,
@@ -4152,7 +5858,7 @@ impl IterableVfPortsAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("VfPortsAttrs", offset));
             return (
                 stack,
@@ -4245,7 +5951,7 @@ impl IterablePortSelfAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("PortSelfAttrs", offset));
             return (
                 stack,
@@ -4349,6 +6055,7 @@ pub enum LinkinfoDataMsg<'a> {
     Gretap(IterableLinkinfoGreAttrs<'a>),
     Ip6gre(IterableLinkinfoGre6Attrs<'a>),
     Geneve(IterableLinkinfoGeneveAttrs<'a>),
+    Hsr(IterableLinkinfoHsrAttrs<'a>),
     Ipip(IterableLinkinfoIptunAttrs<'a>),
     Ip6tnl(IterableLinkinfoIp6tnlAttrs<'a>),
     Sit(IterableLinkinfoIptunAttrs<'a>),
@@ -4384,6 +6091,9 @@ impl<'a> LinkinfoDataMsg<'a> {
             b"geneve" => Some(LinkinfoDataMsg::Geneve(
                 IterableLinkinfoGeneveAttrs::with_loc(buf, loc),
             )),
+            b"hsr" => Some(LinkinfoDataMsg::Hsr(IterableLinkinfoHsrAttrs::with_loc(
+                buf, loc,
+            ))),
             b"ipip" => Some(LinkinfoDataMsg::Ipip(IterableLinkinfoIptunAttrs::with_loc(
                 buf, loc,
             ))),
@@ -4572,7 +6282,7 @@ impl IterableLinkinfoAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoAttrs", offset));
             return (
                 stack,
@@ -5524,7 +7234,9 @@ impl<'a> std::fmt::Debug for IterableLinkinfoBondAttrs<'_> {
                 LinkinfoBondAttrs::AdInfo(val) => fmt.field("AdInfo", &val),
                 LinkinfoBondAttrs::AdActorSysPrio(val) => fmt.field("AdActorSysPrio", &val),
                 LinkinfoBondAttrs::AdUserPortKey(val) => fmt.field("AdUserPortKey", &val),
-                LinkinfoBondAttrs::AdActorSystem(val) => fmt.field("AdActorSystem", &val),
+                LinkinfoBondAttrs::AdActorSystem(val) => {
+                    fmt.field("AdActorSystem", &FormatMac(val))
+                }
                 LinkinfoBondAttrs::TlbDynamicLb(val) => fmt.field("TlbDynamicLb", &val),
                 LinkinfoBondAttrs::PeerNotifDelay(val) => fmt.field("PeerNotifDelay", &val),
                 LinkinfoBondAttrs::AdLacpActive(val) => fmt.field("AdLacpActive", &val),
@@ -5544,7 +7256,7 @@ impl IterableLinkinfoBondAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoBondAttrs", offset));
             return (
                 stack,
@@ -5952,7 +7664,7 @@ impl<'a> std::fmt::Debug for IterableBondAdInfoAttrs<'_> {
                 BondAdInfoAttrs::NumPorts(val) => fmt.field("NumPorts", &val),
                 BondAdInfoAttrs::ActorKey(val) => fmt.field("ActorKey", &val),
                 BondAdInfoAttrs::PartnerKey(val) => fmt.field("PartnerKey", &val),
-                BondAdInfoAttrs::PartnerMac(val) => fmt.field("PartnerMac", &val),
+                BondAdInfoAttrs::PartnerMac(val) => fmt.field("PartnerMac", &FormatMac(val)),
             };
         }
         fmt.finish()
@@ -5966,7 +7678,7 @@ impl IterableBondAdInfoAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("BondAdInfoAttrs", offset));
             return (
                 stack,
@@ -6298,7 +8010,7 @@ impl<'a> std::fmt::Debug for IterableBondSlaveAttrs<'_> {
                 BondSlaveAttrs::State(val) => fmt.field("State", &val),
                 BondSlaveAttrs::MiiStatus(val) => fmt.field("MiiStatus", &val),
                 BondSlaveAttrs::LinkFailureCount(val) => fmt.field("LinkFailureCount", &val),
-                BondSlaveAttrs::PermHwaddr(val) => fmt.field("PermHwaddr", &val),
+                BondSlaveAttrs::PermHwaddr(val) => fmt.field("PermHwaddr", &FormatMac(val)),
                 BondSlaveAttrs::QueueId(val) => fmt.field("QueueId", &val),
                 BondSlaveAttrs::AdAggregatorId(val) => fmt.field("AdAggregatorId", &val),
                 BondSlaveAttrs::AdActorOperPortState(val) => {
@@ -6321,7 +8033,7 @@ impl IterableBondSlaveAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("BondSlaveAttrs", offset));
             return (
                 stack,
@@ -6411,8 +8123,8 @@ pub enum LinkinfoBridgeAttrs<'a> {
     VlanFiltering(u8),
     VlanProtocol(u16),
     GroupFwdMask(u16),
-    RootId(PushIflaBridgeId),
-    BridgeId(PushIflaBridgeId),
+    RootId(IflaBridgeId),
+    BridgeId(IflaBridgeId),
     RootPort(u16),
     RootPathCost(u32),
     TopologyChange(u8),
@@ -6447,7 +8159,7 @@ pub enum LinkinfoBridgeAttrs<'a> {
     McastIgmpVersion(u8),
     McastMldVersion(u8),
     VlanStatsPerPort(u8),
-    MultiBoolopt(PushBrBooloptMulti),
+    MultiBoolopt(BrBooloptMulti),
     McastQuerierState(&'a [u8]),
     FdbNLearned(u32),
     FdbMaxLearned(u32),
@@ -6588,7 +8300,7 @@ impl<'a> IterableLinkinfoBridgeAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_root_id(&self) -> Result<PushIflaBridgeId, ErrorContext> {
+    pub fn get_root_id(&self) -> Result<IflaBridgeId, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -6603,7 +8315,7 @@ impl<'a> IterableLinkinfoBridgeAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_bridge_id(&self) -> Result<PushIflaBridgeId, ErrorContext> {
+    pub fn get_bridge_id(&self) -> Result<IflaBridgeId, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -7128,7 +8840,7 @@ impl<'a> IterableLinkinfoBridgeAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_multi_boolopt(&self) -> Result<PushBrBooloptMulti, ErrorContext> {
+    pub fn get_multi_boolopt(&self) -> Result<BrBooloptMulti, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -7328,12 +9040,12 @@ impl<'a> Iterator for IterableLinkinfoBridgeAttrs<'a> {
                     val
                 }),
                 10u16 => LinkinfoBridgeAttrs::RootId({
-                    let res = PushIflaBridgeId::new_from_slice(next);
+                    let res = Some(IflaBridgeId::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
                 11u16 => LinkinfoBridgeAttrs::BridgeId({
-                    let res = PushIflaBridgeId::new_from_slice(next);
+                    let res = Some(IflaBridgeId::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -7508,7 +9220,7 @@ impl<'a> Iterator for IterableLinkinfoBridgeAttrs<'a> {
                     val
                 }),
                 46u16 => LinkinfoBridgeAttrs::MultiBoolopt({
-                    let res = PushBrBooloptMulti::new_from_slice(next);
+                    let res = Some(BrBooloptMulti::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -7577,7 +9289,7 @@ impl<'a> std::fmt::Debug for IterableLinkinfoBridgeAttrs<'_> {
                     fmt.field("TopologyChangeTimer", &val)
                 }
                 LinkinfoBridgeAttrs::GcTimer(val) => fmt.field("GcTimer", &val),
-                LinkinfoBridgeAttrs::GroupAddr(val) => fmt.field("GroupAddr", &val),
+                LinkinfoBridgeAttrs::GroupAddr(val) => fmt.field("GroupAddr", &FormatMac(val)),
                 LinkinfoBridgeAttrs::FdbFlush(val) => fmt.field("FdbFlush", &val),
                 LinkinfoBridgeAttrs::McastRouter(val) => fmt.field("McastRouter", &val),
                 LinkinfoBridgeAttrs::McastSnooping(val) => fmt.field("McastSnooping", &val),
@@ -7636,7 +9348,7 @@ impl IterableLinkinfoBridgeAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoBridgeAttrs", offset));
             return (
                 stack,
@@ -7969,8 +9681,8 @@ pub enum LinkinfoBrportAttrs<'a> {
     Proxyarp(()),
     LearningSync(()),
     ProxyarpWifi(()),
-    RootId(PushIflaBridgeId),
-    BridgeId(PushIflaBridgeId),
+    RootId(IflaBridgeId),
+    BridgeId(IflaBridgeId),
     DesignatedPort(u16),
     DesignatedCost(u16),
     Id(u16),
@@ -8183,7 +9895,7 @@ impl<'a> IterableLinkinfoBrportAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_root_id(&self) -> Result<PushIflaBridgeId, ErrorContext> {
+    pub fn get_root_id(&self) -> Result<IflaBridgeId, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -8198,7 +9910,7 @@ impl<'a> IterableLinkinfoBrportAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_bridge_id(&self) -> Result<PushIflaBridgeId, ErrorContext> {
+    pub fn get_bridge_id(&self) -> Result<IflaBridgeId, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -8777,12 +10489,12 @@ impl<'a> Iterator for IterableLinkinfoBrportAttrs<'a> {
                 11u16 => LinkinfoBrportAttrs::LearningSync(()),
                 12u16 => LinkinfoBrportAttrs::ProxyarpWifi(()),
                 13u16 => LinkinfoBrportAttrs::RootId({
-                    let res = PushIflaBridgeId::new_from_slice(next);
+                    let res = Some(IflaBridgeId::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
                 14u16 => LinkinfoBrportAttrs::BridgeId({
-                    let res = PushIflaBridgeId::new_from_slice(next);
+                    let res = Some(IflaBridgeId::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -8974,7 +10686,7 @@ impl IterableLinkinfoBrportAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoBrportAttrs", offset));
             return (
                 stack,
@@ -9264,14 +10976,14 @@ impl IterableLinkinfoBrportAttrs<'_> {
     }
 }
 #[derive(Clone)]
-pub enum LinkinfoGreAttrs<'a> {
+pub enum LinkinfoGreAttrs {
     Link(u32),
     Iflags(u16),
     Oflags(u16),
     Ikey(u32),
     Okey(u32),
-    Local(&'a [u8]),
-    Remote(&'a [u8]),
+    Local(std::net::IpAddr),
+    Remote(std::net::IpAddr),
     Ttl(u8),
     Tos(u8),
     Pmtudisc(u8),
@@ -9366,7 +11078,7 @@ impl<'a> IterableLinkinfoGreAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_local(&self) -> Result<&'a [u8], ErrorContext> {
+    pub fn get_local(&self) -> Result<std::net::IpAddr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -9381,7 +11093,7 @@ impl<'a> IterableLinkinfoGreAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_remote(&self) -> Result<&'a [u8], ErrorContext> {
+    pub fn get_remote(&self) -> Result<std::net::IpAddr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -9652,7 +11364,7 @@ impl<'a> IterableLinkinfoGreAttrs<'a> {
         ))
     }
 }
-impl LinkinfoGreAttrs<'_> {
+impl LinkinfoGreAttrs {
     pub fn new<'a>(buf: &'a [u8]) -> IterableLinkinfoGreAttrs<'a> {
         IterableLinkinfoGreAttrs::with_loc(buf, buf.as_ptr() as usize)
     }
@@ -9706,7 +11418,7 @@ impl<'a> IterableLinkinfoGreAttrs<'a> {
     }
 }
 impl<'a> Iterator for IterableLinkinfoGreAttrs<'a> {
-    type Item = Result<LinkinfoGreAttrs<'a>, ErrorContext>;
+    type Item = Result<LinkinfoGreAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
         let pos = self.pos;
         let mut r#type;
@@ -9746,12 +11458,12 @@ impl<'a> Iterator for IterableLinkinfoGreAttrs<'a> {
                     val
                 }),
                 6u16 => LinkinfoGreAttrs::Local({
-                    let res = Some(next);
+                    let res = parse_ip(next);
                     let Some(val) = res else { break };
                     val
                 }),
                 7u16 => LinkinfoGreAttrs::Remote({
-                    let res = Some(next);
+                    let res = parse_ip(next);
                     let Some(val) = res else { break };
                     val
                 }),
@@ -9849,7 +11561,7 @@ impl<'a> Iterator for IterableLinkinfoGreAttrs<'a> {
         )))
     }
 }
-impl<'a> std::fmt::Debug for IterableLinkinfoGreAttrs<'_> {
+impl std::fmt::Debug for IterableLinkinfoGreAttrs<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut fmt = f.debug_struct("LinkinfoGreAttrs");
         for attr in self.clone() {
@@ -9900,7 +11612,7 @@ impl IterableLinkinfoGreAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoGreAttrs", offset));
             return (
                 stack,
@@ -10613,7 +12325,7 @@ impl IterableLinkinfoGre6Attrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoGre6Attrs", offset));
             return (
                 stack,
@@ -10765,12 +12477,12 @@ impl IterableLinkinfoGre6Attrs<'_> {
     }
 }
 #[derive(Clone)]
-pub enum LinkinfoVtiAttrs<'a> {
+pub enum LinkinfoVtiAttrs {
     Link(u32),
     Ikey(u32),
     Okey(u32),
-    Local(&'a [u8]),
-    Remote(&'a [u8]),
+    Local(std::net::IpAddr),
+    Remote(std::net::IpAddr),
     Fwmark(u32),
 }
 impl<'a> IterableLinkinfoVtiAttrs<'a> {
@@ -10819,7 +12531,7 @@ impl<'a> IterableLinkinfoVtiAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_local(&self) -> Result<&'a [u8], ErrorContext> {
+    pub fn get_local(&self) -> Result<std::net::IpAddr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -10834,7 +12546,7 @@ impl<'a> IterableLinkinfoVtiAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_remote(&self) -> Result<&'a [u8], ErrorContext> {
+    pub fn get_remote(&self) -> Result<std::net::IpAddr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -10865,7 +12577,7 @@ impl<'a> IterableLinkinfoVtiAttrs<'a> {
         ))
     }
 }
-impl LinkinfoVtiAttrs<'_> {
+impl LinkinfoVtiAttrs {
     pub fn new<'a>(buf: &'a [u8]) -> IterableLinkinfoVtiAttrs<'a> {
         IterableLinkinfoVtiAttrs::with_loc(buf, buf.as_ptr() as usize)
     }
@@ -10901,7 +12613,7 @@ impl<'a> IterableLinkinfoVtiAttrs<'a> {
     }
 }
 impl<'a> Iterator for IterableLinkinfoVtiAttrs<'a> {
-    type Item = Result<LinkinfoVtiAttrs<'a>, ErrorContext>;
+    type Item = Result<LinkinfoVtiAttrs, ErrorContext>;
     fn next(&mut self) -> Option<Self::Item> {
         let pos = self.pos;
         let mut r#type;
@@ -10931,12 +12643,12 @@ impl<'a> Iterator for IterableLinkinfoVtiAttrs<'a> {
                     val
                 }),
                 4u16 => LinkinfoVtiAttrs::Local({
-                    let res = Some(next);
+                    let res = parse_ip(next);
                     let Some(val) = res else { break };
                     val
                 }),
                 5u16 => LinkinfoVtiAttrs::Remote({
-                    let res = Some(next);
+                    let res = parse_ip(next);
                     let Some(val) = res else { break };
                     val
                 }),
@@ -10958,7 +12670,7 @@ impl<'a> Iterator for IterableLinkinfoVtiAttrs<'a> {
         )))
     }
 }
-impl<'a> std::fmt::Debug for IterableLinkinfoVtiAttrs<'_> {
+impl std::fmt::Debug for IterableLinkinfoVtiAttrs<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut fmt = f.debug_struct("LinkinfoVtiAttrs");
         for attr in self.clone() {
@@ -10991,7 +12703,7 @@ impl IterableLinkinfoVtiAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoVtiAttrs", offset));
             return (
                 stack,
@@ -11270,7 +12982,7 @@ impl IterableLinkinfoVti6Attrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoVti6Attrs", offset));
             return (
                 stack,
@@ -11334,7 +13046,7 @@ impl IterableLinkinfoVti6Attrs<'_> {
 #[derive(Clone)]
 pub enum LinkinfoGeneveAttrs<'a> {
     Id(u32),
-    Remote(&'a [u8]),
+    Remote(std::net::Ipv4Addr),
     Ttl(u8),
     Tos(u8),
     Port(u16),
@@ -11347,7 +13059,8 @@ pub enum LinkinfoGeneveAttrs<'a> {
     TtlInherit(u8),
     Df(u8),
     InnerProtoInherit(()),
-    PortRange(PushIflaGenevePortRange),
+    PortRange(IflaGenevePortRange),
+    GroHint(()),
 }
 impl<'a> IterableLinkinfoGeneveAttrs<'a> {
     pub fn get_id(&self) -> Result<u32, ErrorContext> {
@@ -11365,7 +13078,7 @@ impl<'a> IterableLinkinfoGeneveAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_remote(&self) -> Result<&'a [u8], ErrorContext> {
+    pub fn get_remote(&self) -> Result<std::net::Ipv4Addr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -11560,7 +13273,7 @@ impl<'a> IterableLinkinfoGeneveAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_port_range(&self) -> Result<PushIflaGenevePortRange, ErrorContext> {
+    pub fn get_port_range(&self) -> Result<IflaGenevePortRange, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -11571,6 +13284,21 @@ impl<'a> IterableLinkinfoGeneveAttrs<'a> {
         Err(ErrorContext::new_missing(
             "LinkinfoGeneveAttrs",
             "PortRange",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_gro_hint(&self) -> Result<(), ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let LinkinfoGeneveAttrs::GroHint(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "LinkinfoGeneveAttrs",
+            "GroHint",
             self.orig_loc,
             self.buf.as_ptr() as usize,
         ))
@@ -11597,6 +13325,7 @@ impl LinkinfoGeneveAttrs<'_> {
             13u16 => "Df",
             14u16 => "InnerProtoInherit",
             15u16 => "PortRange",
+            16u16 => "GroHint",
             _ => return None,
         };
         Some(res)
@@ -11641,7 +13370,7 @@ impl<'a> Iterator for IterableLinkinfoGeneveAttrs<'a> {
                     val
                 }),
                 2u16 => LinkinfoGeneveAttrs::Remote({
-                    let res = Some(next);
+                    let res = parse_be_u32(next).map(Ipv4Addr::from_bits);
                     let Some(val) = res else { break };
                     val
                 }),
@@ -11698,10 +13427,11 @@ impl<'a> Iterator for IterableLinkinfoGeneveAttrs<'a> {
                 }),
                 14u16 => LinkinfoGeneveAttrs::InnerProtoInherit(()),
                 15u16 => LinkinfoGeneveAttrs::PortRange({
-                    let res = PushIflaGenevePortRange::new_from_slice(next);
+                    let res = Some(IflaGenevePortRange::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
+                16u16 => LinkinfoGeneveAttrs::GroHint(()),
                 n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
                 n => continue,
             };
@@ -11744,6 +13474,7 @@ impl<'a> std::fmt::Debug for IterableLinkinfoGeneveAttrs<'_> {
                 LinkinfoGeneveAttrs::Df(val) => fmt.field("Df", &val),
                 LinkinfoGeneveAttrs::InnerProtoInherit(val) => fmt.field("InnerProtoInherit", &val),
                 LinkinfoGeneveAttrs::PortRange(val) => fmt.field("PortRange", &val),
+                LinkinfoGeneveAttrs::GroHint(val) => fmt.field("GroHint", &val),
             };
         }
         fmt.finish()
@@ -11757,7 +13488,7 @@ impl IterableLinkinfoGeneveAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoGeneveAttrs", offset));
             return (
                 stack,
@@ -11862,6 +13593,12 @@ impl IterableLinkinfoGeneveAttrs<'_> {
                         break;
                     }
                 }
+                LinkinfoGeneveAttrs::GroHint(val) => {
+                    if last_off == offset {
+                        stack.push(("GroHint", last_off));
+                        break;
+                    }
+                }
                 _ => {}
             };
             last_off = cur + attrs.pos;
@@ -11873,10 +13610,358 @@ impl IterableLinkinfoGeneveAttrs<'_> {
     }
 }
 #[derive(Clone)]
+pub enum LinkinfoHsrAttrs<'a> {
+    Slave1(u32),
+    Slave2(u32),
+    MulticastSpec(u8),
+    SupervisionAddr(&'a [u8]),
+    SeqNr(u16),
+    Version(u8),
+    Protocol(u8),
+    Interlink(u32),
+}
+impl<'a> IterableLinkinfoHsrAttrs<'a> {
+    pub fn get_slave1(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let LinkinfoHsrAttrs::Slave1(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "LinkinfoHsrAttrs",
+            "Slave1",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_slave2(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let LinkinfoHsrAttrs::Slave2(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "LinkinfoHsrAttrs",
+            "Slave2",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_multicast_spec(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let LinkinfoHsrAttrs::MulticastSpec(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "LinkinfoHsrAttrs",
+            "MulticastSpec",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_supervision_addr(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let LinkinfoHsrAttrs::SupervisionAddr(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "LinkinfoHsrAttrs",
+            "SupervisionAddr",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_seq_nr(&self) -> Result<u16, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let LinkinfoHsrAttrs::SeqNr(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "LinkinfoHsrAttrs",
+            "SeqNr",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_version(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let LinkinfoHsrAttrs::Version(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "LinkinfoHsrAttrs",
+            "Version",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_protocol(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let LinkinfoHsrAttrs::Protocol(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "LinkinfoHsrAttrs",
+            "Protocol",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_interlink(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let LinkinfoHsrAttrs::Interlink(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "LinkinfoHsrAttrs",
+            "Interlink",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl LinkinfoHsrAttrs<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableLinkinfoHsrAttrs<'a> {
+        IterableLinkinfoHsrAttrs::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            1u16 => "Slave1",
+            2u16 => "Slave2",
+            3u16 => "MulticastSpec",
+            4u16 => "SupervisionAddr",
+            5u16 => "SeqNr",
+            6u16 => "Version",
+            7u16 => "Protocol",
+            8u16 => "Interlink",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableLinkinfoHsrAttrs<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableLinkinfoHsrAttrs<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableLinkinfoHsrAttrs<'a> {
+    type Item = Result<LinkinfoHsrAttrs<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                1u16 => LinkinfoHsrAttrs::Slave1({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => LinkinfoHsrAttrs::Slave2({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => LinkinfoHsrAttrs::MulticastSpec({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => LinkinfoHsrAttrs::SupervisionAddr({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => LinkinfoHsrAttrs::SeqNr({
+                    let res = parse_u16(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => LinkinfoHsrAttrs::Version({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => LinkinfoHsrAttrs::Protocol({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                8u16 => LinkinfoHsrAttrs::Interlink({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "LinkinfoHsrAttrs",
+            r#type.and_then(|t| LinkinfoHsrAttrs::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableLinkinfoHsrAttrs<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("LinkinfoHsrAttrs");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                LinkinfoHsrAttrs::Slave1(val) => fmt.field("Slave1", &val),
+                LinkinfoHsrAttrs::Slave2(val) => fmt.field("Slave2", &val),
+                LinkinfoHsrAttrs::MulticastSpec(val) => fmt.field("MulticastSpec", &val),
+                LinkinfoHsrAttrs::SupervisionAddr(val) => {
+                    fmt.field("SupervisionAddr", &FormatMac(val))
+                }
+                LinkinfoHsrAttrs::SeqNr(val) => fmt.field("SeqNr", &val),
+                LinkinfoHsrAttrs::Version(val) => fmt.field("Version", &val),
+                LinkinfoHsrAttrs::Protocol(val) => fmt.field("Protocol", &val),
+                LinkinfoHsrAttrs::Interlink(val) => fmt.field("Interlink", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableLinkinfoHsrAttrs<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("LinkinfoHsrAttrs", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| LinkinfoHsrAttrs::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                LinkinfoHsrAttrs::Slave1(val) => {
+                    if last_off == offset {
+                        stack.push(("Slave1", last_off));
+                        break;
+                    }
+                }
+                LinkinfoHsrAttrs::Slave2(val) => {
+                    if last_off == offset {
+                        stack.push(("Slave2", last_off));
+                        break;
+                    }
+                }
+                LinkinfoHsrAttrs::MulticastSpec(val) => {
+                    if last_off == offset {
+                        stack.push(("MulticastSpec", last_off));
+                        break;
+                    }
+                }
+                LinkinfoHsrAttrs::SupervisionAddr(val) => {
+                    if last_off == offset {
+                        stack.push(("SupervisionAddr", last_off));
+                        break;
+                    }
+                }
+                LinkinfoHsrAttrs::SeqNr(val) => {
+                    if last_off == offset {
+                        stack.push(("SeqNr", last_off));
+                        break;
+                    }
+                }
+                LinkinfoHsrAttrs::Version(val) => {
+                    if last_off == offset {
+                        stack.push(("Version", last_off));
+                        break;
+                    }
+                }
+                LinkinfoHsrAttrs::Protocol(val) => {
+                    if last_off == offset {
+                        stack.push(("Protocol", last_off));
+                        break;
+                    }
+                }
+                LinkinfoHsrAttrs::Interlink(val) => {
+                    if last_off == offset {
+                        stack.push(("Interlink", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("LinkinfoHsrAttrs", cur));
+        }
+        (stack, None)
+    }
+}
+#[derive(Clone)]
 pub enum LinkinfoIptunAttrs<'a> {
     Link(u32),
-    Local(&'a [u8]),
-    Remote(&'a [u8]),
+    Local(std::net::IpAddr),
+    Remote(std::net::IpAddr),
     Ttl(u8),
     Tos(u8),
     EncapLimit(u8),
@@ -11885,7 +13970,7 @@ pub enum LinkinfoIptunAttrs<'a> {
     Proto(u8),
     Pmtudisc(u8),
     _6rdPrefix(&'a [u8]),
-    _6rdRelayPrefix(&'a [u8]),
+    _6rdRelayPrefix(std::net::Ipv4Addr),
     _6rdPrefixlen(u16),
     _6rdRelayPrefixlen(u16),
     EncapType(u16),
@@ -11911,7 +13996,7 @@ impl<'a> IterableLinkinfoIptunAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_local(&self) -> Result<&'a [u8], ErrorContext> {
+    pub fn get_local(&self) -> Result<std::net::IpAddr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -11926,7 +14011,7 @@ impl<'a> IterableLinkinfoIptunAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_remote(&self) -> Result<&'a [u8], ErrorContext> {
+    pub fn get_remote(&self) -> Result<std::net::IpAddr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -12061,7 +14146,7 @@ impl<'a> IterableLinkinfoIptunAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_6rd_relay_prefix(&self) -> Result<&'a [u8], ErrorContext> {
+    pub fn get_6rd_relay_prefix(&self) -> Result<std::net::Ipv4Addr, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -12267,12 +14352,12 @@ impl<'a> Iterator for IterableLinkinfoIptunAttrs<'a> {
                     val
                 }),
                 2u16 => LinkinfoIptunAttrs::Local({
-                    let res = Some(next);
+                    let res = parse_ip(next);
                     let Some(val) = res else { break };
                     val
                 }),
                 3u16 => LinkinfoIptunAttrs::Remote({
-                    let res = Some(next);
+                    let res = parse_ip(next);
                     let Some(val) = res else { break };
                     val
                 }),
@@ -12317,7 +14402,7 @@ impl<'a> Iterator for IterableLinkinfoIptunAttrs<'a> {
                     val
                 }),
                 12u16 => LinkinfoIptunAttrs::_6rdRelayPrefix({
-                    let res = Some(next);
+                    let res = parse_be_u32(next).map(Ipv4Addr::from_bits);
                     let Some(val) = res else { break };
                     val
                 }),
@@ -12419,7 +14504,7 @@ impl IterableLinkinfoIptunAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoIptunAttrs", offset));
             return (
                 stack,
@@ -12954,7 +15039,7 @@ impl IterableLinkinfoIp6tnlAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoIp6tnlAttrs", offset));
             return (
                 stack,
@@ -13359,7 +15444,7 @@ impl IterableLinkinfoTunAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoTunAttrs", offset));
             return (
                 stack,
@@ -13441,10 +15526,10 @@ impl IterableLinkinfoTunAttrs<'_> {
 #[derive(Clone)]
 pub enum LinkinfoVlanAttrs<'a> {
     Id(u16),
-    Flags(PushIflaVlanFlags),
+    Flags(IflaVlanFlags),
     EgressQos(IterableIflaVlanQos<'a>),
     IngressQos(IterableIflaVlanQos<'a>),
-    #[doc = "Associated type: \"VlanProtocols\" (enum)"]
+    #[doc = "Associated type: [`VlanProtocols`] (enum)"]
     Protocol(u16),
 }
 impl<'a> IterableLinkinfoVlanAttrs<'a> {
@@ -13463,7 +15548,7 @@ impl<'a> IterableLinkinfoVlanAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_flags(&self) -> Result<PushIflaVlanFlags, ErrorContext> {
+    pub fn get_flags(&self) -> Result<IflaVlanFlags, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -13508,7 +15593,7 @@ impl<'a> IterableLinkinfoVlanAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Associated type: \"VlanProtocols\" (enum)"]
+    #[doc = "Associated type: [`VlanProtocols`] (enum)"]
     pub fn get_protocol(&self) -> Result<u16, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -13580,7 +15665,7 @@ impl<'a> Iterator for IterableLinkinfoVlanAttrs<'a> {
                     val
                 }),
                 2u16 => LinkinfoVlanAttrs::Flags({
-                    let res = PushIflaVlanFlags::new_from_slice(next);
+                    let res = Some(IflaVlanFlags::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -13647,7 +15732,7 @@ impl IterableLinkinfoVlanAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoVlanAttrs", offset));
             return (
                 stack,
@@ -13706,11 +15791,11 @@ impl IterableLinkinfoVlanAttrs<'_> {
 #[derive(Clone)]
 pub enum IflaVlanQos {
     #[doc = "Attribute may repeat multiple times (treat it as array)"]
-    Mapping(PushIflaVlanQosMapping),
+    Mapping(IflaVlanQosMapping),
 }
 impl<'a> IterableIflaVlanQos<'a> {
     #[doc = "Attribute may repeat multiple times (treat it as array)"]
-    pub fn get_mapping(&self) -> MultiAttrIterable<Self, IflaVlanQos, PushIflaVlanQosMapping> {
+    pub fn get_mapping(&self) -> MultiAttrIterable<Self, IflaVlanQos, IflaVlanQosMapping> {
         MultiAttrIterable::new(self.clone(), |variant| {
             if let IflaVlanQos::Mapping(val) = variant {
                 Some(val)
@@ -13766,7 +15851,7 @@ impl<'a> Iterator for IterableIflaVlanQos<'a> {
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => IflaVlanQos::Mapping({
-                    let res = PushIflaVlanQosMapping::new_from_slice(next);
+                    let res = Some(IflaVlanQosMapping::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -13811,7 +15896,7 @@ impl IterableIflaVlanQos<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("IflaVlanQos", offset));
             return (
                 stack,
@@ -13954,7 +16039,7 @@ impl IterableLinkinfoVrfAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoVrfAttrs", offset));
             return (
                 stack,
@@ -14258,7 +16343,7 @@ impl IterableXdpAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("XdpAttrs", offset));
             return (
                 stack,
@@ -14333,11 +16418,11 @@ impl IterableXdpAttrs<'_> {
 }
 #[derive(Clone)]
 pub enum IflaAttrs<'a> {
-    #[doc = "u32 indexed by ipv4-devconf - 1 on output, on input it's a nest"]
+    #[doc = "u32 indexed by ipv4\\-devconf \\- 1 on output, on input it's a nest"]
     Conf(&'a [u8]),
 }
 impl<'a> IterableIflaAttrs<'a> {
-    #[doc = "u32 indexed by ipv4-devconf - 1 on output, on input it's a nest"]
+    #[doc = "u32 indexed by ipv4\\-devconf \\- 1 on output, on input it's a nest"]
     pub fn get_conf(&self) -> Result<&'a [u8], ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -14445,7 +16530,7 @@ impl IterableIflaAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("IflaAttrs", offset));
             return (
                 stack,
@@ -14479,11 +16564,11 @@ impl IterableIflaAttrs<'_> {
 #[derive(Clone)]
 pub enum Ifla6Attrs<'a> {
     Flags(u32),
-    #[doc = "u32 indexed by ipv6-devconf - 1 on output, on input it's a nest"]
+    #[doc = "u32 indexed by ipv6\\-devconf \\- 1 on output, on input it's a nest"]
     Conf(&'a [u8]),
     Stats(&'a [u8]),
     Mcast(&'a [u8]),
-    Cacheinfo(PushIflaCacheinfo),
+    Cacheinfo(IflaCacheinfo),
     Icmp6stats(&'a [u8]),
     Token(&'a [u8]),
     AddrGenMode(u8),
@@ -14505,7 +16590,7 @@ impl<'a> IterableIfla6Attrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "u32 indexed by ipv6-devconf - 1 on output, on input it's a nest"]
+    #[doc = "u32 indexed by ipv6\\-devconf \\- 1 on output, on input it's a nest"]
     pub fn get_conf(&self) -> Result<&'a [u8], ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -14551,7 +16636,7 @@ impl<'a> IterableIfla6Attrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    pub fn get_cacheinfo(&self) -> Result<PushIflaCacheinfo, ErrorContext> {
+    pub fn get_cacheinfo(&self) -> Result<IflaCacheinfo, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -14701,7 +16786,7 @@ impl<'a> Iterator for IterableIfla6Attrs<'a> {
                     val
                 }),
                 5u16 => Ifla6Attrs::Cacheinfo({
-                    let res = PushIflaCacheinfo::new_from_slice(next);
+                    let res = Some(IflaCacheinfo::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -14774,7 +16859,7 @@ impl IterableIfla6Attrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("Ifla6Attrs", offset));
             return (
                 stack,
@@ -14988,7 +17073,7 @@ impl IterableMctpAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("MctpAttrs", offset));
             return (
                 stack,
@@ -15027,14 +17112,14 @@ impl IterableMctpAttrs<'_> {
 }
 #[derive(Clone)]
 pub enum StatsAttrs<'a> {
-    Link64(PushRtnlLinkStats64),
+    Link64(RtnlLinkStats64),
     LinkXstats(&'a [u8]),
     LinkXstatsSlave(&'a [u8]),
     LinkOffloadXstats(IterableLinkOffloadXstats<'a>),
     AfSpec(&'a [u8]),
 }
 impl<'a> IterableStatsAttrs<'a> {
-    pub fn get_link_64(&self) -> Result<PushRtnlLinkStats64, ErrorContext> {
+    pub fn get_link_64(&self) -> Result<RtnlLinkStats64, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
         for attr in iter {
@@ -15160,7 +17245,7 @@ impl<'a> Iterator for IterableStatsAttrs<'a> {
             r#type = Some(header.r#type);
             let res = match header.r#type {
                 1u16 => StatsAttrs::Link64({
-                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
+                    let res = Some(RtnlLinkStats64::new_from_zeroed(next));
                     let Some(val) = res else { break };
                     val
                 }),
@@ -15229,7 +17314,7 @@ impl IterableStatsAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("StatsAttrs", offset));
             return (
                 stack,
@@ -15493,7 +17578,7 @@ impl IterableLinkOffloadXstats<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkOffloadXstats", offset));
             return (
                 stack,
@@ -15679,7 +17764,7 @@ impl IterableHwSInfoOne<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("HwSInfoOne", offset));
             return (
                 stack,
@@ -15828,7 +17913,7 @@ impl IterableLinkDpllPinAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkDpllPinAttrs", offset));
             return (
                 stack,
@@ -15863,15 +17948,15 @@ impl IterableLinkDpllPinAttrs<'_> {
 pub enum LinkinfoNetkitAttrs<'a> {
     PeerInfo(&'a [u8]),
     Primary(u8),
-    #[doc = "Associated type: \"NetkitPolicy\" (enum)"]
+    #[doc = "Associated type: [`NetkitPolicy`] (enum)"]
     Policy(u32),
-    #[doc = "Associated type: \"NetkitPolicy\" (enum)"]
+    #[doc = "Associated type: [`NetkitPolicy`] (enum)"]
     PeerPolicy(u32),
-    #[doc = "Associated type: \"NetkitMode\" (enum)"]
+    #[doc = "Associated type: [`NetkitMode`] (enum)"]
     Mode(u32),
-    #[doc = "Associated type: \"NetkitScrub\" (enum)"]
+    #[doc = "Associated type: [`NetkitScrub`] (enum)"]
     Scrub(u32),
-    #[doc = "Associated type: \"NetkitScrub\" (enum)"]
+    #[doc = "Associated type: [`NetkitScrub`] (enum)"]
     PeerScrub(u32),
     Headroom(u16),
     Tailroom(u16),
@@ -15907,7 +17992,7 @@ impl<'a> IterableLinkinfoNetkitAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Associated type: \"NetkitPolicy\" (enum)"]
+    #[doc = "Associated type: [`NetkitPolicy`] (enum)"]
     pub fn get_policy(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -15923,7 +18008,7 @@ impl<'a> IterableLinkinfoNetkitAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Associated type: \"NetkitPolicy\" (enum)"]
+    #[doc = "Associated type: [`NetkitPolicy`] (enum)"]
     pub fn get_peer_policy(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -15939,7 +18024,7 @@ impl<'a> IterableLinkinfoNetkitAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Associated type: \"NetkitMode\" (enum)"]
+    #[doc = "Associated type: [`NetkitMode`] (enum)"]
     pub fn get_mode(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -15955,7 +18040,7 @@ impl<'a> IterableLinkinfoNetkitAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Associated type: \"NetkitScrub\" (enum)"]
+    #[doc = "Associated type: [`NetkitScrub`] (enum)"]
     pub fn get_scrub(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -15971,7 +18056,7 @@ impl<'a> IterableLinkinfoNetkitAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Associated type: \"NetkitScrub\" (enum)"]
+    #[doc = "Associated type: [`NetkitScrub`] (enum)"]
     pub fn get_peer_scrub(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -16177,7 +18262,7 @@ impl IterableLinkinfoNetkitAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoNetkitAttrs", offset));
             return (
                 stack,
@@ -16258,11 +18343,11 @@ impl IterableLinkinfoNetkitAttrs<'_> {
 }
 #[derive(Clone)]
 pub enum LinkinfoOvpnAttrs {
-    #[doc = "Associated type: \"OvpnMode\" (enum)"]
+    #[doc = "Associated type: [`OvpnMode`] (enum)"]
     Mode(u8),
 }
 impl<'a> IterableLinkinfoOvpnAttrs<'a> {
-    #[doc = "Associated type: \"OvpnMode\" (enum)"]
+    #[doc = "Associated type: [`OvpnMode`] (enum)"]
     pub fn get_mode(&self) -> Result<u8, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -16372,7 +18457,7 @@ impl IterableLinkinfoOvpnAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("LinkinfoOvpnAttrs", offset));
             return (
                 stack,
@@ -16479,7 +18564,7 @@ impl<Prev: Rec> PushLinkAttrs<Prev> {
         self.as_rec_mut().push(0);
         self
     }
-    pub fn push_stats(mut self, value: PushRtnlLinkStats) -> Self {
+    pub fn push_stats(mut self, value: RtnlLinkStats) -> Self {
         push_header(self.as_rec_mut(), 7u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -16554,7 +18639,7 @@ impl<Prev: Rec> PushLinkAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    pub fn push_map(mut self, value: PushRtnlLinkIfmap) -> Self {
+    pub fn push_map(mut self, value: RtnlLinkIfmap) -> Self {
         push_header(self.as_rec_mut(), 14u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -16613,7 +18698,7 @@ impl<Prev: Rec> PushLinkAttrs<Prev> {
             header_offset: Some(header_offset),
         }
     }
-    pub fn push_stats64(mut self, value: PushRtnlLinkStats64) -> Self {
+    pub fn push_stats64(mut self, value: RtnlLinkStats64) -> Self {
         push_header(self.as_rec_mut(), 23u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -16649,7 +18734,7 @@ impl<Prev: Rec> PushLinkAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
+    #[doc = "Associated type: [`RtextFilter`] (1 bit per enumeration)"]
     pub fn push_ext_mask(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 29u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -16891,7 +18976,7 @@ impl<Prev: Rec> PushLinkAttrs<Prev> {
             header_offset: Some(header_offset),
         }
     }
-    #[doc = "EDT offload horizon supported by the device (in nsec)."]
+    #[doc = "EDT offload horizon supported by the device (in nsec)\\."]
     pub fn push_max_pacing_offload_horizon(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 66u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -16899,6 +18984,16 @@ impl<Prev: Rec> PushLinkAttrs<Prev> {
     }
     pub fn push_netns_immutable(mut self, value: u8) -> Self {
         push_header(self.as_rec_mut(), 67u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_headroom(mut self, value: u16) -> Self {
+        push_header(self.as_rec_mut(), 68u16, 2 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_tailroom(mut self, value: u16) -> Self {
+        push_header(self.as_rec_mut(), 69u16, 2 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
@@ -17092,37 +19187,37 @@ impl<Prev: Rec> PushVfinfoAttrs<Prev> {
         }
         prev
     }
-    pub fn push_mac(mut self, value: PushIflaVfMac) -> Self {
+    pub fn push_mac(mut self, value: IflaVfMac) -> Self {
         push_header(self.as_rec_mut(), 1u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
     }
-    pub fn push_vlan(mut self, value: PushIflaVfVlan) -> Self {
+    pub fn push_vlan(mut self, value: IflaVfVlan) -> Self {
         push_header(self.as_rec_mut(), 2u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
     }
-    pub fn push_tx_rate(mut self, value: PushIflaVfTxRate) -> Self {
+    pub fn push_tx_rate(mut self, value: IflaVfTxRate) -> Self {
         push_header(self.as_rec_mut(), 3u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
     }
-    pub fn push_spoofchk(mut self, value: PushIflaVfSpoofchk) -> Self {
+    pub fn push_spoofchk(mut self, value: IflaVfSpoofchk) -> Self {
         push_header(self.as_rec_mut(), 4u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
     }
-    pub fn push_link_state(mut self, value: PushIflaVfLinkState) -> Self {
+    pub fn push_link_state(mut self, value: IflaVfLinkState) -> Self {
         push_header(self.as_rec_mut(), 5u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
     }
-    pub fn push_rate(mut self, value: PushIflaVfRate) -> Self {
+    pub fn push_rate(mut self, value: IflaVfRate) -> Self {
         push_header(self.as_rec_mut(), 6u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
     }
-    pub fn push_rss_query_en(mut self, value: PushIflaVfRssQueryEn) -> Self {
+    pub fn push_rss_query_en(mut self, value: IflaVfRssQueryEn) -> Self {
         push_header(self.as_rec_mut(), 7u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -17134,17 +19229,17 @@ impl<Prev: Rec> PushVfinfoAttrs<Prev> {
             header_offset: Some(header_offset),
         }
     }
-    pub fn push_trust(mut self, value: PushIflaVfTrust) -> Self {
+    pub fn push_trust(mut self, value: IflaVfTrust) -> Self {
         push_header(self.as_rec_mut(), 9u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
     }
-    pub fn push_ib_node_guid(mut self, value: PushIflaVfGuid) -> Self {
+    pub fn push_ib_node_guid(mut self, value: IflaVfGuid) -> Self {
         push_header(self.as_rec_mut(), 10u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
     }
-    pub fn push_ib_port_guid(mut self, value: PushIflaVfGuid) -> Self {
+    pub fn push_ib_port_guid(mut self, value: IflaVfGuid) -> Self {
         push_header(self.as_rec_mut(), 11u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -17279,7 +19374,7 @@ impl<Prev: Rec> PushVfVlanAttrs<Prev> {
         prev
     }
     #[doc = "Attribute may repeat multiple times (treat it as array)"]
-    pub fn push_info(mut self, value: PushIflaVfVlanInfo) -> Self {
+    pub fn push_info(mut self, value: IflaVfVlanInfo) -> Self {
         push_header(self.as_rec_mut(), 1u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -17501,6 +19596,20 @@ impl<Prev: Rec> PushLinkinfoAttrs<Prev> {
             header_offset: self.header_offset.take(),
         };
         PushLinkinfoGeneveAttrs {
+            prev: Some(dummy),
+            header_offset: Some(new_header_offset),
+        }
+    }
+    #[doc = "Selector attribute is inserted automatically."]
+    #[doc = "At most one sub-message attribute is expected per attribute set."]
+    pub fn nested_data_hsr(mut self) -> PushLinkinfoHsrAttrs<PushDummy<Prev>> {
+        self = self.push_kind(c"hsr");
+        let new_header_offset = push_nested_header(self.as_rec_mut(), 2u16);
+        let dummy = PushDummy {
+            prev: self.prev.take(),
+            header_offset: self.header_offset.take(),
+        };
+        PushLinkinfoHsrAttrs {
             prev: Some(dummy),
             header_offset: Some(new_header_offset),
         }
@@ -18210,12 +20319,12 @@ impl<Prev: Rec> PushLinkinfoBridgeAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    pub fn push_root_id(mut self, value: PushIflaBridgeId) -> Self {
+    pub fn push_root_id(mut self, value: IflaBridgeId) -> Self {
         push_header(self.as_rec_mut(), 10u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
     }
-    pub fn push_bridge_id(mut self, value: PushIflaBridgeId) -> Self {
+    pub fn push_bridge_id(mut self, value: IflaBridgeId) -> Self {
         push_header(self.as_rec_mut(), 11u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -18390,7 +20499,7 @@ impl<Prev: Rec> PushLinkinfoBridgeAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    pub fn push_multi_boolopt(mut self, value: PushBrBooloptMulti) -> Self {
+    pub fn push_multi_boolopt(mut self, value: BrBooloptMulti) -> Self {
         push_header(self.as_rec_mut(), 46u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -18497,12 +20606,12 @@ impl<Prev: Rec> PushLinkinfoBrportAttrs<Prev> {
         push_header(self.as_rec_mut(), 12u16, 0 as u16);
         self
     }
-    pub fn push_root_id(mut self, value: PushIflaBridgeId) -> Self {
+    pub fn push_root_id(mut self, value: IflaBridgeId) -> Self {
         push_header(self.as_rec_mut(), 13u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
     }
-    pub fn push_bridge_id(mut self, value: PushIflaBridgeId) -> Self {
+    pub fn push_bridge_id(mut self, value: IflaBridgeId) -> Self {
         push_header(self.as_rec_mut(), 14u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -18706,14 +20815,24 @@ impl<Prev: Rec> PushLinkinfoGreAttrs<Prev> {
         self.as_rec_mut().extend(value.to_be_bytes());
         self
     }
-    pub fn push_local(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 6u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
+    pub fn push_local(mut self, value: std::net::IpAddr) -> Self {
+        push_header(self.as_rec_mut(), 6u16, {
+            match &value {
+                IpAddr::V4(_) => 4,
+                IpAddr::V6(_) => 16,
+            }
+        } as u16);
+        encode_ip(self.as_rec_mut(), value);
         self
     }
-    pub fn push_remote(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 7u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
+    pub fn push_remote(mut self, value: std::net::IpAddr) -> Self {
+        push_header(self.as_rec_mut(), 7u16, {
+            match &value {
+                IpAddr::V4(_) => 4,
+                IpAddr::V6(_) => 16,
+            }
+        } as u16);
+        encode_ip(self.as_rec_mut(), value);
         self
     }
     pub fn push_ttl(mut self, value: u8) -> Self {
@@ -18991,14 +21110,24 @@ impl<Prev: Rec> PushLinkinfoVtiAttrs<Prev> {
         self.as_rec_mut().extend(value.to_be_bytes());
         self
     }
-    pub fn push_local(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 4u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
+    pub fn push_local(mut self, value: std::net::IpAddr) -> Self {
+        push_header(self.as_rec_mut(), 4u16, {
+            match &value {
+                IpAddr::V4(_) => 4,
+                IpAddr::V6(_) => 16,
+            }
+        } as u16);
+        encode_ip(self.as_rec_mut(), value);
         self
     }
-    pub fn push_remote(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 5u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
+    pub fn push_remote(mut self, value: std::net::IpAddr) -> Self {
+        push_header(self.as_rec_mut(), 5u16, {
+            match &value {
+                IpAddr::V4(_) => 4,
+                IpAddr::V6(_) => 16,
+            }
+        } as u16);
+        encode_ip(self.as_rec_mut(), value);
         self
     }
     pub fn push_fwmark(mut self, value: u32) -> Self {
@@ -19113,9 +21242,9 @@ impl<Prev: Rec> PushLinkinfoGeneveAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    pub fn push_remote(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
+    pub fn push_remote(mut self, value: std::net::Ipv4Addr) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(&value.to_bits().to_be_bytes());
         self
     }
     pub fn push_ttl(mut self, value: u8) -> Self {
@@ -19176,13 +21305,93 @@ impl<Prev: Rec> PushLinkinfoGeneveAttrs<Prev> {
         push_header(self.as_rec_mut(), 14u16, 0 as u16);
         self
     }
-    pub fn push_port_range(mut self, value: PushIflaGenevePortRange) -> Self {
+    pub fn push_port_range(mut self, value: IflaGenevePortRange) -> Self {
         push_header(self.as_rec_mut(), 15u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
     }
+    pub fn push_gro_hint(mut self, value: ()) -> Self {
+        push_header(self.as_rec_mut(), 16u16, 0 as u16);
+        self
+    }
 }
 impl<Prev: Rec> Drop for PushLinkinfoGeneveAttrs<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+pub struct PushLinkinfoHsrAttrs<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushLinkinfoHsrAttrs<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushLinkinfoHsrAttrs<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    pub fn push_slave1(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 1u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_slave2(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_multicast_spec(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 3u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_supervision_addr(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 4u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    pub fn push_seq_nr(mut self, value: u16) -> Self {
+        push_header(self.as_rec_mut(), 5u16, 2 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_version(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_protocol(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_interlink(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 8u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushLinkinfoHsrAttrs<Prev> {
     fn drop(&mut self) {
         if let Some(prev) = &mut self.prev {
             if let Some(header_offset) = &self.header_offset {
@@ -19222,14 +21431,24 @@ impl<Prev: Rec> PushLinkinfoIptunAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    pub fn push_local(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
+    pub fn push_local(mut self, value: std::net::IpAddr) -> Self {
+        push_header(self.as_rec_mut(), 2u16, {
+            match &value {
+                IpAddr::V4(_) => 4,
+                IpAddr::V6(_) => 16,
+            }
+        } as u16);
+        encode_ip(self.as_rec_mut(), value);
         self
     }
-    pub fn push_remote(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 3u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
+    pub fn push_remote(mut self, value: std::net::IpAddr) -> Self {
+        push_header(self.as_rec_mut(), 3u16, {
+            match &value {
+                IpAddr::V4(_) => 4,
+                IpAddr::V6(_) => 16,
+            }
+        } as u16);
+        encode_ip(self.as_rec_mut(), value);
         self
     }
     pub fn push_ttl(mut self, value: u8) -> Self {
@@ -19272,9 +21491,9 @@ impl<Prev: Rec> PushLinkinfoIptunAttrs<Prev> {
         self.as_rec_mut().extend(value);
         self
     }
-    pub fn push_6rd_relay_prefix(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 12u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
+    pub fn push_6rd_relay_prefix(mut self, value: std::net::Ipv4Addr) -> Self {
+        push_header(self.as_rec_mut(), 12u16, 4 as u16);
+        self.as_rec_mut().extend(&value.to_bits().to_be_bytes());
         self
     }
     pub fn push_6rd_prefixlen(mut self, value: u16) -> Self {
@@ -19543,7 +21762,7 @@ impl<Prev: Rec> PushLinkinfoVlanAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    pub fn push_flags(mut self, value: PushIflaVlanFlags) -> Self {
+    pub fn push_flags(mut self, value: IflaVlanFlags) -> Self {
         push_header(self.as_rec_mut(), 2u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -19562,7 +21781,7 @@ impl<Prev: Rec> PushLinkinfoVlanAttrs<Prev> {
             header_offset: Some(header_offset),
         }
     }
-    #[doc = "Associated type: \"VlanProtocols\" (enum)"]
+    #[doc = "Associated type: [`VlanProtocols`] (enum)"]
     pub fn push_protocol(mut self, value: u16) -> Self {
         push_header(self.as_rec_mut(), 5u16, 2 as u16);
         self.as_rec_mut().extend(value.to_be_bytes());
@@ -19605,7 +21824,7 @@ impl<Prev: Rec> PushIflaVlanQos<Prev> {
         prev
     }
     #[doc = "Attribute may repeat multiple times (treat it as array)"]
-    pub fn push_mapping(mut self, value: PushIflaVlanQosMapping) -> Self {
+    pub fn push_mapping(mut self, value: IflaVlanQosMapping) -> Self {
         push_header(self.as_rec_mut(), 1u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -19763,7 +21982,7 @@ impl<Prev: Rec> PushIflaAttrs<Prev> {
         }
         prev
     }
-    #[doc = "u32 indexed by ipv4-devconf - 1 on output, on input it's a nest"]
+    #[doc = "u32 indexed by ipv4\\-devconf \\- 1 on output, on input it's a nest"]
     pub fn push_conf(mut self, value: &[u8]) -> Self {
         push_header(self.as_rec_mut(), 1u16, value.len() as u16);
         self.as_rec_mut().extend(value);
@@ -19810,7 +22029,7 @@ impl<Prev: Rec> PushIfla6Attrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "u32 indexed by ipv6-devconf - 1 on output, on input it's a nest"]
+    #[doc = "u32 indexed by ipv6\\-devconf \\- 1 on output, on input it's a nest"]
     pub fn push_conf(mut self, value: &[u8]) -> Self {
         push_header(self.as_rec_mut(), 2u16, value.len() as u16);
         self.as_rec_mut().extend(value);
@@ -19826,7 +22045,7 @@ impl<Prev: Rec> PushIfla6Attrs<Prev> {
         self.as_rec_mut().extend(value);
         self
     }
-    pub fn push_cacheinfo(mut self, value: PushIflaCacheinfo) -> Self {
+    pub fn push_cacheinfo(mut self, value: IflaCacheinfo) -> Self {
         push_header(self.as_rec_mut(), 5u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -19933,7 +22152,7 @@ impl<Prev: Rec> PushStatsAttrs<Prev> {
         }
         prev
     }
-    pub fn push_link_64(mut self, value: PushRtnlLinkStats64) -> Self {
+    pub fn push_link_64(mut self, value: RtnlLinkStats64) -> Self {
         push_header(self.as_rec_mut(), 1u16, value.as_slice().len() as u16);
         self.as_rec_mut().extend(value.as_slice());
         self
@@ -20194,31 +22413,31 @@ impl<Prev: Rec> PushLinkinfoNetkitAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "Associated type: \"NetkitPolicy\" (enum)"]
+    #[doc = "Associated type: [`NetkitPolicy`] (enum)"]
     pub fn push_policy(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 3u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "Associated type: \"NetkitPolicy\" (enum)"]
+    #[doc = "Associated type: [`NetkitPolicy`] (enum)"]
     pub fn push_peer_policy(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 4u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "Associated type: \"NetkitMode\" (enum)"]
+    #[doc = "Associated type: [`NetkitMode`] (enum)"]
     pub fn push_mode(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 5u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "Associated type: \"NetkitScrub\" (enum)"]
+    #[doc = "Associated type: [`NetkitScrub`] (enum)"]
     pub fn push_scrub(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 6u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "Associated type: \"NetkitScrub\" (enum)"]
+    #[doc = "Associated type: [`NetkitScrub`] (enum)"]
     pub fn push_peer_scrub(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 7u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -20270,7 +22489,7 @@ impl<Prev: Rec> PushLinkinfoOvpnAttrs<Prev> {
         }
         prev
     }
-    #[doc = "Associated type: \"OvpnMode\" (enum)"]
+    #[doc = "Associated type: [`OvpnMode`] (enum)"]
     pub fn push_mode(mut self, value: u8) -> Self {
         push_header(self.as_rec_mut(), 1u16, 1 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -20286,2823 +22505,41 @@ impl<Prev: Rec> Drop for PushLinkinfoOvpnAttrs<Prev> {
         }
     }
 }
-#[derive(Clone)]
-pub struct PushRtgenmsg {
-    pub(crate) buf: [u8; 1usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushRtgenmsg {
-    fn default() -> Self {
-        Self { buf: [0u8; 1usize] }
-    }
-}
-impl PushRtgenmsg {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        1usize
-    }
-    pub fn family(&self) -> u8 {
-        parse_u8(&self.buf[0usize..1usize]).unwrap()
-    }
-    pub fn set_family(&mut self, value: u8) {
-        self.buf[0usize..1usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushRtgenmsg {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("Rtgenmsg")
-            .field("family", &self.family())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIfinfomsg {
-    pub(crate) buf: [u8; 16usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIfinfomsg {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 16usize],
-        }
-    }
-}
-impl PushIfinfomsg {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        16usize
-    }
-    pub fn ifi_family(&self) -> u8 {
-        parse_u8(&self.buf[0usize..1usize]).unwrap()
-    }
-    pub fn set_ifi_family(&mut self, value: u8) {
-        self.buf[0usize..1usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn ifi_type(&self) -> u16 {
-        parse_u16(&self.buf[2usize..4usize]).unwrap()
-    }
-    pub fn set_ifi_type(&mut self, value: u16) {
-        self.buf[2usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn ifi_index(&self) -> i32 {
-        parse_i32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_ifi_index(&mut self, value: i32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    #[doc = "Associated type: \"IfinfoFlags\" (1 bit per enumeration)"]
-    pub fn ifi_flags(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
-    }
-    #[doc = "Associated type: \"IfinfoFlags\" (1 bit per enumeration)"]
-    pub fn set_ifi_flags(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn ifi_change(&self) -> u32 {
-        parse_u32(&self.buf[12usize..16usize]).unwrap()
-    }
-    pub fn set_ifi_change(&mut self, value: u32) {
-        self.buf[12usize..16usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIfinfomsg {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("Ifinfomsg")
-            .field("ifi_family", &self.ifi_family())
-            .field("ifi_type", &self.ifi_type())
-            .field("ifi_index", &self.ifi_index())
-            .field(
-                "ifi_flags",
-                &FormatFlags(self.ifi_flags().into(), IfinfoFlags::from_value),
-            )
-            .field("ifi_change", &self.ifi_change())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaBridgeId {
-    pub(crate) buf: [u8; 8usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaBridgeId {
-    fn default() -> Self {
-        Self { buf: [0u8; 8usize] }
-    }
-}
-impl PushIflaBridgeId {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        8usize
-    }
-    pub fn prio(&self) -> u16 {
-        parse_u16(&self.buf[0usize..2usize]).unwrap()
-    }
-    pub fn set_prio(&mut self, value: u16) {
-        self.buf[0usize..2usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn addr(&self) -> [u8; 6usize] {
-        self.buf[2usize..8usize].try_into().unwrap()
-    }
-    pub fn set_addr(&mut self, value: [u8; 6usize]) {
-        self.buf[2usize..8usize].copy_from_slice(&value)
-    }
-}
-impl std::fmt::Debug for PushIflaBridgeId {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaBridgeId")
-            .field("prio", &self.prio())
-            .field("addr", &self.addr())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaCacheinfo {
-    pub(crate) buf: [u8; 16usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaCacheinfo {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 16usize],
-        }
-    }
-}
-impl PushIflaCacheinfo {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        16usize
-    }
-    pub fn max_reasm_len(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_max_reasm_len(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tstamp(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_tstamp(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn reachable_time(&self) -> i32 {
-        parse_i32(&self.buf[8usize..12usize]).unwrap()
-    }
-    pub fn set_reachable_time(&mut self, value: i32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn retrans_time(&self) -> u32 {
-        parse_u32(&self.buf[12usize..16usize]).unwrap()
-    }
-    pub fn set_retrans_time(&mut self, value: u32) {
-        self.buf[12usize..16usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIflaCacheinfo {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaCacheinfo")
-            .field("max_reasm_len", &self.max_reasm_len())
-            .field("tstamp", &self.tstamp())
-            .field("reachable_time", &self.reachable_time())
-            .field("retrans_time", &self.retrans_time())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushRtnlLinkStats {
-    pub(crate) buf: [u8; 96usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushRtnlLinkStats {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 96usize],
-        }
-    }
-}
-impl PushRtnlLinkStats {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        96usize
-    }
-    pub fn rx_packets(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_rx_packets(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_packets(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_tx_packets(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_bytes(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
-    }
-    pub fn set_rx_bytes(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_bytes(&self) -> u32 {
-        parse_u32(&self.buf[12usize..16usize]).unwrap()
-    }
-    pub fn set_tx_bytes(&mut self, value: u32) {
-        self.buf[12usize..16usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_errors(&self) -> u32 {
-        parse_u32(&self.buf[16usize..20usize]).unwrap()
-    }
-    pub fn set_rx_errors(&mut self, value: u32) {
-        self.buf[16usize..20usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_errors(&self) -> u32 {
-        parse_u32(&self.buf[20usize..24usize]).unwrap()
-    }
-    pub fn set_tx_errors(&mut self, value: u32) {
-        self.buf[20usize..24usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_dropped(&self) -> u32 {
-        parse_u32(&self.buf[24usize..28usize]).unwrap()
-    }
-    pub fn set_rx_dropped(&mut self, value: u32) {
-        self.buf[24usize..28usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_dropped(&self) -> u32 {
-        parse_u32(&self.buf[28usize..32usize]).unwrap()
-    }
-    pub fn set_tx_dropped(&mut self, value: u32) {
-        self.buf[28usize..32usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn multicast(&self) -> u32 {
-        parse_u32(&self.buf[32usize..36usize]).unwrap()
-    }
-    pub fn set_multicast(&mut self, value: u32) {
-        self.buf[32usize..36usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn collisions(&self) -> u32 {
-        parse_u32(&self.buf[36usize..40usize]).unwrap()
-    }
-    pub fn set_collisions(&mut self, value: u32) {
-        self.buf[36usize..40usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_length_errors(&self) -> u32 {
-        parse_u32(&self.buf[40usize..44usize]).unwrap()
-    }
-    pub fn set_rx_length_errors(&mut self, value: u32) {
-        self.buf[40usize..44usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_over_errors(&self) -> u32 {
-        parse_u32(&self.buf[44usize..48usize]).unwrap()
-    }
-    pub fn set_rx_over_errors(&mut self, value: u32) {
-        self.buf[44usize..48usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_crc_errors(&self) -> u32 {
-        parse_u32(&self.buf[48usize..52usize]).unwrap()
-    }
-    pub fn set_rx_crc_errors(&mut self, value: u32) {
-        self.buf[48usize..52usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_frame_errors(&self) -> u32 {
-        parse_u32(&self.buf[52usize..56usize]).unwrap()
-    }
-    pub fn set_rx_frame_errors(&mut self, value: u32) {
-        self.buf[52usize..56usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_fifo_errors(&self) -> u32 {
-        parse_u32(&self.buf[56usize..60usize]).unwrap()
-    }
-    pub fn set_rx_fifo_errors(&mut self, value: u32) {
-        self.buf[56usize..60usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_missed_errors(&self) -> u32 {
-        parse_u32(&self.buf[60usize..64usize]).unwrap()
-    }
-    pub fn set_rx_missed_errors(&mut self, value: u32) {
-        self.buf[60usize..64usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_aborted_errors(&self) -> u32 {
-        parse_u32(&self.buf[64usize..68usize]).unwrap()
-    }
-    pub fn set_tx_aborted_errors(&mut self, value: u32) {
-        self.buf[64usize..68usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_carrier_errors(&self) -> u32 {
-        parse_u32(&self.buf[68usize..72usize]).unwrap()
-    }
-    pub fn set_tx_carrier_errors(&mut self, value: u32) {
-        self.buf[68usize..72usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_fifo_errors(&self) -> u32 {
-        parse_u32(&self.buf[72usize..76usize]).unwrap()
-    }
-    pub fn set_tx_fifo_errors(&mut self, value: u32) {
-        self.buf[72usize..76usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_heartbeat_errors(&self) -> u32 {
-        parse_u32(&self.buf[76usize..80usize]).unwrap()
-    }
-    pub fn set_tx_heartbeat_errors(&mut self, value: u32) {
-        self.buf[76usize..80usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_window_errors(&self) -> u32 {
-        parse_u32(&self.buf[80usize..84usize]).unwrap()
-    }
-    pub fn set_tx_window_errors(&mut self, value: u32) {
-        self.buf[80usize..84usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_compressed(&self) -> u32 {
-        parse_u32(&self.buf[84usize..88usize]).unwrap()
-    }
-    pub fn set_rx_compressed(&mut self, value: u32) {
-        self.buf[84usize..88usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_compressed(&self) -> u32 {
-        parse_u32(&self.buf[88usize..92usize]).unwrap()
-    }
-    pub fn set_tx_compressed(&mut self, value: u32) {
-        self.buf[88usize..92usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_nohandler(&self) -> u32 {
-        parse_u32(&self.buf[92usize..96usize]).unwrap()
-    }
-    pub fn set_rx_nohandler(&mut self, value: u32) {
-        self.buf[92usize..96usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushRtnlLinkStats {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("RtnlLinkStats")
-            .field("rx_packets", &self.rx_packets())
-            .field("tx_packets", &self.tx_packets())
-            .field("rx_bytes", &self.rx_bytes())
-            .field("tx_bytes", &self.tx_bytes())
-            .field("rx_errors", &self.rx_errors())
-            .field("tx_errors", &self.tx_errors())
-            .field("rx_dropped", &self.rx_dropped())
-            .field("tx_dropped", &self.tx_dropped())
-            .field("multicast", &self.multicast())
-            .field("collisions", &self.collisions())
-            .field("rx_length_errors", &self.rx_length_errors())
-            .field("rx_over_errors", &self.rx_over_errors())
-            .field("rx_crc_errors", &self.rx_crc_errors())
-            .field("rx_frame_errors", &self.rx_frame_errors())
-            .field("rx_fifo_errors", &self.rx_fifo_errors())
-            .field("rx_missed_errors", &self.rx_missed_errors())
-            .field("tx_aborted_errors", &self.tx_aborted_errors())
-            .field("tx_carrier_errors", &self.tx_carrier_errors())
-            .field("tx_fifo_errors", &self.tx_fifo_errors())
-            .field("tx_heartbeat_errors", &self.tx_heartbeat_errors())
-            .field("tx_window_errors", &self.tx_window_errors())
-            .field("rx_compressed", &self.rx_compressed())
-            .field("tx_compressed", &self.tx_compressed())
-            .field("rx_nohandler", &self.rx_nohandler())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushRtnlLinkStats64 {
-    pub(crate) buf: [u8; 200usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushRtnlLinkStats64 {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 200usize],
-        }
-    }
-}
-impl PushRtnlLinkStats64 {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        200usize
-    }
-    pub fn rx_packets(&self) -> u64 {
-        parse_u64(&self.buf[0usize..8usize]).unwrap()
-    }
-    pub fn set_rx_packets(&mut self, value: u64) {
-        self.buf[0usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_packets(&self) -> u64 {
-        parse_u64(&self.buf[8usize..16usize]).unwrap()
-    }
-    pub fn set_tx_packets(&mut self, value: u64) {
-        self.buf[8usize..16usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_bytes(&self) -> u64 {
-        parse_u64(&self.buf[16usize..24usize]).unwrap()
-    }
-    pub fn set_rx_bytes(&mut self, value: u64) {
-        self.buf[16usize..24usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_bytes(&self) -> u64 {
-        parse_u64(&self.buf[24usize..32usize]).unwrap()
-    }
-    pub fn set_tx_bytes(&mut self, value: u64) {
-        self.buf[24usize..32usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_errors(&self) -> u64 {
-        parse_u64(&self.buf[32usize..40usize]).unwrap()
-    }
-    pub fn set_rx_errors(&mut self, value: u64) {
-        self.buf[32usize..40usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_errors(&self) -> u64 {
-        parse_u64(&self.buf[40usize..48usize]).unwrap()
-    }
-    pub fn set_tx_errors(&mut self, value: u64) {
-        self.buf[40usize..48usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_dropped(&self) -> u64 {
-        parse_u64(&self.buf[48usize..56usize]).unwrap()
-    }
-    pub fn set_rx_dropped(&mut self, value: u64) {
-        self.buf[48usize..56usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_dropped(&self) -> u64 {
-        parse_u64(&self.buf[56usize..64usize]).unwrap()
-    }
-    pub fn set_tx_dropped(&mut self, value: u64) {
-        self.buf[56usize..64usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn multicast(&self) -> u64 {
-        parse_u64(&self.buf[64usize..72usize]).unwrap()
-    }
-    pub fn set_multicast(&mut self, value: u64) {
-        self.buf[64usize..72usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn collisions(&self) -> u64 {
-        parse_u64(&self.buf[72usize..80usize]).unwrap()
-    }
-    pub fn set_collisions(&mut self, value: u64) {
-        self.buf[72usize..80usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_length_errors(&self) -> u64 {
-        parse_u64(&self.buf[80usize..88usize]).unwrap()
-    }
-    pub fn set_rx_length_errors(&mut self, value: u64) {
-        self.buf[80usize..88usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_over_errors(&self) -> u64 {
-        parse_u64(&self.buf[88usize..96usize]).unwrap()
-    }
-    pub fn set_rx_over_errors(&mut self, value: u64) {
-        self.buf[88usize..96usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_crc_errors(&self) -> u64 {
-        parse_u64(&self.buf[96usize..104usize]).unwrap()
-    }
-    pub fn set_rx_crc_errors(&mut self, value: u64) {
-        self.buf[96usize..104usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_frame_errors(&self) -> u64 {
-        parse_u64(&self.buf[104usize..112usize]).unwrap()
-    }
-    pub fn set_rx_frame_errors(&mut self, value: u64) {
-        self.buf[104usize..112usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_fifo_errors(&self) -> u64 {
-        parse_u64(&self.buf[112usize..120usize]).unwrap()
-    }
-    pub fn set_rx_fifo_errors(&mut self, value: u64) {
-        self.buf[112usize..120usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_missed_errors(&self) -> u64 {
-        parse_u64(&self.buf[120usize..128usize]).unwrap()
-    }
-    pub fn set_rx_missed_errors(&mut self, value: u64) {
-        self.buf[120usize..128usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_aborted_errors(&self) -> u64 {
-        parse_u64(&self.buf[128usize..136usize]).unwrap()
-    }
-    pub fn set_tx_aborted_errors(&mut self, value: u64) {
-        self.buf[128usize..136usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_carrier_errors(&self) -> u64 {
-        parse_u64(&self.buf[136usize..144usize]).unwrap()
-    }
-    pub fn set_tx_carrier_errors(&mut self, value: u64) {
-        self.buf[136usize..144usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_fifo_errors(&self) -> u64 {
-        parse_u64(&self.buf[144usize..152usize]).unwrap()
-    }
-    pub fn set_tx_fifo_errors(&mut self, value: u64) {
-        self.buf[144usize..152usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_heartbeat_errors(&self) -> u64 {
-        parse_u64(&self.buf[152usize..160usize]).unwrap()
-    }
-    pub fn set_tx_heartbeat_errors(&mut self, value: u64) {
-        self.buf[152usize..160usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_window_errors(&self) -> u64 {
-        parse_u64(&self.buf[160usize..168usize]).unwrap()
-    }
-    pub fn set_tx_window_errors(&mut self, value: u64) {
-        self.buf[160usize..168usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_compressed(&self) -> u64 {
-        parse_u64(&self.buf[168usize..176usize]).unwrap()
-    }
-    pub fn set_rx_compressed(&mut self, value: u64) {
-        self.buf[168usize..176usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn tx_compressed(&self) -> u64 {
-        parse_u64(&self.buf[176usize..184usize]).unwrap()
-    }
-    pub fn set_tx_compressed(&mut self, value: u64) {
-        self.buf[176usize..184usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_nohandler(&self) -> u64 {
-        parse_u64(&self.buf[184usize..192usize]).unwrap()
-    }
-    pub fn set_rx_nohandler(&mut self, value: u64) {
-        self.buf[184usize..192usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rx_otherhost_dropped(&self) -> u64 {
-        parse_u64(&self.buf[192usize..200usize]).unwrap()
-    }
-    pub fn set_rx_otherhost_dropped(&mut self, value: u64) {
-        self.buf[192usize..200usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushRtnlLinkStats64 {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("RtnlLinkStats64")
-            .field("rx_packets", &self.rx_packets())
-            .field("tx_packets", &self.tx_packets())
-            .field("rx_bytes", &self.rx_bytes())
-            .field("tx_bytes", &self.tx_bytes())
-            .field("rx_errors", &self.rx_errors())
-            .field("tx_errors", &self.tx_errors())
-            .field("rx_dropped", &self.rx_dropped())
-            .field("tx_dropped", &self.tx_dropped())
-            .field("multicast", &self.multicast())
-            .field("collisions", &self.collisions())
-            .field("rx_length_errors", &self.rx_length_errors())
-            .field("rx_over_errors", &self.rx_over_errors())
-            .field("rx_crc_errors", &self.rx_crc_errors())
-            .field("rx_frame_errors", &self.rx_frame_errors())
-            .field("rx_fifo_errors", &self.rx_fifo_errors())
-            .field("rx_missed_errors", &self.rx_missed_errors())
-            .field("tx_aborted_errors", &self.tx_aborted_errors())
-            .field("tx_carrier_errors", &self.tx_carrier_errors())
-            .field("tx_fifo_errors", &self.tx_fifo_errors())
-            .field("tx_heartbeat_errors", &self.tx_heartbeat_errors())
-            .field("tx_window_errors", &self.tx_window_errors())
-            .field("rx_compressed", &self.rx_compressed())
-            .field("tx_compressed", &self.tx_compressed())
-            .field("rx_nohandler", &self.rx_nohandler())
-            .field("rx_otherhost_dropped", &self.rx_otherhost_dropped())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushRtnlLinkIfmap {
-    pub(crate) buf: [u8; 32usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushRtnlLinkIfmap {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 32usize],
-        }
-    }
-}
-impl PushRtnlLinkIfmap {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        32usize
-    }
-    pub fn mem_start(&self) -> u64 {
-        parse_u64(&self.buf[0usize..8usize]).unwrap()
-    }
-    pub fn set_mem_start(&mut self, value: u64) {
-        self.buf[0usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn mem_end(&self) -> u64 {
-        parse_u64(&self.buf[8usize..16usize]).unwrap()
-    }
-    pub fn set_mem_end(&mut self, value: u64) {
-        self.buf[8usize..16usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn base_addr(&self) -> u64 {
-        parse_u64(&self.buf[16usize..24usize]).unwrap()
-    }
-    pub fn set_base_addr(&mut self, value: u64) {
-        self.buf[16usize..24usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn irq(&self) -> u16 {
-        parse_u16(&self.buf[24usize..26usize]).unwrap()
-    }
-    pub fn set_irq(&mut self, value: u16) {
-        self.buf[24usize..26usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn dma(&self) -> u8 {
-        parse_u8(&self.buf[26usize..27usize]).unwrap()
-    }
-    pub fn set_dma(&mut self, value: u8) {
-        self.buf[26usize..27usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn port(&self) -> u8 {
-        parse_u8(&self.buf[27usize..28usize]).unwrap()
-    }
-    pub fn set_port(&mut self, value: u8) {
-        self.buf[27usize..28usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushRtnlLinkIfmap {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("RtnlLinkIfmap")
-            .field("mem_start", &self.mem_start())
-            .field("mem_end", &self.mem_end())
-            .field("base_addr", &self.base_addr())
-            .field("irq", &self.irq())
-            .field("dma", &self.dma())
-            .field("port", &self.port())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushBrBooloptMulti {
-    pub(crate) buf: [u8; 8usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushBrBooloptMulti {
-    fn default() -> Self {
-        Self { buf: [0u8; 8usize] }
-    }
-}
-impl PushBrBooloptMulti {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        8usize
-    }
-    pub fn optval(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_optval(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn optmask(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_optmask(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushBrBooloptMulti {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("BrBooloptMulti")
-            .field("optval", &self.optval())
-            .field("optmask", &self.optmask())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIfStatsMsg {
-    pub(crate) buf: [u8; 12usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIfStatsMsg {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 12usize],
-        }
-    }
-}
-impl PushIfStatsMsg {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        12usize
-    }
-    pub fn family(&self) -> u8 {
-        parse_u8(&self.buf[0usize..1usize]).unwrap()
-    }
-    pub fn set_family(&mut self, value: u8) {
-        self.buf[0usize..1usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn ifindex(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_ifindex(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn filter_mask(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
-    }
-    pub fn set_filter_mask(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIfStatsMsg {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IfStatsMsg")
-            .field("family", &self.family())
-            .field("ifindex", &self.ifindex())
-            .field("filter_mask", &self.filter_mask())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaVlanFlags {
-    pub(crate) buf: [u8; 8usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaVlanFlags {
-    fn default() -> Self {
-        Self { buf: [0u8; 8usize] }
-    }
-}
-impl PushIflaVlanFlags {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        8usize
-    }
-    #[doc = "Associated type: \"VlanFlags\" (1 bit per enumeration)"]
-    pub fn flags(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    #[doc = "Associated type: \"VlanFlags\" (1 bit per enumeration)"]
-    pub fn set_flags(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn mask(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_mask(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIflaVlanFlags {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaVlanFlags")
-            .field(
-                "flags",
-                &FormatFlags(self.flags().into(), VlanFlags::from_value),
-            )
-            .field("mask", &FormatHex(self.mask().to_ne_bytes()))
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaVlanQosMapping {
-    pub(crate) buf: [u8; 8usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaVlanQosMapping {
-    fn default() -> Self {
-        Self { buf: [0u8; 8usize] }
-    }
-}
-impl PushIflaVlanQosMapping {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        8usize
-    }
-    pub fn from(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_from(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn to(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_to(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIflaVlanQosMapping {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaVlanQosMapping")
-            .field("from", &self.from())
-            .field("to", &self.to())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaGenevePortRange {
-    pub(crate) buf: [u8; 4usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaGenevePortRange {
-    fn default() -> Self {
-        Self { buf: [0u8; 4usize] }
-    }
-}
-impl PushIflaGenevePortRange {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        4usize
-    }
-    pub fn low(&self) -> u16 {
-        parse_be_u16(&self.buf[0usize..2usize]).unwrap()
-    }
-    pub fn set_low(&mut self, value: u16) {
-        self.buf[0usize..2usize].copy_from_slice(&value.to_be_bytes())
-    }
-    pub fn high(&self) -> u16 {
-        parse_be_u16(&self.buf[2usize..4usize]).unwrap()
-    }
-    pub fn set_high(&mut self, value: u16) {
-        self.buf[2usize..4usize].copy_from_slice(&value.to_be_bytes())
-    }
-}
-impl std::fmt::Debug for PushIflaGenevePortRange {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaGenevePortRange")
-            .field("low", &self.low())
-            .field("high", &self.high())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaVfMac {
-    pub(crate) buf: [u8; 36usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaVfMac {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 36usize],
-        }
-    }
-}
-impl PushIflaVfMac {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        36usize
-    }
-    pub fn vf(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_vf(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn mac(&self) -> [u8; 32usize] {
-        self.buf[4usize..36usize].try_into().unwrap()
-    }
-    pub fn set_mac(&mut self, value: [u8; 32usize]) {
-        self.buf[4usize..36usize].copy_from_slice(&value)
-    }
-}
-impl std::fmt::Debug for PushIflaVfMac {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaVfMac")
-            .field("vf", &self.vf())
-            .field("mac", &self.mac())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaVfVlan {
-    pub(crate) buf: [u8; 12usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaVfVlan {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 12usize],
-        }
-    }
-}
-impl PushIflaVfVlan {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        12usize
-    }
-    pub fn vf(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_vf(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn vlan(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_vlan(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn qos(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
-    }
-    pub fn set_qos(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIflaVfVlan {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaVfVlan")
-            .field("vf", &self.vf())
-            .field("vlan", &self.vlan())
-            .field("qos", &self.qos())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaVfTxRate {
-    pub(crate) buf: [u8; 8usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaVfTxRate {
-    fn default() -> Self {
-        Self { buf: [0u8; 8usize] }
-    }
-}
-impl PushIflaVfTxRate {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        8usize
-    }
-    pub fn vf(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_vf(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn rate(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_rate(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIflaVfTxRate {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaVfTxRate")
-            .field("vf", &self.vf())
-            .field("rate", &self.rate())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaVfSpoofchk {
-    pub(crate) buf: [u8; 8usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaVfSpoofchk {
-    fn default() -> Self {
-        Self { buf: [0u8; 8usize] }
-    }
-}
-impl PushIflaVfSpoofchk {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        8usize
-    }
-    pub fn vf(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_vf(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn setting(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_setting(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIflaVfSpoofchk {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaVfSpoofchk")
-            .field("vf", &self.vf())
-            .field("setting", &self.setting())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaVfLinkState {
-    pub(crate) buf: [u8; 8usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaVfLinkState {
-    fn default() -> Self {
-        Self { buf: [0u8; 8usize] }
-    }
-}
-impl PushIflaVfLinkState {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        8usize
-    }
-    pub fn vf(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_vf(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    #[doc = "Associated type: \"IflaVfLinkStateEnum\" (enum)"]
-    pub fn link_state(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    #[doc = "Associated type: \"IflaVfLinkStateEnum\" (enum)"]
-    pub fn set_link_state(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIflaVfLinkState {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaVfLinkState")
-            .field("vf", &self.vf())
-            .field(
-                "link_state",
-                &FormatEnum(self.link_state().into(), IflaVfLinkStateEnum::from_value),
-            )
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaVfRate {
-    pub(crate) buf: [u8; 12usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaVfRate {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 12usize],
-        }
-    }
-}
-impl PushIflaVfRate {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        12usize
-    }
-    pub fn vf(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_vf(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn min_tx_rate(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_min_tx_rate(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn max_tx_rate(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
-    }
-    pub fn set_max_tx_rate(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIflaVfRate {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaVfRate")
-            .field("vf", &self.vf())
-            .field("min_tx_rate", &self.min_tx_rate())
-            .field("max_tx_rate", &self.max_tx_rate())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaVfRssQueryEn {
-    pub(crate) buf: [u8; 8usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaVfRssQueryEn {
-    fn default() -> Self {
-        Self { buf: [0u8; 8usize] }
-    }
-}
-impl PushIflaVfRssQueryEn {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        8usize
-    }
-    pub fn vf(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_vf(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn setting(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_setting(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIflaVfRssQueryEn {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaVfRssQueryEn")
-            .field("vf", &self.vf())
-            .field("setting", &self.setting())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaVfTrust {
-    pub(crate) buf: [u8; 8usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaVfTrust {
-    fn default() -> Self {
-        Self { buf: [0u8; 8usize] }
-    }
-}
-impl PushIflaVfTrust {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        8usize
-    }
-    pub fn vf(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_vf(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn setting(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_setting(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIflaVfTrust {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaVfTrust")
-            .field("vf", &self.vf())
-            .field("setting", &self.setting())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaVfGuid {
-    pub(crate) buf: [u8; 16usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaVfGuid {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 16usize],
-        }
-    }
-}
-impl PushIflaVfGuid {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        16usize
-    }
-    pub fn vf(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_vf(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn guid(&self) -> u64 {
-        parse_u64(&self.buf[8usize..16usize]).unwrap()
-    }
-    pub fn set_guid(&mut self, value: u64) {
-        self.buf[8usize..16usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIflaVfGuid {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaVfGuid")
-            .field("vf", &self.vf())
-            .field("guid", &self.guid())
-            .finish()
-    }
-}
-#[derive(Clone)]
-pub struct PushIflaVfVlanInfo {
-    pub(crate) buf: [u8; 16usize],
-}
-#[doc = "Create zero-initialized struct"]
-impl Default for PushIflaVfVlanInfo {
-    fn default() -> Self {
-        Self {
-            buf: [0u8; 16usize],
-        }
-    }
-}
-impl PushIflaVfVlanInfo {
-    #[doc = "Create zero-initialized struct"]
-    pub fn new() -> Self {
-        Default::default()
-    }
-    #[doc = "Copy from contents from other slice"]
-    pub fn new_from_slice(other: &[u8]) -> Option<Self> {
-        if other.len() != Self::len() {
-            return None;
-        }
-        let mut buf = [0u8; Self::len()];
-        buf.clone_from_slice(other);
-        Some(Self { buf })
-    }
-    #[doc = "Copy from contents from another slice, padding with zeros or truncating when needed"]
-    pub fn new_from_zeroed(other: &[u8]) -> Self {
-        let mut buf = [0u8; Self::len()];
-        let len = buf.len().min(other.len());
-        buf[..len].clone_from_slice(&other[..len]);
-        Self { buf }
-    }
-    pub fn as_slice(&self) -> &[u8] {
-        &self.buf
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        &mut self.buf
-    }
-    pub const fn len() -> usize {
-        16usize
-    }
-    pub fn vf(&self) -> u32 {
-        parse_u32(&self.buf[0usize..4usize]).unwrap()
-    }
-    pub fn set_vf(&mut self, value: u32) {
-        self.buf[0usize..4usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn vlan(&self) -> u32 {
-        parse_u32(&self.buf[4usize..8usize]).unwrap()
-    }
-    pub fn set_vlan(&mut self, value: u32) {
-        self.buf[4usize..8usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn qos(&self) -> u32 {
-        parse_u32(&self.buf[8usize..12usize]).unwrap()
-    }
-    pub fn set_qos(&mut self, value: u32) {
-        self.buf[8usize..12usize].copy_from_slice(&value.to_ne_bytes())
-    }
-    pub fn vlan_proto(&self) -> u32 {
-        parse_u32(&self.buf[12usize..16usize]).unwrap()
-    }
-    pub fn set_vlan_proto(&mut self, value: u32) {
-        self.buf[12usize..16usize].copy_from_slice(&value.to_ne_bytes())
-    }
-}
-impl std::fmt::Debug for PushIflaVfVlanInfo {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("IflaVfVlanInfo")
-            .field("vf", &self.vf())
-            .field("vlan", &self.vlan())
-            .field("qos", &self.qos())
-            .field("vlan_proto", &self.vlan_proto())
-            .finish()
-    }
-}
-#[doc = "Create a new link."]
-pub struct PushOpNewlinkDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpNewlinkDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpNewlinkDoRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfinfomsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfinfomsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_address(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_broadcast(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_ifname(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            3u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_ifname_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 3u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_mtu(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_txqlen(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 13u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_operstate(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 16u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_linkmode(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 17u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_linkinfo(mut self) -> PushLinkinfoAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 18u16);
-        PushLinkinfoAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_net_ns_pid(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 19u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_af_spec(mut self) -> PushAfSpecAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 26u16);
-        PushAfSpecAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_group(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 27u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_net_ns_fd(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 28u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_num_tx_queues(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 31u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_num_rx_queues(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 32u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_link_netnsid(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 37u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gso_max_segs(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 40u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gso_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 41u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_target_netnsid(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 46u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gro_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 58u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gso_ipv4_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 63u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gro_ipv4_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 64u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpNewlinkDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Create a new link."]
-#[derive(Clone)]
-pub enum OpNewlinkDoRequest<'a> {
-    Address(&'a [u8]),
-    Broadcast(&'a [u8]),
-    Ifname(&'a CStr),
-    Mtu(u32),
-    Txqlen(u32),
-    Operstate(u8),
-    Linkmode(u8),
-    Linkinfo(IterableLinkinfoAttrs<'a>),
-    NetNsPid(u32),
-    AfSpec(IterableAfSpecAttrs<'a>),
-    Group(u32),
-    NetNsFd(u32),
-    NumTxQueues(u32),
-    NumRxQueues(u32),
-    LinkNetnsid(i32),
-    GsoMaxSegs(u32),
-    GsoMaxSize(u32),
-    TargetNetnsid(i32),
-    GroMaxSize(u32),
-    GsoIpv4MaxSize(u32),
-    GroIpv4MaxSize(u32),
-}
-impl<'a> IterableOpNewlinkDoRequest<'a> {
-    pub fn get_address(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::Address(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "Address",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_broadcast(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::Broadcast(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "Broadcast",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifname(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::Ifname(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "Ifname",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mtu(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::Mtu(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "Mtu",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_txqlen(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::Txqlen(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "Txqlen",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_operstate(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::Operstate(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "Operstate",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_linkmode(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::Linkmode(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "Linkmode",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_linkinfo(&self) -> Result<IterableLinkinfoAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::Linkinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "Linkinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_net_ns_pid(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::NetNsPid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "NetNsPid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_af_spec(&self) -> Result<IterableAfSpecAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::AfSpec(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "AfSpec",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_group(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::Group(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "Group",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_net_ns_fd(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::NetNsFd(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "NetNsFd",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_num_tx_queues(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::NumTxQueues(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "NumTxQueues",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_num_rx_queues(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::NumRxQueues(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "NumRxQueues",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_link_netnsid(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::LinkNetnsid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "LinkNetnsid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gso_max_segs(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::GsoMaxSegs(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "GsoMaxSegs",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gso_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::GsoMaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "GsoMaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_target_netnsid(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::TargetNetnsid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "TargetNetnsid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gro_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::GroMaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "GroMaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gso_ipv4_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::GsoIpv4MaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "GsoIpv4MaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gro_ipv4_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpNewlinkDoRequest::GroIpv4MaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpNewlinkDoRequest",
-            "GroIpv4MaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpNewlinkDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfinfomsg, IterableOpNewlinkDoRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfinfomsg::len()));
-        (
-            PushIfinfomsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpNewlinkDoRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        LinkAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpNewlinkDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpNewlinkDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpNewlinkDoRequest<'a> {
-    type Item = Result<OpNewlinkDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpNewlinkDoRequest::Address({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpNewlinkDoRequest::Broadcast({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpNewlinkDoRequest::Ifname({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpNewlinkDoRequest::Mtu({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                13u16 => OpNewlinkDoRequest::Txqlen({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                16u16 => OpNewlinkDoRequest::Operstate({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                17u16 => OpNewlinkDoRequest::Linkmode({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                18u16 => OpNewlinkDoRequest::Linkinfo({
-                    let res = Some(IterableLinkinfoAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                19u16 => OpNewlinkDoRequest::NetNsPid({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                26u16 => OpNewlinkDoRequest::AfSpec({
-                    let res = Some(IterableAfSpecAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                27u16 => OpNewlinkDoRequest::Group({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                28u16 => OpNewlinkDoRequest::NetNsFd({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                31u16 => OpNewlinkDoRequest::NumTxQueues({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                32u16 => OpNewlinkDoRequest::NumRxQueues({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                37u16 => OpNewlinkDoRequest::LinkNetnsid({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                40u16 => OpNewlinkDoRequest::GsoMaxSegs({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                41u16 => OpNewlinkDoRequest::GsoMaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                46u16 => OpNewlinkDoRequest::TargetNetnsid({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                58u16 => OpNewlinkDoRequest::GroMaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                63u16 => OpNewlinkDoRequest::GsoIpv4MaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                64u16 => OpNewlinkDoRequest::GroIpv4MaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpNewlinkDoRequest",
-            r#type.and_then(|t| OpNewlinkDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpNewlinkDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpNewlinkDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpNewlinkDoRequest::Address(val) => fmt.field("Address", &val),
-                OpNewlinkDoRequest::Broadcast(val) => fmt.field("Broadcast", &val),
-                OpNewlinkDoRequest::Ifname(val) => fmt.field("Ifname", &val),
-                OpNewlinkDoRequest::Mtu(val) => fmt.field("Mtu", &val),
-                OpNewlinkDoRequest::Txqlen(val) => fmt.field("Txqlen", &val),
-                OpNewlinkDoRequest::Operstate(val) => fmt.field("Operstate", &val),
-                OpNewlinkDoRequest::Linkmode(val) => fmt.field("Linkmode", &val),
-                OpNewlinkDoRequest::Linkinfo(val) => fmt.field("Linkinfo", &val),
-                OpNewlinkDoRequest::NetNsPid(val) => fmt.field("NetNsPid", &val),
-                OpNewlinkDoRequest::AfSpec(val) => fmt.field("AfSpec", &val),
-                OpNewlinkDoRequest::Group(val) => fmt.field("Group", &val),
-                OpNewlinkDoRequest::NetNsFd(val) => fmt.field("NetNsFd", &val),
-                OpNewlinkDoRequest::NumTxQueues(val) => fmt.field("NumTxQueues", &val),
-                OpNewlinkDoRequest::NumRxQueues(val) => fmt.field("NumRxQueues", &val),
-                OpNewlinkDoRequest::LinkNetnsid(val) => fmt.field("LinkNetnsid", &val),
-                OpNewlinkDoRequest::GsoMaxSegs(val) => fmt.field("GsoMaxSegs", &val),
-                OpNewlinkDoRequest::GsoMaxSize(val) => fmt.field("GsoMaxSize", &val),
-                OpNewlinkDoRequest::TargetNetnsid(val) => fmt.field("TargetNetnsid", &val),
-                OpNewlinkDoRequest::GroMaxSize(val) => fmt.field("GroMaxSize", &val),
-                OpNewlinkDoRequest::GsoIpv4MaxSize(val) => fmt.field("GsoIpv4MaxSize", &val),
-                OpNewlinkDoRequest::GroIpv4MaxSize(val) => fmt.field("GroIpv4MaxSize", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpNewlinkDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfinfomsg::len() {
-            stack.push(("OpNewlinkDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpNewlinkDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpNewlinkDoRequest::Address(val) => {
-                    if last_off == offset {
-                        stack.push(("Address", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::Broadcast(val) => {
-                    if last_off == offset {
-                        stack.push(("Broadcast", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::Ifname(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifname", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::Mtu(val) => {
-                    if last_off == offset {
-                        stack.push(("Mtu", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::Txqlen(val) => {
-                    if last_off == offset {
-                        stack.push(("Txqlen", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::Operstate(val) => {
-                    if last_off == offset {
-                        stack.push(("Operstate", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::Linkmode(val) => {
-                    if last_off == offset {
-                        stack.push(("Linkmode", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::Linkinfo(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::NetNsPid(val) => {
-                    if last_off == offset {
-                        stack.push(("NetNsPid", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::AfSpec(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::Group(val) => {
-                    if last_off == offset {
-                        stack.push(("Group", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::NetNsFd(val) => {
-                    if last_off == offset {
-                        stack.push(("NetNsFd", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::NumTxQueues(val) => {
-                    if last_off == offset {
-                        stack.push(("NumTxQueues", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::NumRxQueues(val) => {
-                    if last_off == offset {
-                        stack.push(("NumRxQueues", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::LinkNetnsid(val) => {
-                    if last_off == offset {
-                        stack.push(("LinkNetnsid", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::GsoMaxSegs(val) => {
-                    if last_off == offset {
-                        stack.push(("GsoMaxSegs", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::GsoMaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GsoMaxSize", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::TargetNetnsid(val) => {
-                    if last_off == offset {
-                        stack.push(("TargetNetnsid", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::GroMaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GroMaxSize", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::GsoIpv4MaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GsoIpv4MaxSize", last_off));
-                        break;
-                    }
-                }
-                OpNewlinkDoRequest::GroIpv4MaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GroIpv4MaxSize", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpNewlinkDoRequest", cur));
-        }
-        (stack, missing)
-    }
-}
-#[doc = "Create a new link."]
-pub struct PushOpNewlinkDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpNewlinkDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpNewlinkDoReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfinfomsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfinfomsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpNewlinkDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Create a new link."]
-#[derive(Clone)]
-pub enum OpNewlinkDoReply {}
-impl<'a> IterableOpNewlinkDoReply<'a> {}
-impl OpNewlinkDoReply {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfinfomsg, IterableOpNewlinkDoReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfinfomsg::len()));
-        (
-            PushIfinfomsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpNewlinkDoReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        LinkAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpNewlinkDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpNewlinkDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpNewlinkDoReply<'a> {
-    type Item = Result<OpNewlinkDoReply, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpNewlinkDoReply",
-            r#type.and_then(|t| OpNewlinkDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpNewlinkDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpNewlinkDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpNewlinkDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfinfomsg::len() {
-            stack.push(("OpNewlinkDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpNewlinkDoReply::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
+#[doc = "Create a new link\\.\nRequest attributes:\n- [.push_address()](PushLinkAttrs::push_address)\n- [.push_broadcast()](PushLinkAttrs::push_broadcast)\n- [.push_ifname()](PushLinkAttrs::push_ifname)\n- [.push_mtu()](PushLinkAttrs::push_mtu)\n- [.push_txqlen()](PushLinkAttrs::push_txqlen)\n- [.push_operstate()](PushLinkAttrs::push_operstate)\n- [.push_linkmode()](PushLinkAttrs::push_linkmode)\n- [.nested_linkinfo()](PushLinkAttrs::nested_linkinfo)\n- [.push_net_ns_pid()](PushLinkAttrs::push_net_ns_pid)\n- [.nested_af_spec()](PushLinkAttrs::nested_af_spec)\n- [.push_group()](PushLinkAttrs::push_group)\n- [.push_net_ns_fd()](PushLinkAttrs::push_net_ns_fd)\n- [.push_num_tx_queues()](PushLinkAttrs::push_num_tx_queues)\n- [.push_num_rx_queues()](PushLinkAttrs::push_num_rx_queues)\n- [.push_link_netnsid()](PushLinkAttrs::push_link_netnsid)\n- [.push_gso_max_segs()](PushLinkAttrs::push_gso_max_segs)\n- [.push_gso_max_size()](PushLinkAttrs::push_gso_max_size)\n- [.push_target_netnsid()](PushLinkAttrs::push_target_netnsid)\n- [.push_gro_max_size()](PushLinkAttrs::push_gro_max_size)\n- [.push_gso_ipv4_max_size()](PushLinkAttrs::push_gso_ipv4_max_size)\n- [.push_gro_ipv4_max_size()](PushLinkAttrs::push_gro_ipv4_max_size)\n"]
 #[derive(Debug)]
-pub struct RequestOpNewlinkDoRequest<'r> {
+pub struct OpNewlinkDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpNewlinkDoRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushIfinfomsg) -> Self {
-        PushOpNewlinkDoRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpNewlinkDo<'r> {
+    pub fn new(mut request: Request<'r>, header: &Ifinfomsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpNewlinkDoRequest<&mut Vec<u8>> {
-        PushOpNewlinkDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Ifinfomsg,
+    ) -> PushLinkAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushLinkAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpNewlinkDoRequest<RequestBuf<'r>> {
-        PushOpNewlinkDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushLinkAttrs<&mut Vec<u8>> {
+        PushLinkAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(
-        buf: &'buf [u8],
-    ) -> (PushIfinfomsg, IterableOpNewlinkDoRequest<'buf>) {
-        OpNewlinkDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushLinkAttrs<RequestBuf<'r>> {
+        PushLinkAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Ifinfomsg, IterableLinkAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Ifinfomsg::len()));
+        (
+            Ifinfomsg::new_from_slice(header).unwrap_or_default(),
+            IterableLinkAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Ifinfomsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpNewlinkDoRequest<'_> {
+impl NetlinkRequest for OpNewlinkDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -23115,387 +22552,55 @@ impl NetlinkRequest for RequestOpNewlinkDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushIfinfomsg, IterableOpNewlinkDoReply<'buf>);
+    type ReplyType<'buf> = (Ifinfomsg, IterableLinkAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpNewlinkDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpNewlinkDoRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Delete an existing link."]
-pub struct PushOpDellinkDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpDellinkDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpDellinkDoRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfinfomsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfinfomsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_ifname(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            3u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_ifname_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 3u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpDellinkDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Delete an existing link."]
-#[derive(Clone)]
-pub enum OpDellinkDoRequest<'a> {
-    Ifname(&'a CStr),
-}
-impl<'a> IterableOpDellinkDoRequest<'a> {
-    pub fn get_ifname(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpDellinkDoRequest::Ifname(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpDellinkDoRequest",
-            "Ifname",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpDellinkDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfinfomsg, IterableOpDellinkDoRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfinfomsg::len()));
-        (
-            PushIfinfomsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpDellinkDoRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        LinkAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpDellinkDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpDellinkDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpDellinkDoRequest<'a> {
-    type Item = Result<OpDellinkDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                3u16 => OpDellinkDoRequest::Ifname({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpDellinkDoRequest",
-            r#type.and_then(|t| OpDellinkDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpDellinkDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpDellinkDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpDellinkDoRequest::Ifname(val) => fmt.field("Ifname", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpDellinkDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfinfomsg::len() {
-            stack.push(("OpDellinkDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpDellinkDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpDellinkDoRequest::Ifname(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifname", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpDellinkDoRequest", cur));
-        }
-        (stack, None)
-    }
-}
-#[doc = "Delete an existing link."]
-pub struct PushOpDellinkDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpDellinkDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpDellinkDoReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfinfomsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfinfomsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpDellinkDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Delete an existing link."]
-#[derive(Clone)]
-pub enum OpDellinkDoReply {}
-impl<'a> IterableOpDellinkDoReply<'a> {}
-impl OpDellinkDoReply {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfinfomsg, IterableOpDellinkDoReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfinfomsg::len()));
-        (
-            PushIfinfomsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpDellinkDoReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        LinkAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpDellinkDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpDellinkDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpDellinkDoReply<'a> {
-    type Item = Result<OpDellinkDoReply, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpDellinkDoReply",
-            r#type.and_then(|t| OpDellinkDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpDellinkDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpDellinkDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpDellinkDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfinfomsg::len() {
-            stack.push(("OpDellinkDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpDellinkDoReply::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
+#[doc = "Delete an existing link\\.\nRequest attributes:\n- [.push_ifname()](PushLinkAttrs::push_ifname)\n"]
 #[derive(Debug)]
-pub struct RequestOpDellinkDoRequest<'r> {
+pub struct OpDellinkDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpDellinkDoRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushIfinfomsg) -> Self {
-        PushOpDellinkDoRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpDellinkDo<'r> {
+    pub fn new(mut request: Request<'r>, header: &Ifinfomsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpDellinkDoRequest<&mut Vec<u8>> {
-        PushOpDellinkDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Ifinfomsg,
+    ) -> PushLinkAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushLinkAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpDellinkDoRequest<RequestBuf<'r>> {
-        PushOpDellinkDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushLinkAttrs<&mut Vec<u8>> {
+        PushLinkAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(
-        buf: &'buf [u8],
-    ) -> (PushIfinfomsg, IterableOpDellinkDoRequest<'buf>) {
-        OpDellinkDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushLinkAttrs<RequestBuf<'r>> {
+        PushLinkAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Ifinfomsg, IterableLinkAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Ifinfomsg::len()));
+        (
+            Ifinfomsg::new_from_slice(header).unwrap_or_default(),
+            IterableLinkAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Ifinfomsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpDellinkDoRequest<'_> {
+impl NetlinkRequest for OpDellinkDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -23508,2819 +22613,57 @@ impl NetlinkRequest for RequestOpDellinkDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushIfinfomsg, IterableOpDellinkDoReply<'buf>);
+    type ReplyType<'buf> = (Ifinfomsg, IterableLinkAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpDellinkDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpDellinkDoRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Get / dump information about a link."]
-pub struct PushOpGetlinkDumpRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetlinkDumpRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetlinkDumpRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfinfomsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfinfomsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_master(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 10u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_linkinfo(mut self) -> PushLinkinfoAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 18u16);
-        PushLinkinfoAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    pub fn push_ext_mask(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 29u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_target_netnsid(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 46u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetlinkDumpRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump information about a link."]
-#[derive(Clone)]
-pub enum OpGetlinkDumpRequest<'a> {
-    Master(u32),
-    Linkinfo(IterableLinkinfoAttrs<'a>),
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    ExtMask(u32),
-    TargetNetnsid(i32),
-}
-impl<'a> IterableOpGetlinkDumpRequest<'a> {
-    pub fn get_master(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpRequest::Master(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpRequest",
-            "Master",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_linkinfo(&self) -> Result<IterableLinkinfoAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpRequest::Linkinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpRequest",
-            "Linkinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    pub fn get_ext_mask(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpRequest::ExtMask(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpRequest",
-            "ExtMask",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_target_netnsid(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpRequest::TargetNetnsid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpRequest",
-            "TargetNetnsid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetlinkDumpRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfinfomsg, IterableOpGetlinkDumpRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfinfomsg::len()));
-        (
-            PushIfinfomsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetlinkDumpRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        LinkAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetlinkDumpRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetlinkDumpRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetlinkDumpRequest<'a> {
-    type Item = Result<OpGetlinkDumpRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                10u16 => OpGetlinkDumpRequest::Master({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                18u16 => OpGetlinkDumpRequest::Linkinfo({
-                    let res = Some(IterableLinkinfoAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                29u16 => OpGetlinkDumpRequest::ExtMask({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                46u16 => OpGetlinkDumpRequest::TargetNetnsid({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetlinkDumpRequest",
-            r#type.and_then(|t| OpGetlinkDumpRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetlinkDumpRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetlinkDumpRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetlinkDumpRequest::Master(val) => fmt.field("Master", &val),
-                OpGetlinkDumpRequest::Linkinfo(val) => fmt.field("Linkinfo", &val),
-                OpGetlinkDumpRequest::ExtMask(val) => {
-                    fmt.field("ExtMask", &FormatFlags(val.into(), RtextFilter::from_value))
-                }
-                OpGetlinkDumpRequest::TargetNetnsid(val) => fmt.field("TargetNetnsid", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetlinkDumpRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfinfomsg::len() {
-            stack.push(("OpGetlinkDumpRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetlinkDumpRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetlinkDumpRequest::Master(val) => {
-                    if last_off == offset {
-                        stack.push(("Master", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpRequest::Linkinfo(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDumpRequest::ExtMask(val) => {
-                    if last_off == offset {
-                        stack.push(("ExtMask", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpRequest::TargetNetnsid(val) => {
-                    if last_off == offset {
-                        stack.push(("TargetNetnsid", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetlinkDumpRequest", cur));
-        }
-        (stack, missing)
-    }
-}
-#[doc = "Get / dump information about a link."]
-pub struct PushOpGetlinkDumpReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetlinkDumpReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetlinkDumpReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfinfomsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfinfomsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_address(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_broadcast(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_ifname(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            3u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_ifname_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 3u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_mtu(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_link(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 5u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_qdisc(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            6u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_qdisc_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 6u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_stats(mut self, value: PushRtnlLinkStats) -> Self {
-        push_header(self.as_rec_mut(), 7u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_cost(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            8u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_cost_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 8u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_priority(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            9u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_priority_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 9u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_master(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 10u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_wireless(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            11u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_wireless_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 11u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_protinfo(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            12u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_protinfo_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 12u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_txqlen(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 13u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_map(mut self, value: PushRtnlLinkIfmap) -> Self {
-        push_header(self.as_rec_mut(), 14u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_weight(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 15u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_operstate(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 16u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_linkmode(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 17u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_linkinfo(mut self) -> PushLinkinfoAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 18u16);
-        PushLinkinfoAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_net_ns_pid(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 19u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ifalias(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            20u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_ifalias_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 20u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_num_vf(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 21u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_vfinfo_list(mut self) -> PushVfinfoListAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 22u16);
-        PushVfinfoListAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_stats64(mut self, value: PushRtnlLinkStats64) -> Self {
-        push_header(self.as_rec_mut(), 23u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn nested_vf_ports(mut self) -> PushVfPortsAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 24u16);
-        PushVfPortsAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_port_self(mut self) -> PushPortSelfAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 25u16);
-        PushPortSelfAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_af_spec(mut self) -> PushAfSpecAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 26u16);
-        PushAfSpecAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_group(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 27u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_net_ns_fd(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 28u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    pub fn push_ext_mask(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 29u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_promiscuity(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 30u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_num_tx_queues(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 31u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_num_rx_queues(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 32u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_carrier(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 33u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_phys_port_id(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 34u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_carrier_changes(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 35u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_phys_switch_id(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 36u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_link_netnsid(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 37u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_phys_port_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            38u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_phys_port_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 38u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_proto_down(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 39u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gso_max_segs(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 40u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gso_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 41u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_pad(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 42u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn nested_xdp(mut self) -> PushXdpAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 43u16);
-        PushXdpAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_event(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 44u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_new_netnsid(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 45u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_target_netnsid(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 46u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_carrier_up_count(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 47u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_carrier_down_count(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 48u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_new_ifindex(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 49u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_min_mtu(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 50u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_max_mtu(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 51u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_prop_list(mut self) -> PushPropListLinkAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 52u16);
-        PushPropListLinkAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_perm_address(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 54u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_proto_down_reason(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            55u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_proto_down_reason_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 55u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_parent_dev_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            56u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_parent_dev_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 56u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_parent_dev_bus_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            57u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_parent_dev_bus_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 57u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_gro_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 58u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_tso_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 59u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_tso_max_segs(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 60u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_allmulti(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 61u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_devlink_port(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 62u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_gso_ipv4_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 63u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gro_ipv4_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 64u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_dpll_pin(mut self) -> PushLinkDpllPinAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 65u16);
-        PushLinkDpllPinAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    #[doc = "EDT offload horizon supported by the device (in nsec)."]
-    pub fn push_max_pacing_offload_horizon(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 66u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_netns_immutable(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 67u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetlinkDumpReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump information about a link."]
-#[derive(Clone)]
-pub enum OpGetlinkDumpReply<'a> {
-    Address(&'a [u8]),
-    Broadcast(&'a [u8]),
-    Ifname(&'a CStr),
-    Mtu(u32),
-    Link(u32),
-    Qdisc(&'a CStr),
-    Stats(PushRtnlLinkStats),
-    Cost(&'a CStr),
-    Priority(&'a CStr),
-    Master(u32),
-    Wireless(&'a CStr),
-    Protinfo(&'a CStr),
-    Txqlen(u32),
-    Map(PushRtnlLinkIfmap),
-    Weight(u32),
-    Operstate(u8),
-    Linkmode(u8),
-    Linkinfo(IterableLinkinfoAttrs<'a>),
-    NetNsPid(u32),
-    Ifalias(&'a CStr),
-    NumVf(u32),
-    VfinfoList(IterableVfinfoListAttrs<'a>),
-    Stats64(PushRtnlLinkStats64),
-    VfPorts(IterableVfPortsAttrs<'a>),
-    PortSelf(IterablePortSelfAttrs<'a>),
-    AfSpec(IterableAfSpecAttrs<'a>),
-    Group(u32),
-    NetNsFd(u32),
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    ExtMask(u32),
-    Promiscuity(u32),
-    NumTxQueues(u32),
-    NumRxQueues(u32),
-    Carrier(u8),
-    PhysPortId(&'a [u8]),
-    CarrierChanges(u32),
-    PhysSwitchId(&'a [u8]),
-    LinkNetnsid(i32),
-    PhysPortName(&'a CStr),
-    ProtoDown(u8),
-    GsoMaxSegs(u32),
-    GsoMaxSize(u32),
-    Pad(&'a [u8]),
-    Xdp(IterableXdpAttrs<'a>),
-    Event(u32),
-    NewNetnsid(i32),
-    TargetNetnsid(i32),
-    CarrierUpCount(u32),
-    CarrierDownCount(u32),
-    NewIfindex(i32),
-    MinMtu(u32),
-    MaxMtu(u32),
-    PropList(IterablePropListLinkAttrs<'a>),
-    PermAddress(&'a [u8]),
-    ProtoDownReason(&'a CStr),
-    ParentDevName(&'a CStr),
-    ParentDevBusName(&'a CStr),
-    GroMaxSize(u32),
-    TsoMaxSize(u32),
-    TsoMaxSegs(u32),
-    Allmulti(u32),
-    DevlinkPort(&'a [u8]),
-    GsoIpv4MaxSize(u32),
-    GroIpv4MaxSize(u32),
-    DpllPin(IterableLinkDpllPinAttrs<'a>),
-    #[doc = "EDT offload horizon supported by the device (in nsec)."]
-    MaxPacingOffloadHorizon(u32),
-    NetnsImmutable(u8),
-}
-impl<'a> IterableOpGetlinkDumpReply<'a> {
-    pub fn get_address(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Address(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Address",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_broadcast(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Broadcast(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Broadcast",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifname(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Ifname(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Ifname",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mtu(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Mtu(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Mtu",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_link(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Link(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Link",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_qdisc(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Qdisc(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Qdisc",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_stats(&self) -> Result<PushRtnlLinkStats, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Stats(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Stats",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_cost(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Cost(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Cost",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_priority(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Priority(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Priority",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_master(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Master(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Master",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_wireless(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Wireless(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Wireless",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_protinfo(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Protinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Protinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_txqlen(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Txqlen(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Txqlen",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_map(&self) -> Result<PushRtnlLinkIfmap, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Map(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Map",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_weight(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Weight(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Weight",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_operstate(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Operstate(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Operstate",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_linkmode(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Linkmode(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Linkmode",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_linkinfo(&self) -> Result<IterableLinkinfoAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Linkinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Linkinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_net_ns_pid(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::NetNsPid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "NetNsPid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifalias(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Ifalias(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Ifalias",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_num_vf(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::NumVf(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "NumVf",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_vfinfo_list(&self) -> Result<IterableVfinfoListAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::VfinfoList(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "VfinfoList",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_stats64(&self) -> Result<PushRtnlLinkStats64, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Stats64(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Stats64",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_vf_ports(&self) -> Result<IterableVfPortsAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::VfPorts(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "VfPorts",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_port_self(&self) -> Result<IterablePortSelfAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::PortSelf(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "PortSelf",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_af_spec(&self) -> Result<IterableAfSpecAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::AfSpec(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "AfSpec",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_group(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Group(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Group",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_net_ns_fd(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::NetNsFd(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "NetNsFd",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    pub fn get_ext_mask(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::ExtMask(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "ExtMask",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_promiscuity(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Promiscuity(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Promiscuity",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_num_tx_queues(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::NumTxQueues(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "NumTxQueues",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_num_rx_queues(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::NumRxQueues(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "NumRxQueues",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_carrier(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Carrier(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Carrier",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_phys_port_id(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::PhysPortId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "PhysPortId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_carrier_changes(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::CarrierChanges(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "CarrierChanges",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_phys_switch_id(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::PhysSwitchId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "PhysSwitchId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_link_netnsid(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::LinkNetnsid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "LinkNetnsid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_phys_port_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::PhysPortName(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "PhysPortName",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_proto_down(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::ProtoDown(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "ProtoDown",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gso_max_segs(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::GsoMaxSegs(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "GsoMaxSegs",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gso_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::GsoMaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "GsoMaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Pad(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Pad",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_xdp(&self) -> Result<IterableXdpAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Xdp(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Xdp",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_event(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Event(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Event",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_new_netnsid(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::NewNetnsid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "NewNetnsid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_target_netnsid(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::TargetNetnsid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "TargetNetnsid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_carrier_up_count(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::CarrierUpCount(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "CarrierUpCount",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_carrier_down_count(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::CarrierDownCount(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "CarrierDownCount",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_new_ifindex(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::NewIfindex(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "NewIfindex",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_min_mtu(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::MinMtu(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "MinMtu",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_max_mtu(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::MaxMtu(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "MaxMtu",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_prop_list(&self) -> Result<IterablePropListLinkAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::PropList(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "PropList",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_perm_address(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::PermAddress(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "PermAddress",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_proto_down_reason(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::ProtoDownReason(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "ProtoDownReason",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_parent_dev_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::ParentDevName(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "ParentDevName",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_parent_dev_bus_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::ParentDevBusName(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "ParentDevBusName",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gro_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::GroMaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "GroMaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_tso_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::TsoMaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "TsoMaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_tso_max_segs(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::TsoMaxSegs(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "TsoMaxSegs",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_allmulti(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::Allmulti(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "Allmulti",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_devlink_port(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::DevlinkPort(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "DevlinkPort",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gso_ipv4_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::GsoIpv4MaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "GsoIpv4MaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gro_ipv4_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::GroIpv4MaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "GroIpv4MaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_dpll_pin(&self) -> Result<IterableLinkDpllPinAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::DpllPin(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "DpllPin",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "EDT offload horizon supported by the device (in nsec)."]
-    pub fn get_max_pacing_offload_horizon(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::MaxPacingOffloadHorizon(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "MaxPacingOffloadHorizon",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_netns_immutable(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDumpReply::NetnsImmutable(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDumpReply",
-            "NetnsImmutable",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetlinkDumpReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfinfomsg, IterableOpGetlinkDumpReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfinfomsg::len()));
-        (
-            PushIfinfomsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetlinkDumpReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        LinkAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetlinkDumpReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetlinkDumpReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetlinkDumpReply<'a> {
-    type Item = Result<OpGetlinkDumpReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetlinkDumpReply::Address({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetlinkDumpReply::Broadcast({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetlinkDumpReply::Ifname({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetlinkDumpReply::Mtu({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetlinkDumpReply::Link({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpGetlinkDumpReply::Qdisc({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpGetlinkDumpReply::Stats({
-                    let res = Some(PushRtnlLinkStats::new_from_zeroed(next));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetlinkDumpReply::Cost({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpGetlinkDumpReply::Priority({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                10u16 => OpGetlinkDumpReply::Master({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                11u16 => OpGetlinkDumpReply::Wireless({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                12u16 => OpGetlinkDumpReply::Protinfo({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                13u16 => OpGetlinkDumpReply::Txqlen({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                14u16 => OpGetlinkDumpReply::Map({
-                    let res = PushRtnlLinkIfmap::new_from_slice(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                15u16 => OpGetlinkDumpReply::Weight({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                16u16 => OpGetlinkDumpReply::Operstate({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                17u16 => OpGetlinkDumpReply::Linkmode({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                18u16 => OpGetlinkDumpReply::Linkinfo({
-                    let res = Some(IterableLinkinfoAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                19u16 => OpGetlinkDumpReply::NetNsPid({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                20u16 => OpGetlinkDumpReply::Ifalias({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                21u16 => OpGetlinkDumpReply::NumVf({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                22u16 => OpGetlinkDumpReply::VfinfoList({
-                    let res = Some(IterableVfinfoListAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                23u16 => OpGetlinkDumpReply::Stats64({
-                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                24u16 => OpGetlinkDumpReply::VfPorts({
-                    let res = Some(IterableVfPortsAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                25u16 => OpGetlinkDumpReply::PortSelf({
-                    let res = Some(IterablePortSelfAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                26u16 => OpGetlinkDumpReply::AfSpec({
-                    let res = Some(IterableAfSpecAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                27u16 => OpGetlinkDumpReply::Group({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                28u16 => OpGetlinkDumpReply::NetNsFd({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                29u16 => OpGetlinkDumpReply::ExtMask({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                30u16 => OpGetlinkDumpReply::Promiscuity({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                31u16 => OpGetlinkDumpReply::NumTxQueues({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                32u16 => OpGetlinkDumpReply::NumRxQueues({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                33u16 => OpGetlinkDumpReply::Carrier({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                34u16 => OpGetlinkDumpReply::PhysPortId({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                35u16 => OpGetlinkDumpReply::CarrierChanges({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                36u16 => OpGetlinkDumpReply::PhysSwitchId({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                37u16 => OpGetlinkDumpReply::LinkNetnsid({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                38u16 => OpGetlinkDumpReply::PhysPortName({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                39u16 => OpGetlinkDumpReply::ProtoDown({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                40u16 => OpGetlinkDumpReply::GsoMaxSegs({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                41u16 => OpGetlinkDumpReply::GsoMaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                42u16 => OpGetlinkDumpReply::Pad({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                43u16 => OpGetlinkDumpReply::Xdp({
-                    let res = Some(IterableXdpAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                44u16 => OpGetlinkDumpReply::Event({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                45u16 => OpGetlinkDumpReply::NewNetnsid({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                46u16 => OpGetlinkDumpReply::TargetNetnsid({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                47u16 => OpGetlinkDumpReply::CarrierUpCount({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                48u16 => OpGetlinkDumpReply::CarrierDownCount({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                49u16 => OpGetlinkDumpReply::NewIfindex({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                50u16 => OpGetlinkDumpReply::MinMtu({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                51u16 => OpGetlinkDumpReply::MaxMtu({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                52u16 => OpGetlinkDumpReply::PropList({
-                    let res = Some(IterablePropListLinkAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                54u16 => OpGetlinkDumpReply::PermAddress({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                55u16 => OpGetlinkDumpReply::ProtoDownReason({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                56u16 => OpGetlinkDumpReply::ParentDevName({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                57u16 => OpGetlinkDumpReply::ParentDevBusName({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                58u16 => OpGetlinkDumpReply::GroMaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                59u16 => OpGetlinkDumpReply::TsoMaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                60u16 => OpGetlinkDumpReply::TsoMaxSegs({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                61u16 => OpGetlinkDumpReply::Allmulti({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                62u16 => OpGetlinkDumpReply::DevlinkPort({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                63u16 => OpGetlinkDumpReply::GsoIpv4MaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                64u16 => OpGetlinkDumpReply::GroIpv4MaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                65u16 => OpGetlinkDumpReply::DpllPin({
-                    let res = Some(IterableLinkDpllPinAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                66u16 => OpGetlinkDumpReply::MaxPacingOffloadHorizon({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                67u16 => OpGetlinkDumpReply::NetnsImmutable({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetlinkDumpReply",
-            r#type.and_then(|t| OpGetlinkDumpReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetlinkDumpReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetlinkDumpReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetlinkDumpReply::Address(val) => fmt.field("Address", &val),
-                OpGetlinkDumpReply::Broadcast(val) => fmt.field("Broadcast", &val),
-                OpGetlinkDumpReply::Ifname(val) => fmt.field("Ifname", &val),
-                OpGetlinkDumpReply::Mtu(val) => fmt.field("Mtu", &val),
-                OpGetlinkDumpReply::Link(val) => fmt.field("Link", &val),
-                OpGetlinkDumpReply::Qdisc(val) => fmt.field("Qdisc", &val),
-                OpGetlinkDumpReply::Stats(val) => fmt.field("Stats", &val),
-                OpGetlinkDumpReply::Cost(val) => fmt.field("Cost", &val),
-                OpGetlinkDumpReply::Priority(val) => fmt.field("Priority", &val),
-                OpGetlinkDumpReply::Master(val) => fmt.field("Master", &val),
-                OpGetlinkDumpReply::Wireless(val) => fmt.field("Wireless", &val),
-                OpGetlinkDumpReply::Protinfo(val) => fmt.field("Protinfo", &val),
-                OpGetlinkDumpReply::Txqlen(val) => fmt.field("Txqlen", &val),
-                OpGetlinkDumpReply::Map(val) => fmt.field("Map", &val),
-                OpGetlinkDumpReply::Weight(val) => fmt.field("Weight", &val),
-                OpGetlinkDumpReply::Operstate(val) => fmt.field("Operstate", &val),
-                OpGetlinkDumpReply::Linkmode(val) => fmt.field("Linkmode", &val),
-                OpGetlinkDumpReply::Linkinfo(val) => fmt.field("Linkinfo", &val),
-                OpGetlinkDumpReply::NetNsPid(val) => fmt.field("NetNsPid", &val),
-                OpGetlinkDumpReply::Ifalias(val) => fmt.field("Ifalias", &val),
-                OpGetlinkDumpReply::NumVf(val) => fmt.field("NumVf", &val),
-                OpGetlinkDumpReply::VfinfoList(val) => fmt.field("VfinfoList", &val),
-                OpGetlinkDumpReply::Stats64(val) => fmt.field("Stats64", &val),
-                OpGetlinkDumpReply::VfPorts(val) => fmt.field("VfPorts", &val),
-                OpGetlinkDumpReply::PortSelf(val) => fmt.field("PortSelf", &val),
-                OpGetlinkDumpReply::AfSpec(val) => fmt.field("AfSpec", &val),
-                OpGetlinkDumpReply::Group(val) => fmt.field("Group", &val),
-                OpGetlinkDumpReply::NetNsFd(val) => fmt.field("NetNsFd", &val),
-                OpGetlinkDumpReply::ExtMask(val) => {
-                    fmt.field("ExtMask", &FormatFlags(val.into(), RtextFilter::from_value))
-                }
-                OpGetlinkDumpReply::Promiscuity(val) => fmt.field("Promiscuity", &val),
-                OpGetlinkDumpReply::NumTxQueues(val) => fmt.field("NumTxQueues", &val),
-                OpGetlinkDumpReply::NumRxQueues(val) => fmt.field("NumRxQueues", &val),
-                OpGetlinkDumpReply::Carrier(val) => fmt.field("Carrier", &val),
-                OpGetlinkDumpReply::PhysPortId(val) => fmt.field("PhysPortId", &val),
-                OpGetlinkDumpReply::CarrierChanges(val) => fmt.field("CarrierChanges", &val),
-                OpGetlinkDumpReply::PhysSwitchId(val) => fmt.field("PhysSwitchId", &val),
-                OpGetlinkDumpReply::LinkNetnsid(val) => fmt.field("LinkNetnsid", &val),
-                OpGetlinkDumpReply::PhysPortName(val) => fmt.field("PhysPortName", &val),
-                OpGetlinkDumpReply::ProtoDown(val) => fmt.field("ProtoDown", &val),
-                OpGetlinkDumpReply::GsoMaxSegs(val) => fmt.field("GsoMaxSegs", &val),
-                OpGetlinkDumpReply::GsoMaxSize(val) => fmt.field("GsoMaxSize", &val),
-                OpGetlinkDumpReply::Pad(val) => fmt.field("Pad", &val),
-                OpGetlinkDumpReply::Xdp(val) => fmt.field("Xdp", &val),
-                OpGetlinkDumpReply::Event(val) => fmt.field("Event", &val),
-                OpGetlinkDumpReply::NewNetnsid(val) => fmt.field("NewNetnsid", &val),
-                OpGetlinkDumpReply::TargetNetnsid(val) => fmt.field("TargetNetnsid", &val),
-                OpGetlinkDumpReply::CarrierUpCount(val) => fmt.field("CarrierUpCount", &val),
-                OpGetlinkDumpReply::CarrierDownCount(val) => fmt.field("CarrierDownCount", &val),
-                OpGetlinkDumpReply::NewIfindex(val) => fmt.field("NewIfindex", &val),
-                OpGetlinkDumpReply::MinMtu(val) => fmt.field("MinMtu", &val),
-                OpGetlinkDumpReply::MaxMtu(val) => fmt.field("MaxMtu", &val),
-                OpGetlinkDumpReply::PropList(val) => fmt.field("PropList", &val),
-                OpGetlinkDumpReply::PermAddress(val) => fmt.field("PermAddress", &val),
-                OpGetlinkDumpReply::ProtoDownReason(val) => fmt.field("ProtoDownReason", &val),
-                OpGetlinkDumpReply::ParentDevName(val) => fmt.field("ParentDevName", &val),
-                OpGetlinkDumpReply::ParentDevBusName(val) => fmt.field("ParentDevBusName", &val),
-                OpGetlinkDumpReply::GroMaxSize(val) => fmt.field("GroMaxSize", &val),
-                OpGetlinkDumpReply::TsoMaxSize(val) => fmt.field("TsoMaxSize", &val),
-                OpGetlinkDumpReply::TsoMaxSegs(val) => fmt.field("TsoMaxSegs", &val),
-                OpGetlinkDumpReply::Allmulti(val) => fmt.field("Allmulti", &val),
-                OpGetlinkDumpReply::DevlinkPort(val) => fmt.field("DevlinkPort", &val),
-                OpGetlinkDumpReply::GsoIpv4MaxSize(val) => fmt.field("GsoIpv4MaxSize", &val),
-                OpGetlinkDumpReply::GroIpv4MaxSize(val) => fmt.field("GroIpv4MaxSize", &val),
-                OpGetlinkDumpReply::DpllPin(val) => fmt.field("DpllPin", &val),
-                OpGetlinkDumpReply::MaxPacingOffloadHorizon(val) => {
-                    fmt.field("MaxPacingOffloadHorizon", &val)
-                }
-                OpGetlinkDumpReply::NetnsImmutable(val) => fmt.field("NetnsImmutable", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetlinkDumpReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfinfomsg::len() {
-            stack.push(("OpGetlinkDumpReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetlinkDumpReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetlinkDumpReply::Address(val) => {
-                    if last_off == offset {
-                        stack.push(("Address", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Broadcast(val) => {
-                    if last_off == offset {
-                        stack.push(("Broadcast", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Ifname(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifname", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Mtu(val) => {
-                    if last_off == offset {
-                        stack.push(("Mtu", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Link(val) => {
-                    if last_off == offset {
-                        stack.push(("Link", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Qdisc(val) => {
-                    if last_off == offset {
-                        stack.push(("Qdisc", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Stats(val) => {
-                    if last_off == offset {
-                        stack.push(("Stats", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Cost(val) => {
-                    if last_off == offset {
-                        stack.push(("Cost", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Priority(val) => {
-                    if last_off == offset {
-                        stack.push(("Priority", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Master(val) => {
-                    if last_off == offset {
-                        stack.push(("Master", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Wireless(val) => {
-                    if last_off == offset {
-                        stack.push(("Wireless", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Protinfo(val) => {
-                    if last_off == offset {
-                        stack.push(("Protinfo", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Txqlen(val) => {
-                    if last_off == offset {
-                        stack.push(("Txqlen", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Map(val) => {
-                    if last_off == offset {
-                        stack.push(("Map", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Weight(val) => {
-                    if last_off == offset {
-                        stack.push(("Weight", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Operstate(val) => {
-                    if last_off == offset {
-                        stack.push(("Operstate", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Linkmode(val) => {
-                    if last_off == offset {
-                        stack.push(("Linkmode", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Linkinfo(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::NetNsPid(val) => {
-                    if last_off == offset {
-                        stack.push(("NetNsPid", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Ifalias(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifalias", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::NumVf(val) => {
-                    if last_off == offset {
-                        stack.push(("NumVf", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::VfinfoList(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Stats64(val) => {
-                    if last_off == offset {
-                        stack.push(("Stats64", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::VfPorts(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::PortSelf(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::AfSpec(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Group(val) => {
-                    if last_off == offset {
-                        stack.push(("Group", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::NetNsFd(val) => {
-                    if last_off == offset {
-                        stack.push(("NetNsFd", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::ExtMask(val) => {
-                    if last_off == offset {
-                        stack.push(("ExtMask", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Promiscuity(val) => {
-                    if last_off == offset {
-                        stack.push(("Promiscuity", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::NumTxQueues(val) => {
-                    if last_off == offset {
-                        stack.push(("NumTxQueues", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::NumRxQueues(val) => {
-                    if last_off == offset {
-                        stack.push(("NumRxQueues", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Carrier(val) => {
-                    if last_off == offset {
-                        stack.push(("Carrier", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::PhysPortId(val) => {
-                    if last_off == offset {
-                        stack.push(("PhysPortId", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::CarrierChanges(val) => {
-                    if last_off == offset {
-                        stack.push(("CarrierChanges", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::PhysSwitchId(val) => {
-                    if last_off == offset {
-                        stack.push(("PhysSwitchId", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::LinkNetnsid(val) => {
-                    if last_off == offset {
-                        stack.push(("LinkNetnsid", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::PhysPortName(val) => {
-                    if last_off == offset {
-                        stack.push(("PhysPortName", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::ProtoDown(val) => {
-                    if last_off == offset {
-                        stack.push(("ProtoDown", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::GsoMaxSegs(val) => {
-                    if last_off == offset {
-                        stack.push(("GsoMaxSegs", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::GsoMaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GsoMaxSize", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Pad(val) => {
-                    if last_off == offset {
-                        stack.push(("Pad", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Xdp(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Event(val) => {
-                    if last_off == offset {
-                        stack.push(("Event", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::NewNetnsid(val) => {
-                    if last_off == offset {
-                        stack.push(("NewNetnsid", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::TargetNetnsid(val) => {
-                    if last_off == offset {
-                        stack.push(("TargetNetnsid", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::CarrierUpCount(val) => {
-                    if last_off == offset {
-                        stack.push(("CarrierUpCount", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::CarrierDownCount(val) => {
-                    if last_off == offset {
-                        stack.push(("CarrierDownCount", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::NewIfindex(val) => {
-                    if last_off == offset {
-                        stack.push(("NewIfindex", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::MinMtu(val) => {
-                    if last_off == offset {
-                        stack.push(("MinMtu", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::MaxMtu(val) => {
-                    if last_off == offset {
-                        stack.push(("MaxMtu", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::PropList(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::PermAddress(val) => {
-                    if last_off == offset {
-                        stack.push(("PermAddress", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::ProtoDownReason(val) => {
-                    if last_off == offset {
-                        stack.push(("ProtoDownReason", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::ParentDevName(val) => {
-                    if last_off == offset {
-                        stack.push(("ParentDevName", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::ParentDevBusName(val) => {
-                    if last_off == offset {
-                        stack.push(("ParentDevBusName", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::GroMaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GroMaxSize", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::TsoMaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("TsoMaxSize", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::TsoMaxSegs(val) => {
-                    if last_off == offset {
-                        stack.push(("TsoMaxSegs", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::Allmulti(val) => {
-                    if last_off == offset {
-                        stack.push(("Allmulti", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::DevlinkPort(val) => {
-                    if last_off == offset {
-                        stack.push(("DevlinkPort", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::GsoIpv4MaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GsoIpv4MaxSize", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::GroIpv4MaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GroIpv4MaxSize", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::DpllPin(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::MaxPacingOffloadHorizon(val) => {
-                    if last_off == offset {
-                        stack.push(("MaxPacingOffloadHorizon", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDumpReply::NetnsImmutable(val) => {
-                    if last_off == offset {
-                        stack.push(("NetnsImmutable", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetlinkDumpReply", cur));
-        }
-        (stack, missing)
-    }
-}
+#[doc = "Get / dump information about a link\\.\nRequest attributes:\n- [.push_master()](PushLinkAttrs::push_master)\n- [.nested_linkinfo()](PushLinkAttrs::nested_linkinfo)\n- [.push_ext_mask()](PushLinkAttrs::push_ext_mask)\n- [.push_target_netnsid()](PushLinkAttrs::push_target_netnsid)\n\nReply attributes:\n- [.get_address()](IterableLinkAttrs::get_address)\n- [.get_broadcast()](IterableLinkAttrs::get_broadcast)\n- [.get_ifname()](IterableLinkAttrs::get_ifname)\n- [.get_mtu()](IterableLinkAttrs::get_mtu)\n- [.get_link()](IterableLinkAttrs::get_link)\n- [.get_qdisc()](IterableLinkAttrs::get_qdisc)\n- [.get_stats()](IterableLinkAttrs::get_stats)\n- [.get_cost()](IterableLinkAttrs::get_cost)\n- [.get_priority()](IterableLinkAttrs::get_priority)\n- [.get_master()](IterableLinkAttrs::get_master)\n- [.get_wireless()](IterableLinkAttrs::get_wireless)\n- [.get_protinfo()](IterableLinkAttrs::get_protinfo)\n- [.get_txqlen()](IterableLinkAttrs::get_txqlen)\n- [.get_map()](IterableLinkAttrs::get_map)\n- [.get_weight()](IterableLinkAttrs::get_weight)\n- [.get_operstate()](IterableLinkAttrs::get_operstate)\n- [.get_linkmode()](IterableLinkAttrs::get_linkmode)\n- [.get_linkinfo()](IterableLinkAttrs::get_linkinfo)\n- [.get_net_ns_pid()](IterableLinkAttrs::get_net_ns_pid)\n- [.get_ifalias()](IterableLinkAttrs::get_ifalias)\n- [.get_num_vf()](IterableLinkAttrs::get_num_vf)\n- [.get_vfinfo_list()](IterableLinkAttrs::get_vfinfo_list)\n- [.get_stats64()](IterableLinkAttrs::get_stats64)\n- [.get_vf_ports()](IterableLinkAttrs::get_vf_ports)\n- [.get_port_self()](IterableLinkAttrs::get_port_self)\n- [.get_af_spec()](IterableLinkAttrs::get_af_spec)\n- [.get_group()](IterableLinkAttrs::get_group)\n- [.get_net_ns_fd()](IterableLinkAttrs::get_net_ns_fd)\n- [.get_ext_mask()](IterableLinkAttrs::get_ext_mask)\n- [.get_promiscuity()](IterableLinkAttrs::get_promiscuity)\n- [.get_num_tx_queues()](IterableLinkAttrs::get_num_tx_queues)\n- [.get_num_rx_queues()](IterableLinkAttrs::get_num_rx_queues)\n- [.get_carrier()](IterableLinkAttrs::get_carrier)\n- [.get_phys_port_id()](IterableLinkAttrs::get_phys_port_id)\n- [.get_carrier_changes()](IterableLinkAttrs::get_carrier_changes)\n- [.get_phys_switch_id()](IterableLinkAttrs::get_phys_switch_id)\n- [.get_link_netnsid()](IterableLinkAttrs::get_link_netnsid)\n- [.get_phys_port_name()](IterableLinkAttrs::get_phys_port_name)\n- [.get_proto_down()](IterableLinkAttrs::get_proto_down)\n- [.get_gso_max_segs()](IterableLinkAttrs::get_gso_max_segs)\n- [.get_gso_max_size()](IterableLinkAttrs::get_gso_max_size)\n- [.get_xdp()](IterableLinkAttrs::get_xdp)\n- [.get_event()](IterableLinkAttrs::get_event)\n- [.get_new_netnsid()](IterableLinkAttrs::get_new_netnsid)\n- [.get_target_netnsid()](IterableLinkAttrs::get_target_netnsid)\n- [.get_carrier_up_count()](IterableLinkAttrs::get_carrier_up_count)\n- [.get_carrier_down_count()](IterableLinkAttrs::get_carrier_down_count)\n- [.get_new_ifindex()](IterableLinkAttrs::get_new_ifindex)\n- [.get_min_mtu()](IterableLinkAttrs::get_min_mtu)\n- [.get_max_mtu()](IterableLinkAttrs::get_max_mtu)\n- [.get_prop_list()](IterableLinkAttrs::get_prop_list)\n- [.get_perm_address()](IterableLinkAttrs::get_perm_address)\n- [.get_proto_down_reason()](IterableLinkAttrs::get_proto_down_reason)\n- [.get_parent_dev_name()](IterableLinkAttrs::get_parent_dev_name)\n- [.get_parent_dev_bus_name()](IterableLinkAttrs::get_parent_dev_bus_name)\n- [.get_gro_max_size()](IterableLinkAttrs::get_gro_max_size)\n- [.get_tso_max_size()](IterableLinkAttrs::get_tso_max_size)\n- [.get_tso_max_segs()](IterableLinkAttrs::get_tso_max_segs)\n- [.get_allmulti()](IterableLinkAttrs::get_allmulti)\n- [.get_devlink_port()](IterableLinkAttrs::get_devlink_port)\n- [.get_gso_ipv4_max_size()](IterableLinkAttrs::get_gso_ipv4_max_size)\n- [.get_gro_ipv4_max_size()](IterableLinkAttrs::get_gro_ipv4_max_size)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetlinkDumpRequest<'r> {
+pub struct OpGetlinkDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetlinkDumpRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushIfinfomsg) -> Self {
-        PushOpGetlinkDumpRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpGetlinkDump<'r> {
+    pub fn new(mut request: Request<'r>, header: &Ifinfomsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self {
             request: request.set_dump(),
         }
     }
-    pub fn encode(&mut self) -> PushOpGetlinkDumpRequest<&mut Vec<u8>> {
-        PushOpGetlinkDumpRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Ifinfomsg,
+    ) -> PushLinkAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushLinkAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetlinkDumpRequest<RequestBuf<'r>> {
-        PushOpGetlinkDumpRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushLinkAttrs<&mut Vec<u8>> {
+        PushLinkAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(
-        buf: &'buf [u8],
-    ) -> (PushIfinfomsg, IterableOpGetlinkDumpRequest<'buf>) {
-        OpGetlinkDumpRequest::new(buf)
+    pub fn into_encoder(self) -> PushLinkAttrs<RequestBuf<'r>> {
+        PushLinkAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Ifinfomsg, IterableLinkAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Ifinfomsg::len()));
+        (
+            Ifinfomsg::new_from_slice(header).unwrap_or_default(),
+            IterableLinkAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Ifinfomsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetlinkDumpRequest<'_> {
+impl NetlinkRequest for OpGetlinkDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -26333,2834 +22676,55 @@ impl NetlinkRequest for RequestOpGetlinkDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushIfinfomsg, IterableOpGetlinkDumpReply<'buf>);
+    type ReplyType<'buf> = (Ifinfomsg, IterableLinkAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetlinkDumpReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetlinkDumpRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Get / dump information about a link."]
-pub struct PushOpGetlinkDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetlinkDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetlinkDoRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfinfomsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfinfomsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_ifname(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            3u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_ifname_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 3u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    pub fn push_ext_mask(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 29u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_target_netnsid(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 46u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_alt_ifname(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            53u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_alt_ifname_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 53u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetlinkDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump information about a link."]
-#[derive(Clone)]
-pub enum OpGetlinkDoRequest<'a> {
-    Ifname(&'a CStr),
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    ExtMask(u32),
-    TargetNetnsid(i32),
-    AltIfname(&'a CStr),
-}
-impl<'a> IterableOpGetlinkDoRequest<'a> {
-    pub fn get_ifname(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoRequest::Ifname(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoRequest",
-            "Ifname",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    pub fn get_ext_mask(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoRequest::ExtMask(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoRequest",
-            "ExtMask",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_target_netnsid(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoRequest::TargetNetnsid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoRequest",
-            "TargetNetnsid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_alt_ifname(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoRequest::AltIfname(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoRequest",
-            "AltIfname",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetlinkDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfinfomsg, IterableOpGetlinkDoRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfinfomsg::len()));
-        (
-            PushIfinfomsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetlinkDoRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        LinkAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetlinkDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetlinkDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetlinkDoRequest<'a> {
-    type Item = Result<OpGetlinkDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                3u16 => OpGetlinkDoRequest::Ifname({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                29u16 => OpGetlinkDoRequest::ExtMask({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                46u16 => OpGetlinkDoRequest::TargetNetnsid({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                53u16 => OpGetlinkDoRequest::AltIfname({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetlinkDoRequest",
-            r#type.and_then(|t| OpGetlinkDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetlinkDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetlinkDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetlinkDoRequest::Ifname(val) => fmt.field("Ifname", &val),
-                OpGetlinkDoRequest::ExtMask(val) => {
-                    fmt.field("ExtMask", &FormatFlags(val.into(), RtextFilter::from_value))
-                }
-                OpGetlinkDoRequest::TargetNetnsid(val) => fmt.field("TargetNetnsid", &val),
-                OpGetlinkDoRequest::AltIfname(val) => fmt.field("AltIfname", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetlinkDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfinfomsg::len() {
-            stack.push(("OpGetlinkDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetlinkDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetlinkDoRequest::Ifname(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifname", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoRequest::ExtMask(val) => {
-                    if last_off == offset {
-                        stack.push(("ExtMask", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoRequest::TargetNetnsid(val) => {
-                    if last_off == offset {
-                        stack.push(("TargetNetnsid", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoRequest::AltIfname(val) => {
-                    if last_off == offset {
-                        stack.push(("AltIfname", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetlinkDoRequest", cur));
-        }
-        (stack, None)
-    }
-}
-#[doc = "Get / dump information about a link."]
-pub struct PushOpGetlinkDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetlinkDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetlinkDoReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfinfomsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfinfomsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_address(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_broadcast(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_ifname(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            3u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_ifname_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 3u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_mtu(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_link(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 5u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_qdisc(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            6u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_qdisc_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 6u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_stats(mut self, value: PushRtnlLinkStats) -> Self {
-        push_header(self.as_rec_mut(), 7u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_cost(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            8u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_cost_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 8u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_priority(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            9u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_priority_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 9u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_master(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 10u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_wireless(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            11u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_wireless_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 11u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_protinfo(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            12u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_protinfo_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 12u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_txqlen(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 13u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_map(mut self, value: PushRtnlLinkIfmap) -> Self {
-        push_header(self.as_rec_mut(), 14u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_weight(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 15u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_operstate(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 16u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_linkmode(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 17u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_linkinfo(mut self) -> PushLinkinfoAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 18u16);
-        PushLinkinfoAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_net_ns_pid(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 19u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ifalias(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            20u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_ifalias_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 20u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_num_vf(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 21u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_vfinfo_list(mut self) -> PushVfinfoListAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 22u16);
-        PushVfinfoListAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_stats64(mut self, value: PushRtnlLinkStats64) -> Self {
-        push_header(self.as_rec_mut(), 23u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn nested_vf_ports(mut self) -> PushVfPortsAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 24u16);
-        PushVfPortsAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_port_self(mut self) -> PushPortSelfAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 25u16);
-        PushPortSelfAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_af_spec(mut self) -> PushAfSpecAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 26u16);
-        PushAfSpecAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_group(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 27u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_net_ns_fd(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 28u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    pub fn push_ext_mask(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 29u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_promiscuity(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 30u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_num_tx_queues(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 31u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_num_rx_queues(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 32u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_carrier(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 33u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_phys_port_id(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 34u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_carrier_changes(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 35u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_phys_switch_id(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 36u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_link_netnsid(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 37u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_phys_port_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            38u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_phys_port_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 38u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_proto_down(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 39u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gso_max_segs(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 40u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gso_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 41u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_pad(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 42u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn nested_xdp(mut self) -> PushXdpAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 43u16);
-        PushXdpAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_event(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 44u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_new_netnsid(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 45u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_target_netnsid(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 46u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_carrier_up_count(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 47u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_carrier_down_count(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 48u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_new_ifindex(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 49u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_min_mtu(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 50u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_max_mtu(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 51u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_prop_list(mut self) -> PushPropListLinkAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 52u16);
-        PushPropListLinkAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_perm_address(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 54u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_proto_down_reason(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            55u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_proto_down_reason_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 55u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_parent_dev_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            56u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_parent_dev_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 56u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_parent_dev_bus_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            57u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_parent_dev_bus_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 57u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_gro_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 58u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_tso_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 59u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_tso_max_segs(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 60u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_allmulti(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 61u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_devlink_port(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 62u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_gso_ipv4_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 63u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gro_ipv4_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 64u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_dpll_pin(mut self) -> PushLinkDpllPinAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 65u16);
-        PushLinkDpllPinAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    #[doc = "EDT offload horizon supported by the device (in nsec)."]
-    pub fn push_max_pacing_offload_horizon(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 66u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_netns_immutable(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 67u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetlinkDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump information about a link."]
-#[derive(Clone)]
-pub enum OpGetlinkDoReply<'a> {
-    Address(&'a [u8]),
-    Broadcast(&'a [u8]),
-    Ifname(&'a CStr),
-    Mtu(u32),
-    Link(u32),
-    Qdisc(&'a CStr),
-    Stats(PushRtnlLinkStats),
-    Cost(&'a CStr),
-    Priority(&'a CStr),
-    Master(u32),
-    Wireless(&'a CStr),
-    Protinfo(&'a CStr),
-    Txqlen(u32),
-    Map(PushRtnlLinkIfmap),
-    Weight(u32),
-    Operstate(u8),
-    Linkmode(u8),
-    Linkinfo(IterableLinkinfoAttrs<'a>),
-    NetNsPid(u32),
-    Ifalias(&'a CStr),
-    NumVf(u32),
-    VfinfoList(IterableVfinfoListAttrs<'a>),
-    Stats64(PushRtnlLinkStats64),
-    VfPorts(IterableVfPortsAttrs<'a>),
-    PortSelf(IterablePortSelfAttrs<'a>),
-    AfSpec(IterableAfSpecAttrs<'a>),
-    Group(u32),
-    NetNsFd(u32),
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    ExtMask(u32),
-    Promiscuity(u32),
-    NumTxQueues(u32),
-    NumRxQueues(u32),
-    Carrier(u8),
-    PhysPortId(&'a [u8]),
-    CarrierChanges(u32),
-    PhysSwitchId(&'a [u8]),
-    LinkNetnsid(i32),
-    PhysPortName(&'a CStr),
-    ProtoDown(u8),
-    GsoMaxSegs(u32),
-    GsoMaxSize(u32),
-    Pad(&'a [u8]),
-    Xdp(IterableXdpAttrs<'a>),
-    Event(u32),
-    NewNetnsid(i32),
-    TargetNetnsid(i32),
-    CarrierUpCount(u32),
-    CarrierDownCount(u32),
-    NewIfindex(i32),
-    MinMtu(u32),
-    MaxMtu(u32),
-    PropList(IterablePropListLinkAttrs<'a>),
-    PermAddress(&'a [u8]),
-    ProtoDownReason(&'a CStr),
-    ParentDevName(&'a CStr),
-    ParentDevBusName(&'a CStr),
-    GroMaxSize(u32),
-    TsoMaxSize(u32),
-    TsoMaxSegs(u32),
-    Allmulti(u32),
-    DevlinkPort(&'a [u8]),
-    GsoIpv4MaxSize(u32),
-    GroIpv4MaxSize(u32),
-    DpllPin(IterableLinkDpllPinAttrs<'a>),
-    #[doc = "EDT offload horizon supported by the device (in nsec)."]
-    MaxPacingOffloadHorizon(u32),
-    NetnsImmutable(u8),
-}
-impl<'a> IterableOpGetlinkDoReply<'a> {
-    pub fn get_address(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Address(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Address",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_broadcast(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Broadcast(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Broadcast",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifname(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Ifname(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Ifname",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mtu(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Mtu(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Mtu",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_link(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Link(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Link",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_qdisc(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Qdisc(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Qdisc",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_stats(&self) -> Result<PushRtnlLinkStats, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Stats(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Stats",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_cost(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Cost(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Cost",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_priority(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Priority(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Priority",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_master(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Master(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Master",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_wireless(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Wireless(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Wireless",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_protinfo(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Protinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Protinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_txqlen(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Txqlen(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Txqlen",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_map(&self) -> Result<PushRtnlLinkIfmap, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Map(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Map",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_weight(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Weight(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Weight",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_operstate(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Operstate(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Operstate",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_linkmode(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Linkmode(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Linkmode",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_linkinfo(&self) -> Result<IterableLinkinfoAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Linkinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Linkinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_net_ns_pid(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::NetNsPid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "NetNsPid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifalias(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Ifalias(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Ifalias",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_num_vf(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::NumVf(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "NumVf",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_vfinfo_list(&self) -> Result<IterableVfinfoListAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::VfinfoList(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "VfinfoList",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_stats64(&self) -> Result<PushRtnlLinkStats64, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Stats64(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Stats64",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_vf_ports(&self) -> Result<IterableVfPortsAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::VfPorts(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "VfPorts",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_port_self(&self) -> Result<IterablePortSelfAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::PortSelf(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "PortSelf",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_af_spec(&self) -> Result<IterableAfSpecAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::AfSpec(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "AfSpec",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_group(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Group(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Group",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_net_ns_fd(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::NetNsFd(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "NetNsFd",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    pub fn get_ext_mask(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::ExtMask(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "ExtMask",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_promiscuity(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Promiscuity(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Promiscuity",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_num_tx_queues(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::NumTxQueues(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "NumTxQueues",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_num_rx_queues(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::NumRxQueues(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "NumRxQueues",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_carrier(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Carrier(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Carrier",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_phys_port_id(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::PhysPortId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "PhysPortId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_carrier_changes(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::CarrierChanges(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "CarrierChanges",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_phys_switch_id(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::PhysSwitchId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "PhysSwitchId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_link_netnsid(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::LinkNetnsid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "LinkNetnsid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_phys_port_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::PhysPortName(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "PhysPortName",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_proto_down(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::ProtoDown(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "ProtoDown",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gso_max_segs(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::GsoMaxSegs(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "GsoMaxSegs",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gso_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::GsoMaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "GsoMaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Pad(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Pad",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_xdp(&self) -> Result<IterableXdpAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Xdp(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Xdp",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_event(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Event(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Event",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_new_netnsid(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::NewNetnsid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "NewNetnsid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_target_netnsid(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::TargetNetnsid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "TargetNetnsid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_carrier_up_count(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::CarrierUpCount(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "CarrierUpCount",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_carrier_down_count(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::CarrierDownCount(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "CarrierDownCount",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_new_ifindex(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::NewIfindex(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "NewIfindex",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_min_mtu(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::MinMtu(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "MinMtu",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_max_mtu(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::MaxMtu(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "MaxMtu",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_prop_list(&self) -> Result<IterablePropListLinkAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::PropList(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "PropList",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_perm_address(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::PermAddress(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "PermAddress",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_proto_down_reason(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::ProtoDownReason(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "ProtoDownReason",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_parent_dev_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::ParentDevName(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "ParentDevName",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_parent_dev_bus_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::ParentDevBusName(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "ParentDevBusName",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gro_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::GroMaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "GroMaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_tso_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::TsoMaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "TsoMaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_tso_max_segs(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::TsoMaxSegs(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "TsoMaxSegs",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_allmulti(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::Allmulti(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "Allmulti",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_devlink_port(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::DevlinkPort(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "DevlinkPort",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gso_ipv4_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::GsoIpv4MaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "GsoIpv4MaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gro_ipv4_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::GroIpv4MaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "GroIpv4MaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_dpll_pin(&self) -> Result<IterableLinkDpllPinAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::DpllPin(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "DpllPin",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "EDT offload horizon supported by the device (in nsec)."]
-    pub fn get_max_pacing_offload_horizon(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::MaxPacingOffloadHorizon(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "MaxPacingOffloadHorizon",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_netns_immutable(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetlinkDoReply::NetnsImmutable(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetlinkDoReply",
-            "NetnsImmutable",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetlinkDoReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfinfomsg, IterableOpGetlinkDoReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfinfomsg::len()));
-        (
-            PushIfinfomsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetlinkDoReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        LinkAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetlinkDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetlinkDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetlinkDoReply<'a> {
-    type Item = Result<OpGetlinkDoReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetlinkDoReply::Address({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetlinkDoReply::Broadcast({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetlinkDoReply::Ifname({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetlinkDoReply::Mtu({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetlinkDoReply::Link({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpGetlinkDoReply::Qdisc({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpGetlinkDoReply::Stats({
-                    let res = Some(PushRtnlLinkStats::new_from_zeroed(next));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetlinkDoReply::Cost({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpGetlinkDoReply::Priority({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                10u16 => OpGetlinkDoReply::Master({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                11u16 => OpGetlinkDoReply::Wireless({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                12u16 => OpGetlinkDoReply::Protinfo({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                13u16 => OpGetlinkDoReply::Txqlen({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                14u16 => OpGetlinkDoReply::Map({
-                    let res = PushRtnlLinkIfmap::new_from_slice(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                15u16 => OpGetlinkDoReply::Weight({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                16u16 => OpGetlinkDoReply::Operstate({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                17u16 => OpGetlinkDoReply::Linkmode({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                18u16 => OpGetlinkDoReply::Linkinfo({
-                    let res = Some(IterableLinkinfoAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                19u16 => OpGetlinkDoReply::NetNsPid({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                20u16 => OpGetlinkDoReply::Ifalias({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                21u16 => OpGetlinkDoReply::NumVf({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                22u16 => OpGetlinkDoReply::VfinfoList({
-                    let res = Some(IterableVfinfoListAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                23u16 => OpGetlinkDoReply::Stats64({
-                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                24u16 => OpGetlinkDoReply::VfPorts({
-                    let res = Some(IterableVfPortsAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                25u16 => OpGetlinkDoReply::PortSelf({
-                    let res = Some(IterablePortSelfAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                26u16 => OpGetlinkDoReply::AfSpec({
-                    let res = Some(IterableAfSpecAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                27u16 => OpGetlinkDoReply::Group({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                28u16 => OpGetlinkDoReply::NetNsFd({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                29u16 => OpGetlinkDoReply::ExtMask({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                30u16 => OpGetlinkDoReply::Promiscuity({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                31u16 => OpGetlinkDoReply::NumTxQueues({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                32u16 => OpGetlinkDoReply::NumRxQueues({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                33u16 => OpGetlinkDoReply::Carrier({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                34u16 => OpGetlinkDoReply::PhysPortId({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                35u16 => OpGetlinkDoReply::CarrierChanges({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                36u16 => OpGetlinkDoReply::PhysSwitchId({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                37u16 => OpGetlinkDoReply::LinkNetnsid({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                38u16 => OpGetlinkDoReply::PhysPortName({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                39u16 => OpGetlinkDoReply::ProtoDown({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                40u16 => OpGetlinkDoReply::GsoMaxSegs({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                41u16 => OpGetlinkDoReply::GsoMaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                42u16 => OpGetlinkDoReply::Pad({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                43u16 => OpGetlinkDoReply::Xdp({
-                    let res = Some(IterableXdpAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                44u16 => OpGetlinkDoReply::Event({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                45u16 => OpGetlinkDoReply::NewNetnsid({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                46u16 => OpGetlinkDoReply::TargetNetnsid({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                47u16 => OpGetlinkDoReply::CarrierUpCount({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                48u16 => OpGetlinkDoReply::CarrierDownCount({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                49u16 => OpGetlinkDoReply::NewIfindex({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                50u16 => OpGetlinkDoReply::MinMtu({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                51u16 => OpGetlinkDoReply::MaxMtu({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                52u16 => OpGetlinkDoReply::PropList({
-                    let res = Some(IterablePropListLinkAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                54u16 => OpGetlinkDoReply::PermAddress({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                55u16 => OpGetlinkDoReply::ProtoDownReason({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                56u16 => OpGetlinkDoReply::ParentDevName({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                57u16 => OpGetlinkDoReply::ParentDevBusName({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                58u16 => OpGetlinkDoReply::GroMaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                59u16 => OpGetlinkDoReply::TsoMaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                60u16 => OpGetlinkDoReply::TsoMaxSegs({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                61u16 => OpGetlinkDoReply::Allmulti({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                62u16 => OpGetlinkDoReply::DevlinkPort({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                63u16 => OpGetlinkDoReply::GsoIpv4MaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                64u16 => OpGetlinkDoReply::GroIpv4MaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                65u16 => OpGetlinkDoReply::DpllPin({
-                    let res = Some(IterableLinkDpllPinAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                66u16 => OpGetlinkDoReply::MaxPacingOffloadHorizon({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                67u16 => OpGetlinkDoReply::NetnsImmutable({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetlinkDoReply",
-            r#type.and_then(|t| OpGetlinkDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetlinkDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetlinkDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetlinkDoReply::Address(val) => fmt.field("Address", &val),
-                OpGetlinkDoReply::Broadcast(val) => fmt.field("Broadcast", &val),
-                OpGetlinkDoReply::Ifname(val) => fmt.field("Ifname", &val),
-                OpGetlinkDoReply::Mtu(val) => fmt.field("Mtu", &val),
-                OpGetlinkDoReply::Link(val) => fmt.field("Link", &val),
-                OpGetlinkDoReply::Qdisc(val) => fmt.field("Qdisc", &val),
-                OpGetlinkDoReply::Stats(val) => fmt.field("Stats", &val),
-                OpGetlinkDoReply::Cost(val) => fmt.field("Cost", &val),
-                OpGetlinkDoReply::Priority(val) => fmt.field("Priority", &val),
-                OpGetlinkDoReply::Master(val) => fmt.field("Master", &val),
-                OpGetlinkDoReply::Wireless(val) => fmt.field("Wireless", &val),
-                OpGetlinkDoReply::Protinfo(val) => fmt.field("Protinfo", &val),
-                OpGetlinkDoReply::Txqlen(val) => fmt.field("Txqlen", &val),
-                OpGetlinkDoReply::Map(val) => fmt.field("Map", &val),
-                OpGetlinkDoReply::Weight(val) => fmt.field("Weight", &val),
-                OpGetlinkDoReply::Operstate(val) => fmt.field("Operstate", &val),
-                OpGetlinkDoReply::Linkmode(val) => fmt.field("Linkmode", &val),
-                OpGetlinkDoReply::Linkinfo(val) => fmt.field("Linkinfo", &val),
-                OpGetlinkDoReply::NetNsPid(val) => fmt.field("NetNsPid", &val),
-                OpGetlinkDoReply::Ifalias(val) => fmt.field("Ifalias", &val),
-                OpGetlinkDoReply::NumVf(val) => fmt.field("NumVf", &val),
-                OpGetlinkDoReply::VfinfoList(val) => fmt.field("VfinfoList", &val),
-                OpGetlinkDoReply::Stats64(val) => fmt.field("Stats64", &val),
-                OpGetlinkDoReply::VfPorts(val) => fmt.field("VfPorts", &val),
-                OpGetlinkDoReply::PortSelf(val) => fmt.field("PortSelf", &val),
-                OpGetlinkDoReply::AfSpec(val) => fmt.field("AfSpec", &val),
-                OpGetlinkDoReply::Group(val) => fmt.field("Group", &val),
-                OpGetlinkDoReply::NetNsFd(val) => fmt.field("NetNsFd", &val),
-                OpGetlinkDoReply::ExtMask(val) => {
-                    fmt.field("ExtMask", &FormatFlags(val.into(), RtextFilter::from_value))
-                }
-                OpGetlinkDoReply::Promiscuity(val) => fmt.field("Promiscuity", &val),
-                OpGetlinkDoReply::NumTxQueues(val) => fmt.field("NumTxQueues", &val),
-                OpGetlinkDoReply::NumRxQueues(val) => fmt.field("NumRxQueues", &val),
-                OpGetlinkDoReply::Carrier(val) => fmt.field("Carrier", &val),
-                OpGetlinkDoReply::PhysPortId(val) => fmt.field("PhysPortId", &val),
-                OpGetlinkDoReply::CarrierChanges(val) => fmt.field("CarrierChanges", &val),
-                OpGetlinkDoReply::PhysSwitchId(val) => fmt.field("PhysSwitchId", &val),
-                OpGetlinkDoReply::LinkNetnsid(val) => fmt.field("LinkNetnsid", &val),
-                OpGetlinkDoReply::PhysPortName(val) => fmt.field("PhysPortName", &val),
-                OpGetlinkDoReply::ProtoDown(val) => fmt.field("ProtoDown", &val),
-                OpGetlinkDoReply::GsoMaxSegs(val) => fmt.field("GsoMaxSegs", &val),
-                OpGetlinkDoReply::GsoMaxSize(val) => fmt.field("GsoMaxSize", &val),
-                OpGetlinkDoReply::Pad(val) => fmt.field("Pad", &val),
-                OpGetlinkDoReply::Xdp(val) => fmt.field("Xdp", &val),
-                OpGetlinkDoReply::Event(val) => fmt.field("Event", &val),
-                OpGetlinkDoReply::NewNetnsid(val) => fmt.field("NewNetnsid", &val),
-                OpGetlinkDoReply::TargetNetnsid(val) => fmt.field("TargetNetnsid", &val),
-                OpGetlinkDoReply::CarrierUpCount(val) => fmt.field("CarrierUpCount", &val),
-                OpGetlinkDoReply::CarrierDownCount(val) => fmt.field("CarrierDownCount", &val),
-                OpGetlinkDoReply::NewIfindex(val) => fmt.field("NewIfindex", &val),
-                OpGetlinkDoReply::MinMtu(val) => fmt.field("MinMtu", &val),
-                OpGetlinkDoReply::MaxMtu(val) => fmt.field("MaxMtu", &val),
-                OpGetlinkDoReply::PropList(val) => fmt.field("PropList", &val),
-                OpGetlinkDoReply::PermAddress(val) => fmt.field("PermAddress", &val),
-                OpGetlinkDoReply::ProtoDownReason(val) => fmt.field("ProtoDownReason", &val),
-                OpGetlinkDoReply::ParentDevName(val) => fmt.field("ParentDevName", &val),
-                OpGetlinkDoReply::ParentDevBusName(val) => fmt.field("ParentDevBusName", &val),
-                OpGetlinkDoReply::GroMaxSize(val) => fmt.field("GroMaxSize", &val),
-                OpGetlinkDoReply::TsoMaxSize(val) => fmt.field("TsoMaxSize", &val),
-                OpGetlinkDoReply::TsoMaxSegs(val) => fmt.field("TsoMaxSegs", &val),
-                OpGetlinkDoReply::Allmulti(val) => fmt.field("Allmulti", &val),
-                OpGetlinkDoReply::DevlinkPort(val) => fmt.field("DevlinkPort", &val),
-                OpGetlinkDoReply::GsoIpv4MaxSize(val) => fmt.field("GsoIpv4MaxSize", &val),
-                OpGetlinkDoReply::GroIpv4MaxSize(val) => fmt.field("GroIpv4MaxSize", &val),
-                OpGetlinkDoReply::DpllPin(val) => fmt.field("DpllPin", &val),
-                OpGetlinkDoReply::MaxPacingOffloadHorizon(val) => {
-                    fmt.field("MaxPacingOffloadHorizon", &val)
-                }
-                OpGetlinkDoReply::NetnsImmutable(val) => fmt.field("NetnsImmutable", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetlinkDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfinfomsg::len() {
-            stack.push(("OpGetlinkDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetlinkDoReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetlinkDoReply::Address(val) => {
-                    if last_off == offset {
-                        stack.push(("Address", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Broadcast(val) => {
-                    if last_off == offset {
-                        stack.push(("Broadcast", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Ifname(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifname", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Mtu(val) => {
-                    if last_off == offset {
-                        stack.push(("Mtu", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Link(val) => {
-                    if last_off == offset {
-                        stack.push(("Link", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Qdisc(val) => {
-                    if last_off == offset {
-                        stack.push(("Qdisc", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Stats(val) => {
-                    if last_off == offset {
-                        stack.push(("Stats", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Cost(val) => {
-                    if last_off == offset {
-                        stack.push(("Cost", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Priority(val) => {
-                    if last_off == offset {
-                        stack.push(("Priority", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Master(val) => {
-                    if last_off == offset {
-                        stack.push(("Master", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Wireless(val) => {
-                    if last_off == offset {
-                        stack.push(("Wireless", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Protinfo(val) => {
-                    if last_off == offset {
-                        stack.push(("Protinfo", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Txqlen(val) => {
-                    if last_off == offset {
-                        stack.push(("Txqlen", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Map(val) => {
-                    if last_off == offset {
-                        stack.push(("Map", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Weight(val) => {
-                    if last_off == offset {
-                        stack.push(("Weight", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Operstate(val) => {
-                    if last_off == offset {
-                        stack.push(("Operstate", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Linkmode(val) => {
-                    if last_off == offset {
-                        stack.push(("Linkmode", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Linkinfo(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::NetNsPid(val) => {
-                    if last_off == offset {
-                        stack.push(("NetNsPid", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Ifalias(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifalias", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::NumVf(val) => {
-                    if last_off == offset {
-                        stack.push(("NumVf", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::VfinfoList(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Stats64(val) => {
-                    if last_off == offset {
-                        stack.push(("Stats64", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::VfPorts(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::PortSelf(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::AfSpec(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Group(val) => {
-                    if last_off == offset {
-                        stack.push(("Group", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::NetNsFd(val) => {
-                    if last_off == offset {
-                        stack.push(("NetNsFd", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::ExtMask(val) => {
-                    if last_off == offset {
-                        stack.push(("ExtMask", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Promiscuity(val) => {
-                    if last_off == offset {
-                        stack.push(("Promiscuity", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::NumTxQueues(val) => {
-                    if last_off == offset {
-                        stack.push(("NumTxQueues", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::NumRxQueues(val) => {
-                    if last_off == offset {
-                        stack.push(("NumRxQueues", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Carrier(val) => {
-                    if last_off == offset {
-                        stack.push(("Carrier", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::PhysPortId(val) => {
-                    if last_off == offset {
-                        stack.push(("PhysPortId", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::CarrierChanges(val) => {
-                    if last_off == offset {
-                        stack.push(("CarrierChanges", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::PhysSwitchId(val) => {
-                    if last_off == offset {
-                        stack.push(("PhysSwitchId", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::LinkNetnsid(val) => {
-                    if last_off == offset {
-                        stack.push(("LinkNetnsid", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::PhysPortName(val) => {
-                    if last_off == offset {
-                        stack.push(("PhysPortName", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::ProtoDown(val) => {
-                    if last_off == offset {
-                        stack.push(("ProtoDown", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::GsoMaxSegs(val) => {
-                    if last_off == offset {
-                        stack.push(("GsoMaxSegs", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::GsoMaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GsoMaxSize", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Pad(val) => {
-                    if last_off == offset {
-                        stack.push(("Pad", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Xdp(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Event(val) => {
-                    if last_off == offset {
-                        stack.push(("Event", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::NewNetnsid(val) => {
-                    if last_off == offset {
-                        stack.push(("NewNetnsid", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::TargetNetnsid(val) => {
-                    if last_off == offset {
-                        stack.push(("TargetNetnsid", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::CarrierUpCount(val) => {
-                    if last_off == offset {
-                        stack.push(("CarrierUpCount", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::CarrierDownCount(val) => {
-                    if last_off == offset {
-                        stack.push(("CarrierDownCount", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::NewIfindex(val) => {
-                    if last_off == offset {
-                        stack.push(("NewIfindex", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::MinMtu(val) => {
-                    if last_off == offset {
-                        stack.push(("MinMtu", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::MaxMtu(val) => {
-                    if last_off == offset {
-                        stack.push(("MaxMtu", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::PropList(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::PermAddress(val) => {
-                    if last_off == offset {
-                        stack.push(("PermAddress", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::ProtoDownReason(val) => {
-                    if last_off == offset {
-                        stack.push(("ProtoDownReason", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::ParentDevName(val) => {
-                    if last_off == offset {
-                        stack.push(("ParentDevName", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::ParentDevBusName(val) => {
-                    if last_off == offset {
-                        stack.push(("ParentDevBusName", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::GroMaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GroMaxSize", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::TsoMaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("TsoMaxSize", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::TsoMaxSegs(val) => {
-                    if last_off == offset {
-                        stack.push(("TsoMaxSegs", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::Allmulti(val) => {
-                    if last_off == offset {
-                        stack.push(("Allmulti", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::DevlinkPort(val) => {
-                    if last_off == offset {
-                        stack.push(("DevlinkPort", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::GsoIpv4MaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GsoIpv4MaxSize", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::GroIpv4MaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GroIpv4MaxSize", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::DpllPin(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::MaxPacingOffloadHorizon(val) => {
-                    if last_off == offset {
-                        stack.push(("MaxPacingOffloadHorizon", last_off));
-                        break;
-                    }
-                }
-                OpGetlinkDoReply::NetnsImmutable(val) => {
-                    if last_off == offset {
-                        stack.push(("NetnsImmutable", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetlinkDoReply", cur));
-        }
-        (stack, missing)
-    }
-}
+#[doc = "Get / dump information about a link\\.\nRequest attributes:\n- [.push_ifname()](PushLinkAttrs::push_ifname)\n- [.push_ext_mask()](PushLinkAttrs::push_ext_mask)\n- [.push_target_netnsid()](PushLinkAttrs::push_target_netnsid)\n- [.push_alt_ifname()](PushLinkAttrs::push_alt_ifname)\n\nReply attributes:\n- [.get_address()](IterableLinkAttrs::get_address)\n- [.get_broadcast()](IterableLinkAttrs::get_broadcast)\n- [.get_ifname()](IterableLinkAttrs::get_ifname)\n- [.get_mtu()](IterableLinkAttrs::get_mtu)\n- [.get_link()](IterableLinkAttrs::get_link)\n- [.get_qdisc()](IterableLinkAttrs::get_qdisc)\n- [.get_stats()](IterableLinkAttrs::get_stats)\n- [.get_cost()](IterableLinkAttrs::get_cost)\n- [.get_priority()](IterableLinkAttrs::get_priority)\n- [.get_master()](IterableLinkAttrs::get_master)\n- [.get_wireless()](IterableLinkAttrs::get_wireless)\n- [.get_protinfo()](IterableLinkAttrs::get_protinfo)\n- [.get_txqlen()](IterableLinkAttrs::get_txqlen)\n- [.get_map()](IterableLinkAttrs::get_map)\n- [.get_weight()](IterableLinkAttrs::get_weight)\n- [.get_operstate()](IterableLinkAttrs::get_operstate)\n- [.get_linkmode()](IterableLinkAttrs::get_linkmode)\n- [.get_linkinfo()](IterableLinkAttrs::get_linkinfo)\n- [.get_net_ns_pid()](IterableLinkAttrs::get_net_ns_pid)\n- [.get_ifalias()](IterableLinkAttrs::get_ifalias)\n- [.get_num_vf()](IterableLinkAttrs::get_num_vf)\n- [.get_vfinfo_list()](IterableLinkAttrs::get_vfinfo_list)\n- [.get_stats64()](IterableLinkAttrs::get_stats64)\n- [.get_vf_ports()](IterableLinkAttrs::get_vf_ports)\n- [.get_port_self()](IterableLinkAttrs::get_port_self)\n- [.get_af_spec()](IterableLinkAttrs::get_af_spec)\n- [.get_group()](IterableLinkAttrs::get_group)\n- [.get_net_ns_fd()](IterableLinkAttrs::get_net_ns_fd)\n- [.get_ext_mask()](IterableLinkAttrs::get_ext_mask)\n- [.get_promiscuity()](IterableLinkAttrs::get_promiscuity)\n- [.get_num_tx_queues()](IterableLinkAttrs::get_num_tx_queues)\n- [.get_num_rx_queues()](IterableLinkAttrs::get_num_rx_queues)\n- [.get_carrier()](IterableLinkAttrs::get_carrier)\n- [.get_phys_port_id()](IterableLinkAttrs::get_phys_port_id)\n- [.get_carrier_changes()](IterableLinkAttrs::get_carrier_changes)\n- [.get_phys_switch_id()](IterableLinkAttrs::get_phys_switch_id)\n- [.get_link_netnsid()](IterableLinkAttrs::get_link_netnsid)\n- [.get_phys_port_name()](IterableLinkAttrs::get_phys_port_name)\n- [.get_proto_down()](IterableLinkAttrs::get_proto_down)\n- [.get_gso_max_segs()](IterableLinkAttrs::get_gso_max_segs)\n- [.get_gso_max_size()](IterableLinkAttrs::get_gso_max_size)\n- [.get_xdp()](IterableLinkAttrs::get_xdp)\n- [.get_event()](IterableLinkAttrs::get_event)\n- [.get_new_netnsid()](IterableLinkAttrs::get_new_netnsid)\n- [.get_target_netnsid()](IterableLinkAttrs::get_target_netnsid)\n- [.get_carrier_up_count()](IterableLinkAttrs::get_carrier_up_count)\n- [.get_carrier_down_count()](IterableLinkAttrs::get_carrier_down_count)\n- [.get_new_ifindex()](IterableLinkAttrs::get_new_ifindex)\n- [.get_min_mtu()](IterableLinkAttrs::get_min_mtu)\n- [.get_max_mtu()](IterableLinkAttrs::get_max_mtu)\n- [.get_prop_list()](IterableLinkAttrs::get_prop_list)\n- [.get_perm_address()](IterableLinkAttrs::get_perm_address)\n- [.get_proto_down_reason()](IterableLinkAttrs::get_proto_down_reason)\n- [.get_parent_dev_name()](IterableLinkAttrs::get_parent_dev_name)\n- [.get_parent_dev_bus_name()](IterableLinkAttrs::get_parent_dev_bus_name)\n- [.get_gro_max_size()](IterableLinkAttrs::get_gro_max_size)\n- [.get_tso_max_size()](IterableLinkAttrs::get_tso_max_size)\n- [.get_tso_max_segs()](IterableLinkAttrs::get_tso_max_segs)\n- [.get_allmulti()](IterableLinkAttrs::get_allmulti)\n- [.get_devlink_port()](IterableLinkAttrs::get_devlink_port)\n- [.get_gso_ipv4_max_size()](IterableLinkAttrs::get_gso_ipv4_max_size)\n- [.get_gro_ipv4_max_size()](IterableLinkAttrs::get_gro_ipv4_max_size)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetlinkDoRequest<'r> {
+pub struct OpGetlinkDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetlinkDoRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushIfinfomsg) -> Self {
-        PushOpGetlinkDoRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpGetlinkDo<'r> {
+    pub fn new(mut request: Request<'r>, header: &Ifinfomsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpGetlinkDoRequest<&mut Vec<u8>> {
-        PushOpGetlinkDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Ifinfomsg,
+    ) -> PushLinkAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushLinkAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetlinkDoRequest<RequestBuf<'r>> {
-        PushOpGetlinkDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushLinkAttrs<&mut Vec<u8>> {
+        PushLinkAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(
-        buf: &'buf [u8],
-    ) -> (PushIfinfomsg, IterableOpGetlinkDoRequest<'buf>) {
-        OpGetlinkDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushLinkAttrs<RequestBuf<'r>> {
+        PushLinkAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Ifinfomsg, IterableLinkAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Ifinfomsg::len()));
+        (
+            Ifinfomsg::new_from_slice(header).unwrap_or_default(),
+            IterableLinkAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Ifinfomsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetlinkDoRequest<'_> {
+impl NetlinkRequest for OpGetlinkDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -29173,2659 +22737,55 @@ impl NetlinkRequest for RequestOpGetlinkDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushIfinfomsg, IterableOpGetlinkDoReply<'buf>);
+    type ReplyType<'buf> = (Ifinfomsg, IterableLinkAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetlinkDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetlinkDoRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Set information about a link."]
-pub struct PushOpSetlinkDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpSetlinkDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpSetlinkDoRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfinfomsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfinfomsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_address(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_broadcast(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_ifname(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            3u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_ifname_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 3u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_mtu(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_link(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 5u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_qdisc(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            6u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_qdisc_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 6u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_stats(mut self, value: PushRtnlLinkStats) -> Self {
-        push_header(self.as_rec_mut(), 7u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_cost(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            8u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_cost_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 8u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_priority(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            9u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_priority_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 9u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_master(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 10u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_wireless(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            11u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_wireless_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 11u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_protinfo(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            12u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_protinfo_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 12u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_txqlen(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 13u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_map(mut self, value: PushRtnlLinkIfmap) -> Self {
-        push_header(self.as_rec_mut(), 14u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_weight(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 15u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_operstate(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 16u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_linkmode(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 17u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_linkinfo(mut self) -> PushLinkinfoAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 18u16);
-        PushLinkinfoAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_net_ns_pid(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 19u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_ifalias(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            20u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_ifalias_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 20u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_num_vf(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 21u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_vfinfo_list(mut self) -> PushVfinfoListAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 22u16);
-        PushVfinfoListAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_stats64(mut self, value: PushRtnlLinkStats64) -> Self {
-        push_header(self.as_rec_mut(), 23u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn nested_vf_ports(mut self) -> PushVfPortsAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 24u16);
-        PushVfPortsAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_port_self(mut self) -> PushPortSelfAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 25u16);
-        PushPortSelfAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_af_spec(mut self) -> PushAfSpecAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 26u16);
-        PushAfSpecAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_group(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 27u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_net_ns_fd(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 28u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    pub fn push_ext_mask(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 29u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_promiscuity(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 30u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_num_tx_queues(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 31u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_num_rx_queues(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 32u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_carrier(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 33u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_phys_port_id(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 34u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_carrier_changes(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 35u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_phys_switch_id(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 36u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_link_netnsid(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 37u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_phys_port_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            38u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_phys_port_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 38u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_proto_down(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 39u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gso_max_segs(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 40u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gso_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 41u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_pad(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 42u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn nested_xdp(mut self) -> PushXdpAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 43u16);
-        PushXdpAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_event(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 44u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_new_netnsid(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 45u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_target_netnsid(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 46u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_carrier_up_count(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 47u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_carrier_down_count(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 48u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_new_ifindex(mut self, value: i32) -> Self {
-        push_header(self.as_rec_mut(), 49u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_min_mtu(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 50u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_max_mtu(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 51u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_prop_list(mut self) -> PushPropListLinkAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 52u16);
-        PushPropListLinkAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_perm_address(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 54u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_proto_down_reason(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            55u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_proto_down_reason_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 55u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_parent_dev_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            56u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_parent_dev_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 56u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_parent_dev_bus_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            57u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_parent_dev_bus_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 57u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_gro_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 58u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_tso_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 59u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_tso_max_segs(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 60u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_allmulti(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 61u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_devlink_port(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 62u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_gso_ipv4_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 63u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_gro_ipv4_max_size(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 64u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_dpll_pin(mut self) -> PushLinkDpllPinAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 65u16);
-        PushLinkDpllPinAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    #[doc = "EDT offload horizon supported by the device (in nsec)."]
-    pub fn push_max_pacing_offload_horizon(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 66u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_netns_immutable(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 67u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpSetlinkDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Set information about a link."]
-#[derive(Clone)]
-pub enum OpSetlinkDoRequest<'a> {
-    Address(&'a [u8]),
-    Broadcast(&'a [u8]),
-    Ifname(&'a CStr),
-    Mtu(u32),
-    Link(u32),
-    Qdisc(&'a CStr),
-    Stats(PushRtnlLinkStats),
-    Cost(&'a CStr),
-    Priority(&'a CStr),
-    Master(u32),
-    Wireless(&'a CStr),
-    Protinfo(&'a CStr),
-    Txqlen(u32),
-    Map(PushRtnlLinkIfmap),
-    Weight(u32),
-    Operstate(u8),
-    Linkmode(u8),
-    Linkinfo(IterableLinkinfoAttrs<'a>),
-    NetNsPid(u32),
-    Ifalias(&'a CStr),
-    NumVf(u32),
-    VfinfoList(IterableVfinfoListAttrs<'a>),
-    Stats64(PushRtnlLinkStats64),
-    VfPorts(IterableVfPortsAttrs<'a>),
-    PortSelf(IterablePortSelfAttrs<'a>),
-    AfSpec(IterableAfSpecAttrs<'a>),
-    Group(u32),
-    NetNsFd(u32),
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    ExtMask(u32),
-    Promiscuity(u32),
-    NumTxQueues(u32),
-    NumRxQueues(u32),
-    Carrier(u8),
-    PhysPortId(&'a [u8]),
-    CarrierChanges(u32),
-    PhysSwitchId(&'a [u8]),
-    LinkNetnsid(i32),
-    PhysPortName(&'a CStr),
-    ProtoDown(u8),
-    GsoMaxSegs(u32),
-    GsoMaxSize(u32),
-    Pad(&'a [u8]),
-    Xdp(IterableXdpAttrs<'a>),
-    Event(u32),
-    NewNetnsid(i32),
-    TargetNetnsid(i32),
-    CarrierUpCount(u32),
-    CarrierDownCount(u32),
-    NewIfindex(i32),
-    MinMtu(u32),
-    MaxMtu(u32),
-    PropList(IterablePropListLinkAttrs<'a>),
-    PermAddress(&'a [u8]),
-    ProtoDownReason(&'a CStr),
-    ParentDevName(&'a CStr),
-    ParentDevBusName(&'a CStr),
-    GroMaxSize(u32),
-    TsoMaxSize(u32),
-    TsoMaxSegs(u32),
-    Allmulti(u32),
-    DevlinkPort(&'a [u8]),
-    GsoIpv4MaxSize(u32),
-    GroIpv4MaxSize(u32),
-    DpllPin(IterableLinkDpllPinAttrs<'a>),
-    #[doc = "EDT offload horizon supported by the device (in nsec)."]
-    MaxPacingOffloadHorizon(u32),
-    NetnsImmutable(u8),
-}
-impl<'a> IterableOpSetlinkDoRequest<'a> {
-    pub fn get_address(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Address(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Address",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_broadcast(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Broadcast(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Broadcast",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifname(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Ifname(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Ifname",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mtu(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Mtu(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Mtu",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_link(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Link(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Link",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_qdisc(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Qdisc(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Qdisc",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_stats(&self) -> Result<PushRtnlLinkStats, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Stats(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Stats",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_cost(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Cost(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Cost",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_priority(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Priority(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Priority",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_master(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Master(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Master",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_wireless(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Wireless(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Wireless",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_protinfo(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Protinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Protinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_txqlen(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Txqlen(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Txqlen",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_map(&self) -> Result<PushRtnlLinkIfmap, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Map(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Map",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_weight(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Weight(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Weight",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_operstate(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Operstate(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Operstate",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_linkmode(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Linkmode(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Linkmode",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_linkinfo(&self) -> Result<IterableLinkinfoAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Linkinfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Linkinfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_net_ns_pid(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::NetNsPid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "NetNsPid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ifalias(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Ifalias(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Ifalias",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_num_vf(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::NumVf(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "NumVf",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_vfinfo_list(&self) -> Result<IterableVfinfoListAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::VfinfoList(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "VfinfoList",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_stats64(&self) -> Result<PushRtnlLinkStats64, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Stats64(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Stats64",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_vf_ports(&self) -> Result<IterableVfPortsAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::VfPorts(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "VfPorts",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_port_self(&self) -> Result<IterablePortSelfAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::PortSelf(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "PortSelf",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_af_spec(&self) -> Result<IterableAfSpecAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::AfSpec(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "AfSpec",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_group(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Group(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Group",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_net_ns_fd(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::NetNsFd(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "NetNsFd",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "Associated type: \"RtextFilter\" (1 bit per enumeration)"]
-    pub fn get_ext_mask(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::ExtMask(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "ExtMask",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_promiscuity(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Promiscuity(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Promiscuity",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_num_tx_queues(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::NumTxQueues(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "NumTxQueues",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_num_rx_queues(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::NumRxQueues(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "NumRxQueues",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_carrier(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Carrier(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Carrier",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_phys_port_id(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::PhysPortId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "PhysPortId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_carrier_changes(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::CarrierChanges(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "CarrierChanges",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_phys_switch_id(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::PhysSwitchId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "PhysSwitchId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_link_netnsid(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::LinkNetnsid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "LinkNetnsid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_phys_port_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::PhysPortName(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "PhysPortName",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_proto_down(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::ProtoDown(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "ProtoDown",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gso_max_segs(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::GsoMaxSegs(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "GsoMaxSegs",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gso_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::GsoMaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "GsoMaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_pad(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Pad(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Pad",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_xdp(&self) -> Result<IterableXdpAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Xdp(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Xdp",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_event(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Event(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Event",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_new_netnsid(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::NewNetnsid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "NewNetnsid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_target_netnsid(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::TargetNetnsid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "TargetNetnsid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_carrier_up_count(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::CarrierUpCount(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "CarrierUpCount",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_carrier_down_count(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::CarrierDownCount(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "CarrierDownCount",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_new_ifindex(&self) -> Result<i32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::NewIfindex(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "NewIfindex",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_min_mtu(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::MinMtu(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "MinMtu",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_max_mtu(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::MaxMtu(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "MaxMtu",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_prop_list(&self) -> Result<IterablePropListLinkAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::PropList(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "PropList",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_perm_address(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::PermAddress(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "PermAddress",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_proto_down_reason(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::ProtoDownReason(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "ProtoDownReason",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_parent_dev_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::ParentDevName(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "ParentDevName",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_parent_dev_bus_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::ParentDevBusName(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "ParentDevBusName",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gro_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::GroMaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "GroMaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_tso_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::TsoMaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "TsoMaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_tso_max_segs(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::TsoMaxSegs(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "TsoMaxSegs",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_allmulti(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::Allmulti(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "Allmulti",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_devlink_port(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::DevlinkPort(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "DevlinkPort",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gso_ipv4_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::GsoIpv4MaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "GsoIpv4MaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_gro_ipv4_max_size(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::GroIpv4MaxSize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "GroIpv4MaxSize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_dpll_pin(&self) -> Result<IterableLinkDpllPinAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::DpllPin(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "DpllPin",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    #[doc = "EDT offload horizon supported by the device (in nsec)."]
-    pub fn get_max_pacing_offload_horizon(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::MaxPacingOffloadHorizon(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "MaxPacingOffloadHorizon",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_netns_immutable(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpSetlinkDoRequest::NetnsImmutable(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpSetlinkDoRequest",
-            "NetnsImmutable",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpSetlinkDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfinfomsg, IterableOpSetlinkDoRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfinfomsg::len()));
-        (
-            PushIfinfomsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpSetlinkDoRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        LinkAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpSetlinkDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpSetlinkDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpSetlinkDoRequest<'a> {
-    type Item = Result<OpSetlinkDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpSetlinkDoRequest::Address({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpSetlinkDoRequest::Broadcast({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpSetlinkDoRequest::Ifname({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpSetlinkDoRequest::Mtu({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpSetlinkDoRequest::Link({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpSetlinkDoRequest::Qdisc({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpSetlinkDoRequest::Stats({
-                    let res = Some(PushRtnlLinkStats::new_from_zeroed(next));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpSetlinkDoRequest::Cost({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpSetlinkDoRequest::Priority({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                10u16 => OpSetlinkDoRequest::Master({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                11u16 => OpSetlinkDoRequest::Wireless({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                12u16 => OpSetlinkDoRequest::Protinfo({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                13u16 => OpSetlinkDoRequest::Txqlen({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                14u16 => OpSetlinkDoRequest::Map({
-                    let res = PushRtnlLinkIfmap::new_from_slice(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                15u16 => OpSetlinkDoRequest::Weight({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                16u16 => OpSetlinkDoRequest::Operstate({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                17u16 => OpSetlinkDoRequest::Linkmode({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                18u16 => OpSetlinkDoRequest::Linkinfo({
-                    let res = Some(IterableLinkinfoAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                19u16 => OpSetlinkDoRequest::NetNsPid({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                20u16 => OpSetlinkDoRequest::Ifalias({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                21u16 => OpSetlinkDoRequest::NumVf({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                22u16 => OpSetlinkDoRequest::VfinfoList({
-                    let res = Some(IterableVfinfoListAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                23u16 => OpSetlinkDoRequest::Stats64({
-                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                24u16 => OpSetlinkDoRequest::VfPorts({
-                    let res = Some(IterableVfPortsAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                25u16 => OpSetlinkDoRequest::PortSelf({
-                    let res = Some(IterablePortSelfAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                26u16 => OpSetlinkDoRequest::AfSpec({
-                    let res = Some(IterableAfSpecAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                27u16 => OpSetlinkDoRequest::Group({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                28u16 => OpSetlinkDoRequest::NetNsFd({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                29u16 => OpSetlinkDoRequest::ExtMask({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                30u16 => OpSetlinkDoRequest::Promiscuity({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                31u16 => OpSetlinkDoRequest::NumTxQueues({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                32u16 => OpSetlinkDoRequest::NumRxQueues({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                33u16 => OpSetlinkDoRequest::Carrier({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                34u16 => OpSetlinkDoRequest::PhysPortId({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                35u16 => OpSetlinkDoRequest::CarrierChanges({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                36u16 => OpSetlinkDoRequest::PhysSwitchId({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                37u16 => OpSetlinkDoRequest::LinkNetnsid({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                38u16 => OpSetlinkDoRequest::PhysPortName({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                39u16 => OpSetlinkDoRequest::ProtoDown({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                40u16 => OpSetlinkDoRequest::GsoMaxSegs({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                41u16 => OpSetlinkDoRequest::GsoMaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                42u16 => OpSetlinkDoRequest::Pad({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                43u16 => OpSetlinkDoRequest::Xdp({
-                    let res = Some(IterableXdpAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                44u16 => OpSetlinkDoRequest::Event({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                45u16 => OpSetlinkDoRequest::NewNetnsid({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                46u16 => OpSetlinkDoRequest::TargetNetnsid({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                47u16 => OpSetlinkDoRequest::CarrierUpCount({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                48u16 => OpSetlinkDoRequest::CarrierDownCount({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                49u16 => OpSetlinkDoRequest::NewIfindex({
-                    let res = parse_i32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                50u16 => OpSetlinkDoRequest::MinMtu({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                51u16 => OpSetlinkDoRequest::MaxMtu({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                52u16 => OpSetlinkDoRequest::PropList({
-                    let res = Some(IterablePropListLinkAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                54u16 => OpSetlinkDoRequest::PermAddress({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                55u16 => OpSetlinkDoRequest::ProtoDownReason({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                56u16 => OpSetlinkDoRequest::ParentDevName({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                57u16 => OpSetlinkDoRequest::ParentDevBusName({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                58u16 => OpSetlinkDoRequest::GroMaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                59u16 => OpSetlinkDoRequest::TsoMaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                60u16 => OpSetlinkDoRequest::TsoMaxSegs({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                61u16 => OpSetlinkDoRequest::Allmulti({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                62u16 => OpSetlinkDoRequest::DevlinkPort({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                63u16 => OpSetlinkDoRequest::GsoIpv4MaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                64u16 => OpSetlinkDoRequest::GroIpv4MaxSize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                65u16 => OpSetlinkDoRequest::DpllPin({
-                    let res = Some(IterableLinkDpllPinAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                66u16 => OpSetlinkDoRequest::MaxPacingOffloadHorizon({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                67u16 => OpSetlinkDoRequest::NetnsImmutable({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpSetlinkDoRequest",
-            r#type.and_then(|t| OpSetlinkDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpSetlinkDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpSetlinkDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpSetlinkDoRequest::Address(val) => fmt.field("Address", &val),
-                OpSetlinkDoRequest::Broadcast(val) => fmt.field("Broadcast", &val),
-                OpSetlinkDoRequest::Ifname(val) => fmt.field("Ifname", &val),
-                OpSetlinkDoRequest::Mtu(val) => fmt.field("Mtu", &val),
-                OpSetlinkDoRequest::Link(val) => fmt.field("Link", &val),
-                OpSetlinkDoRequest::Qdisc(val) => fmt.field("Qdisc", &val),
-                OpSetlinkDoRequest::Stats(val) => fmt.field("Stats", &val),
-                OpSetlinkDoRequest::Cost(val) => fmt.field("Cost", &val),
-                OpSetlinkDoRequest::Priority(val) => fmt.field("Priority", &val),
-                OpSetlinkDoRequest::Master(val) => fmt.field("Master", &val),
-                OpSetlinkDoRequest::Wireless(val) => fmt.field("Wireless", &val),
-                OpSetlinkDoRequest::Protinfo(val) => fmt.field("Protinfo", &val),
-                OpSetlinkDoRequest::Txqlen(val) => fmt.field("Txqlen", &val),
-                OpSetlinkDoRequest::Map(val) => fmt.field("Map", &val),
-                OpSetlinkDoRequest::Weight(val) => fmt.field("Weight", &val),
-                OpSetlinkDoRequest::Operstate(val) => fmt.field("Operstate", &val),
-                OpSetlinkDoRequest::Linkmode(val) => fmt.field("Linkmode", &val),
-                OpSetlinkDoRequest::Linkinfo(val) => fmt.field("Linkinfo", &val),
-                OpSetlinkDoRequest::NetNsPid(val) => fmt.field("NetNsPid", &val),
-                OpSetlinkDoRequest::Ifalias(val) => fmt.field("Ifalias", &val),
-                OpSetlinkDoRequest::NumVf(val) => fmt.field("NumVf", &val),
-                OpSetlinkDoRequest::VfinfoList(val) => fmt.field("VfinfoList", &val),
-                OpSetlinkDoRequest::Stats64(val) => fmt.field("Stats64", &val),
-                OpSetlinkDoRequest::VfPorts(val) => fmt.field("VfPorts", &val),
-                OpSetlinkDoRequest::PortSelf(val) => fmt.field("PortSelf", &val),
-                OpSetlinkDoRequest::AfSpec(val) => fmt.field("AfSpec", &val),
-                OpSetlinkDoRequest::Group(val) => fmt.field("Group", &val),
-                OpSetlinkDoRequest::NetNsFd(val) => fmt.field("NetNsFd", &val),
-                OpSetlinkDoRequest::ExtMask(val) => {
-                    fmt.field("ExtMask", &FormatFlags(val.into(), RtextFilter::from_value))
-                }
-                OpSetlinkDoRequest::Promiscuity(val) => fmt.field("Promiscuity", &val),
-                OpSetlinkDoRequest::NumTxQueues(val) => fmt.field("NumTxQueues", &val),
-                OpSetlinkDoRequest::NumRxQueues(val) => fmt.field("NumRxQueues", &val),
-                OpSetlinkDoRequest::Carrier(val) => fmt.field("Carrier", &val),
-                OpSetlinkDoRequest::PhysPortId(val) => fmt.field("PhysPortId", &val),
-                OpSetlinkDoRequest::CarrierChanges(val) => fmt.field("CarrierChanges", &val),
-                OpSetlinkDoRequest::PhysSwitchId(val) => fmt.field("PhysSwitchId", &val),
-                OpSetlinkDoRequest::LinkNetnsid(val) => fmt.field("LinkNetnsid", &val),
-                OpSetlinkDoRequest::PhysPortName(val) => fmt.field("PhysPortName", &val),
-                OpSetlinkDoRequest::ProtoDown(val) => fmt.field("ProtoDown", &val),
-                OpSetlinkDoRequest::GsoMaxSegs(val) => fmt.field("GsoMaxSegs", &val),
-                OpSetlinkDoRequest::GsoMaxSize(val) => fmt.field("GsoMaxSize", &val),
-                OpSetlinkDoRequest::Pad(val) => fmt.field("Pad", &val),
-                OpSetlinkDoRequest::Xdp(val) => fmt.field("Xdp", &val),
-                OpSetlinkDoRequest::Event(val) => fmt.field("Event", &val),
-                OpSetlinkDoRequest::NewNetnsid(val) => fmt.field("NewNetnsid", &val),
-                OpSetlinkDoRequest::TargetNetnsid(val) => fmt.field("TargetNetnsid", &val),
-                OpSetlinkDoRequest::CarrierUpCount(val) => fmt.field("CarrierUpCount", &val),
-                OpSetlinkDoRequest::CarrierDownCount(val) => fmt.field("CarrierDownCount", &val),
-                OpSetlinkDoRequest::NewIfindex(val) => fmt.field("NewIfindex", &val),
-                OpSetlinkDoRequest::MinMtu(val) => fmt.field("MinMtu", &val),
-                OpSetlinkDoRequest::MaxMtu(val) => fmt.field("MaxMtu", &val),
-                OpSetlinkDoRequest::PropList(val) => fmt.field("PropList", &val),
-                OpSetlinkDoRequest::PermAddress(val) => fmt.field("PermAddress", &val),
-                OpSetlinkDoRequest::ProtoDownReason(val) => fmt.field("ProtoDownReason", &val),
-                OpSetlinkDoRequest::ParentDevName(val) => fmt.field("ParentDevName", &val),
-                OpSetlinkDoRequest::ParentDevBusName(val) => fmt.field("ParentDevBusName", &val),
-                OpSetlinkDoRequest::GroMaxSize(val) => fmt.field("GroMaxSize", &val),
-                OpSetlinkDoRequest::TsoMaxSize(val) => fmt.field("TsoMaxSize", &val),
-                OpSetlinkDoRequest::TsoMaxSegs(val) => fmt.field("TsoMaxSegs", &val),
-                OpSetlinkDoRequest::Allmulti(val) => fmt.field("Allmulti", &val),
-                OpSetlinkDoRequest::DevlinkPort(val) => fmt.field("DevlinkPort", &val),
-                OpSetlinkDoRequest::GsoIpv4MaxSize(val) => fmt.field("GsoIpv4MaxSize", &val),
-                OpSetlinkDoRequest::GroIpv4MaxSize(val) => fmt.field("GroIpv4MaxSize", &val),
-                OpSetlinkDoRequest::DpllPin(val) => fmt.field("DpllPin", &val),
-                OpSetlinkDoRequest::MaxPacingOffloadHorizon(val) => {
-                    fmt.field("MaxPacingOffloadHorizon", &val)
-                }
-                OpSetlinkDoRequest::NetnsImmutable(val) => fmt.field("NetnsImmutable", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpSetlinkDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfinfomsg::len() {
-            stack.push(("OpSetlinkDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpSetlinkDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpSetlinkDoRequest::Address(val) => {
-                    if last_off == offset {
-                        stack.push(("Address", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Broadcast(val) => {
-                    if last_off == offset {
-                        stack.push(("Broadcast", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Ifname(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifname", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Mtu(val) => {
-                    if last_off == offset {
-                        stack.push(("Mtu", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Link(val) => {
-                    if last_off == offset {
-                        stack.push(("Link", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Qdisc(val) => {
-                    if last_off == offset {
-                        stack.push(("Qdisc", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Stats(val) => {
-                    if last_off == offset {
-                        stack.push(("Stats", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Cost(val) => {
-                    if last_off == offset {
-                        stack.push(("Cost", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Priority(val) => {
-                    if last_off == offset {
-                        stack.push(("Priority", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Master(val) => {
-                    if last_off == offset {
-                        stack.push(("Master", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Wireless(val) => {
-                    if last_off == offset {
-                        stack.push(("Wireless", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Protinfo(val) => {
-                    if last_off == offset {
-                        stack.push(("Protinfo", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Txqlen(val) => {
-                    if last_off == offset {
-                        stack.push(("Txqlen", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Map(val) => {
-                    if last_off == offset {
-                        stack.push(("Map", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Weight(val) => {
-                    if last_off == offset {
-                        stack.push(("Weight", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Operstate(val) => {
-                    if last_off == offset {
-                        stack.push(("Operstate", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Linkmode(val) => {
-                    if last_off == offset {
-                        stack.push(("Linkmode", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Linkinfo(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::NetNsPid(val) => {
-                    if last_off == offset {
-                        stack.push(("NetNsPid", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Ifalias(val) => {
-                    if last_off == offset {
-                        stack.push(("Ifalias", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::NumVf(val) => {
-                    if last_off == offset {
-                        stack.push(("NumVf", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::VfinfoList(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Stats64(val) => {
-                    if last_off == offset {
-                        stack.push(("Stats64", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::VfPorts(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::PortSelf(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::AfSpec(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Group(val) => {
-                    if last_off == offset {
-                        stack.push(("Group", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::NetNsFd(val) => {
-                    if last_off == offset {
-                        stack.push(("NetNsFd", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::ExtMask(val) => {
-                    if last_off == offset {
-                        stack.push(("ExtMask", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Promiscuity(val) => {
-                    if last_off == offset {
-                        stack.push(("Promiscuity", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::NumTxQueues(val) => {
-                    if last_off == offset {
-                        stack.push(("NumTxQueues", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::NumRxQueues(val) => {
-                    if last_off == offset {
-                        stack.push(("NumRxQueues", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Carrier(val) => {
-                    if last_off == offset {
-                        stack.push(("Carrier", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::PhysPortId(val) => {
-                    if last_off == offset {
-                        stack.push(("PhysPortId", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::CarrierChanges(val) => {
-                    if last_off == offset {
-                        stack.push(("CarrierChanges", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::PhysSwitchId(val) => {
-                    if last_off == offset {
-                        stack.push(("PhysSwitchId", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::LinkNetnsid(val) => {
-                    if last_off == offset {
-                        stack.push(("LinkNetnsid", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::PhysPortName(val) => {
-                    if last_off == offset {
-                        stack.push(("PhysPortName", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::ProtoDown(val) => {
-                    if last_off == offset {
-                        stack.push(("ProtoDown", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::GsoMaxSegs(val) => {
-                    if last_off == offset {
-                        stack.push(("GsoMaxSegs", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::GsoMaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GsoMaxSize", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Pad(val) => {
-                    if last_off == offset {
-                        stack.push(("Pad", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Xdp(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Event(val) => {
-                    if last_off == offset {
-                        stack.push(("Event", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::NewNetnsid(val) => {
-                    if last_off == offset {
-                        stack.push(("NewNetnsid", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::TargetNetnsid(val) => {
-                    if last_off == offset {
-                        stack.push(("TargetNetnsid", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::CarrierUpCount(val) => {
-                    if last_off == offset {
-                        stack.push(("CarrierUpCount", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::CarrierDownCount(val) => {
-                    if last_off == offset {
-                        stack.push(("CarrierDownCount", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::NewIfindex(val) => {
-                    if last_off == offset {
-                        stack.push(("NewIfindex", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::MinMtu(val) => {
-                    if last_off == offset {
-                        stack.push(("MinMtu", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::MaxMtu(val) => {
-                    if last_off == offset {
-                        stack.push(("MaxMtu", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::PropList(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::PermAddress(val) => {
-                    if last_off == offset {
-                        stack.push(("PermAddress", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::ProtoDownReason(val) => {
-                    if last_off == offset {
-                        stack.push(("ProtoDownReason", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::ParentDevName(val) => {
-                    if last_off == offset {
-                        stack.push(("ParentDevName", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::ParentDevBusName(val) => {
-                    if last_off == offset {
-                        stack.push(("ParentDevBusName", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::GroMaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GroMaxSize", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::TsoMaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("TsoMaxSize", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::TsoMaxSegs(val) => {
-                    if last_off == offset {
-                        stack.push(("TsoMaxSegs", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::Allmulti(val) => {
-                    if last_off == offset {
-                        stack.push(("Allmulti", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::DevlinkPort(val) => {
-                    if last_off == offset {
-                        stack.push(("DevlinkPort", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::GsoIpv4MaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GsoIpv4MaxSize", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::GroIpv4MaxSize(val) => {
-                    if last_off == offset {
-                        stack.push(("GroIpv4MaxSize", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::DpllPin(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::MaxPacingOffloadHorizon(val) => {
-                    if last_off == offset {
-                        stack.push(("MaxPacingOffloadHorizon", last_off));
-                        break;
-                    }
-                }
-                OpSetlinkDoRequest::NetnsImmutable(val) => {
-                    if last_off == offset {
-                        stack.push(("NetnsImmutable", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpSetlinkDoRequest", cur));
-        }
-        (stack, missing)
-    }
-}
-#[doc = "Set information about a link."]
-pub struct PushOpSetlinkDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpSetlinkDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpSetlinkDoReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfinfomsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfinfomsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpSetlinkDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Set information about a link."]
-#[derive(Clone)]
-pub enum OpSetlinkDoReply {}
-impl<'a> IterableOpSetlinkDoReply<'a> {}
-impl OpSetlinkDoReply {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfinfomsg, IterableOpSetlinkDoReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfinfomsg::len()));
-        (
-            PushIfinfomsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpSetlinkDoReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        LinkAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpSetlinkDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpSetlinkDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpSetlinkDoReply<'a> {
-    type Item = Result<OpSetlinkDoReply, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpSetlinkDoReply",
-            r#type.and_then(|t| OpSetlinkDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpSetlinkDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpSetlinkDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpSetlinkDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfinfomsg::len() {
-            stack.push(("OpSetlinkDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpSetlinkDoReply::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
+#[doc = "Set information about a link\\.\nRequest attributes:\n- [.push_address()](PushLinkAttrs::push_address)\n- [.push_broadcast()](PushLinkAttrs::push_broadcast)\n- [.push_ifname()](PushLinkAttrs::push_ifname)\n- [.push_mtu()](PushLinkAttrs::push_mtu)\n- [.push_link()](PushLinkAttrs::push_link)\n- [.push_qdisc()](PushLinkAttrs::push_qdisc)\n- [.push_stats()](PushLinkAttrs::push_stats)\n- [.push_cost()](PushLinkAttrs::push_cost)\n- [.push_priority()](PushLinkAttrs::push_priority)\n- [.push_master()](PushLinkAttrs::push_master)\n- [.push_wireless()](PushLinkAttrs::push_wireless)\n- [.push_protinfo()](PushLinkAttrs::push_protinfo)\n- [.push_txqlen()](PushLinkAttrs::push_txqlen)\n- [.push_map()](PushLinkAttrs::push_map)\n- [.push_weight()](PushLinkAttrs::push_weight)\n- [.push_operstate()](PushLinkAttrs::push_operstate)\n- [.push_linkmode()](PushLinkAttrs::push_linkmode)\n- [.nested_linkinfo()](PushLinkAttrs::nested_linkinfo)\n- [.push_net_ns_pid()](PushLinkAttrs::push_net_ns_pid)\n- [.push_ifalias()](PushLinkAttrs::push_ifalias)\n- [.push_num_vf()](PushLinkAttrs::push_num_vf)\n- [.nested_vfinfo_list()](PushLinkAttrs::nested_vfinfo_list)\n- [.push_stats64()](PushLinkAttrs::push_stats64)\n- [.nested_vf_ports()](PushLinkAttrs::nested_vf_ports)\n- [.nested_port_self()](PushLinkAttrs::nested_port_self)\n- [.nested_af_spec()](PushLinkAttrs::nested_af_spec)\n- [.push_group()](PushLinkAttrs::push_group)\n- [.push_net_ns_fd()](PushLinkAttrs::push_net_ns_fd)\n- [.push_ext_mask()](PushLinkAttrs::push_ext_mask)\n- [.push_promiscuity()](PushLinkAttrs::push_promiscuity)\n- [.push_num_tx_queues()](PushLinkAttrs::push_num_tx_queues)\n- [.push_num_rx_queues()](PushLinkAttrs::push_num_rx_queues)\n- [.push_carrier()](PushLinkAttrs::push_carrier)\n- [.push_phys_port_id()](PushLinkAttrs::push_phys_port_id)\n- [.push_carrier_changes()](PushLinkAttrs::push_carrier_changes)\n- [.push_phys_switch_id()](PushLinkAttrs::push_phys_switch_id)\n- [.push_link_netnsid()](PushLinkAttrs::push_link_netnsid)\n- [.push_phys_port_name()](PushLinkAttrs::push_phys_port_name)\n- [.push_proto_down()](PushLinkAttrs::push_proto_down)\n- [.push_gso_max_segs()](PushLinkAttrs::push_gso_max_segs)\n- [.push_gso_max_size()](PushLinkAttrs::push_gso_max_size)\n- [.nested_xdp()](PushLinkAttrs::nested_xdp)\n- [.push_event()](PushLinkAttrs::push_event)\n- [.push_new_netnsid()](PushLinkAttrs::push_new_netnsid)\n- [.push_target_netnsid()](PushLinkAttrs::push_target_netnsid)\n- [.push_carrier_up_count()](PushLinkAttrs::push_carrier_up_count)\n- [.push_carrier_down_count()](PushLinkAttrs::push_carrier_down_count)\n- [.push_new_ifindex()](PushLinkAttrs::push_new_ifindex)\n- [.push_min_mtu()](PushLinkAttrs::push_min_mtu)\n- [.push_max_mtu()](PushLinkAttrs::push_max_mtu)\n- [.nested_prop_list()](PushLinkAttrs::nested_prop_list)\n- [.push_perm_address()](PushLinkAttrs::push_perm_address)\n- [.push_proto_down_reason()](PushLinkAttrs::push_proto_down_reason)\n- [.push_parent_dev_name()](PushLinkAttrs::push_parent_dev_name)\n- [.push_parent_dev_bus_name()](PushLinkAttrs::push_parent_dev_bus_name)\n- [.push_gro_max_size()](PushLinkAttrs::push_gro_max_size)\n- [.push_tso_max_size()](PushLinkAttrs::push_tso_max_size)\n- [.push_tso_max_segs()](PushLinkAttrs::push_tso_max_segs)\n- [.push_allmulti()](PushLinkAttrs::push_allmulti)\n- [.push_devlink_port()](PushLinkAttrs::push_devlink_port)\n- [.push_gso_ipv4_max_size()](PushLinkAttrs::push_gso_ipv4_max_size)\n- [.push_gro_ipv4_max_size()](PushLinkAttrs::push_gro_ipv4_max_size)\n"]
 #[derive(Debug)]
-pub struct RequestOpSetlinkDoRequest<'r> {
+pub struct OpSetlinkDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpSetlinkDoRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushIfinfomsg) -> Self {
-        PushOpSetlinkDoRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpSetlinkDo<'r> {
+    pub fn new(mut request: Request<'r>, header: &Ifinfomsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpSetlinkDoRequest<&mut Vec<u8>> {
-        PushOpSetlinkDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Ifinfomsg,
+    ) -> PushLinkAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushLinkAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpSetlinkDoRequest<RequestBuf<'r>> {
-        PushOpSetlinkDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushLinkAttrs<&mut Vec<u8>> {
+        PushLinkAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(
-        buf: &'buf [u8],
-    ) -> (PushIfinfomsg, IterableOpSetlinkDoRequest<'buf>) {
-        OpSetlinkDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushLinkAttrs<RequestBuf<'r>> {
+        PushLinkAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (Ifinfomsg, IterableLinkAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(Ifinfomsg::len()));
+        (
+            Ifinfomsg::new_from_slice(header).unwrap_or_default(),
+            IterableLinkAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Ifinfomsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpSetlinkDoRequest<'_> {
+impl NetlinkRequest for OpSetlinkDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -31838,514 +22798,57 @@ impl NetlinkRequest for RequestOpSetlinkDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushIfinfomsg, IterableOpSetlinkDoReply<'buf>);
+    type ReplyType<'buf> = (Ifinfomsg, IterableLinkAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpSetlinkDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpSetlinkDoRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Get / dump link stats."]
-pub struct PushOpGetstatsDumpRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetstatsDumpRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetstatsDumpRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfStatsMsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfStatsMsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetstatsDumpRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump link stats."]
-#[derive(Clone)]
-pub enum OpGetstatsDumpRequest {}
-impl<'a> IterableOpGetstatsDumpRequest<'a> {}
-impl OpGetstatsDumpRequest {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfStatsMsg, IterableOpGetstatsDumpRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfStatsMsg::len()));
-        (
-            PushIfStatsMsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetstatsDumpRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        StatsAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetstatsDumpRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetstatsDumpRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetstatsDumpRequest<'a> {
-    type Item = Result<OpGetstatsDumpRequest, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetstatsDumpRequest",
-            r#type.and_then(|t| OpGetstatsDumpRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpGetstatsDumpRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetstatsDumpRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetstatsDumpRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfStatsMsg::len() {
-            stack.push(("OpGetstatsDumpRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetstatsDumpRequest::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
-#[doc = "Get / dump link stats."]
-pub struct PushOpGetstatsDumpReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetstatsDumpReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetstatsDumpReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfStatsMsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfStatsMsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_link_64(mut self, value: PushRtnlLinkStats64) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_link_xstats(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_link_xstats_slave(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 3u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn nested_link_offload_xstats(mut self) -> PushLinkOffloadXstats<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 4u16);
-        PushLinkOffloadXstats {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_af_spec(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 5u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetstatsDumpReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump link stats."]
-#[derive(Clone)]
-pub enum OpGetstatsDumpReply<'a> {
-    Link64(PushRtnlLinkStats64),
-    LinkXstats(&'a [u8]),
-    LinkXstatsSlave(&'a [u8]),
-    LinkOffloadXstats(IterableLinkOffloadXstats<'a>),
-    AfSpec(&'a [u8]),
-}
-impl<'a> IterableOpGetstatsDumpReply<'a> {
-    pub fn get_link_64(&self) -> Result<PushRtnlLinkStats64, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetstatsDumpReply::Link64(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetstatsDumpReply",
-            "Link64",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_link_xstats(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetstatsDumpReply::LinkXstats(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetstatsDumpReply",
-            "LinkXstats",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_link_xstats_slave(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetstatsDumpReply::LinkXstatsSlave(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetstatsDumpReply",
-            "LinkXstatsSlave",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_link_offload_xstats(&self) -> Result<IterableLinkOffloadXstats<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetstatsDumpReply::LinkOffloadXstats(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetstatsDumpReply",
-            "LinkOffloadXstats",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_af_spec(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetstatsDumpReply::AfSpec(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetstatsDumpReply",
-            "AfSpec",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetstatsDumpReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfStatsMsg, IterableOpGetstatsDumpReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfStatsMsg::len()));
-        (
-            PushIfStatsMsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetstatsDumpReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        StatsAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetstatsDumpReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetstatsDumpReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetstatsDumpReply<'a> {
-    type Item = Result<OpGetstatsDumpReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetstatsDumpReply::Link64({
-                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetstatsDumpReply::LinkXstats({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetstatsDumpReply::LinkXstatsSlave({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetstatsDumpReply::LinkOffloadXstats({
-                    let res = Some(IterableLinkOffloadXstats::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetstatsDumpReply::AfSpec({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetstatsDumpReply",
-            r#type.and_then(|t| OpGetstatsDumpReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetstatsDumpReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetstatsDumpReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetstatsDumpReply::Link64(val) => fmt.field("Link64", &val),
-                OpGetstatsDumpReply::LinkXstats(val) => fmt.field("LinkXstats", &val),
-                OpGetstatsDumpReply::LinkXstatsSlave(val) => fmt.field("LinkXstatsSlave", &val),
-                OpGetstatsDumpReply::LinkOffloadXstats(val) => fmt.field("LinkOffloadXstats", &val),
-                OpGetstatsDumpReply::AfSpec(val) => fmt.field("AfSpec", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetstatsDumpReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfStatsMsg::len() {
-            stack.push(("OpGetstatsDumpReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetstatsDumpReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetstatsDumpReply::Link64(val) => {
-                    if last_off == offset {
-                        stack.push(("Link64", last_off));
-                        break;
-                    }
-                }
-                OpGetstatsDumpReply::LinkXstats(val) => {
-                    if last_off == offset {
-                        stack.push(("LinkXstats", last_off));
-                        break;
-                    }
-                }
-                OpGetstatsDumpReply::LinkXstatsSlave(val) => {
-                    if last_off == offset {
-                        stack.push(("LinkXstatsSlave", last_off));
-                        break;
-                    }
-                }
-                OpGetstatsDumpReply::LinkOffloadXstats(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetstatsDumpReply::AfSpec(val) => {
-                    if last_off == offset {
-                        stack.push(("AfSpec", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetstatsDumpReply", cur));
-        }
-        (stack, missing)
-    }
-}
+#[doc = "Get / dump link stats\\.\n\nReply attributes:\n- [.get_link_64()](IterableStatsAttrs::get_link_64)\n- [.get_link_xstats()](IterableStatsAttrs::get_link_xstats)\n- [.get_link_xstats_slave()](IterableStatsAttrs::get_link_xstats_slave)\n- [.get_link_offload_xstats()](IterableStatsAttrs::get_link_offload_xstats)\n- [.get_af_spec()](IterableStatsAttrs::get_af_spec)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetstatsDumpRequest<'r> {
+pub struct OpGetstatsDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetstatsDumpRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushIfStatsMsg) -> Self {
-        PushOpGetstatsDumpRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpGetstatsDump<'r> {
+    pub fn new(mut request: Request<'r>, header: &IfStatsMsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self {
             request: request.set_dump(),
         }
     }
-    pub fn encode(&mut self) -> PushOpGetstatsDumpRequest<&mut Vec<u8>> {
-        PushOpGetstatsDumpRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &IfStatsMsg,
+    ) -> PushStatsAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushStatsAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetstatsDumpRequest<RequestBuf<'r>> {
-        PushOpGetstatsDumpRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushStatsAttrs<&mut Vec<u8>> {
+        PushStatsAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(
-        buf: &'buf [u8],
-    ) -> (PushIfStatsMsg, IterableOpGetstatsDumpRequest<'buf>) {
-        OpGetstatsDumpRequest::new(buf)
+    pub fn into_encoder(self) -> PushStatsAttrs<RequestBuf<'r>> {
+        PushStatsAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (IfStatsMsg, IterableStatsAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(IfStatsMsg::len()));
+        (
+            IfStatsMsg::new_from_slice(header).unwrap_or_default(),
+            IterableStatsAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &IfStatsMsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetstatsDumpRequest<'_> {
+impl NetlinkRequest for OpGetstatsDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -32358,512 +22861,55 @@ impl NetlinkRequest for RequestOpGetstatsDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushIfStatsMsg, IterableOpGetstatsDumpReply<'buf>);
+    type ReplyType<'buf> = (IfStatsMsg, IterableStatsAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetstatsDumpReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetstatsDumpRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Get / dump link stats."]
-pub struct PushOpGetstatsDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetstatsDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetstatsDoRequest<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfStatsMsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfStatsMsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetstatsDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump link stats."]
-#[derive(Clone)]
-pub enum OpGetstatsDoRequest {}
-impl<'a> IterableOpGetstatsDoRequest<'a> {}
-impl OpGetstatsDoRequest {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfStatsMsg, IterableOpGetstatsDoRequest<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfStatsMsg::len()));
-        (
-            PushIfStatsMsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetstatsDoRequest::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        StatsAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetstatsDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetstatsDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetstatsDoRequest<'a> {
-    type Item = Result<OpGetstatsDoRequest, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetstatsDoRequest",
-            r#type.and_then(|t| OpGetstatsDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpGetstatsDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetstatsDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetstatsDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfStatsMsg::len() {
-            stack.push(("OpGetstatsDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetstatsDoRequest::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
-#[doc = "Get / dump link stats."]
-pub struct PushOpGetstatsDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetstatsDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetstatsDoReply<Prev> {
-    pub fn new(mut prev: Prev, header: &PushIfStatsMsg) -> Self {
-        Self::write_header(&mut prev, header);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev, header: &PushIfStatsMsg) {
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_link_64(mut self, value: PushRtnlLinkStats64) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_link_xstats(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_link_xstats_slave(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 3u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn nested_link_offload_xstats(mut self) -> PushLinkOffloadXstats<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 4u16);
-        PushLinkOffloadXstats {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn push_af_spec(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 5u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetstatsDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump link stats."]
-#[derive(Clone)]
-pub enum OpGetstatsDoReply<'a> {
-    Link64(PushRtnlLinkStats64),
-    LinkXstats(&'a [u8]),
-    LinkXstatsSlave(&'a [u8]),
-    LinkOffloadXstats(IterableLinkOffloadXstats<'a>),
-    AfSpec(&'a [u8]),
-}
-impl<'a> IterableOpGetstatsDoReply<'a> {
-    pub fn get_link_64(&self) -> Result<PushRtnlLinkStats64, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetstatsDoReply::Link64(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetstatsDoReply",
-            "Link64",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_link_xstats(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetstatsDoReply::LinkXstats(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetstatsDoReply",
-            "LinkXstats",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_link_xstats_slave(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetstatsDoReply::LinkXstatsSlave(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetstatsDoReply",
-            "LinkXstatsSlave",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_link_offload_xstats(&self) -> Result<IterableLinkOffloadXstats<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetstatsDoReply::LinkOffloadXstats(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetstatsDoReply",
-            "LinkOffloadXstats",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_af_spec(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetstatsDoReply::AfSpec(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetstatsDoReply",
-            "AfSpec",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetstatsDoReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> (PushIfStatsMsg, IterableOpGetstatsDoReply<'a>) {
-        let (header, attrs) = buf.split_at(buf.len().min(PushIfStatsMsg::len()));
-        (
-            PushIfStatsMsg::new_from_slice(header).unwrap_or_default(),
-            IterableOpGetstatsDoReply::with_loc(attrs, buf.as_ptr() as usize),
-        )
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        StatsAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetstatsDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetstatsDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetstatsDoReply<'a> {
-    type Item = Result<OpGetstatsDoReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetstatsDoReply::Link64({
-                    let res = Some(PushRtnlLinkStats64::new_from_zeroed(next));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetstatsDoReply::LinkXstats({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetstatsDoReply::LinkXstatsSlave({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetstatsDoReply::LinkOffloadXstats({
-                    let res = Some(IterableLinkOffloadXstats::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetstatsDoReply::AfSpec({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetstatsDoReply",
-            r#type.and_then(|t| OpGetstatsDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetstatsDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetstatsDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetstatsDoReply::Link64(val) => fmt.field("Link64", &val),
-                OpGetstatsDoReply::LinkXstats(val) => fmt.field("LinkXstats", &val),
-                OpGetstatsDoReply::LinkXstatsSlave(val) => fmt.field("LinkXstatsSlave", &val),
-                OpGetstatsDoReply::LinkOffloadXstats(val) => fmt.field("LinkOffloadXstats", &val),
-                OpGetstatsDoReply::AfSpec(val) => fmt.field("AfSpec", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetstatsDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushIfStatsMsg::len() {
-            stack.push(("OpGetstatsDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetstatsDoReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetstatsDoReply::Link64(val) => {
-                    if last_off == offset {
-                        stack.push(("Link64", last_off));
-                        break;
-                    }
-                }
-                OpGetstatsDoReply::LinkXstats(val) => {
-                    if last_off == offset {
-                        stack.push(("LinkXstats", last_off));
-                        break;
-                    }
-                }
-                OpGetstatsDoReply::LinkXstatsSlave(val) => {
-                    if last_off == offset {
-                        stack.push(("LinkXstatsSlave", last_off));
-                        break;
-                    }
-                }
-                OpGetstatsDoReply::LinkOffloadXstats(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetstatsDoReply::AfSpec(val) => {
-                    if last_off == offset {
-                        stack.push(("AfSpec", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetstatsDoReply", cur));
-        }
-        (stack, missing)
-    }
-}
+#[doc = "Get / dump link stats\\.\n\nReply attributes:\n- [.get_link_64()](IterableStatsAttrs::get_link_64)\n- [.get_link_xstats()](IterableStatsAttrs::get_link_xstats)\n- [.get_link_xstats_slave()](IterableStatsAttrs::get_link_xstats_slave)\n- [.get_link_offload_xstats()](IterableStatsAttrs::get_link_offload_xstats)\n- [.get_af_spec()](IterableStatsAttrs::get_af_spec)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetstatsDoRequest<'r> {
+pub struct OpGetstatsDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetstatsDoRequest<'r> {
-    pub fn new(mut request: Request<'r>, header: &PushIfStatsMsg) -> Self {
-        PushOpGetstatsDoRequest::write_header(&mut request.buf_mut(), header);
+impl<'r> OpGetstatsDo<'r> {
+    pub fn new(mut request: Request<'r>, header: &IfStatsMsg) -> Self {
+        Self::write_header(request.buf_mut(), header);
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpGetstatsDoRequest<&mut Vec<u8>> {
-        PushOpGetstatsDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &IfStatsMsg,
+    ) -> PushStatsAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushStatsAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetstatsDoRequest<RequestBuf<'r>> {
-        PushOpGetstatsDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushStatsAttrs<&mut Vec<u8>> {
+        PushStatsAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(
-        buf: &'buf [u8],
-    ) -> (PushIfStatsMsg, IterableOpGetstatsDoRequest<'buf>) {
-        OpGetstatsDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushStatsAttrs<RequestBuf<'r>> {
+        PushStatsAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> (IfStatsMsg, IterableStatsAttrs<'a>) {
+        let (header, attrs) = buf.split_at(buf.len().min(IfStatsMsg::len()));
+        (
+            IfStatsMsg::new_from_slice(header).unwrap_or_default(),
+            IterableStatsAttrs::with_loc(attrs, buf.as_ptr() as usize),
+        )
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &IfStatsMsg) {
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetstatsDoRequest<'_> {
+impl NetlinkRequest for OpGetstatsDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0u16,
@@ -32876,16 +22922,16 @@ impl NetlinkRequest for RequestOpGetstatsDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = (PushIfStatsMsg, IterableOpGetstatsDoReply<'buf>);
+    type ReplyType<'buf> = (IfStatsMsg, IterableStatsAttrs<'buf>);
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetstatsDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetstatsDoRequest::new(buf)
+        Self::decode_request(buf)
             .1
             .lookup_attr(offset, missing_type)
     }
@@ -32983,8 +23029,7 @@ impl<'a> Chained<'a> {
     pub fn request(&mut self) -> Request<'_> {
         self.update_header();
         self.last_header_offset = self.buf().len();
-        self.buf_mut()
-            .extend_from_slice(PushNlmsghdr::new().as_slice());
+        self.buf_mut().extend_from_slice(Nlmsghdr::new().as_slice());
         let mut request = Request::new_extend(self.buf.buf_mut());
         self.last_kind = None;
         request.writeback = Some(&mut self.last_kind);
@@ -33005,10 +23050,7 @@ impl<'a> Chained<'a> {
         }) = self.last_kind
         else {
             if !self.buf().is_empty() {
-                assert_eq!(
-                    self.last_header_offset + PushNlmsghdr::len(),
-                    self.buf().len()
-                );
+                assert_eq!(self.last_header_offset + Nlmsghdr::len(), self.buf().len());
                 self.buf.buf_mut().truncate(self.last_header_offset);
             }
             return;
@@ -33023,11 +23065,13 @@ impl<'a> Chained<'a> {
         self.lookups.push((name, lookup));
         let buf = self.buf_mut();
         align(buf);
-        let mut header = PushNlmsghdr::new();
-        header.set_len((buf.len() - header_offset) as u32);
-        header.set_type(request_type);
-        header.set_flags(flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16);
-        header.set_seq(seq);
+        let header = Nlmsghdr {
+            len: (buf.len() - header_offset) as u32,
+            r#type: request_type,
+            flags: flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16,
+            seq,
+            pid: 0,
+        };
         buf[header_offset..(header_offset + 16)].clone_from_slice(header.as_slice());
     }
 }
@@ -33118,81 +23162,205 @@ impl<'buf> Request<'buf> {
         self.flags |= consts::NLM_F_APPEND as u16;
         self
     }
+    #[doc = "Set `self.flags |= flags`"]
+    pub fn set_flags(mut self, flags: u16) -> Self {
+        self.flags |= flags;
+        self
+    }
+    #[doc = "Set `self.flags ^= self.flags & flags`"]
+    pub fn unset_flags(mut self, flags: u16) -> Self {
+        self.flags ^= self.flags & flags;
+        self
+    }
     #[doc = "Set `NLM_F_DUMP` flag"]
     fn set_dump(mut self) -> Self {
         self.flags |= consts::NLM_F_DUMP as u16;
         self
     }
-    pub fn op_newlink_do_request(self, header: &PushIfinfomsg) -> RequestOpNewlinkDoRequest<'buf> {
-        let mut res = RequestOpNewlinkDoRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-newlink-do-request",
-            RequestOpNewlinkDoRequest::lookup,
-        );
+    #[doc = "Create a new link\\.\nRequest attributes:\n- [.push_address()](PushLinkAttrs::push_address)\n- [.push_broadcast()](PushLinkAttrs::push_broadcast)\n- [.push_ifname()](PushLinkAttrs::push_ifname)\n- [.push_mtu()](PushLinkAttrs::push_mtu)\n- [.push_txqlen()](PushLinkAttrs::push_txqlen)\n- [.push_operstate()](PushLinkAttrs::push_operstate)\n- [.push_linkmode()](PushLinkAttrs::push_linkmode)\n- [.nested_linkinfo()](PushLinkAttrs::nested_linkinfo)\n- [.push_net_ns_pid()](PushLinkAttrs::push_net_ns_pid)\n- [.nested_af_spec()](PushLinkAttrs::nested_af_spec)\n- [.push_group()](PushLinkAttrs::push_group)\n- [.push_net_ns_fd()](PushLinkAttrs::push_net_ns_fd)\n- [.push_num_tx_queues()](PushLinkAttrs::push_num_tx_queues)\n- [.push_num_rx_queues()](PushLinkAttrs::push_num_rx_queues)\n- [.push_link_netnsid()](PushLinkAttrs::push_link_netnsid)\n- [.push_gso_max_segs()](PushLinkAttrs::push_gso_max_segs)\n- [.push_gso_max_size()](PushLinkAttrs::push_gso_max_size)\n- [.push_target_netnsid()](PushLinkAttrs::push_target_netnsid)\n- [.push_gro_max_size()](PushLinkAttrs::push_gro_max_size)\n- [.push_gso_ipv4_max_size()](PushLinkAttrs::push_gso_ipv4_max_size)\n- [.push_gro_ipv4_max_size()](PushLinkAttrs::push_gro_ipv4_max_size)\n"]
+    pub fn op_newlink_do(self, header: &Ifinfomsg) -> OpNewlinkDo<'buf> {
+        let mut res = OpNewlinkDo::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-newlink-do", OpNewlinkDo::lookup);
         res
     }
-    pub fn op_dellink_do_request(self, header: &PushIfinfomsg) -> RequestOpDellinkDoRequest<'buf> {
-        let mut res = RequestOpDellinkDoRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-dellink-do-request",
-            RequestOpDellinkDoRequest::lookup,
-        );
+    #[doc = "Delete an existing link\\.\nRequest attributes:\n- [.push_ifname()](PushLinkAttrs::push_ifname)\n"]
+    pub fn op_dellink_do(self, header: &Ifinfomsg) -> OpDellinkDo<'buf> {
+        let mut res = OpDellinkDo::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-dellink-do", OpDellinkDo::lookup);
         res
     }
-    pub fn op_getlink_dump_request(
-        self,
-        header: &PushIfinfomsg,
-    ) -> RequestOpGetlinkDumpRequest<'buf> {
-        let mut res = RequestOpGetlinkDumpRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-getlink-dump-request",
-            RequestOpGetlinkDumpRequest::lookup,
-        );
+    #[doc = "Get / dump information about a link\\.\nRequest attributes:\n- [.push_master()](PushLinkAttrs::push_master)\n- [.nested_linkinfo()](PushLinkAttrs::nested_linkinfo)\n- [.push_ext_mask()](PushLinkAttrs::push_ext_mask)\n- [.push_target_netnsid()](PushLinkAttrs::push_target_netnsid)\n\nReply attributes:\n- [.get_address()](IterableLinkAttrs::get_address)\n- [.get_broadcast()](IterableLinkAttrs::get_broadcast)\n- [.get_ifname()](IterableLinkAttrs::get_ifname)\n- [.get_mtu()](IterableLinkAttrs::get_mtu)\n- [.get_link()](IterableLinkAttrs::get_link)\n- [.get_qdisc()](IterableLinkAttrs::get_qdisc)\n- [.get_stats()](IterableLinkAttrs::get_stats)\n- [.get_cost()](IterableLinkAttrs::get_cost)\n- [.get_priority()](IterableLinkAttrs::get_priority)\n- [.get_master()](IterableLinkAttrs::get_master)\n- [.get_wireless()](IterableLinkAttrs::get_wireless)\n- [.get_protinfo()](IterableLinkAttrs::get_protinfo)\n- [.get_txqlen()](IterableLinkAttrs::get_txqlen)\n- [.get_map()](IterableLinkAttrs::get_map)\n- [.get_weight()](IterableLinkAttrs::get_weight)\n- [.get_operstate()](IterableLinkAttrs::get_operstate)\n- [.get_linkmode()](IterableLinkAttrs::get_linkmode)\n- [.get_linkinfo()](IterableLinkAttrs::get_linkinfo)\n- [.get_net_ns_pid()](IterableLinkAttrs::get_net_ns_pid)\n- [.get_ifalias()](IterableLinkAttrs::get_ifalias)\n- [.get_num_vf()](IterableLinkAttrs::get_num_vf)\n- [.get_vfinfo_list()](IterableLinkAttrs::get_vfinfo_list)\n- [.get_stats64()](IterableLinkAttrs::get_stats64)\n- [.get_vf_ports()](IterableLinkAttrs::get_vf_ports)\n- [.get_port_self()](IterableLinkAttrs::get_port_self)\n- [.get_af_spec()](IterableLinkAttrs::get_af_spec)\n- [.get_group()](IterableLinkAttrs::get_group)\n- [.get_net_ns_fd()](IterableLinkAttrs::get_net_ns_fd)\n- [.get_ext_mask()](IterableLinkAttrs::get_ext_mask)\n- [.get_promiscuity()](IterableLinkAttrs::get_promiscuity)\n- [.get_num_tx_queues()](IterableLinkAttrs::get_num_tx_queues)\n- [.get_num_rx_queues()](IterableLinkAttrs::get_num_rx_queues)\n- [.get_carrier()](IterableLinkAttrs::get_carrier)\n- [.get_phys_port_id()](IterableLinkAttrs::get_phys_port_id)\n- [.get_carrier_changes()](IterableLinkAttrs::get_carrier_changes)\n- [.get_phys_switch_id()](IterableLinkAttrs::get_phys_switch_id)\n- [.get_link_netnsid()](IterableLinkAttrs::get_link_netnsid)\n- [.get_phys_port_name()](IterableLinkAttrs::get_phys_port_name)\n- [.get_proto_down()](IterableLinkAttrs::get_proto_down)\n- [.get_gso_max_segs()](IterableLinkAttrs::get_gso_max_segs)\n- [.get_gso_max_size()](IterableLinkAttrs::get_gso_max_size)\n- [.get_xdp()](IterableLinkAttrs::get_xdp)\n- [.get_event()](IterableLinkAttrs::get_event)\n- [.get_new_netnsid()](IterableLinkAttrs::get_new_netnsid)\n- [.get_target_netnsid()](IterableLinkAttrs::get_target_netnsid)\n- [.get_carrier_up_count()](IterableLinkAttrs::get_carrier_up_count)\n- [.get_carrier_down_count()](IterableLinkAttrs::get_carrier_down_count)\n- [.get_new_ifindex()](IterableLinkAttrs::get_new_ifindex)\n- [.get_min_mtu()](IterableLinkAttrs::get_min_mtu)\n- [.get_max_mtu()](IterableLinkAttrs::get_max_mtu)\n- [.get_prop_list()](IterableLinkAttrs::get_prop_list)\n- [.get_perm_address()](IterableLinkAttrs::get_perm_address)\n- [.get_proto_down_reason()](IterableLinkAttrs::get_proto_down_reason)\n- [.get_parent_dev_name()](IterableLinkAttrs::get_parent_dev_name)\n- [.get_parent_dev_bus_name()](IterableLinkAttrs::get_parent_dev_bus_name)\n- [.get_gro_max_size()](IterableLinkAttrs::get_gro_max_size)\n- [.get_tso_max_size()](IterableLinkAttrs::get_tso_max_size)\n- [.get_tso_max_segs()](IterableLinkAttrs::get_tso_max_segs)\n- [.get_allmulti()](IterableLinkAttrs::get_allmulti)\n- [.get_devlink_port()](IterableLinkAttrs::get_devlink_port)\n- [.get_gso_ipv4_max_size()](IterableLinkAttrs::get_gso_ipv4_max_size)\n- [.get_gro_ipv4_max_size()](IterableLinkAttrs::get_gro_ipv4_max_size)\n"]
+    pub fn op_getlink_dump(self, header: &Ifinfomsg) -> OpGetlinkDump<'buf> {
+        let mut res = OpGetlinkDump::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-getlink-dump", OpGetlinkDump::lookup);
         res
     }
-    pub fn op_getlink_do_request(self, header: &PushIfinfomsg) -> RequestOpGetlinkDoRequest<'buf> {
-        let mut res = RequestOpGetlinkDoRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-getlink-do-request",
-            RequestOpGetlinkDoRequest::lookup,
-        );
+    #[doc = "Get / dump information about a link\\.\nRequest attributes:\n- [.push_ifname()](PushLinkAttrs::push_ifname)\n- [.push_ext_mask()](PushLinkAttrs::push_ext_mask)\n- [.push_target_netnsid()](PushLinkAttrs::push_target_netnsid)\n- [.push_alt_ifname()](PushLinkAttrs::push_alt_ifname)\n\nReply attributes:\n- [.get_address()](IterableLinkAttrs::get_address)\n- [.get_broadcast()](IterableLinkAttrs::get_broadcast)\n- [.get_ifname()](IterableLinkAttrs::get_ifname)\n- [.get_mtu()](IterableLinkAttrs::get_mtu)\n- [.get_link()](IterableLinkAttrs::get_link)\n- [.get_qdisc()](IterableLinkAttrs::get_qdisc)\n- [.get_stats()](IterableLinkAttrs::get_stats)\n- [.get_cost()](IterableLinkAttrs::get_cost)\n- [.get_priority()](IterableLinkAttrs::get_priority)\n- [.get_master()](IterableLinkAttrs::get_master)\n- [.get_wireless()](IterableLinkAttrs::get_wireless)\n- [.get_protinfo()](IterableLinkAttrs::get_protinfo)\n- [.get_txqlen()](IterableLinkAttrs::get_txqlen)\n- [.get_map()](IterableLinkAttrs::get_map)\n- [.get_weight()](IterableLinkAttrs::get_weight)\n- [.get_operstate()](IterableLinkAttrs::get_operstate)\n- [.get_linkmode()](IterableLinkAttrs::get_linkmode)\n- [.get_linkinfo()](IterableLinkAttrs::get_linkinfo)\n- [.get_net_ns_pid()](IterableLinkAttrs::get_net_ns_pid)\n- [.get_ifalias()](IterableLinkAttrs::get_ifalias)\n- [.get_num_vf()](IterableLinkAttrs::get_num_vf)\n- [.get_vfinfo_list()](IterableLinkAttrs::get_vfinfo_list)\n- [.get_stats64()](IterableLinkAttrs::get_stats64)\n- [.get_vf_ports()](IterableLinkAttrs::get_vf_ports)\n- [.get_port_self()](IterableLinkAttrs::get_port_self)\n- [.get_af_spec()](IterableLinkAttrs::get_af_spec)\n- [.get_group()](IterableLinkAttrs::get_group)\n- [.get_net_ns_fd()](IterableLinkAttrs::get_net_ns_fd)\n- [.get_ext_mask()](IterableLinkAttrs::get_ext_mask)\n- [.get_promiscuity()](IterableLinkAttrs::get_promiscuity)\n- [.get_num_tx_queues()](IterableLinkAttrs::get_num_tx_queues)\n- [.get_num_rx_queues()](IterableLinkAttrs::get_num_rx_queues)\n- [.get_carrier()](IterableLinkAttrs::get_carrier)\n- [.get_phys_port_id()](IterableLinkAttrs::get_phys_port_id)\n- [.get_carrier_changes()](IterableLinkAttrs::get_carrier_changes)\n- [.get_phys_switch_id()](IterableLinkAttrs::get_phys_switch_id)\n- [.get_link_netnsid()](IterableLinkAttrs::get_link_netnsid)\n- [.get_phys_port_name()](IterableLinkAttrs::get_phys_port_name)\n- [.get_proto_down()](IterableLinkAttrs::get_proto_down)\n- [.get_gso_max_segs()](IterableLinkAttrs::get_gso_max_segs)\n- [.get_gso_max_size()](IterableLinkAttrs::get_gso_max_size)\n- [.get_xdp()](IterableLinkAttrs::get_xdp)\n- [.get_event()](IterableLinkAttrs::get_event)\n- [.get_new_netnsid()](IterableLinkAttrs::get_new_netnsid)\n- [.get_target_netnsid()](IterableLinkAttrs::get_target_netnsid)\n- [.get_carrier_up_count()](IterableLinkAttrs::get_carrier_up_count)\n- [.get_carrier_down_count()](IterableLinkAttrs::get_carrier_down_count)\n- [.get_new_ifindex()](IterableLinkAttrs::get_new_ifindex)\n- [.get_min_mtu()](IterableLinkAttrs::get_min_mtu)\n- [.get_max_mtu()](IterableLinkAttrs::get_max_mtu)\n- [.get_prop_list()](IterableLinkAttrs::get_prop_list)\n- [.get_perm_address()](IterableLinkAttrs::get_perm_address)\n- [.get_proto_down_reason()](IterableLinkAttrs::get_proto_down_reason)\n- [.get_parent_dev_name()](IterableLinkAttrs::get_parent_dev_name)\n- [.get_parent_dev_bus_name()](IterableLinkAttrs::get_parent_dev_bus_name)\n- [.get_gro_max_size()](IterableLinkAttrs::get_gro_max_size)\n- [.get_tso_max_size()](IterableLinkAttrs::get_tso_max_size)\n- [.get_tso_max_segs()](IterableLinkAttrs::get_tso_max_segs)\n- [.get_allmulti()](IterableLinkAttrs::get_allmulti)\n- [.get_devlink_port()](IterableLinkAttrs::get_devlink_port)\n- [.get_gso_ipv4_max_size()](IterableLinkAttrs::get_gso_ipv4_max_size)\n- [.get_gro_ipv4_max_size()](IterableLinkAttrs::get_gro_ipv4_max_size)\n"]
+    pub fn op_getlink_do(self, header: &Ifinfomsg) -> OpGetlinkDo<'buf> {
+        let mut res = OpGetlinkDo::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-getlink-do", OpGetlinkDo::lookup);
         res
     }
-    pub fn op_setlink_do_request(self, header: &PushIfinfomsg) -> RequestOpSetlinkDoRequest<'buf> {
-        let mut res = RequestOpSetlinkDoRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-setlink-do-request",
-            RequestOpSetlinkDoRequest::lookup,
-        );
+    #[doc = "Set information about a link\\.\nRequest attributes:\n- [.push_address()](PushLinkAttrs::push_address)\n- [.push_broadcast()](PushLinkAttrs::push_broadcast)\n- [.push_ifname()](PushLinkAttrs::push_ifname)\n- [.push_mtu()](PushLinkAttrs::push_mtu)\n- [.push_link()](PushLinkAttrs::push_link)\n- [.push_qdisc()](PushLinkAttrs::push_qdisc)\n- [.push_stats()](PushLinkAttrs::push_stats)\n- [.push_cost()](PushLinkAttrs::push_cost)\n- [.push_priority()](PushLinkAttrs::push_priority)\n- [.push_master()](PushLinkAttrs::push_master)\n- [.push_wireless()](PushLinkAttrs::push_wireless)\n- [.push_protinfo()](PushLinkAttrs::push_protinfo)\n- [.push_txqlen()](PushLinkAttrs::push_txqlen)\n- [.push_map()](PushLinkAttrs::push_map)\n- [.push_weight()](PushLinkAttrs::push_weight)\n- [.push_operstate()](PushLinkAttrs::push_operstate)\n- [.push_linkmode()](PushLinkAttrs::push_linkmode)\n- [.nested_linkinfo()](PushLinkAttrs::nested_linkinfo)\n- [.push_net_ns_pid()](PushLinkAttrs::push_net_ns_pid)\n- [.push_ifalias()](PushLinkAttrs::push_ifalias)\n- [.push_num_vf()](PushLinkAttrs::push_num_vf)\n- [.nested_vfinfo_list()](PushLinkAttrs::nested_vfinfo_list)\n- [.push_stats64()](PushLinkAttrs::push_stats64)\n- [.nested_vf_ports()](PushLinkAttrs::nested_vf_ports)\n- [.nested_port_self()](PushLinkAttrs::nested_port_self)\n- [.nested_af_spec()](PushLinkAttrs::nested_af_spec)\n- [.push_group()](PushLinkAttrs::push_group)\n- [.push_net_ns_fd()](PushLinkAttrs::push_net_ns_fd)\n- [.push_ext_mask()](PushLinkAttrs::push_ext_mask)\n- [.push_promiscuity()](PushLinkAttrs::push_promiscuity)\n- [.push_num_tx_queues()](PushLinkAttrs::push_num_tx_queues)\n- [.push_num_rx_queues()](PushLinkAttrs::push_num_rx_queues)\n- [.push_carrier()](PushLinkAttrs::push_carrier)\n- [.push_phys_port_id()](PushLinkAttrs::push_phys_port_id)\n- [.push_carrier_changes()](PushLinkAttrs::push_carrier_changes)\n- [.push_phys_switch_id()](PushLinkAttrs::push_phys_switch_id)\n- [.push_link_netnsid()](PushLinkAttrs::push_link_netnsid)\n- [.push_phys_port_name()](PushLinkAttrs::push_phys_port_name)\n- [.push_proto_down()](PushLinkAttrs::push_proto_down)\n- [.push_gso_max_segs()](PushLinkAttrs::push_gso_max_segs)\n- [.push_gso_max_size()](PushLinkAttrs::push_gso_max_size)\n- [.nested_xdp()](PushLinkAttrs::nested_xdp)\n- [.push_event()](PushLinkAttrs::push_event)\n- [.push_new_netnsid()](PushLinkAttrs::push_new_netnsid)\n- [.push_target_netnsid()](PushLinkAttrs::push_target_netnsid)\n- [.push_carrier_up_count()](PushLinkAttrs::push_carrier_up_count)\n- [.push_carrier_down_count()](PushLinkAttrs::push_carrier_down_count)\n- [.push_new_ifindex()](PushLinkAttrs::push_new_ifindex)\n- [.push_min_mtu()](PushLinkAttrs::push_min_mtu)\n- [.push_max_mtu()](PushLinkAttrs::push_max_mtu)\n- [.nested_prop_list()](PushLinkAttrs::nested_prop_list)\n- [.push_perm_address()](PushLinkAttrs::push_perm_address)\n- [.push_proto_down_reason()](PushLinkAttrs::push_proto_down_reason)\n- [.push_parent_dev_name()](PushLinkAttrs::push_parent_dev_name)\n- [.push_parent_dev_bus_name()](PushLinkAttrs::push_parent_dev_bus_name)\n- [.push_gro_max_size()](PushLinkAttrs::push_gro_max_size)\n- [.push_tso_max_size()](PushLinkAttrs::push_tso_max_size)\n- [.push_tso_max_segs()](PushLinkAttrs::push_tso_max_segs)\n- [.push_allmulti()](PushLinkAttrs::push_allmulti)\n- [.push_devlink_port()](PushLinkAttrs::push_devlink_port)\n- [.push_gso_ipv4_max_size()](PushLinkAttrs::push_gso_ipv4_max_size)\n- [.push_gro_ipv4_max_size()](PushLinkAttrs::push_gro_ipv4_max_size)\n"]
+    pub fn op_setlink_do(self, header: &Ifinfomsg) -> OpSetlinkDo<'buf> {
+        let mut res = OpSetlinkDo::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-setlink-do", OpSetlinkDo::lookup);
         res
     }
-    pub fn op_getstats_dump_request(
-        self,
-        header: &PushIfStatsMsg,
-    ) -> RequestOpGetstatsDumpRequest<'buf> {
-        let mut res = RequestOpGetstatsDumpRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-getstats-dump-request",
-            RequestOpGetstatsDumpRequest::lookup,
-        );
+    #[doc = "Get / dump link stats\\.\n\nReply attributes:\n- [.get_link_64()](IterableStatsAttrs::get_link_64)\n- [.get_link_xstats()](IterableStatsAttrs::get_link_xstats)\n- [.get_link_xstats_slave()](IterableStatsAttrs::get_link_xstats_slave)\n- [.get_link_offload_xstats()](IterableStatsAttrs::get_link_offload_xstats)\n- [.get_af_spec()](IterableStatsAttrs::get_af_spec)\n"]
+    pub fn op_getstats_dump(self, header: &IfStatsMsg) -> OpGetstatsDump<'buf> {
+        let mut res = OpGetstatsDump::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-getstats-dump", OpGetstatsDump::lookup);
         res
     }
-    pub fn op_getstats_do_request(
-        self,
-        header: &PushIfStatsMsg,
-    ) -> RequestOpGetstatsDoRequest<'buf> {
-        let mut res = RequestOpGetstatsDoRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-getstats-do-request",
-            RequestOpGetstatsDoRequest::lookup,
-        );
+    #[doc = "Get / dump link stats\\.\n\nReply attributes:\n- [.get_link_64()](IterableStatsAttrs::get_link_64)\n- [.get_link_xstats()](IterableStatsAttrs::get_link_xstats)\n- [.get_link_xstats_slave()](IterableStatsAttrs::get_link_xstats_slave)\n- [.get_link_offload_xstats()](IterableStatsAttrs::get_link_offload_xstats)\n- [.get_af_spec()](IterableStatsAttrs::get_af_spec)\n"]
+    pub fn op_getstats_do(self, header: &IfStatsMsg) -> OpGetstatsDo<'buf> {
+        let mut res = OpGetstatsDo::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-getstats-do", OpGetstatsDo::lookup);
         res
+    }
+}
+#[cfg(test)]
+mod generated_tests {
+    use super::*;
+    #[test]
+    fn tests() {
+        let _ = IterableLinkAttrs::get_address;
+        let _ = IterableLinkAttrs::get_af_spec;
+        let _ = IterableLinkAttrs::get_allmulti;
+        let _ = IterableLinkAttrs::get_broadcast;
+        let _ = IterableLinkAttrs::get_carrier;
+        let _ = IterableLinkAttrs::get_carrier_changes;
+        let _ = IterableLinkAttrs::get_carrier_down_count;
+        let _ = IterableLinkAttrs::get_carrier_up_count;
+        let _ = IterableLinkAttrs::get_cost;
+        let _ = IterableLinkAttrs::get_devlink_port;
+        let _ = IterableLinkAttrs::get_event;
+        let _ = IterableLinkAttrs::get_ext_mask;
+        let _ = IterableLinkAttrs::get_gro_ipv4_max_size;
+        let _ = IterableLinkAttrs::get_gro_max_size;
+        let _ = IterableLinkAttrs::get_group;
+        let _ = IterableLinkAttrs::get_gso_ipv4_max_size;
+        let _ = IterableLinkAttrs::get_gso_max_segs;
+        let _ = IterableLinkAttrs::get_gso_max_size;
+        let _ = IterableLinkAttrs::get_ifalias;
+        let _ = IterableLinkAttrs::get_ifname;
+        let _ = IterableLinkAttrs::get_link;
+        let _ = IterableLinkAttrs::get_link_netnsid;
+        let _ = IterableLinkAttrs::get_linkinfo;
+        let _ = IterableLinkAttrs::get_linkmode;
+        let _ = IterableLinkAttrs::get_map;
+        let _ = IterableLinkAttrs::get_master;
+        let _ = IterableLinkAttrs::get_max_mtu;
+        let _ = IterableLinkAttrs::get_min_mtu;
+        let _ = IterableLinkAttrs::get_mtu;
+        let _ = IterableLinkAttrs::get_net_ns_fd;
+        let _ = IterableLinkAttrs::get_net_ns_pid;
+        let _ = IterableLinkAttrs::get_new_ifindex;
+        let _ = IterableLinkAttrs::get_new_netnsid;
+        let _ = IterableLinkAttrs::get_num_rx_queues;
+        let _ = IterableLinkAttrs::get_num_tx_queues;
+        let _ = IterableLinkAttrs::get_num_vf;
+        let _ = IterableLinkAttrs::get_operstate;
+        let _ = IterableLinkAttrs::get_parent_dev_bus_name;
+        let _ = IterableLinkAttrs::get_parent_dev_name;
+        let _ = IterableLinkAttrs::get_perm_address;
+        let _ = IterableLinkAttrs::get_phys_port_id;
+        let _ = IterableLinkAttrs::get_phys_port_name;
+        let _ = IterableLinkAttrs::get_phys_switch_id;
+        let _ = IterableLinkAttrs::get_port_self;
+        let _ = IterableLinkAttrs::get_priority;
+        let _ = IterableLinkAttrs::get_promiscuity;
+        let _ = IterableLinkAttrs::get_prop_list;
+        let _ = IterableLinkAttrs::get_protinfo;
+        let _ = IterableLinkAttrs::get_proto_down;
+        let _ = IterableLinkAttrs::get_proto_down_reason;
+        let _ = IterableLinkAttrs::get_qdisc;
+        let _ = IterableLinkAttrs::get_stats64;
+        let _ = IterableLinkAttrs::get_stats;
+        let _ = IterableLinkAttrs::get_target_netnsid;
+        let _ = IterableLinkAttrs::get_tso_max_segs;
+        let _ = IterableLinkAttrs::get_tso_max_size;
+        let _ = IterableLinkAttrs::get_txqlen;
+        let _ = IterableLinkAttrs::get_vf_ports;
+        let _ = IterableLinkAttrs::get_vfinfo_list;
+        let _ = IterableLinkAttrs::get_weight;
+        let _ = IterableLinkAttrs::get_wireless;
+        let _ = IterableLinkAttrs::get_xdp;
+        let _ = IterableStatsAttrs::get_af_spec;
+        let _ = IterableStatsAttrs::get_link_64;
+        let _ = IterableStatsAttrs::get_link_offload_xstats;
+        let _ = IterableStatsAttrs::get_link_xstats;
+        let _ = IterableStatsAttrs::get_link_xstats_slave;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::nested_af_spec;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::nested_linkinfo;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::nested_port_self;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::nested_prop_list;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::nested_vf_ports;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::nested_vfinfo_list;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::nested_xdp;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_address;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_allmulti;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_alt_ifname;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_broadcast;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_carrier;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_carrier_changes;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_carrier_down_count;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_carrier_up_count;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_cost;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_devlink_port;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_event;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_ext_mask;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_gro_ipv4_max_size;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_gro_max_size;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_group;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_gso_ipv4_max_size;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_gso_max_segs;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_gso_max_size;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_ifalias;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_ifname;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_link;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_link_netnsid;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_linkmode;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_map;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_master;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_max_mtu;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_min_mtu;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_mtu;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_net_ns_fd;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_net_ns_pid;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_new_ifindex;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_new_netnsid;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_num_rx_queues;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_num_tx_queues;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_num_vf;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_operstate;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_parent_dev_bus_name;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_parent_dev_name;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_perm_address;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_phys_port_id;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_phys_port_name;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_phys_switch_id;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_priority;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_promiscuity;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_protinfo;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_proto_down;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_proto_down_reason;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_qdisc;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_stats64;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_stats;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_target_netnsid;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_tso_max_segs;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_tso_max_size;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_txqlen;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_weight;
+        let _ = PushLinkAttrs::<&mut Vec<u8>>::push_wireless;
     }
 }

@@ -7,13 +7,14 @@
 #![allow(irrefutable_let_patterns)]
 #![allow(unreachable_code)]
 #![allow(unreachable_patterns)]
-use crate::builtin::{PushBuiltinBitfield32, PushBuiltinNfgenmsg, PushDummy, PushNlmsghdr};
+use crate::builtin::{BuiltinBitfield32, BuiltinNfgenmsg, Nlmsghdr, PushDummy};
 use crate::{
     consts,
     traits::{NetlinkRequest, Protocol},
     utils::*,
 };
-pub const PROTONAME: &CStr = c"unix-diag";
+pub const PROTONAME: &str = "unix-diag";
+pub const PROTONAME_CSTR: &CStr = c"unix-diag";
 pub const PROTONUM: u16 = 4u16;
 #[doc = "VFS inode info"]
 #[doc = "Receive queue length info"]
@@ -47,431 +48,6 @@ impl ShowFlags {
             n if n == 1 << 6 => Self::Uid,
             _ => return None,
         })
-    }
-}
-#[derive(Clone)]
-pub enum UnixDiagAttrs<'a> {
-    #[doc = "Unix socket sun_path. May or may not contain '\\0'."]
-    Name(&'a [u8]),
-    Vfs(Vfs),
-    Peer(u32),
-    Icons(&'a [u8]),
-    Rqlen(Rqlen),
-    Meminfo(&'a [u8]),
-    Shutdown(u8),
-    Uid(u32),
-}
-impl<'a> IterableUnixDiagAttrs<'a> {
-    #[doc = "Unix socket sun_path. May or may not contain '\\0'."]
-    pub fn get_name(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let UnixDiagAttrs::Name(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "UnixDiagAttrs",
-            "Name",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_vfs(&self) -> Result<Vfs, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let UnixDiagAttrs::Vfs(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "UnixDiagAttrs",
-            "Vfs",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_peer(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let UnixDiagAttrs::Peer(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "UnixDiagAttrs",
-            "Peer",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_icons(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let UnixDiagAttrs::Icons(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "UnixDiagAttrs",
-            "Icons",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_rqlen(&self) -> Result<Rqlen, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let UnixDiagAttrs::Rqlen(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "UnixDiagAttrs",
-            "Rqlen",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_meminfo(&self) -> Result<&'a [u8], ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let UnixDiagAttrs::Meminfo(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "UnixDiagAttrs",
-            "Meminfo",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_shutdown(&self) -> Result<u8, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let UnixDiagAttrs::Shutdown(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "UnixDiagAttrs",
-            "Shutdown",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_uid(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let UnixDiagAttrs::Uid(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "UnixDiagAttrs",
-            "Uid",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl UnixDiagAttrs<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> IterableUnixDiagAttrs<'a> {
-        IterableUnixDiagAttrs::with_loc(buf, buf.as_ptr() as usize)
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        let res = match r#type {
-            0u16 => "Name",
-            1u16 => "Vfs",
-            2u16 => "Peer",
-            3u16 => "Icons",
-            4u16 => "Rqlen",
-            5u16 => "Meminfo",
-            6u16 => "Shutdown",
-            7u16 => "Uid",
-            _ => return None,
-        };
-        Some(res)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableUnixDiagAttrs<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableUnixDiagAttrs<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableUnixDiagAttrs<'a> {
-    type Item = Result<UnixDiagAttrs<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                0u16 => UnixDiagAttrs::Name({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                1u16 => UnixDiagAttrs::Vfs({
-                    let res = Vfs::new_from_slice(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => UnixDiagAttrs::Peer({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => UnixDiagAttrs::Icons({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => UnixDiagAttrs::Rqlen({
-                    let res = Rqlen::new_from_slice(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => UnixDiagAttrs::Meminfo({
-                    let res = Some(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => UnixDiagAttrs::Shutdown({
-                    let res = parse_u8(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => UnixDiagAttrs::Uid({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "UnixDiagAttrs",
-            r#type.and_then(|t| UnixDiagAttrs::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableUnixDiagAttrs<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("UnixDiagAttrs");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                UnixDiagAttrs::Name(val) => fmt.field("Name", &FormatBinStr(val)),
-                UnixDiagAttrs::Vfs(val) => fmt.field("Vfs", &val),
-                UnixDiagAttrs::Peer(val) => fmt.field("Peer", &val),
-                UnixDiagAttrs::Icons(val) => fmt.field("Icons", &val),
-                UnixDiagAttrs::Rqlen(val) => fmt.field("Rqlen", &val),
-                UnixDiagAttrs::Meminfo(val) => fmt.field("Meminfo", &val),
-                UnixDiagAttrs::Shutdown(val) => fmt.field("Shutdown", &val),
-                UnixDiagAttrs::Uid(val) => fmt.field("Uid", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableUnixDiagAttrs<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
-            stack.push(("UnixDiagAttrs", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| UnixDiagAttrs::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                UnixDiagAttrs::Name(val) => {
-                    if last_off == offset {
-                        stack.push(("Name", last_off));
-                        break;
-                    }
-                }
-                UnixDiagAttrs::Vfs(val) => {
-                    if last_off == offset {
-                        stack.push(("Vfs", last_off));
-                        break;
-                    }
-                }
-                UnixDiagAttrs::Peer(val) => {
-                    if last_off == offset {
-                        stack.push(("Peer", last_off));
-                        break;
-                    }
-                }
-                UnixDiagAttrs::Icons(val) => {
-                    if last_off == offset {
-                        stack.push(("Icons", last_off));
-                        break;
-                    }
-                }
-                UnixDiagAttrs::Rqlen(val) => {
-                    if last_off == offset {
-                        stack.push(("Rqlen", last_off));
-                        break;
-                    }
-                }
-                UnixDiagAttrs::Meminfo(val) => {
-                    if last_off == offset {
-                        stack.push(("Meminfo", last_off));
-                        break;
-                    }
-                }
-                UnixDiagAttrs::Shutdown(val) => {
-                    if last_off == offset {
-                        stack.push(("Shutdown", last_off));
-                        break;
-                    }
-                }
-                UnixDiagAttrs::Uid(val) => {
-                    if last_off == offset {
-                        stack.push(("Uid", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("UnixDiagAttrs", cur));
-        }
-        (stack, None)
-    }
-}
-pub struct PushUnixDiagAttrs<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushUnixDiagAttrs<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushUnixDiagAttrs<Prev> {
-    pub fn new(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    #[doc = "Unix socket sun_path. May or may not contain '\\0'."]
-    pub fn push_name(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 0u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_vfs(mut self, value: Vfs) -> Self {
-        push_header(self.as_rec_mut(), 1u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_peer(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 2u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_icons(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 3u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_rqlen(mut self, value: Rqlen) -> Self {
-        push_header(self.as_rec_mut(), 4u16, value.as_slice().len() as u16);
-        self.as_rec_mut().extend(value.as_slice());
-        self
-    }
-    pub fn push_meminfo(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 5u16, value.len() as u16);
-        self.as_rec_mut().extend(value);
-        self
-    }
-    pub fn push_shutdown(mut self, value: u8) -> Self {
-        push_header(self.as_rec_mut(), 6u16, 1 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_uid(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 7u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushUnixDiagAttrs<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
     }
 }
 #[repr(C, packed(4))]
@@ -776,25 +352,455 @@ impl Rqlen {
         8usize
     }
 }
+#[derive(Clone)]
+pub enum UnixDiagAttrs<'a> {
+    #[doc = "Unix socket sun\\_path\\. May or may not contain '\\\\0'\\."]
+    Name(&'a [u8]),
+    Vfs(Vfs),
+    Peer(u32),
+    Icons(&'a [u8]),
+    Rqlen(Rqlen),
+    Meminfo(&'a [u8]),
+    Shutdown(u8),
+    Uid(u32),
+}
+impl<'a> IterableUnixDiagAttrs<'a> {
+    #[doc = "Unix socket sun\\_path\\. May or may not contain '\\\\0'\\."]
+    pub fn get_name(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let UnixDiagAttrs::Name(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "UnixDiagAttrs",
+            "Name",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_vfs(&self) -> Result<Vfs, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let UnixDiagAttrs::Vfs(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "UnixDiagAttrs",
+            "Vfs",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_peer(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let UnixDiagAttrs::Peer(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "UnixDiagAttrs",
+            "Peer",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_icons(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let UnixDiagAttrs::Icons(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "UnixDiagAttrs",
+            "Icons",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_rqlen(&self) -> Result<Rqlen, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let UnixDiagAttrs::Rqlen(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "UnixDiagAttrs",
+            "Rqlen",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_meminfo(&self) -> Result<&'a [u8], ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let UnixDiagAttrs::Meminfo(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "UnixDiagAttrs",
+            "Meminfo",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_shutdown(&self) -> Result<u8, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let UnixDiagAttrs::Shutdown(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "UnixDiagAttrs",
+            "Shutdown",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+    pub fn get_uid(&self) -> Result<u32, ErrorContext> {
+        let mut iter = self.clone();
+        iter.pos = 0;
+        for attr in iter {
+            if let UnixDiagAttrs::Uid(val) = attr? {
+                return Ok(val);
+            }
+        }
+        Err(ErrorContext::new_missing(
+            "UnixDiagAttrs",
+            "Uid",
+            self.orig_loc,
+            self.buf.as_ptr() as usize,
+        ))
+    }
+}
+impl UnixDiagAttrs<'_> {
+    pub fn new<'a>(buf: &'a [u8]) -> IterableUnixDiagAttrs<'a> {
+        IterableUnixDiagAttrs::with_loc(buf, buf.as_ptr() as usize)
+    }
+    fn attr_from_type(r#type: u16) -> Option<&'static str> {
+        let res = match r#type {
+            0u16 => "Name",
+            1u16 => "Vfs",
+            2u16 => "Peer",
+            3u16 => "Icons",
+            4u16 => "Rqlen",
+            5u16 => "Meminfo",
+            6u16 => "Shutdown",
+            7u16 => "Uid",
+            _ => return None,
+        };
+        Some(res)
+    }
+}
+#[derive(Clone, Copy, Default)]
+pub struct IterableUnixDiagAttrs<'a> {
+    buf: &'a [u8],
+    pos: usize,
+    orig_loc: usize,
+}
+impl<'a> IterableUnixDiagAttrs<'a> {
+    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
+        Self {
+            buf,
+            pos: 0,
+            orig_loc,
+        }
+    }
+    pub fn get_buf(&self) -> &'a [u8] {
+        self.buf
+    }
+}
+impl<'a> Iterator for IterableUnixDiagAttrs<'a> {
+    type Item = Result<UnixDiagAttrs<'a>, ErrorContext>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let pos = self.pos;
+        let mut r#type;
+        loop {
+            r#type = None;
+            if self.buf.len() == self.pos {
+                return None;
+            }
+            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
+                break;
+            };
+            r#type = Some(header.r#type);
+            let res = match header.r#type {
+                0u16 => UnixDiagAttrs::Name({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                1u16 => UnixDiagAttrs::Vfs({
+                    let res = Some(Vfs::new_from_zeroed(next));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                2u16 => UnixDiagAttrs::Peer({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                3u16 => UnixDiagAttrs::Icons({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                4u16 => UnixDiagAttrs::Rqlen({
+                    let res = Some(Rqlen::new_from_zeroed(next));
+                    let Some(val) = res else { break };
+                    val
+                }),
+                5u16 => UnixDiagAttrs::Meminfo({
+                    let res = Some(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                6u16 => UnixDiagAttrs::Shutdown({
+                    let res = parse_u8(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                7u16 => UnixDiagAttrs::Uid({
+                    let res = parse_u32(next);
+                    let Some(val) = res else { break };
+                    val
+                }),
+                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
+                n => continue,
+            };
+            return Some(Ok(res));
+        }
+        Some(Err(ErrorContext::new(
+            "UnixDiagAttrs",
+            r#type.and_then(|t| UnixDiagAttrs::attr_from_type(t)),
+            self.orig_loc,
+            self.buf.as_ptr().wrapping_add(pos) as usize,
+        )))
+    }
+}
+impl<'a> std::fmt::Debug for IterableUnixDiagAttrs<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut fmt = f.debug_struct("UnixDiagAttrs");
+        for attr in self.clone() {
+            let attr = match attr {
+                Ok(a) => a,
+                Err(err) => {
+                    fmt.finish()?;
+                    f.write_str("Err(")?;
+                    err.fmt(f)?;
+                    return f.write_str(")");
+                }
+            };
+            match attr {
+                UnixDiagAttrs::Name(val) => fmt.field("Name", &FormatBinStr(val)),
+                UnixDiagAttrs::Vfs(val) => fmt.field("Vfs", &val),
+                UnixDiagAttrs::Peer(val) => fmt.field("Peer", &val),
+                UnixDiagAttrs::Icons(val) => fmt.field("Icons", &val),
+                UnixDiagAttrs::Rqlen(val) => fmt.field("Rqlen", &val),
+                UnixDiagAttrs::Meminfo(val) => fmt.field("Meminfo", &val),
+                UnixDiagAttrs::Shutdown(val) => fmt.field("Shutdown", &val),
+                UnixDiagAttrs::Uid(val) => fmt.field("Uid", &val),
+            };
+        }
+        fmt.finish()
+    }
+}
+impl IterableUnixDiagAttrs<'_> {
+    pub fn lookup_attr(
+        &self,
+        offset: usize,
+        missing_type: Option<u16>,
+    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
+        let mut stack = Vec::new();
+        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
+        if missing_type.is_some() && cur == offset {
+            stack.push(("UnixDiagAttrs", offset));
+            return (
+                stack,
+                missing_type.and_then(|t| UnixDiagAttrs::attr_from_type(t)),
+            );
+        }
+        if cur > offset || cur + self.buf.len() < offset {
+            return (stack, None);
+        }
+        let mut attrs = self.clone();
+        let mut last_off = cur + attrs.pos;
+        while let Some(attr) = attrs.next() {
+            let Ok(attr) = attr else { break };
+            match attr {
+                UnixDiagAttrs::Name(val) => {
+                    if last_off == offset {
+                        stack.push(("Name", last_off));
+                        break;
+                    }
+                }
+                UnixDiagAttrs::Vfs(val) => {
+                    if last_off == offset {
+                        stack.push(("Vfs", last_off));
+                        break;
+                    }
+                }
+                UnixDiagAttrs::Peer(val) => {
+                    if last_off == offset {
+                        stack.push(("Peer", last_off));
+                        break;
+                    }
+                }
+                UnixDiagAttrs::Icons(val) => {
+                    if last_off == offset {
+                        stack.push(("Icons", last_off));
+                        break;
+                    }
+                }
+                UnixDiagAttrs::Rqlen(val) => {
+                    if last_off == offset {
+                        stack.push(("Rqlen", last_off));
+                        break;
+                    }
+                }
+                UnixDiagAttrs::Meminfo(val) => {
+                    if last_off == offset {
+                        stack.push(("Meminfo", last_off));
+                        break;
+                    }
+                }
+                UnixDiagAttrs::Shutdown(val) => {
+                    if last_off == offset {
+                        stack.push(("Shutdown", last_off));
+                        break;
+                    }
+                }
+                UnixDiagAttrs::Uid(val) => {
+                    if last_off == offset {
+                        stack.push(("Uid", last_off));
+                        break;
+                    }
+                }
+                _ => {}
+            };
+            last_off = cur + attrs.pos;
+        }
+        if !stack.is_empty() {
+            stack.push(("UnixDiagAttrs", cur));
+        }
+        (stack, None)
+    }
+}
+pub struct PushUnixDiagAttrs<Prev: Rec> {
+    pub(crate) prev: Option<Prev>,
+    pub(crate) header_offset: Option<usize>,
+}
+impl<Prev: Rec> Rec for PushUnixDiagAttrs<Prev> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self.prev.as_mut().unwrap().as_rec_mut()
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self.prev.as_ref().unwrap().as_rec()
+    }
+}
+impl<Prev: Rec> PushUnixDiagAttrs<Prev> {
+    pub fn new(prev: Prev) -> Self {
+        Self {
+            prev: Some(prev),
+            header_offset: None,
+        }
+    }
+    pub fn end_nested(mut self) -> Prev {
+        let mut prev = self.prev.take().unwrap();
+        if let Some(header_offset) = &self.header_offset {
+            finalize_nested_header(prev.as_rec_mut(), *header_offset);
+        }
+        prev
+    }
+    #[doc = "Unix socket sun\\_path\\. May or may not contain '\\\\0'\\."]
+    pub fn push_name(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 0u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    pub fn push_vfs(mut self, value: Vfs) -> Self {
+        push_header(self.as_rec_mut(), 1u16, value.as_slice().len() as u16);
+        self.as_rec_mut().extend(value.as_slice());
+        self
+    }
+    pub fn push_peer(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 2u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_icons(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 3u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    pub fn push_rqlen(mut self, value: Rqlen) -> Self {
+        push_header(self.as_rec_mut(), 4u16, value.as_slice().len() as u16);
+        self.as_rec_mut().extend(value.as_slice());
+        self
+    }
+    pub fn push_meminfo(mut self, value: &[u8]) -> Self {
+        push_header(self.as_rec_mut(), 5u16, value.len() as u16);
+        self.as_rec_mut().extend(value);
+        self
+    }
+    pub fn push_shutdown(mut self, value: u8) -> Self {
+        push_header(self.as_rec_mut(), 6u16, 1 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+    pub fn push_uid(mut self, value: u32) -> Self {
+        push_header(self.as_rec_mut(), 7u16, 4 as u16);
+        self.as_rec_mut().extend(value.to_ne_bytes());
+        self
+    }
+}
+impl<Prev: Rec> Drop for PushUnixDiagAttrs<Prev> {
+    fn drop(&mut self) {
+        if let Some(prev) = &mut self.prev {
+            if let Some(header_offset) = &self.header_offset {
+                finalize_nested_header(prev.as_rec_mut(), *header_offset);
+            }
+        }
+    }
+}
+#[doc = ""]
 #[derive(Debug)]
-pub struct RequestOpUnixDiagDumpRequest<'r> {
+pub struct OpUnixDiagDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpUnixDiagDumpRequest<'r> {
+impl<'r> OpUnixDiagDump<'r> {
     pub fn new(mut request: Request<'r>, header: &Req) -> Self {
-        Self::write_header(&mut request.buf_mut(), header);
+        Self::write_header(request.buf_mut(), header);
         Self {
             request: request.set_dump(),
         }
+    }
+    pub fn encode_request<'buf>(
+        buf: &'buf mut Vec<u8>,
+        header: &Req,
+    ) -> PushUnixDiagAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf, header);
+        PushUnixDiagAttrs::new(buf)
     }
     pub fn encode(&mut self) -> PushUnixDiagAttrs<&mut Vec<u8>> {
         PushUnixDiagAttrs::new(self.request.buf_mut())
     }
     pub fn into_encoder(self) -> PushUnixDiagAttrs<RequestBuf<'r>> {
         PushUnixDiagAttrs::new(self.request.buf)
-    }
-    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Req) {
-        prev.as_rec_mut().extend(header.as_slice());
     }
     pub fn decode_request<'a>(buf: &'a [u8]) -> (Req, IterableUnixDiagAttrs<'a>) {
         let (header, attrs) = buf.split_at(buf.len().min(Req::len()));
@@ -810,8 +816,11 @@ impl<'r> RequestOpUnixDiagDumpRequest<'r> {
             IterableUnixDiagAttrs::with_loc(attrs, buf.as_ptr() as usize),
         )
     }
+    fn write_header<Prev: Rec>(prev: &mut Prev, header: &Req) {
+        prev.as_rec_mut().extend(header.as_slice());
+    }
 }
-impl NetlinkRequest for RequestOpUnixDiagDumpRequest<'_> {
+impl NetlinkRequest for OpUnixDiagDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 4u16,
@@ -931,8 +940,7 @@ impl<'a> Chained<'a> {
     pub fn request(&mut self) -> Request<'_> {
         self.update_header();
         self.last_header_offset = self.buf().len();
-        self.buf_mut()
-            .extend_from_slice(PushNlmsghdr::new().as_slice());
+        self.buf_mut().extend_from_slice(Nlmsghdr::new().as_slice());
         let mut request = Request::new_extend(self.buf.buf_mut());
         self.last_kind = None;
         request.writeback = Some(&mut self.last_kind);
@@ -953,10 +961,7 @@ impl<'a> Chained<'a> {
         }) = self.last_kind
         else {
             if !self.buf().is_empty() {
-                assert_eq!(
-                    self.last_header_offset + PushNlmsghdr::len(),
-                    self.buf().len()
-                );
+                assert_eq!(self.last_header_offset + Nlmsghdr::len(), self.buf().len());
                 self.buf.buf_mut().truncate(self.last_header_offset);
             }
             return;
@@ -971,11 +976,13 @@ impl<'a> Chained<'a> {
         self.lookups.push((name, lookup));
         let buf = self.buf_mut();
         align(buf);
-        let mut header = PushNlmsghdr::new();
-        header.set_len((buf.len() - header_offset) as u32);
-        header.set_type(request_type);
-        header.set_flags(flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16);
-        header.set_seq(seq);
+        let header = Nlmsghdr {
+            len: (buf.len() - header_offset) as u32,
+            r#type: request_type,
+            flags: flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16,
+            seq,
+            pid: 0,
+        };
         buf[header_offset..(header_offset + 16)].clone_from_slice(header.as_slice());
     }
 }
@@ -1066,18 +1073,26 @@ impl<'buf> Request<'buf> {
         self.flags |= consts::NLM_F_APPEND as u16;
         self
     }
+    #[doc = "Set `self.flags |= flags`"]
+    pub fn set_flags(mut self, flags: u16) -> Self {
+        self.flags |= flags;
+        self
+    }
+    #[doc = "Set `self.flags ^= self.flags & flags`"]
+    pub fn unset_flags(mut self, flags: u16) -> Self {
+        self.flags ^= self.flags & flags;
+        self
+    }
     #[doc = "Set `NLM_F_DUMP` flag"]
     fn set_dump(mut self) -> Self {
         self.flags |= consts::NLM_F_DUMP as u16;
         self
     }
-    pub fn op_unix_diag_dump_request(self, header: &Req) -> RequestOpUnixDiagDumpRequest<'buf> {
-        let mut res = RequestOpUnixDiagDumpRequest::new(self, header);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-unix-diag-dump-request",
-            RequestOpUnixDiagDumpRequest::lookup,
-        );
+    #[doc = ""]
+    pub fn op_unix_diag_dump(self, header: &Req) -> OpUnixDiagDump<'buf> {
+        let mut res = OpUnixDiagDump::new(self, header);
+        res.request
+            .do_writeback(res.protocol(), "op-unix-diag-dump", OpUnixDiagDump::lookup);
         res
     }
 }

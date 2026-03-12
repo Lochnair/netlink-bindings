@@ -1,4 +1,4 @@
-#![doc = "genetlink meta-family that exposes information about all genetlink\nfamilies registered in the kernel (including itself).\n"]
+#![doc = "genetlink meta\\-family that exposes information about all genetlink\nfamilies registered in the kernel (including itself)\\.\n"]
 #![allow(clippy::all)]
 #![allow(unused_imports)]
 #![allow(unused_assignments)]
@@ -7,13 +7,15 @@
 #![allow(irrefutable_let_patterns)]
 #![allow(unreachable_code)]
 #![allow(unreachable_patterns)]
-use crate::builtin::{PushBuiltinBitfield32, PushBuiltinNfgenmsg, PushDummy, PushNlmsghdr};
+use crate::builtin::{BuiltinBitfield32, BuiltinNfgenmsg, Nlmsghdr, PushDummy};
 use crate::{
     consts,
     traits::{NetlinkRequest, Protocol},
     utils::*,
 };
-pub const PROTONAME: &CStr = c"nlctrl";
+pub const PROTONAME: &str = "nlctrl";
+pub const PROTONAME_CSTR: &CStr = c"nlctrl";
+pub const PROTONUM: u16 = 0x10;
 #[doc = "Flags - defines an integer enumeration, with values for each entry occupying a bit, starting from bit 0, (e.g. 1, 2, 4, 8)"]
 #[derive(Debug, Clone, Copy)]
 pub enum OpFlags {
@@ -502,7 +504,7 @@ impl IterableCtrlAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("CtrlAttrs", offset));
             return (
                 stack,
@@ -737,7 +739,7 @@ impl IterableMcastGroupAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("McastGroupAttrs", offset));
             return (
                 stack,
@@ -777,7 +779,7 @@ impl IterableMcastGroupAttrs<'_> {
 #[derive(Clone)]
 pub enum OpAttrs {
     Id(u32),
-    #[doc = "Associated type: \"OpFlags\" (1 bit per enumeration)"]
+    #[doc = "Associated type: [`OpFlags`] (1 bit per enumeration)"]
     Flags(u32),
 }
 impl<'a> IterableOpAttrs<'a> {
@@ -796,7 +798,7 @@ impl<'a> IterableOpAttrs<'a> {
             self.buf.as_ptr() as usize,
         ))
     }
-    #[doc = "Associated type: \"OpFlags\" (1 bit per enumeration)"]
+    #[doc = "Associated type: [`OpFlags`] (1 bit per enumeration)"]
     pub fn get_flags(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -913,7 +915,7 @@ impl IterableOpAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("OpAttrs", offset));
             return (stack, missing_type.and_then(|t| OpAttrs::attr_from_type(t)));
         }
@@ -949,7 +951,7 @@ impl IterableOpAttrs<'_> {
 }
 #[derive(Clone)]
 pub enum PolicyAttrs<'a> {
-    #[doc = "Associated type: \"AttrType\" (enum)"]
+    #[doc = "Associated type: [`AttrType`] (enum)"]
     Type(u32),
     MinValueS(i64),
     MaxValueS(i64),
@@ -964,7 +966,7 @@ pub enum PolicyAttrs<'a> {
     Pad(&'a [u8]),
 }
 impl<'a> IterablePolicyAttrs<'a> {
-    #[doc = "Associated type: \"AttrType\" (enum)"]
+    #[doc = "Associated type: [`AttrType`] (enum)"]
     pub fn get_type(&self) -> Result<u32, ErrorContext> {
         let mut iter = self.clone();
         iter.pos = 0;
@@ -1316,7 +1318,7 @@ impl IterablePolicyAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("PolicyAttrs", offset));
             return (
                 stack,
@@ -1548,7 +1550,7 @@ impl IterableOpPolicyAttrs<'_> {
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
         let mut stack = Vec::new();
         let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset {
+        if missing_type.is_some() && cur == offset {
             stack.push(("OpPolicyAttrs", offset));
             return (
                 stack,
@@ -1872,7 +1874,7 @@ impl<Prev: Rec> PushOpAttrs<Prev> {
         self.as_rec_mut().extend(value.to_ne_bytes());
         self
     }
-    #[doc = "Associated type: \"OpFlags\" (1 bit per enumeration)"]
+    #[doc = "Associated type: [`OpFlags`] (1 bit per enumeration)"]
     pub fn push_flags(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 2u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -1914,7 +1916,7 @@ impl<Prev: Rec> PushPolicyAttrs<Prev> {
         }
         prev
     }
-    #[doc = "Associated type: \"AttrType\" (enum)"]
+    #[doc = "Associated type: [`AttrType`] (enum)"]
     pub fn push_type(mut self, value: u32) -> Self {
         push_header(self.as_rec_mut(), 1u16, 4 as u16);
         self.as_rec_mut().extend(value.to_ne_bytes());
@@ -2031,595 +2033,40 @@ impl<Prev: Rec> Drop for PushOpPolicyAttrs<Prev> {
         }
     }
 }
-#[doc = "Get / dump genetlink families"]
-pub struct PushOpGetfamilyDumpRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetfamilyDumpRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetfamilyDumpRequest<Prev> {
-    pub fn new(mut prev: Prev) -> Self {
-        Self::write_header(&mut prev);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(3u8);
-        header.set_version(1u8);
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetfamilyDumpRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump genetlink families"]
-#[derive(Clone)]
-pub enum OpGetfamilyDumpRequest {}
-impl<'a> IterableOpGetfamilyDumpRequest<'a> {}
-impl OpGetfamilyDumpRequest {
-    pub fn new<'a>(buf: &'a [u8]) -> IterableOpGetfamilyDumpRequest<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableOpGetfamilyDumpRequest::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        CtrlAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetfamilyDumpRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetfamilyDumpRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetfamilyDumpRequest<'a> {
-    type Item = Result<OpGetfamilyDumpRequest, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetfamilyDumpRequest",
-            r#type.and_then(|t| OpGetfamilyDumpRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl std::fmt::Debug for IterableOpGetfamilyDumpRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetfamilyDumpRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {};
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetfamilyDumpRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushBuiltinNfgenmsg::len() {
-            stack.push(("OpGetfamilyDumpRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetfamilyDumpRequest::attr_from_type(t)),
-            );
-        }
-        (stack, None)
-    }
-}
-#[doc = "Get / dump genetlink families"]
-pub struct PushOpGetfamilyDumpReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetfamilyDumpReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetfamilyDumpReply<Prev> {
-    pub fn new(mut prev: Prev) -> Self {
-        Self::write_header(&mut prev);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(1u8);
-        header.set_version(1u8);
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_family_id(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 1u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_family_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            2u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_family_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_version(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 3u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_hdrsize(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_maxattr(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 5u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn array_ops(mut self) -> PushArrayOpAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 6u16);
-        PushArrayOpAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-            counter: 0,
-        }
-    }
-    pub fn array_mcast_groups(mut self) -> PushArrayMcastGroupAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 7u16);
-        PushArrayMcastGroupAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-            counter: 0,
-        }
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetfamilyDumpReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump genetlink families"]
-#[derive(Clone)]
-pub enum OpGetfamilyDumpReply<'a> {
-    FamilyId(u16),
-    FamilyName(&'a CStr),
-    Version(u32),
-    Hdrsize(u32),
-    Maxattr(u32),
-    Ops(IterableArrayOpAttrs<'a>),
-    McastGroups(IterableArrayMcastGroupAttrs<'a>),
-}
-impl<'a> IterableOpGetfamilyDumpReply<'a> {
-    pub fn get_family_id(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetfamilyDumpReply::FamilyId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDumpReply",
-            "FamilyId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_family_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetfamilyDumpReply::FamilyName(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDumpReply",
-            "FamilyName",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_version(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetfamilyDumpReply::Version(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDumpReply",
-            "Version",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_hdrsize(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetfamilyDumpReply::Hdrsize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDumpReply",
-            "Hdrsize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_maxattr(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetfamilyDumpReply::Maxattr(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDumpReply",
-            "Maxattr",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ops(
-        &self,
-    ) -> Result<ArrayIterable<IterableArrayOpAttrs<'a>, IterableOpAttrs<'a>>, ErrorContext> {
-        for attr in self.clone() {
-            if let OpGetfamilyDumpReply::Ops(val) = attr? {
-                return Ok(ArrayIterable::new(val));
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDumpReply",
-            "Ops",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mcast_groups(
-        &self,
-    ) -> Result<
-        ArrayIterable<IterableArrayMcastGroupAttrs<'a>, IterableMcastGroupAttrs<'a>>,
-        ErrorContext,
-    > {
-        for attr in self.clone() {
-            if let OpGetfamilyDumpReply::McastGroups(val) = attr? {
-                return Ok(ArrayIterable::new(val));
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDumpReply",
-            "McastGroups",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetfamilyDumpReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> IterableOpGetfamilyDumpReply<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableOpGetfamilyDumpReply::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        CtrlAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetfamilyDumpReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetfamilyDumpReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetfamilyDumpReply<'a> {
-    type Item = Result<OpGetfamilyDumpReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetfamilyDumpReply::FamilyId({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetfamilyDumpReply::FamilyName({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetfamilyDumpReply::Version({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetfamilyDumpReply::Hdrsize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetfamilyDumpReply::Maxattr({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpGetfamilyDumpReply::Ops({
-                    let res = Some(IterableArrayOpAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpGetfamilyDumpReply::McastGroups({
-                    let res = Some(IterableArrayMcastGroupAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetfamilyDumpReply",
-            r#type.and_then(|t| OpGetfamilyDumpReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetfamilyDumpReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetfamilyDumpReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetfamilyDumpReply::FamilyId(val) => fmt.field("FamilyId", &val),
-                OpGetfamilyDumpReply::FamilyName(val) => fmt.field("FamilyName", &val),
-                OpGetfamilyDumpReply::Version(val) => fmt.field("Version", &val),
-                OpGetfamilyDumpReply::Hdrsize(val) => fmt.field("Hdrsize", &val),
-                OpGetfamilyDumpReply::Maxattr(val) => fmt.field("Maxattr", &val),
-                OpGetfamilyDumpReply::Ops(val) => fmt.field("Ops", &val),
-                OpGetfamilyDumpReply::McastGroups(val) => fmt.field("McastGroups", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetfamilyDumpReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushBuiltinNfgenmsg::len() {
-            stack.push(("OpGetfamilyDumpReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetfamilyDumpReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetfamilyDumpReply::FamilyId(val) => {
-                    if last_off == offset {
-                        stack.push(("FamilyId", last_off));
-                        break;
-                    }
-                }
-                OpGetfamilyDumpReply::FamilyName(val) => {
-                    if last_off == offset {
-                        stack.push(("FamilyName", last_off));
-                        break;
-                    }
-                }
-                OpGetfamilyDumpReply::Version(val) => {
-                    if last_off == offset {
-                        stack.push(("Version", last_off));
-                        break;
-                    }
-                }
-                OpGetfamilyDumpReply::Hdrsize(val) => {
-                    if last_off == offset {
-                        stack.push(("Hdrsize", last_off));
-                        break;
-                    }
-                }
-                OpGetfamilyDumpReply::Maxattr(val) => {
-                    if last_off == offset {
-                        stack.push(("Maxattr", last_off));
-                        break;
-                    }
-                }
-                OpGetfamilyDumpReply::Ops(val) => {
-                    for entry in val {
-                        let Ok(attr) = entry else { break };
-                        (stack, missing) = attr.lookup_attr(offset, missing_type);
-                        if !stack.is_empty() {
-                            break;
-                        }
-                    }
-                    if !stack.is_empty() {
-                        stack.push(("Ops", last_off));
-                        break;
-                    }
-                }
-                OpGetfamilyDumpReply::McastGroups(val) => {
-                    for entry in val {
-                        let Ok(attr) = entry else { break };
-                        (stack, missing) = attr.lookup_attr(offset, missing_type);
-                        if !stack.is_empty() {
-                            break;
-                        }
-                    }
-                    if !stack.is_empty() {
-                        stack.push(("McastGroups", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetfamilyDumpReply", cur));
-        }
-        (stack, missing)
-    }
-}
+#[doc = "Get / dump genetlink families\n\nReply attributes:\n- [.get_family_id()](IterableCtrlAttrs::get_family_id)\n- [.get_family_name()](IterableCtrlAttrs::get_family_name)\n- [.get_version()](IterableCtrlAttrs::get_version)\n- [.get_hdrsize()](IterableCtrlAttrs::get_hdrsize)\n- [.get_maxattr()](IterableCtrlAttrs::get_maxattr)\n- [.get_ops()](IterableCtrlAttrs::get_ops)\n- [.get_mcast_groups()](IterableCtrlAttrs::get_mcast_groups)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetfamilyDumpRequest<'r> {
+pub struct OpGetfamilyDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetfamilyDumpRequest<'r> {
+impl<'r> OpGetfamilyDump<'r> {
     pub fn new(mut request: Request<'r>) -> Self {
-        PushOpGetfamilyDumpRequest::write_header(&mut request.buf_mut());
+        Self::write_header(request.buf_mut());
         Self {
             request: request.set_dump(),
         }
     }
-    pub fn encode(&mut self) -> PushOpGetfamilyDumpRequest<&mut Vec<u8>> {
-        PushOpGetfamilyDumpRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushCtrlAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushCtrlAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetfamilyDumpRequest<RequestBuf<'r>> {
-        PushOpGetfamilyDumpRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushCtrlAttrs<&mut Vec<u8>> {
+        PushCtrlAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpGetfamilyDumpRequest<'buf> {
-        OpGetfamilyDumpRequest::new(buf)
+    pub fn into_encoder(self) -> PushCtrlAttrs<RequestBuf<'r>> {
+        PushCtrlAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableCtrlAttrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableCtrlAttrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 3u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetfamilyDumpRequest<'_> {
+impl NetlinkRequest for OpGetfamilyDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0x10,
@@ -2632,666 +2079,50 @@ impl NetlinkRequest for RequestOpGetfamilyDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = IterableOpGetfamilyDumpReply<'buf>;
+    type ReplyType<'buf> = IterableCtrlAttrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetfamilyDumpReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetfamilyDumpRequest::new(buf).lookup_attr(offset, missing_type)
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Get / dump genetlink families"]
-pub struct PushOpGetfamilyDoRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetfamilyDoRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetfamilyDoRequest<Prev> {
-    pub fn new(mut prev: Prev) -> Self {
-        Self::write_header(&mut prev);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(3u8);
-        header.set_version(1u8);
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_family_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            2u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_family_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetfamilyDoRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump genetlink families"]
-#[derive(Clone)]
-pub enum OpGetfamilyDoRequest<'a> {
-    FamilyName(&'a CStr),
-}
-impl<'a> IterableOpGetfamilyDoRequest<'a> {
-    pub fn get_family_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetfamilyDoRequest::FamilyName(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDoRequest",
-            "FamilyName",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetfamilyDoRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> IterableOpGetfamilyDoRequest<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableOpGetfamilyDoRequest::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        CtrlAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetfamilyDoRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetfamilyDoRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetfamilyDoRequest<'a> {
-    type Item = Result<OpGetfamilyDoRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                2u16 => OpGetfamilyDoRequest::FamilyName({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetfamilyDoRequest",
-            r#type.and_then(|t| OpGetfamilyDoRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetfamilyDoRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetfamilyDoRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetfamilyDoRequest::FamilyName(val) => fmt.field("FamilyName", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetfamilyDoRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushBuiltinNfgenmsg::len() {
-            stack.push(("OpGetfamilyDoRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetfamilyDoRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetfamilyDoRequest::FamilyName(val) => {
-                    if last_off == offset {
-                        stack.push(("FamilyName", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetfamilyDoRequest", cur));
-        }
-        (stack, None)
-    }
-}
-#[doc = "Get / dump genetlink families"]
-pub struct PushOpGetfamilyDoReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetfamilyDoReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetfamilyDoReply<Prev> {
-    pub fn new(mut prev: Prev) -> Self {
-        Self::write_header(&mut prev);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(1u8);
-        header.set_version(1u8);
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_family_id(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 1u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_family_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            2u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_family_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_version(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 3u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_hdrsize(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 4u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_maxattr(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 5u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn array_ops(mut self) -> PushArrayOpAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 6u16);
-        PushArrayOpAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-            counter: 0,
-        }
-    }
-    pub fn array_mcast_groups(mut self) -> PushArrayMcastGroupAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 7u16);
-        PushArrayMcastGroupAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-            counter: 0,
-        }
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetfamilyDoReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump genetlink families"]
-#[derive(Clone)]
-pub enum OpGetfamilyDoReply<'a> {
-    FamilyId(u16),
-    FamilyName(&'a CStr),
-    Version(u32),
-    Hdrsize(u32),
-    Maxattr(u32),
-    Ops(IterableArrayOpAttrs<'a>),
-    McastGroups(IterableArrayMcastGroupAttrs<'a>),
-}
-impl<'a> IterableOpGetfamilyDoReply<'a> {
-    pub fn get_family_id(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetfamilyDoReply::FamilyId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDoReply",
-            "FamilyId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_family_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetfamilyDoReply::FamilyName(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDoReply",
-            "FamilyName",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_version(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetfamilyDoReply::Version(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDoReply",
-            "Version",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_hdrsize(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetfamilyDoReply::Hdrsize(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDoReply",
-            "Hdrsize",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_maxattr(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetfamilyDoReply::Maxattr(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDoReply",
-            "Maxattr",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_ops(
-        &self,
-    ) -> Result<ArrayIterable<IterableArrayOpAttrs<'a>, IterableOpAttrs<'a>>, ErrorContext> {
-        for attr in self.clone() {
-            if let OpGetfamilyDoReply::Ops(val) = attr? {
-                return Ok(ArrayIterable::new(val));
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDoReply",
-            "Ops",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_mcast_groups(
-        &self,
-    ) -> Result<
-        ArrayIterable<IterableArrayMcastGroupAttrs<'a>, IterableMcastGroupAttrs<'a>>,
-        ErrorContext,
-    > {
-        for attr in self.clone() {
-            if let OpGetfamilyDoReply::McastGroups(val) = attr? {
-                return Ok(ArrayIterable::new(val));
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetfamilyDoReply",
-            "McastGroups",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetfamilyDoReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> IterableOpGetfamilyDoReply<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableOpGetfamilyDoReply::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        CtrlAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetfamilyDoReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetfamilyDoReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetfamilyDoReply<'a> {
-    type Item = Result<OpGetfamilyDoReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetfamilyDoReply::FamilyId({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetfamilyDoReply::FamilyName({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                3u16 => OpGetfamilyDoReply::Version({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                4u16 => OpGetfamilyDoReply::Hdrsize({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                5u16 => OpGetfamilyDoReply::Maxattr({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                6u16 => OpGetfamilyDoReply::Ops({
-                    let res = Some(IterableArrayOpAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                7u16 => OpGetfamilyDoReply::McastGroups({
-                    let res = Some(IterableArrayMcastGroupAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetfamilyDoReply",
-            r#type.and_then(|t| OpGetfamilyDoReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetfamilyDoReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetfamilyDoReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetfamilyDoReply::FamilyId(val) => fmt.field("FamilyId", &val),
-                OpGetfamilyDoReply::FamilyName(val) => fmt.field("FamilyName", &val),
-                OpGetfamilyDoReply::Version(val) => fmt.field("Version", &val),
-                OpGetfamilyDoReply::Hdrsize(val) => fmt.field("Hdrsize", &val),
-                OpGetfamilyDoReply::Maxattr(val) => fmt.field("Maxattr", &val),
-                OpGetfamilyDoReply::Ops(val) => fmt.field("Ops", &val),
-                OpGetfamilyDoReply::McastGroups(val) => fmt.field("McastGroups", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetfamilyDoReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushBuiltinNfgenmsg::len() {
-            stack.push(("OpGetfamilyDoReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetfamilyDoReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetfamilyDoReply::FamilyId(val) => {
-                    if last_off == offset {
-                        stack.push(("FamilyId", last_off));
-                        break;
-                    }
-                }
-                OpGetfamilyDoReply::FamilyName(val) => {
-                    if last_off == offset {
-                        stack.push(("FamilyName", last_off));
-                        break;
-                    }
-                }
-                OpGetfamilyDoReply::Version(val) => {
-                    if last_off == offset {
-                        stack.push(("Version", last_off));
-                        break;
-                    }
-                }
-                OpGetfamilyDoReply::Hdrsize(val) => {
-                    if last_off == offset {
-                        stack.push(("Hdrsize", last_off));
-                        break;
-                    }
-                }
-                OpGetfamilyDoReply::Maxattr(val) => {
-                    if last_off == offset {
-                        stack.push(("Maxattr", last_off));
-                        break;
-                    }
-                }
-                OpGetfamilyDoReply::Ops(val) => {
-                    for entry in val {
-                        let Ok(attr) = entry else { break };
-                        (stack, missing) = attr.lookup_attr(offset, missing_type);
-                        if !stack.is_empty() {
-                            break;
-                        }
-                    }
-                    if !stack.is_empty() {
-                        stack.push(("Ops", last_off));
-                        break;
-                    }
-                }
-                OpGetfamilyDoReply::McastGroups(val) => {
-                    for entry in val {
-                        let Ok(attr) = entry else { break };
-                        (stack, missing) = attr.lookup_attr(offset, missing_type);
-                        if !stack.is_empty() {
-                            break;
-                        }
-                    }
-                    if !stack.is_empty() {
-                        stack.push(("McastGroups", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetfamilyDoReply", cur));
-        }
-        (stack, missing)
-    }
-}
+#[doc = "Get / dump genetlink families\nRequest attributes:\n- [.push_family_name()](PushCtrlAttrs::push_family_name)\n\nReply attributes:\n- [.get_family_id()](IterableCtrlAttrs::get_family_id)\n- [.get_family_name()](IterableCtrlAttrs::get_family_name)\n- [.get_version()](IterableCtrlAttrs::get_version)\n- [.get_hdrsize()](IterableCtrlAttrs::get_hdrsize)\n- [.get_maxattr()](IterableCtrlAttrs::get_maxattr)\n- [.get_ops()](IterableCtrlAttrs::get_ops)\n- [.get_mcast_groups()](IterableCtrlAttrs::get_mcast_groups)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetfamilyDoRequest<'r> {
+pub struct OpGetfamilyDo<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetfamilyDoRequest<'r> {
+impl<'r> OpGetfamilyDo<'r> {
     pub fn new(mut request: Request<'r>) -> Self {
-        PushOpGetfamilyDoRequest::write_header(&mut request.buf_mut());
+        Self::write_header(request.buf_mut());
         Self { request: request }
     }
-    pub fn encode(&mut self) -> PushOpGetfamilyDoRequest<&mut Vec<u8>> {
-        PushOpGetfamilyDoRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushCtrlAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushCtrlAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetfamilyDoRequest<RequestBuf<'r>> {
-        PushOpGetfamilyDoRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushCtrlAttrs<&mut Vec<u8>> {
+        PushCtrlAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpGetfamilyDoRequest<'buf> {
-        OpGetfamilyDoRequest::new(buf)
+    pub fn into_encoder(self) -> PushCtrlAttrs<RequestBuf<'r>> {
+        PushCtrlAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableCtrlAttrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableCtrlAttrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 3u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetfamilyDoRequest<'_> {
+impl NetlinkRequest for OpGetfamilyDo<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0x10,
@@ -3304,573 +2135,52 @@ impl NetlinkRequest for RequestOpGetfamilyDoRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = IterableOpGetfamilyDoReply<'buf>;
+    type ReplyType<'buf> = IterableCtrlAttrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetfamilyDoReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetfamilyDoRequest::new(buf).lookup_attr(offset, missing_type)
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
     }
 }
-#[doc = "Get / dump genetlink policies"]
-pub struct PushOpGetpolicyDumpRequest<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetpolicyDumpRequest<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetpolicyDumpRequest<Prev> {
-    pub fn new(mut prev: Prev) -> Self {
-        Self::write_header(&mut prev);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(10u8);
-        header.set_version(1u8);
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_family_id(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 1u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn push_family_name(mut self, value: &CStr) -> Self {
-        push_header(
-            self.as_rec_mut(),
-            2u16,
-            value.to_bytes_with_nul().len() as u16,
-        );
-        self.as_rec_mut().extend(value.to_bytes_with_nul());
-        self
-    }
-    pub fn push_family_name_bytes(mut self, value: &[u8]) -> Self {
-        push_header(self.as_rec_mut(), 2u16, (value.len() + 1) as u16);
-        self.as_rec_mut().extend(value);
-        self.as_rec_mut().push(0);
-        self
-    }
-    pub fn push_op(mut self, value: u32) -> Self {
-        push_header(self.as_rec_mut(), 10u16, 4 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetpolicyDumpRequest<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump genetlink policies"]
-#[derive(Clone)]
-pub enum OpGetpolicyDumpRequest<'a> {
-    FamilyId(u16),
-    FamilyName(&'a CStr),
-    Op(u32),
-}
-impl<'a> IterableOpGetpolicyDumpRequest<'a> {
-    pub fn get_family_id(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetpolicyDumpRequest::FamilyId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetpolicyDumpRequest",
-            "FamilyId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_family_name(&self) -> Result<&'a CStr, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetpolicyDumpRequest::FamilyName(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetpolicyDumpRequest",
-            "FamilyName",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_op(&self) -> Result<u32, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetpolicyDumpRequest::Op(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetpolicyDumpRequest",
-            "Op",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetpolicyDumpRequest<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> IterableOpGetpolicyDumpRequest<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableOpGetpolicyDumpRequest::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        CtrlAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetpolicyDumpRequest<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetpolicyDumpRequest<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetpolicyDumpRequest<'a> {
-    type Item = Result<OpGetpolicyDumpRequest<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetpolicyDumpRequest::FamilyId({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                2u16 => OpGetpolicyDumpRequest::FamilyName({
-                    let res = CStr::from_bytes_with_nul(next).ok();
-                    let Some(val) = res else { break };
-                    val
-                }),
-                10u16 => OpGetpolicyDumpRequest::Op({
-                    let res = parse_u32(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetpolicyDumpRequest",
-            r#type.and_then(|t| OpGetpolicyDumpRequest::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetpolicyDumpRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetpolicyDumpRequest");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetpolicyDumpRequest::FamilyId(val) => fmt.field("FamilyId", &val),
-                OpGetpolicyDumpRequest::FamilyName(val) => fmt.field("FamilyName", &val),
-                OpGetpolicyDumpRequest::Op(val) => fmt.field("Op", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetpolicyDumpRequest<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushBuiltinNfgenmsg::len() {
-            stack.push(("OpGetpolicyDumpRequest", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetpolicyDumpRequest::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetpolicyDumpRequest::FamilyId(val) => {
-                    if last_off == offset {
-                        stack.push(("FamilyId", last_off));
-                        break;
-                    }
-                }
-                OpGetpolicyDumpRequest::FamilyName(val) => {
-                    if last_off == offset {
-                        stack.push(("FamilyName", last_off));
-                        break;
-                    }
-                }
-                OpGetpolicyDumpRequest::Op(val) => {
-                    if last_off == offset {
-                        stack.push(("Op", last_off));
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetpolicyDumpRequest", cur));
-        }
-        (stack, None)
-    }
-}
-#[doc = "Get / dump genetlink policies"]
-pub struct PushOpGetpolicyDumpReply<Prev: Rec> {
-    pub(crate) prev: Option<Prev>,
-    pub(crate) header_offset: Option<usize>,
-}
-impl<Prev: Rec> Rec for PushOpGetpolicyDumpReply<Prev> {
-    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
-        self.prev.as_mut().unwrap().as_rec_mut()
-    }
-    fn as_rec(&self) -> &Vec<u8> {
-        self.prev.as_ref().unwrap().as_rec()
-    }
-}
-impl<Prev: Rec> PushOpGetpolicyDumpReply<Prev> {
-    pub fn new(mut prev: Prev) -> Self {
-        Self::write_header(&mut prev);
-        Self::new_without_header(prev)
-    }
-    fn new_without_header(prev: Prev) -> Self {
-        Self {
-            prev: Some(prev),
-            header_offset: None,
-        }
-    }
-    fn write_header(prev: &mut Prev) {
-        let mut header = PushBuiltinNfgenmsg::new();
-        header.set_cmd(10u8);
-        header.set_version(1u8);
-        prev.as_rec_mut().extend(header.as_slice());
-    }
-    pub fn end_nested(mut self) -> Prev {
-        let mut prev = self.prev.take().unwrap();
-        if let Some(header_offset) = &self.header_offset {
-            finalize_nested_header(prev.as_rec_mut(), *header_offset);
-        }
-        prev
-    }
-    pub fn push_family_id(mut self, value: u16) -> Self {
-        push_header(self.as_rec_mut(), 1u16, 2 as u16);
-        self.as_rec_mut().extend(value.to_ne_bytes());
-        self
-    }
-    pub fn nested_policy(mut self) -> PushPolicyAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 8u16);
-        PushPolicyAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-    pub fn nested_op_policy(mut self) -> PushOpPolicyAttrs<Self> {
-        let header_offset = push_nested_header(self.as_rec_mut(), 9u16);
-        PushOpPolicyAttrs {
-            prev: Some(self),
-            header_offset: Some(header_offset),
-        }
-    }
-}
-impl<Prev: Rec> Drop for PushOpGetpolicyDumpReply<Prev> {
-    fn drop(&mut self) {
-        if let Some(prev) = &mut self.prev {
-            if let Some(header_offset) = &self.header_offset {
-                finalize_nested_header(prev.as_rec_mut(), *header_offset);
-            }
-        }
-    }
-}
-#[doc = "Get / dump genetlink policies"]
-#[derive(Clone)]
-pub enum OpGetpolicyDumpReply<'a> {
-    FamilyId(u16),
-    Policy(IterablePolicyAttrs<'a>),
-    OpPolicy(IterableOpPolicyAttrs<'a>),
-}
-impl<'a> IterableOpGetpolicyDumpReply<'a> {
-    pub fn get_family_id(&self) -> Result<u16, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetpolicyDumpReply::FamilyId(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetpolicyDumpReply",
-            "FamilyId",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_policy(&self) -> Result<IterablePolicyAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetpolicyDumpReply::Policy(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetpolicyDumpReply",
-            "Policy",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-    pub fn get_op_policy(&self) -> Result<IterableOpPolicyAttrs<'a>, ErrorContext> {
-        let mut iter = self.clone();
-        iter.pos = 0;
-        for attr in iter {
-            if let OpGetpolicyDumpReply::OpPolicy(val) = attr? {
-                return Ok(val);
-            }
-        }
-        Err(ErrorContext::new_missing(
-            "OpGetpolicyDumpReply",
-            "OpPolicy",
-            self.orig_loc,
-            self.buf.as_ptr() as usize,
-        ))
-    }
-}
-impl OpGetpolicyDumpReply<'_> {
-    pub fn new<'a>(buf: &'a [u8]) -> IterableOpGetpolicyDumpReply<'a> {
-        let (_header, attrs) = buf.split_at(buf.len().min(PushBuiltinNfgenmsg::len()));
-        IterableOpGetpolicyDumpReply::with_loc(attrs, buf.as_ptr() as usize)
-    }
-    fn attr_from_type(r#type: u16) -> Option<&'static str> {
-        CtrlAttrs::attr_from_type(r#type)
-    }
-}
-#[derive(Clone, Copy, Default)]
-pub struct IterableOpGetpolicyDumpReply<'a> {
-    buf: &'a [u8],
-    pos: usize,
-    orig_loc: usize,
-}
-impl<'a> IterableOpGetpolicyDumpReply<'a> {
-    fn with_loc(buf: &'a [u8], orig_loc: usize) -> Self {
-        Self {
-            buf,
-            pos: 0,
-            orig_loc,
-        }
-    }
-    pub fn get_buf(&self) -> &'a [u8] {
-        self.buf
-    }
-}
-impl<'a> Iterator for IterableOpGetpolicyDumpReply<'a> {
-    type Item = Result<OpGetpolicyDumpReply<'a>, ErrorContext>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let pos = self.pos;
-        let mut r#type;
-        loop {
-            r#type = None;
-            if self.buf.len() == self.pos {
-                return None;
-            }
-            let Some((header, next)) = chop_header(self.buf, &mut self.pos) else {
-                break;
-            };
-            r#type = Some(header.r#type);
-            let res = match header.r#type {
-                1u16 => OpGetpolicyDumpReply::FamilyId({
-                    let res = parse_u16(next);
-                    let Some(val) = res else { break };
-                    val
-                }),
-                8u16 => OpGetpolicyDumpReply::Policy({
-                    let res = Some(IterablePolicyAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                9u16 => OpGetpolicyDumpReply::OpPolicy({
-                    let res = Some(IterableOpPolicyAttrs::with_loc(next, self.orig_loc));
-                    let Some(val) = res else { break };
-                    val
-                }),
-                n if cfg!(any(test, feature = "deny-unknown-attrs")) => break,
-                n => continue,
-            };
-            return Some(Ok(res));
-        }
-        Some(Err(ErrorContext::new(
-            "OpGetpolicyDumpReply",
-            r#type.and_then(|t| OpGetpolicyDumpReply::attr_from_type(t)),
-            self.orig_loc,
-            self.buf.as_ptr().wrapping_add(pos) as usize,
-        )))
-    }
-}
-impl<'a> std::fmt::Debug for IterableOpGetpolicyDumpReply<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut fmt = f.debug_struct("OpGetpolicyDumpReply");
-        for attr in self.clone() {
-            let attr = match attr {
-                Ok(a) => a,
-                Err(err) => {
-                    fmt.finish()?;
-                    f.write_str("Err(")?;
-                    err.fmt(f)?;
-                    return f.write_str(")");
-                }
-            };
-            match attr {
-                OpGetpolicyDumpReply::FamilyId(val) => fmt.field("FamilyId", &val),
-                OpGetpolicyDumpReply::Policy(val) => fmt.field("Policy", &val),
-                OpGetpolicyDumpReply::OpPolicy(val) => fmt.field("OpPolicy", &val),
-            };
-        }
-        fmt.finish()
-    }
-}
-impl IterableOpGetpolicyDumpReply<'_> {
-    pub fn lookup_attr(
-        &self,
-        offset: usize,
-        missing_type: Option<u16>,
-    ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        let mut stack = Vec::new();
-        let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-        if cur == offset + PushBuiltinNfgenmsg::len() {
-            stack.push(("OpGetpolicyDumpReply", offset));
-            return (
-                stack,
-                missing_type.and_then(|t| OpGetpolicyDumpReply::attr_from_type(t)),
-            );
-        }
-        if cur > offset || cur + self.buf.len() < offset {
-            return (stack, None);
-        }
-        let mut attrs = self.clone();
-        let mut last_off = cur + attrs.pos;
-        let mut missing = None;
-        while let Some(attr) = attrs.next() {
-            let Ok(attr) = attr else { break };
-            match attr {
-                OpGetpolicyDumpReply::FamilyId(val) => {
-                    if last_off == offset {
-                        stack.push(("FamilyId", last_off));
-                        break;
-                    }
-                }
-                OpGetpolicyDumpReply::Policy(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                OpGetpolicyDumpReply::OpPolicy(val) => {
-                    (stack, missing) = val.lookup_attr(offset, missing_type);
-                    if !stack.is_empty() {
-                        break;
-                    }
-                }
-                _ => {}
-            };
-            last_off = cur + attrs.pos;
-        }
-        if !stack.is_empty() {
-            stack.push(("OpGetpolicyDumpReply", cur));
-        }
-        (stack, missing)
-    }
-}
+#[doc = "Get / dump genetlink policies\nRequest attributes:\n- [.push_family_id()](PushCtrlAttrs::push_family_id)\n- [.push_family_name()](PushCtrlAttrs::push_family_name)\n- [.push_op()](PushCtrlAttrs::push_op)\n\nReply attributes:\n- [.get_family_id()](IterableCtrlAttrs::get_family_id)\n- [.get_policy()](IterableCtrlAttrs::get_policy)\n- [.get_op_policy()](IterableCtrlAttrs::get_op_policy)\n"]
 #[derive(Debug)]
-pub struct RequestOpGetpolicyDumpRequest<'r> {
+pub struct OpGetpolicyDump<'r> {
     request: Request<'r>,
 }
-impl<'r> RequestOpGetpolicyDumpRequest<'r> {
+impl<'r> OpGetpolicyDump<'r> {
     pub fn new(mut request: Request<'r>) -> Self {
-        PushOpGetpolicyDumpRequest::write_header(&mut request.buf_mut());
+        Self::write_header(request.buf_mut());
         Self {
             request: request.set_dump(),
         }
     }
-    pub fn encode(&mut self) -> PushOpGetpolicyDumpRequest<&mut Vec<u8>> {
-        PushOpGetpolicyDumpRequest::new_without_header(self.request.buf_mut())
+    pub fn encode_request<'buf>(buf: &'buf mut Vec<u8>) -> PushCtrlAttrs<&'buf mut Vec<u8>> {
+        Self::write_header(buf);
+        PushCtrlAttrs::new(buf)
     }
-    pub fn into_encoder(self) -> PushOpGetpolicyDumpRequest<RequestBuf<'r>> {
-        PushOpGetpolicyDumpRequest::new_without_header(self.request.buf)
+    pub fn encode(&mut self) -> PushCtrlAttrs<&mut Vec<u8>> {
+        PushCtrlAttrs::new(self.request.buf_mut())
     }
-    pub fn decode_request<'buf>(buf: &'buf [u8]) -> IterableOpGetpolicyDumpRequest<'buf> {
-        OpGetpolicyDumpRequest::new(buf)
+    pub fn into_encoder(self) -> PushCtrlAttrs<RequestBuf<'r>> {
+        PushCtrlAttrs::new(self.request.buf)
+    }
+    pub fn decode_request<'a>(buf: &'a [u8]) -> IterableCtrlAttrs<'a> {
+        let (_header, attrs) = buf.split_at(buf.len().min(BuiltinNfgenmsg::len()));
+        IterableCtrlAttrs::with_loc(attrs, buf.as_ptr() as usize)
+    }
+    fn write_header<Prev: Rec>(prev: &mut Prev) {
+        let mut header = BuiltinNfgenmsg::new();
+        header.cmd = 10u8;
+        header.version = 1u8;
+        prev.as_rec_mut().extend(header.as_slice());
     }
 }
-impl NetlinkRequest for RequestOpGetpolicyDumpRequest<'_> {
+impl NetlinkRequest for OpGetpolicyDump<'_> {
     fn protocol(&self) -> Protocol {
         Protocol::Raw {
             protonum: 0x10,
@@ -3883,16 +2193,16 @@ impl NetlinkRequest for RequestOpGetpolicyDumpRequest<'_> {
     fn payload(&self) -> &[u8] {
         self.request.buf()
     }
-    type ReplyType<'buf> = IterableOpGetpolicyDumpReply<'buf>;
+    type ReplyType<'buf> = IterableCtrlAttrs<'buf>;
     fn decode_reply<'buf>(buf: &'buf [u8]) -> Self::ReplyType<'buf> {
-        OpGetpolicyDumpReply::new(buf)
+        Self::decode_request(buf)
     }
     fn lookup(
         buf: &[u8],
         offset: usize,
         missing_type: Option<u16>,
     ) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
-        OpGetpolicyDumpRequest::new(buf).lookup_attr(offset, missing_type)
+        Self::decode_request(buf).lookup_attr(offset, missing_type)
     }
 }
 use crate::traits::LookupFn;
@@ -3982,36 +2292,59 @@ impl<'buf> Request<'buf> {
         self.flags |= consts::NLM_F_APPEND as u16;
         self
     }
+    #[doc = "Set `self.flags |= flags`"]
+    pub fn set_flags(mut self, flags: u16) -> Self {
+        self.flags |= flags;
+        self
+    }
+    #[doc = "Set `self.flags ^= self.flags & flags`"]
+    pub fn unset_flags(mut self, flags: u16) -> Self {
+        self.flags ^= self.flags & flags;
+        self
+    }
     #[doc = "Set `NLM_F_DUMP` flag"]
     fn set_dump(mut self) -> Self {
         self.flags |= consts::NLM_F_DUMP as u16;
         self
     }
-    pub fn op_getfamily_dump_request(self) -> RequestOpGetfamilyDumpRequest<'buf> {
-        let mut res = RequestOpGetfamilyDumpRequest::new(self);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-getfamily-dump-request",
-            RequestOpGetfamilyDumpRequest::lookup,
-        );
+    #[doc = "Get / dump genetlink families\n\nReply attributes:\n- [.get_family_id()](IterableCtrlAttrs::get_family_id)\n- [.get_family_name()](IterableCtrlAttrs::get_family_name)\n- [.get_version()](IterableCtrlAttrs::get_version)\n- [.get_hdrsize()](IterableCtrlAttrs::get_hdrsize)\n- [.get_maxattr()](IterableCtrlAttrs::get_maxattr)\n- [.get_ops()](IterableCtrlAttrs::get_ops)\n- [.get_mcast_groups()](IterableCtrlAttrs::get_mcast_groups)\n"]
+    pub fn op_getfamily_dump(self) -> OpGetfamilyDump<'buf> {
+        let mut res = OpGetfamilyDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-getfamily-dump", OpGetfamilyDump::lookup);
         res
     }
-    pub fn op_getfamily_do_request(self) -> RequestOpGetfamilyDoRequest<'buf> {
-        let mut res = RequestOpGetfamilyDoRequest::new(self);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-getfamily-do-request",
-            RequestOpGetfamilyDoRequest::lookup,
-        );
+    #[doc = "Get / dump genetlink families\nRequest attributes:\n- [.push_family_name()](PushCtrlAttrs::push_family_name)\n\nReply attributes:\n- [.get_family_id()](IterableCtrlAttrs::get_family_id)\n- [.get_family_name()](IterableCtrlAttrs::get_family_name)\n- [.get_version()](IterableCtrlAttrs::get_version)\n- [.get_hdrsize()](IterableCtrlAttrs::get_hdrsize)\n- [.get_maxattr()](IterableCtrlAttrs::get_maxattr)\n- [.get_ops()](IterableCtrlAttrs::get_ops)\n- [.get_mcast_groups()](IterableCtrlAttrs::get_mcast_groups)\n"]
+    pub fn op_getfamily_do(self) -> OpGetfamilyDo<'buf> {
+        let mut res = OpGetfamilyDo::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-getfamily-do", OpGetfamilyDo::lookup);
         res
     }
-    pub fn op_getpolicy_dump_request(self) -> RequestOpGetpolicyDumpRequest<'buf> {
-        let mut res = RequestOpGetpolicyDumpRequest::new(self);
-        res.request.do_writeback(
-            res.protocol(),
-            "op-getpolicy-dump-request",
-            RequestOpGetpolicyDumpRequest::lookup,
-        );
+    #[doc = "Get / dump genetlink policies\nRequest attributes:\n- [.push_family_id()](PushCtrlAttrs::push_family_id)\n- [.push_family_name()](PushCtrlAttrs::push_family_name)\n- [.push_op()](PushCtrlAttrs::push_op)\n\nReply attributes:\n- [.get_family_id()](IterableCtrlAttrs::get_family_id)\n- [.get_policy()](IterableCtrlAttrs::get_policy)\n- [.get_op_policy()](IterableCtrlAttrs::get_op_policy)\n"]
+    pub fn op_getpolicy_dump(self) -> OpGetpolicyDump<'buf> {
+        let mut res = OpGetpolicyDump::new(self);
+        res.request
+            .do_writeback(res.protocol(), "op-getpolicy-dump", OpGetpolicyDump::lookup);
         res
+    }
+}
+#[cfg(test)]
+mod generated_tests {
+    use super::*;
+    #[test]
+    fn tests() {
+        let _ = IterableCtrlAttrs::get_family_id;
+        let _ = IterableCtrlAttrs::get_family_name;
+        let _ = IterableCtrlAttrs::get_hdrsize;
+        let _ = IterableCtrlAttrs::get_maxattr;
+        let _ = IterableCtrlAttrs::get_mcast_groups;
+        let _ = IterableCtrlAttrs::get_op_policy;
+        let _ = IterableCtrlAttrs::get_ops;
+        let _ = IterableCtrlAttrs::get_policy;
+        let _ = IterableCtrlAttrs::get_version;
+        let _ = PushCtrlAttrs::<&mut Vec<u8>>::push_family_id;
+        let _ = PushCtrlAttrs::<&mut Vec<u8>>::push_family_name;
+        let _ = PushCtrlAttrs::<&mut Vec<u8>>::push_op;
     }
 }
