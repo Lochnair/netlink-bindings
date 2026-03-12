@@ -20,13 +20,10 @@ fn main() {
     push_netlink_message_header(&mut buf, family_id);
 
     // Dump (request)
-    wireguard::PushOpGetDeviceDumpRequest::new(&mut buf).push_ifname(c"wg0");
+    wireguard::PushWgdevice::new(&mut buf).push_ifname(c"wg0");
 
     println!("Sending:");
-    println!(
-        "{:#?}",
-        wireguard::OpGetDeviceDumpRequest::new(&buf[Nlmsghdr::len()..])
-    );
+    println!("{:#?}", wireguard::Wgdevice::new(&buf[Nlmsghdr::len()..]));
 
     update_netlink_message_lenth(&mut buf);
     sock.send(&buf).unwrap();
@@ -62,7 +59,7 @@ fn main() {
                 _ => {}
             }
 
-            let attrs = wireguard::OpGetDeviceDumpReply::new(frame);
+            let attrs = wireguard::Wgdevice::new(frame);
 
             println!("Received:");
             println!("{:#?}", attrs);
@@ -117,7 +114,7 @@ fn resolve_family_id(sock: &std::net::UdpSocket, name: &str) -> u16 {
 
     buf.extend(header.as_slice());
 
-    nlctrl::PushOpGetfamilyDoRequest::new(&mut buf).push_family_name_bytes(name.as_bytes());
+    nlctrl::PushCtrlAttrs::new(&mut buf).push_family_name_bytes(name.as_bytes());
 
     let len = buf.len() as u32;
     buf[0..4].copy_from_slice(&len.to_le_bytes());
@@ -149,7 +146,7 @@ fn resolve_family_id(sock: &std::net::UdpSocket, name: &str) -> u16 {
                 _ => {}
             }
 
-            let attrs = nlctrl::OpGetfamilyDoReply::new(&buf[Nlmsghdr::len()..]);
+            let attrs = nlctrl::CtrlAttrs::new(&buf[Nlmsghdr::len()..]);
             family_id = attrs.get_family_id().ok();
 
             buf = &buf[reply.len as usize..];
