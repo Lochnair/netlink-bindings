@@ -5,7 +5,7 @@ use serde_aux::field_attributes::deserialize_default_from_empty_object;
 use serde_yaml::Value;
 use std::path::Path;
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Default, Deserialize, Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub enum ByteOrder {
@@ -13,6 +13,7 @@ pub enum ByteOrder {
     Big,
     #[serde(rename = "little-endian")]
     Little,
+    #[default]
     #[serde(rename = "native-endian")]
     Host,
 }
@@ -23,12 +24,6 @@ impl ByteOrder {
     }
     pub fn is_host(&self) -> bool {
         matches!(self, Self::Host)
-    }
-}
-
-impl Default for ByteOrder {
-    fn default() -> Self {
-        Self::Host
     }
 }
 
@@ -767,10 +762,43 @@ impl Spec {
             buf.into()
         };
 
-        // Verify spec now as parsing from Value later won't preserve the source lines
-        let _: Spec = serde_yaml::from_slice(&buf).unwrap();
+        let mut raw_spec: Value = serde_yaml::from_slice(&buf).unwrap();
 
-        serde_yaml::from_slice(&buf).unwrap()
+        // In some cases, we have to first populate attributes of subset-of
+        // attrset, before it can be correctly parsed
+        let attrsets = raw_spec["attribute-sets"].as_sequence_mut().unwrap();
+        for i in 0..attrsets.len() {
+            let Some(subset_of) = attrsets[i].get("subset-of") else {
+                continue;
+            };
+
+            let mut supers = attrsets
+                .iter()
+                .find(|s| s["name"].as_str().unwrap() == subset_of.as_str().unwrap())
+                .unwrap()
+                .clone();
+            merge_yaml(&mut supers, &attrsets[i]);
+
+            for sup in supers["attributes"].as_sequence_mut().unwrap() {
+                let sub_attrs = attrsets[i]["attributes"].as_sequence().unwrap();
+                if sub_attrs
+                    .iter()
+                    .all(|sub| sub["name"].as_str().unwrap() != sup["name"].as_str().unwrap())
+                {
+                    sup["type"] = Value::String("unused".into());
+                }
+            }
+
+            attrsets[i] = supers;
+        }
+
+        // Verify the spec here, as later parsing from Value won't preserve the source lines
+        if serde_yaml::from_value::<Spec>(raw_spec.clone()).is_err() {
+            serde_yaml::from_slice::<Spec>(&buf).unwrap();
+            unreachable!();
+        }
+
+        raw_spec
     }
 
     /// Matches genetlink and genetlink-legacy specifications
@@ -811,57 +839,6 @@ impl Spec {
     }
 
     fn fixup(&mut self) {
-        // Substitute undefined attributes of attrsets with "subset-of"
-        let mut attr_sets = self.attribute_sets.clone();
-        for attrs in &mut attr_sets {
-            let Some(superset) = &attrs.subset_of else {
-                continue;
-            };
-
-            let superset = self.find_attr(superset);
-            let subset = attrs.clone();
-
-            attrs.attributes = superset.attributes.clone();
-
-            for attr in &subset.attributes {
-                let new_attr = attrs
-                    .attributes
-                    .iter_mut()
-                    .find(|a| a.name == attr.name)
-                    .unwrap();
-
-                macro_rules! update_non_default {
-                    (from: $right:ident, to: $left:ident, fields: [$( $attr:ident $(,)? )*]) => {
-                        $(
-                        if &$right.$attr != &Default::default() {
-                            $left.$attr = $right.$attr.clone();
-                        }
-                        )*
-
-                        let stub = AttrProp {
-                            name: $right.name.clone(),
-                            $(
-                            $attr: $right.$attr.clone(),
-                            )*
-                            ..Default::default()
-                        };
-                        assert_eq!(attr, &stub, "Attset {:?} is declared as subset, but has attribute {:?} with non-default parameter not marked for updating", subset.name, attr.name);
-                    }
-                }
-
-                update_non_default!(from: attr, to: new_attr, fields: [
-                    r#type, multi_attr, display_hint,
-                ]);
-            }
-
-            for attr in &mut attrs.attributes {
-                if !subset.attributes.iter().any(|a| a.name == attr.name) {
-                    attr.r#type = AttrType::Unused;
-                }
-            }
-        }
-        self.attribute_sets = attr_sets;
-
         // Add explicit values in attribute sets
         for attrs in &mut self.attribute_sets {
             let mut id: u16 = 0;
@@ -990,11 +967,13 @@ impl Spec {
         self.definitions.iter().find(|op| op.name == name)
     }
 
+    #[track_caller]
     pub fn find_def(&self, name: &str) -> &Definition {
         self.try_find_def(name)
             .unwrap_or_else(|| panic!("Definition {name:?} not found"))
     }
 
+    #[track_caller]
     pub fn find_attr(&self, name: &str) -> &AttrSet {
         self.attribute_sets
             .iter()
@@ -1002,6 +981,7 @@ impl Spec {
             .unwrap_or_else(|| panic!("Attribute set {name:?} not found"))
     }
 
+    #[track_caller]
     pub fn find_sub_message(&self, name: &str) -> &SubMessage {
         self.sub_messages
             .as_ref()
@@ -1011,6 +991,7 @@ impl Spec {
             .unwrap_or_else(|| panic!("Definition {name:?} not found"))
     }
 
+    #[track_caller]
     pub fn find_op(&self, name: &str) -> &OperationSpec {
         self.operations
             .list
