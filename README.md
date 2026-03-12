@@ -361,6 +361,26 @@ $ strace -o ./output_file --decode-fd=socket -e %network --{write,read}=$(seq -s
 $ cargo run --bin reverse-lookup --features=wireguard,nlctrl,rt-link -- ./output_file
 Decoding request in family ROUTE flags=[REQUEST,ACK,DUMP,REPLACE,EXCL] Raw { protonum: 0, request_type: 0 }
 ...
+Decoding reply in genl family wireguard flags=[MULTI] Generic("wireguard")
+Wgdevice {
+    ListenPort: 0,
+    Fwmark: 0,
+    Ifindex: 10,
+    Ifname: "wg0",
+}
+...
+```
+
+This way you can study the structure of the messages the kernel expects/replies
+with. In order to translate it into code, you simply need to convert attributes
+from CamelCase to snake_case, and add occasional .get_\*() or .push_\*()
+prefix.
+
+You can quickly build and install the tool using:
+
+```sh
+$ cargo install --git https://github.com/one-d-wide/netlink-bindings reverse-lookup --features all-subsystems
+$ ~/.cargo/bin/reverse-lookup --help
 ```
 
 ## Generate bindings
