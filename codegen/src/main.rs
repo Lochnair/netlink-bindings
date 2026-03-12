@@ -176,9 +176,11 @@ fn main() {
             use crate::builtin::{BuiltinBitfield32, BuiltinNfgenmsg, Nlmsghdr, PushDummy};
         });
     }
-    let protoname = CString::new(spec.name.clone()).unwrap();
+    let protoname = &spec.name;
+    let cprotoname = CString::new(spec.name.clone()).unwrap();
     tokens.extend(quote! {
-        pub const PROTONAME: &CStr = #protoname;
+        pub const PROTONAME: &str = #protoname;
+        pub const PROTONAME_CSTR: &CStr = #cprotoname;
     });
     if let Some(protonum) = &spec.protonum {
         tokens.extend(quote! {

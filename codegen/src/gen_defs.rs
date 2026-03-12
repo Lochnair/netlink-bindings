@@ -1,3 +1,5 @@
+use std::ffi::CString;
+
 use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote, ToTokens};
 use syn::Ident;
@@ -28,17 +30,29 @@ pub fn gen_defs(spec: &Spec) -> TokenStream {
 }
 
 fn gen_def(tokens: &mut TokenStream, def: &Definition) {
-    if let Some(doc) = &def.doc {
-        tokens.extend(quote!(#[doc = #doc]));
-    };
+    let doc = def
+        .doc
+        .as_ref()
+        .map(|doc| quote!(#[doc = #doc]))
+        .unwrap_or(quote!());
+    tokens.extend(doc.clone());
 
     match &def.def {
         DefType::Const { value } => {
             let const_name = format_ident!("{}", kebab_to_upper(&def.name));
             let (ty, val) = match value {
                 ConstValue::U64(val) => (quote!(u64), quote!(#val)),
-                // TODO: Maybe a CStr here?
-                ConstValue::String(val) => (quote!(&str), quote!(#val)),
+                ConstValue::String(val) => {
+                    let cconst_name = format_ident!("{}_CSTR", kebab_to_upper(&def.name));
+                    let cval = CString::new(val.as_bytes()).unwrap();
+
+                    tokens.extend(quote! {
+                        pub const #const_name: &str = #val;
+                        #doc
+                        pub const #cconst_name: &CStr = #cval;
+                    });
+                    return;
+                },
             };
             tokens.extend(quote! {
                 pub const #const_name: #ty = #val;
