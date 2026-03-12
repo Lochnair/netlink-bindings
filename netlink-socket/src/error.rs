@@ -1,7 +1,7 @@
 use std::{fmt, io, sync::Arc};
 
 use netlink_bindings::{
-    builtin::{IterableNlmsgerrAttrs, NlmsgerrAttrs, PushNlmsghdr},
+    builtin::{IterableNlmsgerrAttrs, NlmsgerrAttrs, Nlmsghdr},
     traits::LookupFn,
     utils::ErrorContext,
 };
@@ -118,7 +118,7 @@ impl fmt::Display for ReplyError {
 
             let (trace, attr) = (self.lookup)(
                 self.request().unwrap(),
-                missing_offset as usize - PushNlmsghdr::len(),
+                missing_offset as usize - Nlmsghdr::len(),
                 missing_attr,
             );
 
@@ -133,7 +133,7 @@ impl fmt::Display for ReplyError {
         if let Ok(invalid_offset) = ext_ack.get_offset() {
             let (trace, _) = (self.lookup)(
                 self.request().unwrap(),
-                invalid_offset as usize - PushNlmsghdr::len(),
+                invalid_offset as usize - Nlmsghdr::len(),
                 None,
             );
 

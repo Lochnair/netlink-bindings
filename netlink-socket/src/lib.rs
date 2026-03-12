@@ -25,7 +25,7 @@ use smol::{
 };
 
 use netlink_bindings::{
-    builtin::PushNlmsghdr,
+    builtin::Nlmsghdr,
     nlctrl,
     traits::{NetlinkRequest, Protocol},
     utils,
@@ -181,11 +181,13 @@ impl NetlinkSocket {
         let seq = self.reserve_seq(1);
         let sock = Self::get_socket_cached(&mut self.sock, protonum)?;
 
-        let mut header = PushNlmsghdr::new();
-        header.set_len(header.as_slice().len() as u32 + request.payload().len() as u32);
-        header.set_type(request_type);
-        header.set_flags(request.flags() | libc::NLM_F_REQUEST as u16 | libc::NLM_F_ACK as u16);
-        header.set_seq(seq);
+        let header = Nlmsghdr {
+            len: Nlmsghdr::len() as u32 + request.payload().len() as u32,
+            r#type: request_type,
+            flags: request.flags() | libc::NLM_F_REQUEST as u16 | libc::NLM_F_ACK as u16,
+            seq,
+            pid: 0,
+        };
 
         Self::write_buf(
             sock,
@@ -203,7 +205,7 @@ impl NetlinkSocket {
                 buf_offset: 0,
                 buf_read: 0,
             },
-            seq: header.seq(),
+            seq: header.seq,
             done: false,
             phantom: PhantomData,
         })
@@ -289,15 +291,15 @@ impl NetlinkReplyInner {
 
         let too_short_err = || io::Error::other("Received packet is too short");
 
-        let Some(header) = packet.get(..PushNlmsghdr::len()) else {
+        let Some(header) = packet.get(..Nlmsghdr::len()) else {
             return Err(too_short_err());
         };
-        let header = PushNlmsghdr::new_from_slice(header).unwrap();
+        let header = Nlmsghdr::from_slice(header);
 
-        let payload_start = self.buf_offset + PushNlmsghdr::len();
-        self.buf_offset += header.get_len() as usize;
+        let payload_start = self.buf_offset + Nlmsghdr::len();
+        self.buf_offset += header.len as usize;
 
-        match header.get_type() as i32 {
+        match header.r#type as i32 {
             libc::NLMSG_DONE | libc::NLMSG_ERROR => {
                 let Some(code) = packet.get(16..20) else {
                     return Err(too_short_err());
@@ -305,29 +307,29 @@ impl NetlinkReplyInner {
                 let code = utils::parse_i32(code).unwrap();
 
                 let (echo_start, echo_end) =
-                    if code == 0 || header.get_type() == libc::NLMSG_DONE as u16 {
+                    if code == 0 || header.r#type == libc::NLMSG_DONE as u16 {
                         (20, 20)
                     } else {
-                        let Some(echo_header) = packet.get(20..(20 + PushNlmsghdr::len())) else {
+                        let Some(echo_header) = packet.get(20..(20 + Nlmsghdr::len())) else {
                             return Err(too_short_err());
                         };
-                        let echo_header = PushNlmsghdr::new_from_slice(echo_header).unwrap();
+                        let echo_header = Nlmsghdr::from_slice(echo_header);
 
-                        if echo_header.flags() & libc::NLM_F_CAPPED as u16 == 0 {
-                            let start = echo_header.get_len();
+                        if echo_header.flags & libc::NLM_F_CAPPED as u16 == 0 {
+                            let start = echo_header.len;
                             if packet.len() < start as usize + 20 {
                                 return Err(too_short_err());
                             }
 
                             (20 + 16, 20 + start as usize)
                         } else {
-                            let ext_ack_start = 20 + PushNlmsghdr::len();
+                            let ext_ack_start = 20 + Nlmsghdr::len();
                             (ext_ack_start, ext_ack_start)
                         }
                     };
 
                 Ok((
-                    header.seq(),
+                    header.seq,
                     Err(ReplyError {
                         code: io::Error::from_raw_os_error(-code),
                         request_bounds: (echo_start as u32, echo_end as u32),
@@ -339,14 +341,14 @@ impl NetlinkReplyInner {
                 ))
             }
             libc::NLMSG_NOOP => Ok((
-                header.seq(),
+                header.seq,
                 Err(io::Error::other("Received NLMSG_NOOP").into()),
             )),
             libc::NLMSG_OVERRUN => Ok((
-                header.seq(),
+                header.seq,
                 Err(io::Error::other("Received NLMSG_OVERRUN").into()),
             )),
-            _ => Ok((header.seq(), Ok((payload_start, self.buf_offset)))),
+            _ => Ok((header.seq, Ok((payload_start, self.buf_offset)))),
         }
     }
 }
