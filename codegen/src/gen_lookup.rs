@@ -121,7 +121,7 @@ pub fn gen_lookup(
             pub fn lookup_attr(&self, offset: usize, missing_type: Option<u16>) -> (Vec<(&'static str, usize)>, Option<&'static str>) {
                 let mut stack = Vec::new();
                 let cur = ErrorContext::calc_offset(self.orig_loc, self.buf.as_ptr() as usize);
-                if cur == offset #correct_for_header_len {
+                if missing_type.is_some() && cur == offset #correct_for_header_len {
                     stack.push((#name_str, offset));
                     return (stack, missing_type.and_then(|t| #type_name::attr_from_type(t)));
                 }
