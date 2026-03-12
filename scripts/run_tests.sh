@@ -69,7 +69,7 @@ run_vm() {
   run "$vm_runner" # [--interactive]
 }
 
-cargo build -p netlink-bindings --all-features
+cargo check -p netlink-bindings --all-features
 
 if ! ip link show wg0 >/dev/null; then
   # Create "wg0" interface for doctests in readme
