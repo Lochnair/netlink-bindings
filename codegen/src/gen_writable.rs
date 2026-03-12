@@ -17,6 +17,52 @@ pub fn writable_type(name: &str) -> Ident {
     format_ident!("Push{}", kebab_to_type(name))
 }
 
+pub fn writable_writer_attr(name: &str) -> Ident {
+    format_ident!("write_{}", kebab_to_rust(&name))
+}
+
+pub fn writable_val_attr(name: &str) -> Ident {
+    format_ident!("push_{}", kebab_to_rust(&name))
+}
+
+pub fn writable_array_attr(name: &str) -> Ident {
+    format_ident!("array_{}", kebab_to_rust(&name))
+}
+
+pub fn writable_nested_attr(name: &str) -> Ident {
+    format_ident!("nested_{}", kebab_to_rust(&name))
+}
+
+pub fn writable_func(spec: &Spec, set: &AttrSet, next: &AttrProp) -> Vec<Ident> {
+    let res = match &next.r#type {
+        AttrType::Unused => return Vec::new(),
+        AttrType::SubMessage {
+            sub_message,
+            selector,
+        } => {
+            if !gen_sub_message::is_supported(set, next, selector) {
+                return Vec::new();
+            }
+
+            let sub = spec.find_sub_message(sub_message);
+
+            let mut res = Vec::new();
+            for sub_attr in &sub.formats {
+                res.push(gen_sub_message::sub_message_push_name(
+                    &next.name,
+                    &sub_attr.value,
+                ));
+            }
+            return res;
+        }
+        AttrType::IndexedArray { .. } => writable_array_attr(&next.name),
+        AttrType::Nest { .. } => writable_nested_attr(&next.name),
+        _ => writable_val_attr(&next.name),
+    };
+
+    vec![res]
+}
+
 pub fn writable_array_type(spec: &Spec, attr: &IndexedArrayType) -> Ident {
     let rust_type = match attr {
         IndexedArrayType::Plain { attr } => match &attr.r#type {
@@ -193,7 +239,7 @@ pub fn gen_writable_attrset(
                 }
 
                 let func = gen_sub_message::sub_message_push_name(&next.name, &sub_attr.value);
-                let push_selector = format_ident!("push_{}", kebab_to_rust(selector));
+                let push_selector = writable_val_attr(selector);
 
                 impls.extend(quote! {
                     #[doc = "Selector attribute is inserted automatically."]
@@ -260,7 +306,7 @@ pub fn gen_writable_attrset(
         }
 
         if let AttrType::IndexedArray { sub_type } = &next.r#type {
-            let func = format_ident!("array_{}", kebab_to_rust(&next.name));
+            let func = writable_array_attr(&next.name);
 
             let array_type = gen_writable_index_array(tokens, ctx, spec, sub_type);
 
@@ -277,7 +323,7 @@ pub fn gen_writable_attrset(
 
         if let AttrType::Nest { nested_attributes } = &next.r#type {
             let nested_type = writable_type(nested_attributes);
-            let func = format_ident!("nested_{}", kebab_to_rust(&next.name));
+            let func = writable_nested_attr(&next.name);
 
             impls.extend(quote! {
                 pub fn #func(mut self) -> #nested_type<Self> {
@@ -290,7 +336,7 @@ pub fn gen_writable_attrset(
             continue;
         }
 
-        let func = format_ident!("push_{}", kebab_to_rust(&next.name));
+        let func = writable_val_attr(&next.name);
         let value_name = format_ident!("value");
 
         let WritableType {
@@ -326,7 +372,7 @@ pub fn gen_writable_attrset(
         if spec.experimental.attr_binary_write
             && matches!(&next.r#type, AttrType::Binary { .. } | AttrType::String)
         {
-            let write_func = format_ident!("write_{}", kebab_to_rust(&next.name));
+            let write_func = writable_writer_attr(&next.name);
             doc_attr(next, |doc| impls.extend(quote!(#[doc = #doc])));
             impls.extend(quote! {
                 pub fn #write_func(mut self) -> PushWriter<Self> {
