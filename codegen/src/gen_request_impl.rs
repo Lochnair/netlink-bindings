@@ -317,13 +317,10 @@ pub fn gen_request_wrapper(
                 pub fn decode_request<'a>(buf: &'a [u8]) -> #request_return_typen {
                     #request_body
                 }
-                fn decode<'a>(buf: &'a [u8]) -> #reply_return_typen {
-                    #reply_body
-                }
             };
 
-            decode_request = quote!(Self::decode);
-            decode_reply = quote!(Self::decode);
+            decode_request = quote!(Self::decode_request);
+            decode_reply = quote!(Self::decode_request);
         } else {
             decode_impl = quote! {
                 pub fn decode_request<'a>(buf: &'a [u8]) -> #request_return_typen {
@@ -347,8 +344,12 @@ pub fn gen_request_wrapper(
             map_decoder = quote!();
             new = quote! {
                 pub fn new(mut request: Request<'r> #new_args) -> Self {
-                    #header_encoder::write_header(&mut request.buf_mut() #header_args);
+                    #header_encoder::write_header(request.buf_mut() #header_args);
                     Self { request: #request #store_request_type }
+                }
+                pub fn encode_request<'buf>(buf: &'buf mut Vec<u8> #new_args) -> #encoder<&'buf mut Vec<u8>> {
+                    #header_encoder::write_header(buf #header_args);
+                    #encoder::#encoder_new(buf)
                 }
             };
         } else {
@@ -359,8 +360,12 @@ pub fn gen_request_wrapper(
             map_decoder = quote!(.1);
             new = quote! {
                 pub fn new(mut request: Request<'r> #new_args, header: &#request_header) -> Self {
-                    #header_encoder::write_header(&mut request.buf_mut(), header);
+                    #header_encoder::write_header(request.buf_mut(), header);
                     Self { request: #request #store_request_type }
+                }
+                pub fn encode_request<'buf>(buf: &'buf mut Vec<u8> #new_args, header: &#request_header) -> #encoder<&'buf mut Vec<u8>> {
+                    #header_encoder::write_header(buf, header);
+                    #encoder::#encoder_new(buf)
                 }
             };
         }
@@ -371,6 +376,9 @@ pub fn gen_request_wrapper(
         new = quote! {
             pub fn new(request: Request<'r> #new_args) -> Self {
                 Self { request: #request #store_request_type }
+            }
+            pub fn encode_request<'buf>(buf: &'buf mut Vec<u8> #new_args) -> #encoder<&'buf mut Vec<u8>> {
+                #encoder::#encoder_new(buf)
             }
         };
     };
@@ -415,8 +423,8 @@ pub fn gen_request_wrapper(
             pub fn into_encoder(self) -> #encoder<RequestBuf<'r>> {
                 #encoder::#encoder_new(self.request.buf)
             }
-            #write_header_impl
             #decode_impl
+            #write_header_impl
         }
 
         impl NetlinkRequest for #name<'_> {
