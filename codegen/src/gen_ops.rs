@@ -12,7 +12,7 @@ use crate::{
 
 pub fn request_kebab_name(type_name: &str, op_name: &str) -> String {
     let delim = type_name.is_empty().then_some("").unwrap_or("-");
-    format!("op{delim}{type_name}-{op_name}-request")
+    format!("op{delim}{type_name}-{op_name}")
 }
 
 pub fn reply_kebab_name(type_name: &str, op_name: &str) -> String {

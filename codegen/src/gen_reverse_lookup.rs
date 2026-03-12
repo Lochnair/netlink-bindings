@@ -100,7 +100,7 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
         let prefix = format_ident!("{}", kebab_to_rust(&spec.name));
         let attrs_name = kebab_to_type(fallback);
         let request_name = request_kebab_name("", "do");
-        let request = format_ident!("Request{}", kebab_to_type(&request_name));
+        let request = format_ident!("{}", kebab_to_type(&request_name));
         let fallback = quote! {
             Debug::fmt(&#b::#prefix::#request::decode_reply(buf), fmt)?;
         };
@@ -123,7 +123,7 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
             let mut reply_decoder = quote!(new);
 
             if *is_transparent {
-                request = format_ident!("Request{}", request);
+                request = format_ident!("{}", request);
                 reply = request.clone();
                 request_decoder = quote!(decode_request);
                 reply_decoder = quote!(decode_reply);
@@ -242,7 +242,7 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
             let mut decoder = quote!(new);
 
             if *is_transparent {
-                request = format_ident!("Request{}", request);
+                request = format_ident!("{}", request);
                 reply = request.clone();
                 decoder = quote!(decode_reply);
             }

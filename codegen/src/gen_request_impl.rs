@@ -213,7 +213,8 @@ pub fn gen_request_wrapper(
         return;
     }
 
-    let name = format_ident!("Request{}", kebab_to_type(request_name));
+    let name = format_ident!("{}", kebab_to_type(request_name));
+
     let (reply_decoder, decoder_new);
     let (request_name, reply_name) = if let Some(transparent_attrs) = transparent_attrs {
         reply_decoder = quote!(Self);
@@ -450,7 +451,7 @@ pub fn gen_request_chained(tokens: &mut TokenStream, requests: &[OpInfo]) {
         let no_ack_requests = requests
             .iter()
             .filter(|r| r.no_ack)
-            .map(|r| format_ident!("Request{}", kebab_to_type(&r.name)))
+            .map(|r| format_ident!("{}", kebab_to_type(&r.name)))
             .fold(quote!(), |acc, r| {
                 quote! {
                     #acc
