@@ -189,6 +189,18 @@ pub fn gen_request(tokens: &mut TokenStream, _ctx: &mut Context, spec: &Spec, re
                 self
             }
 
+            #[doc = "Set `self.flags |= flags`"]
+            pub fn set_flags(mut self, flags: u16) -> Self {
+                self.flags |= flags;
+                self
+            }
+
+            #[doc = "Set `self.flags ^= self.flags & flags`"]
+            pub fn unset_flags(mut self, flags: u16) -> Self {
+                self.flags ^= self.flags & flags;
+                self
+            }
+
             #set_dump
 
             #op_funcs
