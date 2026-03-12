@@ -2,7 +2,7 @@
 //!
 //! Unlike other families, nl80211 yaml specification doesn't fully annotate
 //! each of the ~170 operations. Instead, use [`nl80211::Commands`] enum in
-//! combination with `.op_do_request(cmd: u8)` to access the operations.
+//! combination with `.op_do(cmd: u8)` to access the operations.
 //!
 //! Run with: `cargo run --example nl80211 --features=nl80211,rt-link`
 
@@ -46,7 +46,7 @@ async fn main() {
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn dump_wiphy(sock: &mut NetlinkSocket) -> Vec<(String, u32)> {
-    let mut request = nl80211::Request::new().op_dump_request(Commands::GetWiphy as u8);
+    let mut request = nl80211::Request::new().op_dump(Commands::GetWiphy as u8);
     request
         .encode()
         // Allow the kernel to split reply into multiple chunks, each carrying
@@ -73,7 +73,7 @@ async fn dump_wiphy(sock: &mut NetlinkSocket) -> Vec<(String, u32)> {
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn wiphy_add_interface(sock: &mut NetlinkSocket, phy_id: u32, new_ifname: &str) -> u32 {
-    let mut request = nl80211::Request::new().op_do_request(Commands::NewInterface as u8);
+    let mut request = nl80211::Request::new().op_do(Commands::NewInterface as u8);
     request.encode()
         .push_wiphy(phy_id)
         .push_ifname_bytes(new_ifname.as_bytes())
@@ -89,7 +89,7 @@ async fn wiphy_add_interface(sock: &mut NetlinkSocket, phy_id: u32, new_ifname: 
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn wiphy_del_interface(sock: &mut NetlinkSocket, ifindex: u32) {
-    let mut request = nl80211::Request::new().op_do_request(Commands::DelInterface as u8);
+    let mut request = nl80211::Request::new().op_do(Commands::DelInterface as u8);
     request.encode().push_ifindex(ifindex);
 
     let mut iter = sock.request(&request).await.unwrap();
@@ -98,7 +98,7 @@ async fn wiphy_del_interface(sock: &mut NetlinkSocket, ifindex: u32) {
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn get_interface_index(sock: &mut NetlinkSocket, ifname: &str) -> Option<u32> {
-    let request = rt_link::Request::new().op_getlink_dump_request(&Default::default());
+    let request = rt_link::Request::new().op_getlink_dump(&Default::default());
 
     let mut iter = sock.request(&request).await.unwrap();
     while let Some(res) = iter.recv().await {

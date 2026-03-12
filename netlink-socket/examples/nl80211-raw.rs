@@ -168,7 +168,7 @@ async fn wiphy_del_interface(sock: &mut NetlinkSocket, ifindex: u32) {
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn get_interface_index(sock: &mut NetlinkSocket, ifname: &str) -> Option<u32> {
-    let request = rt_link::Request::new().op_getlink_dump_request(&Default::default());
+    let request = rt_link::Request::new().op_getlink_dump(&Default::default());
 
     let mut iter = sock.request(&request).await.unwrap();
     while let Some(res) = iter.recv().await {

@@ -14,7 +14,7 @@ use netlink_bindings::rt_link;
 async fn main() {
     let mut request = rt_link::Request::new()
         .set_create()
-        .op_newlink_do_request(&rt_link::Ifinfomsg::new());
+        .op_newlink_do(&rt_link::Ifinfomsg::new());
 
     request
         .encode()

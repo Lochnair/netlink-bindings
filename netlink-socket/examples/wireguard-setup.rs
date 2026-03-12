@@ -60,7 +60,7 @@ async fn wg_dump(sock: &mut NetlinkSocket) {
     // you don't need to .clean() the buffer yourself
     let mut buf = Vec::new();
 
-    let request_links = rt_link::Request::new().op_getlink_dump_request(&Ifinfomsg::new());
+    let request_links = rt_link::Request::new().op_getlink_dump(&Ifinfomsg::new());
     let mut iter = sock.request(&request_links).await.unwrap();
     while let Some(res) = iter.recv().await {
         let (_header, attrs) = res.unwrap();
@@ -73,7 +73,7 @@ async fn wg_dump(sock: &mut NetlinkSocket) {
         };
         println!("Dumping {link:?}");
 
-        let mut request = wireguard::Request::new_with_buf(&mut buf).op_get_device_dump_request();
+        let mut request = wireguard::Request::new_with_buf(&mut buf).op_get_device_dump();
         request.encode().push_ifname(link);
 
         let mut iter = sock_wg.request(&request).await.unwrap();
@@ -94,7 +94,7 @@ async fn wg_set(
     peer: SocketAddr,
     peer_key: &[u8],
 ) {
-    let mut request = wireguard::Request::new().op_set_device_do_request();
+    let mut request = wireguard::Request::new().op_set_device_do();
 
     request
         .encode()
@@ -129,7 +129,7 @@ async fn addr_add(sock: &mut NetlinkSocket, ifindex: u32, addr: IpAddr, addr_pre
 
     let mut request = rt_addr::Request::new()
         .set_change() // Don't fail if address already assigned
-        .op_newaddr_do_request(&header);
+        .op_newaddr_do(&header);
 
     request.encode().push_local(addr);
 
@@ -137,12 +137,13 @@ async fn addr_add(sock: &mut NetlinkSocket, ifindex: u32, addr: IpAddr, addr_pre
     iter.recv_ack().await.unwrap();
 }
 
+/// Equivalent to `ip link add dev {ifname} type wireguard`
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn link_add(sock: &mut NetlinkSocket, ifname: &str) {
     let mut request = rt_link::Request::new()
         .set_create()
         // .set_excl() // If exclusive flag set, existing device will cause an error
-        .op_newlink_do_request(&rt_link::Ifinfomsg::new());
+        .op_newlink_do(&rt_link::Ifinfomsg::new());
 
     request
         .encode()
@@ -156,7 +157,7 @@ async fn link_add(sock: &mut NetlinkSocket, ifname: &str) {
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn link_get_ifindex(sock: &mut NetlinkSocket, ifname: &str) -> u32 {
-    let mut request = rt_link::Request::new().op_getlink_do_request(&rt_link::Ifinfomsg::new());
+    let mut request = rt_link::Request::new().op_getlink_do(&rt_link::Ifinfomsg::new());
 
     request.encode().push_ifname_bytes(ifname.as_bytes());
 
@@ -166,9 +167,10 @@ async fn link_get_ifindex(sock: &mut NetlinkSocket, ifname: &str) -> u32 {
     header.ifi_index as u32
 }
 
+/// Equivalent to `ip link del dev {ifname}`
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn link_del(sock: &mut NetlinkSocket, ifname: &str) {
-    let mut request = rt_link::Request::new().op_dellink_do_request(&Default::default());
+    let mut request = rt_link::Request::new().op_dellink_do(&Default::default());
 
     request.encode().push_ifname_bytes(ifname.as_bytes());
 

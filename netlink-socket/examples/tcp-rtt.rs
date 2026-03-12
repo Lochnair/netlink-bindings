@@ -82,7 +82,7 @@ async fn main() {
     // Same subsystem supports dumping info about TCP, UDP, and other inet protocols.
     // UNIX sockets are also supported, though with a slightly different header format.
     let mut request = inet_diag::Request::new() //
-        .op_tcp_diag_dump_request(&header);
+        .op_tcp_diag_dump(&header);
 
     request.encode().push_bytecode(&bytecode);
 

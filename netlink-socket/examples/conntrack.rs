@@ -11,7 +11,7 @@ use netlink_bindings::conntrack;
 #[cfg_attr(feature = "tokio", tokio::main(flavor = "current_thread"))]
 #[cfg_attr(feature = "smol", macro_rules_attribute::apply(smol_macros::main))]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let request = conntrack::Request::new().op_get_dump_request(&conntrack::Nfgenmsg::new());
+    let request = conntrack::Request::new().op_get_dump(&conntrack::Nfgenmsg::new());
 
     let mut sock = netlink_socket2::NetlinkSocket::new();
 
@@ -48,7 +48,7 @@ fn format_proto(attrs: conntrack::IterableTupleProtoAttrs<'_>) {
     print!("{proto}");
 }
 
-fn format_status(attrs: conntrack::IterableOpGetDumpReply<'_>) {
+fn format_status(attrs: conntrack::IterableConntrackAttrs<'_>) {
     let status = attrs.get_status().unwrap();
     print!(" [");
     let mut is_first = true;

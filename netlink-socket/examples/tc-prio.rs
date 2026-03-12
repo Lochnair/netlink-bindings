@@ -50,7 +50,7 @@ async fn tc_prio_add(sock: &mut NetlinkSocket, ifi: i32, handle: u32) {
     let mut req = Request::new()
         .set_create()
         .set_excl()
-        .op_newqdisc_do_request(&header);
+        .op_newqdisc_do(&header);
 
     let priomap: [u8; 16] = [7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
@@ -78,7 +78,7 @@ async fn tc_prio_show(sock: &mut NetlinkSocket, ifi: i32, qdisc_handle: u32) {
         ..Default::default()
     };
 
-    let req = Request::new().op_getqdisc_dump_request(&header);
+    let req = Request::new().op_getqdisc_dump(&header);
 
     let mut iter = sock.request(&req).await.unwrap();
     while let Some(res) = iter.recv().await {
@@ -96,7 +96,7 @@ async fn tc_prio_show(sock: &mut NetlinkSocket, ifi: i32, qdisc_handle: u32) {
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 async fn tc_prio_del(sock: &mut NetlinkSocket, ifi: i32, qdisc_handle: u32) {
-    let req = Request::new().op_delqdisc_do_request(&Tcmsg {
+    let req = Request::new().op_delqdisc_do(&Tcmsg {
         family: 0,
         ifindex: ifi,
         handle: qdisc_handle,
@@ -113,7 +113,7 @@ async fn tc_prio_del(sock: &mut NetlinkSocket, ifi: i32, qdisc_handle: u32) {
 
 #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
 pub async fn link_get_ifindex(sock: &mut NetlinkSocket, ifname: &str) -> i32 {
-    let mut request = rt_link::Request::new().op_getlink_do_request(&Default::default());
+    let mut request = rt_link::Request::new().op_getlink_do(&Default::default());
     request.encode().push_ifname_bytes(ifname.as_bytes());
 
     let mut iter = sock.request(&request).await.unwrap();

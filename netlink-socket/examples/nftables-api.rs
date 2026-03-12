@@ -7,7 +7,7 @@ use std::{io, net::Ipv4Addr};
 
 use netlink_bindings::{
     nftables::{
-        self, CmpOps, Nfgenmsg, PayloadBase, PushExprListAttrs, PushOpNewruleDoRequest, Registers,
+        self, CmpOps, Nfgenmsg, PayloadBase, PushExprListAttrs, PushRuleAttrs, Registers,
         VerdictCode,
     },
     utils,
@@ -78,7 +78,7 @@ struct GenerationId(u32);
 impl GenerationId {
     #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
     async fn new_latest(sock: &mut NetlinkSocket) -> Result<Self, ReplyError> {
-        let request = nftables::Request::new().op_getgen_do_request(&Nfgenmsg::new());
+        let request = nftables::Request::new().op_getgen_do(&Nfgenmsg::new());
         let mut iter = sock.request(&request).await?;
         let (_, attrs) = iter.recv_one().await?;
 
@@ -109,7 +109,7 @@ impl Transaction {
 
         inner
             .request()
-            .op_batch_begin_do_request(&h)
+            .op_batch_begin_do(&h)
             .encode()
             .push_genid(genid.0);
 
@@ -123,7 +123,7 @@ impl Transaction {
         // Create a separate table to not interfere with actual traffic
         self.inner
             .request()
-            .op_newchain_do_request(&h)
+            .op_newchain_do(&h)
             .encode()
             .push_table_bytes(FILTER_TABLE.as_bytes())
             .push_name_bytes(chain.as_bytes());
@@ -135,7 +135,7 @@ impl Transaction {
 
         self.inner
             .request()
-            .op_delchain_do_request(&h)
+            .op_delchain_do(&h)
             .encode()
             .push_table_bytes(FILTER_TABLE.as_bytes())
             .push_name_bytes(chain.as_bytes());
@@ -155,7 +155,7 @@ impl Transaction {
         }
         let inner = inner
             .set_create()
-            .op_newrule_do_request(&h)
+            .op_newrule_do(&h)
             .into_encoder()
             .push_table_bytes(FILTER_TABLE.as_bytes())
             .push_chain_bytes(chain.as_bytes())
@@ -169,7 +169,7 @@ impl Transaction {
         let mut h = nftables::Nfgenmsg::new();
         h.set_res_id(10);
 
-        self.inner.request().op_batch_end_do_request(&h);
+        self.inner.request().op_batch_end_do(&h);
 
         let c = self.inner.finalize();
 
@@ -187,7 +187,7 @@ impl Transaction {
     }
 }
 
-type PushExprs<'a> = PushExprListAttrs<PushOpNewruleDoRequest<utils::RequestBuf<'a>>>;
+type PushExprs<'a> = PushExprListAttrs<PushRuleAttrs<utils::RequestBuf<'a>>>;
 
 struct NewRuleExprs<'a> {
     inner: PushExprs<'a>,
