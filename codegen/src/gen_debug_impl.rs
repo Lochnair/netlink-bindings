@@ -113,6 +113,13 @@ pub fn gen_debug_attrs(
                 })
             }
             AttrType::Binary { r#struct: None, .. }
+                if next.display_hint.as_ref().is_some_and(|h| h == "mac") =>
+            {
+                variants.extend(quote! {
+                    #type_name::#name(#val_name) => #fmt_name.field(#field_name, &FormatMac(#val_name)),
+                })
+            }
+            AttrType::Binary { r#struct: None, .. }
                 if next.display_hint.as_ref().is_some_and(|h| h == "hex") =>
             {
                 variants.extend(quote! {

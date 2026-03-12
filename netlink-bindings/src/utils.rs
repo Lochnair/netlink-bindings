@@ -80,6 +80,22 @@ impl<T: AsRef<[u8]>> Debug for FormatHex<T> {
     }
 }
 
+pub struct FormatMac<T: AsRef<[u8]>>(pub T);
+
+impl<T: AsRef<[u8]>> Debug for FormatMac<T> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut first = true;
+        for i in self.0.as_ref() {
+            if !first {
+                write!(fmt, ":")?;
+            }
+            first = false;
+            write!(fmt, "{i:02x}")?;
+        }
+        Ok(())
+    }
+}
+
 pub struct FormatEnum<T: Debug>(pub u64, pub fn(u64) -> Option<T>);
 
 impl<T: Debug> Debug for FormatEnum<T> {
@@ -301,6 +317,15 @@ pub trait Rec {
     fn as_rec(&self) -> &Vec<u8>;
 }
 
+impl Rec for Vec<u8> {
+    fn as_rec_mut(&mut self) -> &mut Vec<u8> {
+        self
+    }
+    fn as_rec(&self) -> &Vec<u8> {
+        self
+    }
+}
+
 impl Rec for &mut Vec<u8> {
     fn as_rec_mut(&mut self) -> &mut Vec<u8> {
         self
@@ -366,7 +391,7 @@ impl fmt::Display for ErrorContext {
                 }
             }
         }
-        write!(f, " at offset {}", self.offset)?;
+        write!(f, " at offset {} (0x{:02x})", self.offset, self.offset)?;
         Ok(())
     }
 }
