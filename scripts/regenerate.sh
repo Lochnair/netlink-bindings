@@ -15,6 +15,12 @@ usage() {
   echo "  -r, --no-reverse-lookup"
 }
 
+run() {
+  echo >&2
+  echo ">" "$@" >&2
+  command "$@"
+}
+
 SHORT_OPTS="hfr"
 LONG_OPTS="help,force,no-reverse-lookup"
 
@@ -64,7 +70,7 @@ for subsys in netlink-bindings/src/*/; do
 
   if [ "${#filters[@]}" -gt 0 ]; then
     for f in "${filters[@]}"; do
-      case "$subsys" in
+      case "$subsys_name" in
       *"$f"*) subsys_match=1 ;;
       esac
     done
@@ -92,7 +98,7 @@ for subsys in netlink-bindings/src/*/; do
   esac
 
   echo Generating "$subsys_name"
-  command "$codegen" -d "$subsys" "${args[@]}"
+  run "$codegen" -d "$subsys" "${args[@]}"
 done
 
 if [ -n "$no_reverse_lookup" ]; then
@@ -102,7 +108,7 @@ fi
 gen="./reverse-lookup/src/generated.rs"
 if [ -n "$force" ] || [ ! -e "$gen" ] || [ -n "$changed" ]; then
   echo Generating reverse-lookup
-  command "$codegen" -d ./netlink-bindings/src --reverse-lookup "$gen"
+  run "$codegen" -d ./netlink-bindings/src --reverse-lookup "$gen"
 else
   echo Skipping reverse-lookup
 fi
