@@ -8,6 +8,7 @@ use crate::{
     gen_attrs::{gen_attrset, shorthand_name},
     gen_iterable::iterable_name,
     gen_request_impl::{self, OpInfo},
+    gen_utils::escape_md,
     gen_writable::{gen_writable_attrset, writable_func, writable_type},
     parse_spec::{AttrProp, AttrSet, AttrType, Operation, OperationSpec, Request, Spec},
     Context,
@@ -151,8 +152,8 @@ pub fn gen_op(
     };
 
     let mut doc_str = String::new();
-    if let Some(doc) = ops.doc.clone() {
-        writeln!(doc_str, "{doc}").unwrap();
+    if let Some(doc) = &ops.doc {
+        writeln!(doc_str, "{}", escape_md(doc)).unwrap();
     }
     if !ops.flags.is_empty() {
         writeln!(doc_str, "Flags: {}", ops.flags.join(", ")).unwrap();

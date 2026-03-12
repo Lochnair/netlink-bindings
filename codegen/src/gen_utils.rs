@@ -16,6 +16,17 @@ pub fn sanitize_ident(name: &str) -> Ident {
     }
 }
 
+pub fn escape_md(name: &str) -> String {
+    let mut res = String::new();
+    for c in name.chars() {
+        if "\\`~*_{}[]#+-.".contains(c) {
+            res.push('\\');
+        }
+        res.push(c);
+    }
+    res
+}
+
 pub fn kebab_to_rust(name: &str) -> String {
     let res = name
         .chars()
@@ -62,7 +73,7 @@ pub fn kebab_to_upper(name: &str) -> String {
 pub fn doc_attr(attr: &AttrProp, mut write: impl FnMut(&str)) {
     let mut docs = Vec::new();
     if let Some(doc) = &attr.doc {
-        docs.push(doc.clone());
+        docs.push(escape_md(doc));
     }
 
     // if let Some(checks) = &attr.checks {

@@ -5,7 +5,7 @@ use quote::{format_ident, quote, ToTokens};
 use syn::Ident;
 
 use crate::{
-    gen_utils::{kebab_to_type, kebab_to_upper, sanitize_ident},
+    gen_utils::{escape_md, kebab_to_type, kebab_to_upper, sanitize_ident},
     parse_spec::{CBitFieldType, ConstValue, DefType, Definition, EnumEntry, Spec},
 };
 
@@ -32,6 +32,7 @@ fn gen_def(tokens: &mut TokenStream, def: &Definition) {
     let doc = def
         .doc
         .as_ref()
+        .map(|doc| escape_md(doc))
         .map(|doc| quote!(#[doc = #doc]))
         .unwrap_or(quote!());
     tokens.extend(doc.clone());
@@ -111,6 +112,7 @@ fn gen_def_enum(
                 }
 
                 if let Some(doc) = &doc {
+                    let doc = escape_md(doc);
                     variants.extend(quote!(#[doc = #doc]));
                 };
 

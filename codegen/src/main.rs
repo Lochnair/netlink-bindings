@@ -35,6 +35,7 @@ use crate::{
     gen_notif::gen_notifs,
     gen_ops::gen_ops,
     gen_struct::gen_struct,
+    gen_utils::escape_md,
     gen_writable::gen_writable,
     parse_spec::{DefType, Spec},
 };
@@ -154,7 +155,7 @@ fn main() {
     let mut ctx = Context::default();
     let mut tokens = TokenStream::new();
 
-    let mod_doc = &spec.doc;
+    let mod_doc = escape_md(&spec.doc);
     tokens.extend(quote! {
         #![doc = #mod_doc]
         #![allow(clippy::all)]
