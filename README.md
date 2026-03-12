@@ -110,15 +110,15 @@ use netlink_socket2::NetlinkSocket;
 
 let mut sock = NetlinkSocket::new();
 
-let ifindex: u32 = 1234; // Acquired via "get-addr" request
 let addr: IpAddr = "10.0.0.1".parse().unwrap();
-let prefix: u8 = 32; // stands for "/32" in "10.0.0.1/32"
 
 // Create fixed-header for the request
-let mut header = rt_addr::PushIfaddrmsg::new();
-header.set_ifa_index(ifindex);
-header.set_ifa_family(libc::AF_INET as u8); // aka ipv4
-header.set_ifa_prefixlen(prefix);
+let header = rt_addr::Ifaddrmsg {
+    ifa_index: 1234, // Acquired via "get-addr" request
+    ifa_family: libc::AF_INET as u8, // aka ipv4
+    ifa_prefixlen: 32, // stands for "/32" in "10.0.0.1/32"
+    ..Default::default()
+};
 
 let mut request = rt_addr::Request::new()
     .set_change() // Don't fail if address already assigned
