@@ -348,7 +348,7 @@ impl AttrProp {
             && self
                 .display_hint
                 .as_ref()
-                .is_some_and(|h| h == "ipv4-or-v6")
+                .is_some_and(|h| matches!(h.as_ref(), "ipv4" | "ipv4-or-v6"))
     }
 
     pub fn is_sockaddr(&self) -> bool {
