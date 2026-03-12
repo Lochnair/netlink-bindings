@@ -11,7 +11,7 @@ use crate::{
     Context,
 };
 
-pub fn gen_introspect_array(
+pub fn gen_debug_array(
     tokens: &mut TokenStream,
     ctx: &mut Context,
     spec: &Spec,
@@ -42,7 +42,7 @@ pub fn gen_introspect_array(
     });
 }
 
-pub fn gen_introspect_attrs(
+pub fn gen_debug_attrs(
     tokens: &mut TokenStream,
     spec: &Spec,
     ctx: &mut Context,
@@ -60,7 +60,7 @@ pub fn gen_introspect_attrs(
         let val_name = format_ident!("val");
 
         if let AttrType::IndexedArray { sub_type } = &next.r#type {
-            gen_introspect_array(tokens, ctx, spec, sub_type);
+            gen_debug_array(tokens, ctx, spec, sub_type);
         }
 
         match &next.r#type {

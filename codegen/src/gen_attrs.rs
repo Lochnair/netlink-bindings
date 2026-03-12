@@ -4,7 +4,7 @@ use std::collections::HashSet;
 use syn::Ident;
 
 use crate::{
-    gen_debug_impl::gen_introspect_attrs,
+    gen_debug_impl::gen_debug_attrs,
     gen_iterable::{array_iterable_name, gen_iterable_attrs, iterable_name},
     gen_ops::OpHeader,
     gen_struct::struct_type,
@@ -90,7 +90,7 @@ pub fn gen_attrset(
     });
 
     gen_iterable_attrs(tokens, spec, ctx, &mut m, set, fixed_header);
-    gen_introspect_attrs(tokens, spec, ctx, &m, set);
+    gen_debug_attrs(tokens, spec, ctx, &m, set);
     crate::gen_lookup::gen_lookup(tokens, spec, ctx, &m, set, fixed_header);
 }
 
