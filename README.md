@@ -307,48 +307,22 @@ for encoding, and an iterator interface for decoding (internally).
 
 ## Support status
 
-- ✅ - supported, has tests.
-- ✔️ - compiles, testing needed.
-- ? - not attempted.
-- ❌ - doesn't compile (needs adaptations in codegen).
+All [upstream specifications](https://www.kernel.org/doc/html/latest/netlink/specs/) are supported as of Linux 6.19.
 
-| subsystem | ? | comment |
-| --- | --- | --- |
-| [nlctrl](./netlink-bindings/src/nlctrl/nlctrl.md) | ✅ | |
-| [conntrack](./netlink-socket/examples/conntrack.rs) | ✅ | |
-| [inet-diag](./netlink-socket/examples/tcp-rtt.rs) | ✅ | |
-| [nftables](./netlink-socket/examples/nftables.rs) | ✅ | |
-| [nl80211](./netlink-socket/examples/nl80211.rs) | ✅ | |
-| [rt-addr](./netlink-socket/examples/wireguard-setup.rs) | ✅ | |
-| [rt-link](./netlink-socket/examples/wireguard-setup.rs) | ✅ | |
-| [tc](./netlink-socket/examples/tc-prio.rs) | ✅ | |
-| [wireguard](./netlink-socket/examples/wireguard-setup.rs) | ✅ | |
-| devlink | ✔️ | |
-| netdev | ✔️ | |
-| rt-neigh | ✔️ | |
-| rt-route | ✔️ | |
-| rt-rule | ✔️ | |
-| unix-diag | ✔️ | |
-| ethtool | ? | |
-| dpll | ? | |
-| fou | ? | |
-| handshake | ? | |
-| lockd | ? | |
-| mptcp_pm | ? | |
-| net-shaper | ? | |
-| nfsd | ? | |
-| ovpn | ? | |
-| ovs_datapath | ? | |
-| ovs_flow | ? | |
-| ovs_vport | ? | |
-| tcp_metrics | ? | |
-| team | ? | |
-
-The following netlink features are not implemented (yet):
-
-- Attributes denoting a C array (i.e. attributes with type binary and sub-type u32/u64).
-- Events/notifications/multicast messages.
-- Sub messages with a selector attribute outside of the parent attribute set.
+- ✅ supported, has tests:
+[conntrack](./netlink-socket/examples/conntrack.rs),
+[inet-diag](./netlink-socket/examples/tcp-rtt.rs),
+[nftables](./netlink-socket/examples/nftables.rs),
+[nl80211](./netlink-socket/examples/nl80211.rs),
+[nlctrl](./netlink-bindings/src/nlctrl/nlctrl.md),
+[rt-addr](./netlink-socket/examples/wireguard-setup.rs),
+[rt-link](./netlink-socket/examples/wireguard-setup.rs),
+[tc](./netlink-socket/examples/tc-prio.rs),
+[wireguard](./netlink-socket/examples/wireguard-setup.rs).
+- ✔️ compiles, testing needed: binder, dev-energymodel, devlink, dpll, ethtool,
+fou, handshake, lockd, mptcp_pm, netdev, net-shaper, nfsd, ovpn, ovs_datapath,
+ovs_flow, ovs_vport, psp, rt-neigh, rt-route, rt-rule tcp_metrics, team,
+unix-diag.
 
 ## Working off of existing tools
 
