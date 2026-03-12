@@ -59,22 +59,14 @@ pub fn gen_cstruct(tokens: &mut TokenStream, spec: &Spec, name: &str, members: &
         bit_off: 0,
         last_bit_type: None,
         alignment: 1,
+        derive_debug: true,
     };
 
     let mut cinner = TokenStream::new();
     let mut cimpl = TokenStream::new();
     let mut debug = TokenStream::new();
-    let mut default_debug = 0;
     for attr in members {
-        gen_cstruct_field(
-            spec,
-            &mut cinner,
-            &mut cimpl,
-            &mut debug,
-            &mut default_debug,
-            &mut m,
-            attr,
-        );
+        gen_cstruct_field(spec, &mut cinner, &mut cimpl, &mut debug, &mut m, attr);
     }
 
     if m.bit_off != 0 {
@@ -88,7 +80,7 @@ pub fn gen_cstruct(tokens: &mut TokenStream, spec: &Spec, name: &str, members: &
     insert_padding(spec, &mut cinner, &mut m, 0, alignment);
     let len = m.off;
 
-    if default_debug == members.len() {
+    if m.derive_debug {
         tokens.extend(quote! {
             #[derive(Debug)]
         });
@@ -175,7 +167,7 @@ pub fn gen_cstruct(tokens: &mut TokenStream, spec: &Spec, name: &str, members: &
         }
     });
 
-    if default_debug != members.len() {
+    if !m.derive_debug {
         tokens.extend(quote! {
             impl std::fmt::Debug for #type_name {
                 fn fmt(&self, #fmt_name: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -194,7 +186,6 @@ pub fn gen_cstruct_field(
     members: &mut TokenStream,
     cimpl: &mut TokenStream,
     debug: &mut TokenStream,
-    default_debug: &mut usize,
     m: &mut GenImplStruct,
     attr: &AttrProp,
 ) {
@@ -238,8 +229,10 @@ pub fn gen_cstruct_field(
     let encode_num = format_ident!("to_{encode_ord}");
 
     let name = kebab_to_rust(&attr.name);
+    let mut can_derive_debug = false;
     // Taken from ./gen_debug_impl.rs
     let debug_format = match attr.display_hint.as_ref().map(|s| s.as_str()) {
+        _ if matches!(attr.r#type, AttrType::Pad { .. }) => quote!(),
         _ if attr.r#enum.is_some() => {
             let next = attr;
             let val_name = quote!(self.#getter);
@@ -288,11 +281,14 @@ pub fn gen_cstruct_field(
             quote!(&self.#getter)
         }
         _ => {
-            *default_debug += 1;
+            can_derive_debug = true;
             quote!(&self.#getter)
         }
     };
-    debug.extend(quote!(.field(#name, #debug_format)));
+    m.derive_debug &= can_derive_debug;
+    if !debug_format.is_empty() {
+        debug.extend(quote!(.field(#name, #debug_format)));
+    }
 
     let mut docs = TokenStream::new();
     doc_attr(attr, |doc| docs.extend(quote!(#[doc = #doc])));
@@ -378,6 +374,16 @@ pub fn gen_cstruct_field(
 
             return;
         }
+        AttrType::Pad { len: Some(len) } => {
+            m.off += len;
+
+            members.extend(quote! {
+                #docs
+                pub #cname_buf: [u8; #len],
+            });
+
+            return;
+        }
         AttrType::Binary {
             r#struct: None,
             len: Some(len),
@@ -405,6 +411,7 @@ pub fn gen_cstruct_field(
             pub #cname: #rust_type,
         });
     } else {
+        m.derive_debug = false;
         members.extend(quote! {
             #docs
             pub #cname_buf: #rust_type,
@@ -432,6 +439,7 @@ fn insert_padding(
     let pad = align_up(m.off, alignment) - m.off;
     if pad != 0 && (alignment > 4 || spec.experimental.struct_explicit_padding) {
         assert!(alignment <= 8);
+        m.derive_debug = false;
         let pad_name = format_ident!("_pad_{}", m.off);
         members.extend(quote! {
             pub #pad_name: [u8; #pad],

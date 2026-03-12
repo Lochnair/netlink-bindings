@@ -88,11 +88,6 @@ pub fn gen_struct_field(
     let getter_name = format_ident!("{getter_prefix}{}", kebab_to_rust(&attr.name));
     let setter_name = format_ident!("set_{}", kebab_to_rust(&attr.name));
 
-    if let AttrType::Pad { len: Some(len) } = &attr.r#type {
-        m.off += len;
-        return;
-    }
-
     let encode_ord = match attr.byte_order {
         ByteOrder::Host => "ne",
         ByteOrder::Little => "le",
@@ -139,7 +134,9 @@ pub fn gen_struct_field(
         Some("string") => quote!(&FormatBinStr(self.#getter_name())),
         _ => quote!(&self.#getter_name()),
     };
-    debug.extend(quote!(.field(#name, #debug_format)));
+    if !matches!(attr.r#type, AttrType::Pad { .. }) {
+        debug.extend(quote!(.field(#name, #debug_format)));
+    }
 
     let mut docs = TokenStream::new();
     doc_attr(attr, |doc| docs.extend(quote!(#[doc = #doc])));
@@ -250,6 +247,10 @@ pub fn gen_struct_field(
 
             return;
         }
+        AttrType::Pad { len: Some(len) } => {
+            m.off += len;
+            return;
+        }
         AttrType::Binary {
             r#struct: None,
             len: Some(len),
@@ -315,6 +316,7 @@ pub fn gen_struct(tokens: &mut TokenStream, spec: &Spec, name: &str, members: &[
         bit_off: 0,
         last_bit_type: None,
         alignment: 1,
+        derive_debug: false,
     };
 
     let mut inner = TokenStream::new();
