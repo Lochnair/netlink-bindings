@@ -192,6 +192,10 @@ fn main() {
         tokens.extend(quote! {
             pub const PROTONUM: u16 = #protonum;
         });
+    } else if spec.name == "nlctrl" {
+        tokens.extend(quote! {
+            pub const PROTONUM: u16 = 0x10;
+        });
     }
     tokens.extend(gen_defs(&spec));
     for def in &spec.definitions {

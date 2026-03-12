@@ -620,7 +620,6 @@ pub struct Spec {
     pub version: Option<u8>,
     #[serde(default = "default_protocol")]
     pub protocol: Option<String>,
-    #[allow(unused)]
     pub protonum: Option<u16>,
     pub doc: String,
 
