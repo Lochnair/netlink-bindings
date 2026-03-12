@@ -27,11 +27,6 @@ pub fn gen_ops(tokens: &mut TokenStream, spec: &Spec, ctx: &mut Context) {
     let mut request_names = Vec::new();
 
     for op in &spec.operations.list {
-        if op.mcgrp.is_some() && op.r#do.is_none() && op.dump.is_none() {
-            println!("{WARNING} Multicast notifications are yet to be implemented");
-            continue;
-        }
-
         gen_op(tokens, spec, ctx, op, &mut request_names);
     }
 

@@ -491,17 +491,15 @@ pub struct OperationSpec {
     pub no_ack: bool,
 
     /// Name of the command sharing the reply type with this notification.
-    #[allow(unused)]
     pub notify: Option<String>,
     /// Explicit list of the attributes for the notification.
-    #[allow(unused)]
     pub event: Option<NotifyEvent>,
     /// Name of the multicast group generating given notification.
-    #[allow(unused)]
     pub mcgrp: Option<String>,
 
-    #[allow(unused)]
-    pub flags: Option<Vec<String>>,
+    #[serde(default)]
+    pub flags: Vec<String>,
+
     /// Kernel attribute validation flags.
     #[allow(unused)]
     pub dont_validate: Option<Vec<KernelValidationFlag>>,
@@ -545,33 +543,22 @@ pub struct Operations {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
-pub enum CommandFlag {
-    AdminPerm,
-    UnsAdminPerm,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(deny_unknown_fields)]
-#[serde(rename_all = "kebab-case")]
 pub struct MulticastGroup {
     /// The name for the group, used to form the define and the value of the
     /// define.
-    #[allow(unused)]
     pub name: String,
+    #[serde(default)]
+    pub flags: Vec<String>,
+    pub value: Option<u64>,
     /// Override for the name of the define in C uAPI.
     #[allow(unused)]
     pub c_define_name: Option<String>,
-    #[allow(unused)]
-    pub flags: Option<Vec<CommandFlag>>,
-    #[allow(unused)]
-    pub value: Option<u64>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub struct MulticastGroups {
-    #[allow(unused)]
     pub list: Vec<MulticastGroup>,
 }
 

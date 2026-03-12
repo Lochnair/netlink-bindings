@@ -18,6 +18,7 @@ mod gen_debug_impl;
 mod gen_defs;
 mod gen_iterable;
 mod gen_lookup;
+mod gen_notif;
 mod gen_ops;
 mod gen_request_impl;
 mod gen_reverse_lookup;
@@ -31,6 +32,7 @@ use crate::{
     gen_attrs::gen_attrsets,
     gen_cstruct::gen_cstruct,
     gen_defs::gen_defs,
+    gen_notif::gen_notifs,
     gen_ops::gen_ops,
     gen_struct::gen_struct,
     gen_writable::gen_writable,
@@ -213,6 +215,7 @@ fn main() {
     if !args.no_writable {
         tokens.extend(gen_writable(&spec, &mut ctx));
     }
+    gen_notifs(&mut tokens, &spec, &mut ctx);
     if !args.no_operations {
         gen_ops(&mut tokens, &spec, &mut ctx);
     }
