@@ -78,10 +78,8 @@ pub fn doc_attr(attr: &AttrProp, mut write: impl FnMut(&str)) {
             "(enum)"
         };
 
-        docs.push(format!(
-            "Associated type: {:?} {comment}",
-            kebab_to_type(r#enum)
-        ));
+        let enum_type = kebab_to_type(r#enum);
+        docs.push(format!("Associated type: [`{enum_type}`] {comment}",));
     };
 
     if let Some(true) = &attr.multi_attr {
