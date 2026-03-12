@@ -5,12 +5,11 @@ use quote::{format_ident, quote, ToTokens};
 use syn::Ident;
 
 use crate::{
-    gen_cstruct::gen_cstruct,
     gen_ops::OpHeader,
-    gen_struct::{gen_struct, gen_struct_len, struct_type},
+    gen_struct::{gen_struct_len, struct_type},
     gen_sub_message::{self, SelectorType},
     gen_utils::{doc_attr, kebab_to_rust, kebab_to_type},
-    parse_spec::{AttrProp, AttrSet, AttrType, ByteOrder, DefType, IndexedArrayType, Spec},
+    parse_spec::{AttrProp, AttrSet, AttrType, ByteOrder, IndexedArrayType, Spec},
     Context,
 };
 
@@ -40,18 +39,6 @@ pub fn gen_writable(spec: &Spec, ctx: &mut Context) -> TokenStream {
 
     for set in &spec.attribute_sets {
         gen_writable_attrset(&mut tokens, ctx, spec, set, None, false);
-    }
-
-    for def in &spec.definitions {
-        let DefType::Struct { members, .. } = &def.def else {
-            continue;
-        };
-
-        match spec.experimental.struct_type.as_ref().map(|s| s.as_str()) {
-            None | Some("buf") => gen_struct(&mut tokens, spec, &def.name, members),
-            Some("cstruct") => gen_cstruct(&mut tokens, spec, &def.name, members),
-            t => panic!("Unknown rfc struct type: {t:?}"),
-        }
     }
 
     tokens

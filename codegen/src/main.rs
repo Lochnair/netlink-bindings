@@ -28,8 +28,13 @@ mod gen_writable;
 mod parse_spec;
 
 use crate::{
-    gen_attrs::gen_attrsets, gen_defs::gen_defs, gen_ops::gen_ops, gen_writable::gen_writable,
-    parse_spec::Spec,
+    gen_attrs::gen_attrsets,
+    gen_cstruct::gen_cstruct,
+    gen_defs::gen_defs,
+    gen_ops::gen_ops,
+    gen_struct::gen_struct,
+    gen_writable::gen_writable,
+    parse_spec::{DefType, Spec},
 };
 
 /// ANSI escapes to show bold yellow "warning:"
@@ -188,6 +193,17 @@ fn main() {
         });
     }
     tokens.extend(gen_defs(&spec));
+    for def in &spec.definitions {
+        let DefType::Struct { members, .. } = &def.def else {
+            continue;
+        };
+
+        match spec.experimental.struct_type.as_ref().map(|s| s.as_str()) {
+            None | Some("buf") => gen_struct(&mut tokens, &spec, &def.name, members),
+            Some("cstruct") => gen_cstruct(&mut tokens, &spec, &def.name, members),
+            t => panic!("Unknown rfc struct type: {t:?}"),
+        }
+    }
     tokens.extend(gen_attrsets(&spec, &mut ctx));
     if !args.no_writable {
         tokens.extend(gen_writable(&spec, &mut ctx));
