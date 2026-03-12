@@ -618,6 +618,8 @@ fn default_protocol() -> Option<String> {
 pub struct Spec {
     #[allow(unused)]
     pub name: String,
+    #[allow(unused)]
+    pub version: Option<u8>,
     #[serde(default = "default_protocol")]
     pub protocol: Option<String>,
     #[allow(unused)]

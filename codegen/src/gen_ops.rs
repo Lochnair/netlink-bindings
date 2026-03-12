@@ -136,10 +136,9 @@ pub fn gen_op(
                 let cmd = get_value(ops, op) as u8;
                 let cmd = quote!(#cmd);
                 // The expected use for genlmsghdr.version was to allow versioning of the
-                // APIs provided by the subsystems. No subsystem to date made significant use
-                // of this field, so setting it to 1 seems like a safe bet.
+                // APIs provided by the subsystems.
                 // From: https://docs.kernel.org/userspace-api/netlink/intro.html#generic-netlink
-                let version: u8 = 1;
+                let version: u8 = spec.version.unwrap_or(1);
                 Box::new(move |header: &Ident, value_expr: Option<&TokenStream>| {
                     assert_eq!(needs_value, value_expr.is_some());
                     let value = value_expr.unwrap_or(&cmd);
