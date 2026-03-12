@@ -181,6 +181,13 @@ but manually encoding/decoding netlink messages.
 traffic control queueing discipline.
 - [tcp-rtt](./netlink-socket/examples/tcp-rtt.rs) - Dump socket information,
 including RTT of a TCP socket.
+- [multicast-simple](./netlink-socket/examples/multicast-simple.rs) - Listen
+for multicast notifications emitted when a network device is created, changed,
+or deleted.
+- [multicast-generic](./netlink-socket/examples/multicast-generic.rs) - Listen
+for all multicast notifications on a generic netlink subsystem.
+- [multicast-raw](./netlink-socket/examples/multicast-rtnetlink.rs) - Listen
+for multicast notifications on legacy rtnetlink subsystem.
 
 ## Attribute encoding
 

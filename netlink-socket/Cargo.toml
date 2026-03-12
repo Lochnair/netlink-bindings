@@ -44,6 +44,18 @@ required-features = [ "netlink-bindings/tc", "netlink-bindings/rt-link" ]
 name = "tcp-rtt"
 required-features = [ "netlink-bindings/inet-diag" ]
 
+[[example]]
+name = "multicast-simple"
+required-features = [ "netlink-bindings/netdev", "netlink-bindings/rt-link" ]
+
+[[example]]
+name = "multicast-generic"
+required-features = [ "netlink-bindings/netdev", "netlink-bindings/rt-link" ]
+
+[[example]]
+name = "multicast-rtnetlink"
+required-features = [ "netlink-bindings/rt-link" ]
+
 [features]
 async = []
 tokio = [ "async", "dep:tokio"]
