@@ -19,5 +19,4 @@ serde_yaml = "0.9.34-deprecated"
 quote = "1"
 proc-macro2 = "1"
 syn = "2"
-
 argh = { version = "0", default-features = false, features = [ "help" ] }

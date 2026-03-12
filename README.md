@@ -38,8 +38,8 @@ arrays, sub messages.
 
 ```toml
 [dependencies]
-netlink-bindings = { version = "0.2", features = [ "wireguard" ] }
-netlink-socket2 = { version = "0.2", features = [ ] }
+netlink-bindings = { version = "0.3", features = [ "wireguard" ] }
+netlink-socket2 = { version = "0.3", features = [ ] }
 ```
 
 ## Making requests
