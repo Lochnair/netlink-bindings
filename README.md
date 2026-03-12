@@ -62,7 +62,7 @@ let ifname = "wg0";
 
 // All available requests are conveniently accessible using `family::Request`
 let mut request = wireguard::Request::new()
-    .op_get_device_dump_request();
+    .op_get_device_dump();
 
 // Add contents to the request
 request.encode()
@@ -122,7 +122,7 @@ let header = rt_addr::Ifaddrmsg {
 
 let mut request = rt_addr::Request::new()
     .set_change() // Don't fail if address already assigned
-    .op_newaddr_do_request(&header);
+    .op_newaddr_do(&header);
 
 request.encode()
     .push_local(addr);
@@ -152,7 +152,7 @@ use netlink_socket2::NetlinkSocket;
 let mut sock = NetlinkSocket::new();
 
 let mut request = wireguard::Request::new()
-    .op_get_device_dump_request();
+    .op_get_device_dump();
 
 request.encode()
     .push_ifname_bytes(b"wg0");
@@ -191,12 +191,12 @@ prefixed with `Push`. For example, directly encoding a "do" request of
 "set-device" operation looks like the following:
 
 ```rust
-use netlink_bindings::wireguard::{PushOpSetDeviceDoRequest, WgdeviceFlags};
+use netlink_bindings::wireguard::{OpSetDeviceDo, WgdeviceFlags};
 
 let mut vec = Vec::new();
 
 // Do set-device (request)
-PushOpSetDeviceDoRequest::new(&mut vec)
+OpSetDeviceDo::encode_request(&mut vec)
     .push_ifname(c"wg0") // &CStr
     // .push_ifname_bytes("wg0".as_bytes()) // &[u8]
     .push_flags(WgdeviceFlags::ReplacePeers as u32) // Remove existing peers
@@ -229,12 +229,13 @@ it's frame. The low-level interface is based on iterators, with nice-to-use
 wrapper on top.
 
 ```rust,should_panic
-use netlink_bindings::wireguard::OpGetDeviceDumpReply;
+use netlink_bindings::traits::NetlinkRequest;
+use netlink_bindings::wireguard::OpGetDeviceDump;
 
 let buf = vec![/* ... */];
 
 // Dump get-device (reply)
-let attrs = OpGetDeviceDumpReply::new(&buf);
+let attrs = OpGetDeviceDump::decode_reply(&buf);
 
 println!("Ifname: {:?}", attrs.get_ifname().unwrap()); // &CStr
 for peer in attrs.get_peers().unwrap() {
@@ -261,14 +262,15 @@ in case of a nested attribute set. But as you can see, using it directly
 quickly turns very ugly.
 
 ```rust
-use netlink_bindings::wireguard::{OpGetDeviceDumpReply, Wgpeer};
+use netlink_bindings::traits::NetlinkRequest;
+use netlink_bindings::wireguard::{OpGetDeviceDump, Wgdevice, Wgpeer};
 
 let buf = vec![/* ... */];
 
-for attr in OpGetDeviceDumpReply::new(&buf) {
+for attr in OpGetDeviceDump::decode_reply(&buf) {
     match attr.unwrap() {
-        OpGetDeviceDumpReply::Ifname(n) => println!("Ifname: {n:?}"),
-        OpGetDeviceDumpReply::Peers(iter) => {
+        Wgdevice::Ifname(n) => println!("Ifname: {n:?}"),
+        Wgdevice::Peers(iter) => {
             for entry in iter {
                 for attr in entry.unwrap() {
                     match attr.unwrap() {
