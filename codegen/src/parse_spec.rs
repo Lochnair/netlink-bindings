@@ -45,6 +45,10 @@ pub enum EnumEntry {
     },
 }
 
+fn default_true() -> bool {
+    true
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(tag = "type")]
@@ -76,7 +80,7 @@ pub enum DefType {
 
         /// Controls whether decoder should pad missing bytes with zeros or
         /// truncate when needed.
-        #[serde(default)]
+        #[serde(default = "default_true")]
         shrinkable: bool,
     },
     /// defines an integer enumeration, with values for each entry occupying a
