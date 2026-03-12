@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
 use crate::{
-    gen_defs::GenImplStruct,
+    gen_attrs::GenAttrs,
     gen_iterable::iterable_name,
     gen_ops::OpHeader,
     gen_struct::struct_type,
@@ -15,7 +15,7 @@ pub fn gen_lookup(
     tokens: &mut TokenStream,
     spec: &Spec,
     _ctx: &mut Context,
-    m: &GenImplStruct,
+    m: &GenAttrs,
     set: &AttrSet,
     fixed_header: Option<&OpHeader>,
 ) {

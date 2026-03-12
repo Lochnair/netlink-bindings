@@ -15,7 +15,6 @@ pub struct GenImplStruct {
     pub bit_off: usize,
     pub last_bit_type: Option<(CBitFieldType, usize, Ident)>,
     pub alignment: usize,
-    pub lifetime_needed: bool,
     pub type_name: Ident,
 }
 

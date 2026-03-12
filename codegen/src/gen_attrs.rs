@@ -5,7 +5,6 @@ use syn::Ident;
 
 use crate::{
     gen_debug_impl::gen_introspect_attrs,
-    gen_defs::GenImplStruct,
     gen_iterable::{array_iterable_name, gen_iterable_attrs, iterable_name},
     gen_ops::OpHeader,
     gen_struct::struct_type,
@@ -29,6 +28,12 @@ pub fn gen_attrsets(spec: &Spec, ctx: &mut Context) -> TokenStream {
     tokens
 }
 
+#[derive(Debug)]
+pub struct GenAttrs {
+    pub type_name: Ident,
+    pub lifetime_needed: bool,
+}
+
 pub fn gen_attrset(
     tokens: &mut TokenStream,
     spec: &Spec,
@@ -41,14 +46,18 @@ pub fn gen_attrset(
     let mut variants = TokenStream::new();
     let mut shorthands = TokenStream::new();
 
-    let mut m = GenImplStruct {
-        off: 0,
-        bit_off: 0,
-        last_bit_type: None,
-        alignment: 0,
+    let mut m = GenAttrs {
         lifetime_needed: false,
         type_name: type_name.clone(),
     };
+
+    for attr in &set.attributes {
+        if matches!(attr.r#type, AttrType::Unused) {
+            continue;
+        }
+        let (_, lifetime_needed) = gen_attr_type(spec, attr);
+        m.lifetime_needed |= lifetime_needed;
+    }
 
     let mut visited = HashSet::new();
     for attr in &set.attributes {
@@ -90,7 +99,7 @@ pub fn gen_attr(
     variants: &mut TokenStream,
     shorthands: &mut TokenStream,
     spec: &Spec,
-    m: &mut GenImplStruct,
+    m: &mut GenAttrs,
     attr: &AttrProp,
 ) {
     if matches!(attr.r#type, AttrType::Unused) {
@@ -101,9 +110,7 @@ pub fn gen_attr(
 
     let variant_name = sanitize_ident(&kebab_to_type(&attr.name));
 
-    let (rust_type, lifetime_needed) = gen_attr_type(spec, attr);
-
-    m.lifetime_needed |= lifetime_needed;
+    let (rust_type, _) = gen_attr_type(spec, attr);
 
     variants.extend(quote! {
         #variant_name(#rust_type),

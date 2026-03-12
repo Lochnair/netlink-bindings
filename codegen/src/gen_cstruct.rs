@@ -59,7 +59,6 @@ pub fn gen_cstruct(tokens: &mut TokenStream, spec: &Spec, name: &str, members: &
         bit_off: 0,
         last_bit_type: None,
         alignment: 1,
-        lifetime_needed: false,
         type_name: type_name.clone(),
     };
 
@@ -227,11 +226,6 @@ pub fn gen_cstruct_field(
         || matches!(attr.r#type, AttrType::CBitField { .. })
     {
         getter = quote!(#getter_name())
-    }
-
-    if let AttrType::Pad { len: Some(len) } = &attr.r#type {
-        m.off += len;
-        return;
     }
 
     let encode_ord = match attr.byte_order {

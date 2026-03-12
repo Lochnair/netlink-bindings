@@ -3,7 +3,7 @@ use quote::{format_ident, quote};
 
 use crate::{
     gen_attrs::gen_attr_type_name,
-    gen_defs::GenImplStruct,
+    gen_attrs::GenAttrs,
     gen_iterable::{array_iterable_name, iterable_name},
     gen_struct::struct_type,
     gen_utils::{kebab_to_type, lifetime_needed_attrs, sanitize_ident},
@@ -46,7 +46,7 @@ pub fn gen_introspect_attrs(
     tokens: &mut TokenStream,
     spec: &Spec,
     ctx: &mut Context,
-    m: &GenImplStruct,
+    m: &GenAttrs,
     set: &AttrSet,
 ) {
     let mut variants = TokenStream::new();

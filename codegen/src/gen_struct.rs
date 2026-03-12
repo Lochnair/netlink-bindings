@@ -315,7 +315,6 @@ pub fn gen_struct(tokens: &mut TokenStream, spec: &Spec, name: &str, members: &[
         bit_off: 0,
         last_bit_type: None,
         alignment: 1,
-        lifetime_needed: false,
         type_name: type_name.clone(),
     };
 

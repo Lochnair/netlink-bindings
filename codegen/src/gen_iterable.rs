@@ -3,8 +3,8 @@ use quote::{format_ident, quote};
 use syn::Ident;
 
 use crate::{
+    gen_attrs::GenAttrs,
     gen_attrs::{gen_attr_type, gen_attr_type_name},
-    gen_defs::GenImplStruct,
     gen_ops::OpHeader,
     gen_struct::struct_type,
     gen_sub_message::{self},
@@ -27,7 +27,7 @@ pub fn gen_iterable_attrs(
     tokens: &mut TokenStream,
     spec: &Spec,
     ctx: &mut Context,
-    m: &mut GenImplStruct,
+    m: &mut GenAttrs,
     set: &AttrSet,
     fixed_header: Option<&OpHeader>,
 ) {
