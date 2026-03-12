@@ -91,7 +91,7 @@ pub fn gen_introspect_attrs(
                     AttrType::Binary { r#struct: Some(s), .. }
                         if s == "builtin-bitfield32" =>
                     {
-                        quote! { &#formatter(#val_name.value().into(), #from_val) }
+                        quote! { &#formatter(#val_name.value.into(), #from_val) }
                     },
                     _ => quote! { &#formatter(#val_name.into(), #from_val) },
                 };

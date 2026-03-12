@@ -298,7 +298,7 @@ pub fn gen_reverse_lookup(args: &CliArgs, output: &Path) {
         use std::fmt::Debug;
         use std::cell::Cell;
         use netlink_bindings::{
-            builtin::PushBuiltinNfgenmsg,
+            builtin::BuiltinNfgenmsg,
             traits::{NetlinkRequest, Protocol},
         };
 

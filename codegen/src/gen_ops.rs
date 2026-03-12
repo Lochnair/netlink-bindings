@@ -144,11 +144,8 @@ pub fn gen_op(
                     assert_eq!(needs_value, value_expr.is_some());
                     let value = value_expr.unwrap_or(&cmd);
                     quote! {
-                        #header.set_cmd(#value);
-                        #header.set_version(#version);
-
-                        // #header.cmd = #value;
-                        // #header.version = #version;
+                        #header.cmd = #value;
+                        #header.version = #version;
                     }
                 }) as Box<dyn Fn(&Ident, Option<&TokenStream>) -> TokenStream>
             };

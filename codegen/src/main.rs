@@ -173,7 +173,7 @@ fn main() {
     });
     if spec.name != "builtin" {
         tokens.extend(quote! {
-            use crate::builtin::{PushBuiltinBitfield32, PushBuiltinNfgenmsg, PushDummy, PushNlmsghdr};
+            use crate::builtin::{BuiltinBitfield32, BuiltinNfgenmsg, Nlmsghdr, PushDummy};
         });
     }
     let protoname = CString::new(spec.name.clone()).unwrap();

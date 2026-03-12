@@ -570,7 +570,7 @@ pub fn gen_request_chained(tokens: &mut TokenStream, requests: &[OpInfo]) {
                 self.update_header();
 
                 self.last_header_offset = self.buf().len();
-                self.buf_mut().extend_from_slice(PushNlmsghdr::new().as_slice());
+                self.buf_mut().extend_from_slice(Nlmsghdr::new().as_slice());
 
                 let mut request = Request::new_extend(self.buf.buf_mut());
 
@@ -592,7 +592,7 @@ pub fn gen_request_chained(tokens: &mut TokenStream, requests: &[OpInfo]) {
                 let Some(RequestInfo { protocol, flags, name, lookup }) = self.last_kind else {
                     if !self.buf().is_empty() {
                         // Remove reserved space if request wasn't written
-                        assert_eq!(self.last_header_offset + PushNlmsghdr::len(), self.buf().len());
+                        assert_eq!(self.last_header_offset + Nlmsghdr::len(), self.buf().len());
                         self.buf.buf_mut().truncate(self.last_header_offset);
                     }
                     return;
@@ -611,19 +611,13 @@ pub fn gen_request_chained(tokens: &mut TokenStream, requests: &[OpInfo]) {
                 let buf = self.buf_mut();
                 align(buf);
 
-                let mut header = PushNlmsghdr::new();
-                header.set_len((buf.len() - header_offset) as u32);
-                header.set_type(request_type);
-                header.set_flags(flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16);
-                header.set_seq(seq);
-
-                // let mut header = PushNlmsghdr {
-                //     len: (buf.len() - header_offset) as u32,
-                //     r#type: request_type,
-                //     flags: flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16,
-                //     seq,
-                //     pid: 0,
-                // };
+                let header = Nlmsghdr {
+                    len: (buf.len() - header_offset) as u32,
+                    r#type: request_type,
+                    flags: flags | consts::NLM_F_REQUEST as u16 | consts::NLM_F_ACK as u16,
+                    seq,
+                    pid: 0,
+                };
 
                 buf[header_offset..(header_offset+16)].clone_from_slice(header.as_slice());
             }
