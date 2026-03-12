@@ -5,7 +5,7 @@ protocol: netlink-raw
 uapi-header: linux/rtnetlink.h
 protonum: 0
 
-doc:
+doc: >-
   Address configuration over rtnetlink.
 
 definitions:
@@ -96,8 +96,9 @@ attribute-sets:
         type: string
       -
         name: broadcast
-        type: binary
-        display-hint: ipv4-or-v6
+        type: u32
+        byte-order: big-endian
+        display-hint: ipv4
       -
         name: anycast
         type: binary
@@ -141,7 +142,6 @@ operations:
             - label
             - local
             - cacheinfo
-            - flags
     -
       name: deladdr
       doc: Remove address

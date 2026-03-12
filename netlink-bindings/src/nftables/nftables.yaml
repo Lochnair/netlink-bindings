@@ -4,7 +4,7 @@ name: nftables
 protocol: netlink-raw
 protonum: 12
 
-doc: |
+doc: >-
   Netfilter nftables configuration over netlink.
 
 definitions:
@@ -68,20 +68,19 @@ definitions:
     entries:
       -
         name: mask-xor  # aka bool (old name)
-        doc: |
-          mask-and-xor operation used to implement NOT, AND, OR and XOR
-            dreg = (sreg & mask) ^ xor
-          with these mask and xor values:
-                    mask    xor
-            NOT:    1       1
-            OR:     ~x      x
-            XOR:    1       x
-            AND:    x       0
-      - lshift
-      - rshift
-      - and
-      - or
-      - xor
+        doc: >-
+          mask-and-xor operation used to implement NOT, AND, OR and XOR boolean
+          operations
+      -
+        name: lshift
+      -
+        name: rshift
+      -
+        name: and
+      -
+        name: or
+      -
+        name: xor
   -
     name: cmp-ops
     type: enum
@@ -146,7 +145,6 @@ definitions:
       - concat
       - expr
   -
-    # Defined in include/uapi/linux/netfilter/nf_tables.h as nft_set_elem_flags
     name: set-elem-flags
     type: flags
     entries:
@@ -246,7 +244,6 @@ definitions:
       - tcp-rst
       - icmpx-unreach
   -
-    # Defined in include/linux/netfilter/nf_tables.h
     name: reject-inet-code
     doc: These codes are mapped to real ICMP and ICMPv6 codes.
     type: enum
@@ -256,7 +253,6 @@ definitions:
       - icmpx-host-unreach
       - icmpx-admin-prohibited
   -
-    # Defined in include/linux/netfilter/nf_tables.h
     name: payload-base
     type: enum
     entries:
@@ -266,7 +262,6 @@ definitions:
       - inner-header
       - tun-header
   -
-    # Defined in include/linux/netfilter/nf_tables.h
     name: range-ops
     doc: Range operator
     type: enum
@@ -274,7 +269,6 @@ definitions:
       - eq
       - neq
   -
-    # Defined in include/linux/netfilter/nf_tables.h
     name: registers
     doc: |
       nf_tables registers.
@@ -285,31 +279,50 @@ definitions:
       NFT_REG32_00 - NFT_REG32_15.
     type: enum
     entries:
-      - reg-verdict
-      - reg-1
-      - reg-2
-      - reg-3
-      - reg-4
+      -
+        name: reg-verdict
+      -
+        name: reg-1
+      -
+        name: reg-2
+      -
+        name: reg-3
+      -
+        name: reg-4
       -
         name: reg32-00
         value: 8
-      - reg32-01
-      - reg32-02
-      - reg32-03
-      - reg32-04
-      - reg32-05
-      - reg32-06
-      - reg32-07
-      - reg32-08
-      - reg32-09
-      - reg32-10
-      - reg32-11
-      - reg32-12
-      - reg32-13
-      - reg32-14
-      - reg32-15
+      -
+        name: reg32-01
+      -
+        name: reg32-02
+      -
+        name: reg32-03
+      -
+        name: reg32-04
+      -
+        name: reg32-05
+      -
+        name: reg32-06
+      -
+        name: reg32-07
+      -
+        name: reg32-08
+      -
+        name: reg32-09
+      -
+        name: reg32-10
+      -
+        name: reg32-11
+      -
+        name: reg32-12
+      -
+        name: reg32-13
+      -
+        name: reg32-14
+      -
+        name: reg32-15
   -
-    # Defined in include/linux/netfilter/nf_tables.h
     name: numgen-types
     type: enum
     entries:
@@ -348,9 +361,9 @@ definitions:
         name: audit
         doc: enabling audit logging
   -
-    # Defined in include/uapi/linux/netfilter/nf_log.h
     name: log-flags
     doc: nf_tables log flags
+    header: linux/netfilter/nf_log.h
     type: flags
     entries:
       -
@@ -374,7 +387,6 @@ definitions:
 
 attribute-sets:
   -
-    # Defined in include/linux/netfilter/nf_tables.h
     name: log-attrs
     doc: log expression netlink attributes
     attributes:
@@ -411,7 +423,6 @@ attribute-sets:
         enum: log-flags
         byte-order: big-endian
   -
-    # Defined in include/linux/netfilter/nf_tables.h
     name: numgen-attrs
     doc: nf_tables number generator expression netlink attributes
     attributes:
@@ -437,9 +448,9 @@ attribute-sets:
         type: u32
         byte-order: big-endian
   -
-    # Defined in net/netfilter/nft_range.c
     name: range-attrs
     attributes:
+      # Mentioned in net/netfilter/nft_range.c
       -
         name: sreg
         doc: source register of data to compare
@@ -453,7 +464,7 @@ attribute-sets:
         byte-order: big-endian
         enum: range-ops
         checks:
-          max: 256
+          max: 255
       -
         name: from-data
         doc: data range from
@@ -845,9 +856,7 @@ attribute-sets:
         doc: data value of mapping
       -
         name: flags
-        type: u32
-        enum: set-elem-flags
-        byte-order: big-endian
+        type: binary
         doc: bitmask of nft_set_elem_flags
       -
         name: timeout
@@ -1022,8 +1031,23 @@ attribute-sets:
         type: nest
         nested-attributes: hook-dev-attrs
   -
-    # Defined in include/uapi/linux/netfilter/nf_tables.h
     name: expr-bitwise-attrs
+    doc: |
+      The bitwise expression supports boolean and shift operations. It
+      implements the boolean operations by performing the following
+      operation::
+
+          dreg = (sreg & mask) ^ xor
+
+          with these mask and xor values:
+
+          op      mask    xor
+          ----    ----    ---
+          NOT:     1       1
+          OR:     ~x       x
+          XOR:     1       x
+          AND:     x       0
+
     attributes:
       -
         name: sreg
@@ -1056,10 +1080,6 @@ attribute-sets:
         name: data
         type: nest
         nested-attributes: data-attrs
-      -
-        name: sreg2
-        type: u32
-        byte-order: big-endian
   -
     name: expr-cmp-attrs
     attributes:
@@ -1077,7 +1097,6 @@ attribute-sets:
         type: nest
         nested-attributes: data-attrs
   -
-    # Defined as nft_data_attributes in include/linux/netfilter/nf_tables.h
     name: data-attrs
     attributes:
       -
@@ -1203,7 +1222,6 @@ attribute-sets:
         byte-order: big-endian
         enum: lookup-flags
   -
-    # Defined as nft_masq_attributes in include/uapi/linux/netfilter/nf_tables.h
     name: expr-masq-attrs
     attributes:
       -
@@ -1272,7 +1290,6 @@ attribute-sets:
         enum: nat-range-flags
         enum-as-flags: true
   -
-    # Defined as nft_payload_attributes in include/linux/netfilter/nf_tables.h
     name: expr-payload-attrs
     doc: nf_tables payload expression netlink attributes
     attributes:
@@ -1329,13 +1346,7 @@ attribute-sets:
         enum: reject-types
       -
         name: icmp-code
-        doc: |
-          Meaning of this attribute depends on the value of `type`:
-            - icmp-unreach  => raw icmp code
-            - tcp-rst       => ignored
-            - icmpx-unreach => mapped icmp code, see reject-inet-code enum
         type: u8
-        enum: reject-inet-code
   -
     name: expr-target-attrs
     attributes:
@@ -1389,24 +1400,8 @@ attribute-sets:
         byte-order: big-endian
         doc: id of object map
   -
-    # Defined in include/uapi/linux/netfilter/nf_tables_compat.h
     name: compat-target-attrs
-    attributes:
-      -
-        name: name
-        type: string
-        checks:
-          max-len: 32
-      -
-        name: rev
-        type: u32
-        byte-order: big-endian
-      -
-        name: info
-        type: binary
-  -
-    # Defined in include/uapi/linux/netfilter/nf_tables_compat.h
-    name: compat-match-attrs
+    header: linux/netfilter/nf_tables_compat.h
     attributes:
       -
         name: name
@@ -1423,8 +1418,26 @@ attribute-sets:
         name: info
         type: binary
   -
-    # Defined in include/uapi/linux/netfilter/nf_tables_compat.h
+    name: compat-match-attrs
+    header: linux/netfilter/nf_tables_compat.h
+    attributes:
+      -
+        name: name
+        type: string
+        checks:
+          max-len: 32
+      -
+        name: rev
+        type: u32
+        byte-order: big-endian
+        checks:
+          max: 255
+      -
+        name: info
+        type: binary
+  -
     name: compat-attrs
+    header: linux/netfilter/nf_tables_compat.h
     attributes:
       -
         name: name
@@ -1468,14 +1481,23 @@ sub-messages:
         value: immediate
         attribute-set: expr-immediate-attrs
       -
+        value: log
+        attribute-set: log-attrs
+      -
         value: lookup
         attribute-set: expr-lookup-attrs
+      -
+        value: match
+        attribute-set: compat-match-attrs
       -
         value: meta
         attribute-set: expr-meta-attrs
       -
         value: nat
         attribute-set: expr-nat-attrs
+      -
+        value: numgen
+        attribute-set: numgen-attrs
       -
         value: objref
         attribute-set: expr-objref-attrs
@@ -1486,6 +1508,9 @@ sub-messages:
         value: quota
         attribute-set: quota-attrs
       -
+        value: range
+        attribute-set: range-attrs
+      -
         value: reject
         attribute-set: expr-reject-attrs
       -
@@ -1494,21 +1519,6 @@ sub-messages:
       -
         value: tproxy
         attribute-set: expr-tproxy-attrs
-      -
-        value: match
-        attribute-set: compat-match-attrs
-      -
-        value: range
-        attribute-set: range-attrs
-      -
-        value: numgen
-        attribute-set: numgen-attrs
-      -
-        value: log
-        attribute-set: log-attrs
-      -
-        value: masq
-        attribute-set: expr-masq-attrs
         # There're more sub-messages to go:
         #   grep -A10 nft_expr_type
         # and look for .name\s*=\s*"..."
@@ -1627,11 +1637,7 @@ operations:
             - hook
             - name
             - counters
-            - policy
             # Mentioned in nf_tables_addchain()
-            - hook
-            - name
-            - counters
             - userdata
             # Mentioned in nft_chain_parse_hook()
             - type
@@ -1771,7 +1777,6 @@ operations:
             - chain
             - handle
             - id
-            - expressions
     -
       name: destroyrule
       doc: |
@@ -1797,7 +1802,6 @@ operations:
             - key-len
             - id
             - key-type
-            - key-len
             - flags
             - data-type
             - data-len
@@ -1806,8 +1810,6 @@ operations:
             - gc-interval
             - policy
             - desc
-            - table
-            - name
             - userdata
     -
       name: getset
