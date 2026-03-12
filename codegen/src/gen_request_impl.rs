@@ -375,9 +375,7 @@ pub fn gen_request_wrapper(
         };
     };
 
-    let proto = if let Some(protonum) = spec.protonum {
-        quote!(Protocol::Raw { protonum: #protonum, request_type: #request_value })
-    } else if spec.name == "nlctrl" {
+    let proto = if spec.name == "nlctrl" {
         // Generic control socket is special
         quote!(Protocol::Raw {
             protonum: 0x10,
@@ -386,6 +384,8 @@ pub fn gen_request_wrapper(
     } else if spec.protocol.as_ref().unwrap().starts_with("genetlink") {
         let proto = &spec.name;
         quote!(Protocol::Generic(#proto.as_bytes()))
+    } else if let Some(protonum) = spec.protonum {
+        quote!(Protocol::Raw { protonum: #protonum, request_type: #request_value })
     } else {
         panic!("The protocol is not genetlink and the protonum isn't specified")
     };
