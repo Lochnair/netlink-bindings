@@ -359,8 +359,13 @@ $ ~/.cargo/bin/reverse-lookup --help
 
 ## Contribute
 
+See [./CONTRIBUTING.md](./CONTRIBUTING.md) for information on how to work with
+this repo, its structure, codegen stuff, etc.
+
 If your want to contribute, you can, for example:
 
+- Just use netlink-bindings. If you encounter a shortcoming of the current API, report it.
+- Write straightforward higher-level abstractions on top of netlink-bindings.
 - Add testing: collect netlink messages and check that they are parsed
 correctly. See wireguard [tests](./netlink-bindings/src/wireguard/tests.rs) as
 an example. Additional [examples](./netlink-socket/examples) are also very
