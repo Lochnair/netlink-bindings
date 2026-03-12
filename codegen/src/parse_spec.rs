@@ -540,7 +540,7 @@ pub struct Operations {
     /// Fallback to this attribute set in reverse-lookup
     pub fallback_attrs: Option<String>,
     /// Make operation reuse common encoding/decoding types
-    #[serde(default)]
+    #[serde(default = "default_true")]
     pub transparent: bool,
     /// Don't narrow down operation type attributes
     #[serde(default)]
