@@ -383,28 +383,6 @@ $ cargo install --git https://github.com/one-d-wide/netlink-bindings reverse-loo
 $ ~/.cargo/bin/reverse-lookup --help
 ```
 
-## Generate bindings
-
-Update protocol bindings using the yaml description from the protocol
-directory.
-
-```sh
-$ cargo run --bin codegen -- -d ./netlink-bindings/src/wireguard/
-Writing "netlink-bindings/src/wireguard/mod.rs"
-Dumping "netlink-bindings/src/wireguard/wireguard.md"
-Dumping all "netlink-bindings/src/wireguard/wireguard-all.md"
-```
-
-Generate protocol bindings for a new family, copying yaml specification from
-somewhere else.
-
-```sh
-$ cargo run --bin codegen -- -d ./netlink-bindings/src/ linux/Documentation/netlink/specs/wireguard.yaml
-Writing "netlink-bindings/src/wireguard/mod.rs"
-Dumping "netlink-bindings/src/wireguard/wireguard.md"
-Dumping all "netlink-bindings/src/wireguard/wireguard-all.md"
-```
-
 ## To-do
 
 - Testing (for each sensible netlink family and for parsing primitives).
