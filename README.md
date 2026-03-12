@@ -383,16 +383,6 @@ $ cargo install --git https://github.com/one-d-wide/netlink-bindings reverse-loo
 $ ~/.cargo/bin/reverse-lookup --help
 ```
 
-## To-do
-
-- Testing (for each sensible netlink family and for parsing primitives).
-- Simplify codegen logic.
-- Clean up unintentional panics in encoding/decoding.
-- Optimize generated code size, e.g. leave out code encoding kernel replies by
-default.
-- Improve user interface (better error reporting, tooling, etc).
-- Benchmarks, fuzzing.
-
 ## Contribute
 
 If your want to contribute, you can, for example:
