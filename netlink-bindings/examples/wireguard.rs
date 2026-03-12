@@ -4,7 +4,7 @@
 //
 // Run with: `cargo run --example wireguard --features=wireguard,nlctrl`
 
-use netlink_bindings::{builtin::PushNlmsghdr, nlctrl, utils, wireguard};
+use netlink_bindings::{builtin::Nlmsghdr, nlctrl, utils, wireguard};
 
 fn main() {
     let fd = unsafe { libc::socket(libc::AF_NETLINK, libc::SOCK_RAW, libc::NETLINK_GENERIC) };
@@ -25,7 +25,7 @@ fn main() {
     println!("Sending:");
     println!(
         "{:#?}",
-        wireguard::OpGetDeviceDumpRequest::new(&buf[PushNlmsghdr::len()..])
+        wireguard::OpGetDeviceDumpRequest::new(&buf[Nlmsghdr::len()..])
     );
 
     update_netlink_message_lenth(&mut buf);
@@ -37,10 +37,10 @@ fn main() {
 
         let mut buf = &buf[..read];
         while !buf.is_empty() {
-            let reply = PushNlmsghdr::new_from_slice(&buf[..PushNlmsghdr::len()]).unwrap();
-            let frame = &buf[PushNlmsghdr::len()..reply.get_len() as usize];
+            let reply = Nlmsghdr::new_from_slice(&buf[..Nlmsghdr::len()]).unwrap();
+            let frame = &buf[Nlmsghdr::len()..reply.len as usize];
 
-            match reply.get_type() as i32 {
+            match reply.r#type as i32 {
                 libc::NLMSG_DONE => {
                     println!("NLMSG_DONE");
                     println!("DUMP operation succeeded");
@@ -82,17 +82,19 @@ fn main() {
                 }
             }
 
-            buf = &buf[reply.get_len() as usize..];
+            buf = &buf[reply.len as usize..];
         }
     }
 }
 
 fn push_netlink_message_header(buf: &mut Vec<u8>, family_id: u16) {
-    let mut header = PushNlmsghdr::new();
-    header.set_len(0);
-    header.set_type(family_id);
-    header.set_flags(libc::NLM_F_DUMP as u16 | libc::NLM_F_REQUEST as u16 | libc::NLM_F_ACK as u16);
-    header.set_seq(42);
+    let header = Nlmsghdr {
+        len: 0,
+        r#type: family_id,
+        flags: libc::NLM_F_DUMP as u16 | libc::NLM_F_REQUEST as u16 | libc::NLM_F_ACK as u16,
+        seq: 42,
+        pid: 0,
+    };
 
     buf.extend(header.as_slice());
 }
@@ -105,11 +107,13 @@ fn update_netlink_message_lenth(buf: &mut Vec<u8>) {
 fn resolve_family_id(sock: &std::net::UdpSocket, name: &str) -> u16 {
     let mut buf = Vec::new();
 
-    let mut header = PushNlmsghdr::new();
-    header.set_len(0);
-    header.set_type(libc::GENL_ID_CTRL as u16);
-    header.set_flags(libc::NLM_F_REQUEST as u16 | libc::NLM_F_ACK as u16);
-    header.set_seq(1);
+    let header = Nlmsghdr {
+        len: 0,
+        r#type: libc::GENL_ID_CTRL as u16,
+        flags: libc::NLM_F_REQUEST as u16 | libc::NLM_F_ACK as u16,
+        seq: 1,
+        pid: 0,
+    };
 
     buf.extend(header.as_slice());
 
@@ -127,9 +131,9 @@ fn resolve_family_id(sock: &std::net::UdpSocket, name: &str) -> u16 {
 
         let mut buf = &buf[..read];
         while !buf.is_empty() {
-            let reply = PushNlmsghdr::new_from_slice(&buf[..PushNlmsghdr::len()]).unwrap();
+            let reply = Nlmsghdr::new_from_slice(&buf[..Nlmsghdr::len()]).unwrap();
 
-            match reply.get_type() as i32 {
+            match reply.r#type as i32 {
                 libc::NLMSG_ERROR => {
                     let raw_err = utils::parse_i32(&buf[16..20]).unwrap();
                     if raw_err == 0 {
@@ -145,10 +149,10 @@ fn resolve_family_id(sock: &std::net::UdpSocket, name: &str) -> u16 {
                 _ => {}
             }
 
-            let attrs = nlctrl::OpGetfamilyDoReply::new(&buf[PushNlmsghdr::len()..]);
+            let attrs = nlctrl::OpGetfamilyDoReply::new(&buf[Nlmsghdr::len()..]);
             family_id = attrs.get_family_id().ok();
 
-            buf = &buf[reply.get_len() as usize..];
+            buf = &buf[reply.len as usize..];
         }
     }
 }
