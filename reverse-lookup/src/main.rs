@@ -6,7 +6,7 @@ use std::{
 };
 
 use netlink_bindings::{
-    builtin::{self, PushBuiltinNfgenmsg, PushNlmsghdr},
+    builtin::{self, BuiltinNfgenmsg, Nlmsghdr},
     consts, nlctrl,
     traits::Protocol,
     utils,
@@ -100,10 +100,9 @@ fn read(args: &CliArgs, reader: impl Read) {
 
             let mut remaining = &buf[..];
             while !remaining.is_empty() {
-                let header =
-                    PushNlmsghdr::new_from_slice(&remaining[..PushNlmsghdr::len()]).unwrap();
-                let buf = &remaining[PushNlmsghdr::len()..header.get_len() as usize];
-                remaining = &remaining[header.get_len() as usize..];
+                let header = Nlmsghdr::new_from_slice(&remaining[..Nlmsghdr::len()]).unwrap();
+                let buf = &remaining[Nlmsghdr::len()..header.len as usize];
+                remaining = &remaining[header.len as usize..];
 
                 println!();
                 if *is_request {
@@ -112,10 +111,10 @@ fn read(args: &CliArgs, reader: impl Read) {
                     print!("Decoding reply");
                 }
                 print!(" in ");
-                let request_type = header.get_type();
+                let request_type = header.r#type;
                 let (proto, value) = match *protonum as i32 {
                     libc::NETLINK_GENERIC => {
-                        let buf = PushBuiltinNfgenmsg::new_from_slice(&buf[..4]).unwrap();
+                        let buf = BuiltinNfgenmsg::new_from_slice(&buf[..4]).unwrap();
 
                         if matches!(
                             request_type as i32,
@@ -126,7 +125,7 @@ fn read(args: &CliArgs, reader: impl Read) {
                         ) {
                             let family = last_request_genl_family.unwrap();
                             print!("genl family {family}");
-                            (Protocol::Generic(family.as_bytes()), buf.cmd() as u16)
+                            (Protocol::Generic(family.as_bytes()), buf.cmd as u16)
                         } else {
                             let Some(family) = genl.get(&request_type) else {
                                 panic!("Unknown genl family type {request_type}");
@@ -134,7 +133,7 @@ fn read(args: &CliArgs, reader: impl Read) {
                             print!("genl family {family}");
                             last_request_genl_family = Some(family);
 
-                            (Protocol::Generic(family.as_bytes()), buf.cmd() as u16)
+                            (Protocol::Generic(family.as_bytes()), buf.cmd as u16)
                         }
                     }
                     _ => {
@@ -152,7 +151,7 @@ fn read(args: &CliArgs, reader: impl Read) {
                     last_request_value = Some(value);
                 }
                 print!(" ");
-                print_request_flags(header.flags());
+                print_request_flags(header.flags);
                 print!(" ");
                 match proto {
                     Protocol::Generic(family) => {
@@ -166,13 +165,13 @@ fn read(args: &CliArgs, reader: impl Read) {
                     utils::dump_hex(buf);
                 }
 
-                match header.get_type() as i32 {
+                match header.r#type as i32 {
                     libc::NLMSG_NOOP => {
                         println!("NLMSG_NOOP");
                         continue;
                     }
                     libc::NLMSG_DONE | libc::NLMSG_ERROR => {
-                        if header.get_type() == libc::NLMSG_DONE as u16 {
+                        if header.r#type == libc::NLMSG_DONE as u16 {
                             println!("NLMSG_DONE");
                         } else {
                             println!("NLMSG_ERROR");
@@ -187,23 +186,23 @@ fn read(args: &CliArgs, reader: impl Read) {
                             continue;
                         }
 
-                        let echo_end = if header.get_type() == libc::NLMSG_DONE as u16 {
+                        let echo_end = if header.r#type == libc::NLMSG_DONE as u16 {
                             4
                         } else {
-                            let Some(echo_header) = buf.get(4..(4 + PushNlmsghdr::len())) else {
+                            let Some(echo_header) = buf.get(4..(4 + Nlmsghdr::len())) else {
                                 continue;
                             };
-                            let echo_header = PushNlmsghdr::new_from_slice(echo_header).unwrap();
+                            let echo_header = Nlmsghdr::new_from_slice(echo_header).unwrap();
 
-                            if echo_header.flags() & libc::NLM_F_CAPPED as u16 == 0 {
-                                let start = echo_header.get_len();
+                            if echo_header.flags & libc::NLM_F_CAPPED as u16 == 0 {
+                                let start = echo_header.len;
                                 if buf.len() < start as usize + 4 {
                                     continue;
                                 }
 
                                 4 + start as usize
                             } else {
-                                4 + PushNlmsghdr::len()
+                                4 + Nlmsghdr::len()
                             }
                         };
 
@@ -224,7 +223,7 @@ fn read(args: &CliArgs, reader: impl Read) {
                     _ => {}
                 };
 
-                is_dump |= header.flags() & consts::NLM_F_DUMP as u16 == consts::NLM_F_DUMP as u16;
+                is_dump |= header.flags & consts::NLM_F_DUMP as u16 == consts::NLM_F_DUMP as u16;
                 let lookup = ReverseLookup {
                     proto,
                     value,
@@ -287,7 +286,7 @@ fn parse_dump_line(line: &str, buf: &mut Vec<u8>) {
 
 fn genl_families() -> HashMap<u16, &'static str> {
     let mut acc = HashMap::new();
-    let request = nlctrl::Request::new().op_getfamily_dump_request();
+    let request = nlctrl::Request::new().op_getfamily_dump();
     let mut sock = NetlinkSocket::new();
     let mut iter = sock.request(&request).unwrap();
     while let Some(res) = iter.recv() {
