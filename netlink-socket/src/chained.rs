@@ -83,7 +83,7 @@ impl NetlinkReplyChained<'_> {
                     self.done.set_all();
                     return Some(Err(io_err.into()));
                 }
-                Ok((seq, res)) => {
+                Ok((seq, _type, res)) => {
                     let Some(index) = self.request.get_index(seq) else {
                         continue;
                     };

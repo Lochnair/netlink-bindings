@@ -19,10 +19,9 @@ use std::{
 use tokio::net::TcpStream as Socket;
 
 #[cfg(feature = "smol")]
-use smol::{
-    io::{AsyncReadExt, AsyncWriteExt},
-    net::TcpStream as Socket,
-};
+use smol::io::{AsyncReadExt, AsyncWriteExt};
+#[cfg(feature = "smol")]
+type Socket = smol::Async<std::net::TcpStream>;
 
 use netlink_bindings::{
     builtin::Nlmsghdr,
@@ -33,9 +32,11 @@ use netlink_bindings::{
 
 mod chained;
 mod error;
+mod multicast;
 
 pub use chained::NetlinkReplyChained;
 pub use error::ReplyError;
+pub use multicast::{MulticastRecv, MulticastSocketRaw};
 
 /// Netlink documentation recommends max(8192, page_size)
 pub const RECV_BUF_SIZE: usize = 8192;
@@ -281,12 +282,20 @@ impl NetlinkReplyInner {
         &mut self,
         sock: &mut Socket,
         buf: &mut [u8; RECV_BUF_SIZE],
-    ) -> io::Result<(u32, Result<(usize, usize), ReplyError>)> {
+    ) -> io::Result<(u32, u16, Result<(usize, usize), ReplyError>)> {
         if self.buf_offset == self.buf_read {
             self.buf_read = Self::read_buf(sock, &mut buf[..]).await?;
             self.buf_offset = 0;
         }
+        self.parse_next(buf).await
+    }
 
+    #[allow(clippy::type_complexity)]
+    #[cfg_attr(not(feature = "async"), maybe_async::maybe_async)]
+    async fn parse_next(
+        &mut self,
+        buf: &[u8; RECV_BUF_SIZE],
+    ) -> io::Result<(u32, u16, Result<(usize, usize), ReplyError>)> {
         let packet = &buf[self.buf_offset..self.buf_read];
 
         let too_short_err = || io::Error::other("Received packet is too short");
@@ -330,6 +339,7 @@ impl NetlinkReplyInner {
 
                 Ok((
                     header.seq,
+                    header.r#type,
                     Err(ReplyError {
                         code: io::Error::from_raw_os_error(-code),
                         request_bounds: (echo_start as u32, echo_end as u32),
@@ -342,13 +352,19 @@ impl NetlinkReplyInner {
             }
             libc::NLMSG_NOOP => Ok((
                 header.seq,
+                header.r#type,
                 Err(io::Error::other("Received NLMSG_NOOP").into()),
             )),
             libc::NLMSG_OVERRUN => Ok((
                 header.seq,
+                header.r#type,
                 Err(io::Error::other("Received NLMSG_OVERRUN").into()),
             )),
-            _ => Ok((header.seq, Ok((payload_start, self.buf_offset)))),
+            _ => Ok((
+                header.seq,
+                header.r#type,
+                Ok((payload_start, self.buf_offset)),
+            )),
         }
     }
 }
@@ -394,7 +410,7 @@ impl<Request: NetlinkRequest> NetlinkReply<'_, Request> {
                     self.done = true;
                     return Some(Err(io_err.into()));
                 }
-                Ok((seq, res)) => {
+                Ok((seq, _type, res)) => {
                     if seq != self.seq {
                         continue;
                     }
