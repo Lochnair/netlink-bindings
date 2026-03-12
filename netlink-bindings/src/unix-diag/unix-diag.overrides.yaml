@@ -8,11 +8,6 @@ uapi-header: "linux/unix_diag.h"
 doc: |
   UNIX socket diagnostics
 
-experimental:
-  struct-type: cstruct
-  struct-prefix: false
-  struct-explicit-padding: true
-
 definitions:
   -
     name: req

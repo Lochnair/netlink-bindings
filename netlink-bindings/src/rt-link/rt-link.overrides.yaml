@@ -1,7 +1,0 @@
-definitions:
-  -
-    name: rtnl-link-stats
-    shrinkable: true
-  -
-    name: rtnl-link-stats64
-    shrinkable: true

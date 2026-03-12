@@ -8,11 +8,6 @@ uapi-header: "linux/inet_diag.h"
 doc: |
   Internet socket diagnostics
 
-experimental:
-  struct-type: cstruct
-  struct-prefix: false
-  struct-explicit-padding: true
-
 definitions:
   -
     name: tcpdiag-getsock-const
