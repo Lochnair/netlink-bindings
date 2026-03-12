@@ -59,7 +59,6 @@ pub fn gen_cstruct(tokens: &mut TokenStream, spec: &Spec, name: &str, members: &
         bit_off: 0,
         last_bit_type: None,
         alignment: 1,
-        type_name: type_name.clone(),
     };
 
     let mut cinner = TokenStream::new();
