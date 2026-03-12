@@ -642,7 +642,7 @@ pub struct Spec {
     pub sub_messages: Option<Vec<SubMessage>>,
 }
 
-#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
 pub struct Experimental {
@@ -653,6 +653,17 @@ pub struct Experimental {
     pub struct_explicit_padding: bool,
     #[serde(default)]
     pub attr_binary_write: bool,
+}
+
+impl Default for Experimental {
+    fn default() -> Self {
+        Self {
+            struct_type: Some("cstruct".into()),
+            struct_prefix: Some(false),
+            struct_explicit_padding: true,
+            attr_binary_write: false,
+        }
+    }
 }
 
 fn merge_yaml(dst: &mut Value, src: &Value) {
