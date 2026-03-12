@@ -999,4 +999,12 @@ impl Spec {
             .find(|op| op.name == name)
             .unwrap_or_else(|| panic!("Definition {name:?} not found"))
     }
+
+    pub fn find_op(&self, name: &str) -> &OperationSpec {
+        self.operations
+            .list
+            .iter()
+            .find(|op| op.name == name)
+            .unwrap_or_else(|| panic!("Operation {name:?} not found"))
+    }
 }
