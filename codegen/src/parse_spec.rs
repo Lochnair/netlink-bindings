@@ -51,13 +51,22 @@ fn default_true() -> bool {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
+#[serde(untagged)]
+#[serde(rename_all = "kebab-case")]
+pub enum ConstValue {
+    U64(u64),
+    String(String),
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
 #[serde(tag = "type")]
 #[serde(rename_all = "kebab-case")]
 pub enum DefType {
     /// a single, standalone constant
     Const {
         /// The value for the const.
-        value: u64,
+        value: ConstValue,
     },
     /// defines an integer enumeration, with values for each entry incrementing
     /// by 1, (e.g. 0, 1, 2, 3)

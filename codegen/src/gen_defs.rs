@@ -4,7 +4,7 @@ use syn::Ident;
 
 use crate::{
     gen_utils::{kebab_to_type, kebab_to_upper, sanitize_ident},
-    parse_spec::{CBitFieldType, DefType, Definition, EnumEntry, Spec},
+    parse_spec::{CBitFieldType, ConstValue, DefType, Definition, EnumEntry, Spec},
 };
 
 #[derive(Debug)]
@@ -35,8 +35,13 @@ fn gen_def(tokens: &mut TokenStream, def: &Definition) {
     match &def.def {
         DefType::Const { value } => {
             let const_name = format_ident!("{}", kebab_to_upper(&def.name));
+            let (ty, val) = match value {
+                ConstValue::U64(val) => (quote!(u64), quote!(#val)),
+                // TODO: Maybe a CStr here?
+                ConstValue::String(val) => (quote!(&str), quote!(#val)),
+            };
             tokens.extend(quote! {
-                pub const #const_name: u64 = #value;
+                pub const #const_name: #ty = #val;
             });
         }
         DefType::Flags {
