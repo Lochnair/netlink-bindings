@@ -58,13 +58,15 @@ jobs:
           restore-keys: musl-
 
       - name: Install system dependencies
-        run: apk add --no-cache conntrack-tools iproute2 iw ripgrep wireguard-tools
+        run: apk add --no-cache conntrack-tools iproute2 iw nftables ripgrep wireguard-tools
 
       - name: Load kernel modules
         run: |
           modprobe nf_tables
           modprobe wireguard
           modprobe mac80211_hwsim radios=1 || echo "mac80211_hwsim unavailable; nl80211 examples will be skipped"
+          # Ubuntu pre-creates the ip filter table via iptables-nft; Alpine does not.
+          nft add table ip filter
 
       - name: Run tests
         run: bash scripts/run_tests.sh
