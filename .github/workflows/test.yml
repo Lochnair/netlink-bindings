@@ -74,3 +74,4 @@ jobs:
             -w "/__w" \
             rust:alpine \
             sh -c "apk add --no-cache conntrack-tools iptables iproute2 iw nftables ripgrep wireguard-tools && bash scripts/run_tests.sh"
+          sudo chown -R "$USER": target/
