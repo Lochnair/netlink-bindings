@@ -62,6 +62,7 @@ jobs:
 
       - name: Load kernel modules
         run: |
+          modprobe nf_tables
           modprobe wireguard
           modprobe mac80211_hwsim radios=1 || echo "mac80211_hwsim unavailable; nl80211 examples will be skipped"
 
