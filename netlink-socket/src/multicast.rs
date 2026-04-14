@@ -148,15 +148,17 @@ impl MulticastSocketRaw {
 
             let mut control_buf = [0u8; 128];
 
-            let mut msghdr = libc::msghdr {
-                msg_name: &mut addr as *mut libc::sockaddr_nl as *mut libc::c_void,
-                msg_namelen: std::mem::size_of_val(&addr) as u32,
-                msg_iov: &mut iov as *mut libc::iovec,
-                msg_iovlen: 1,
-                msg_control: control_buf.as_mut_ptr() as *mut libc::c_void,
-                msg_controllen: control_buf.len(),
-                msg_flags: 0,
-            };
+            // Use zeroed init + field assignment to avoid private-field struct
+            // literal restrictions on musl targets (__pad1, __pad2 in msghdr).
+            let mut msghdr: libc::msghdr = unsafe { std::mem::zeroed() };
+            msghdr.msg_name = &mut addr as *mut libc::sockaddr_nl as *mut libc::c_void;
+            msghdr.msg_namelen = std::mem::size_of_val(&addr) as u32;
+            msghdr.msg_iov = &mut iov as *mut libc::iovec;
+            msghdr.msg_iovlen = 1;
+            msghdr.msg_control = control_buf.as_mut_ptr() as *mut libc::c_void;
+            // msg_controllen is usize on glibc but u32 on musl - let the compiler infer.
+            msghdr.msg_controllen = control_buf.len() as _;
+            msghdr.msg_flags = 0;
 
             let read = unsafe { libc::recvmsg(sock.as_raw_fd(), &mut msghdr, 0) };
             if read < 0 {
@@ -177,13 +179,14 @@ impl MulticastSocketRaw {
                         cmsg_len,
                         cmsg_level,
                         cmsg_type,
+                        .. // ignore __pad1 on musl
                     } = *cmsg_ptr;
 
                     match (cmsg_level, cmsg_type) {
                         (libc::SOL_NETLINK, libc::NETLINK_PKTINFO) => {
                             let data = std::slice::from_raw_parts(
                                 libc::CMSG_DATA(cmsg_ptr),
-                                cmsg_len - libc::CMSG_LEN(0) as usize,
+                                cmsg_len as usize - libc::CMSG_LEN(0) as usize,
                             );
                             *last_group = Some(utils::parse_u32(&data[..4]).unwrap());
                         }
