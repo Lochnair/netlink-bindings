@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: rust:alpine
-      options: --privileged
+      options: --privileged --network=host
       volumes:
         - /lib/modules:/lib/modules
     steps:
