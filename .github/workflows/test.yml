@@ -58,7 +58,7 @@ jobs:
           restore-keys: musl-
 
       - name: Install system dependencies
-        run: apk add --no-cache conntrack-tools iproute2 iw nftables ripgrep wireguard-tools
+        run: apk add --no-cache conntrack-tools iptables iproute2 iw nftables ripgrep wireguard-tools
 
       - name: Load kernel modules
         run: |
