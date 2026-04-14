@@ -1,0 +1,67 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-glibc:
+    name: Test (glibc / Ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            target/
+          key: glibc-${{ hashFiles('Cargo.lock') }}
+          restore-keys: glibc-
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y conntrack iproute2 iw ripgrep wireguard-tools
+
+      - name: Load kernel modules
+        run: |
+          sudo modprobe wireguard
+          sudo modprobe mac80211_hwsim radios=1 || echo "mac80211_hwsim unavailable; nl80211 examples will be skipped"
+
+      - name: Run tests
+        run: sudo -E env PATH="$PATH" bash scripts/run_tests.sh
+
+  test-musl:
+    name: Test (musl / Alpine)
+    runs-on: ubuntu-latest
+    container:
+      image: rust:alpine
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            target/
+          key: musl-${{ hashFiles('Cargo.lock') }}
+          restore-keys: musl-
+
+      - name: Install system dependencies
+        run: apk add --no-cache conntrack-tools iproute2 iw ripgrep wireguard-tools
+
+      - name: Load kernel modules
+        run: |
+          modprobe wireguard
+          modprobe mac80211_hwsim radios=1 || echo "mac80211_hwsim unavailable; nl80211 examples will be skipped"
+
+      - name: Run tests
+        run: bash scripts/run_tests.sh
